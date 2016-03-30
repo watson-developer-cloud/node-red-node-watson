@@ -1,0 +1,111 @@
+<!--
+  Copyright 2015 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-speech-to-text">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+  <div class="form-row">
+        <label for="node-input-lang"><i class="fa fa-language"></i> Language</label>
+        <select type="text" id="node-input-lang" style="display: inline-block; width: 70%;">
+            <option value="en-US">English (US)</option>
+            <option value="es-ES">Spanish</option>
+            <option value="ja-JP">Japanese</option>
+            <option value="pt-BR">Brazilian Portuguese</option>
+            <option value="zh-CN">Mandarin Chinese</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-band"><i class="fa fa-audio-o"></i> Quality</label>
+        <select type="text" id="node-input-band" style="display: inline-block; width: 70%;">
+            <option value="BroadbandModel">Broadband (>= 16Khz)</option>
+            <option value="NarrowbandModel">Narrowband (>= 8Khz)</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-speech-to-text">
+    <p>The Speech To Text converts the human voice into the written word. This service uses machine intelligence to
+    combine information about grammar and language structure with knowledge of the composition of the audio signal to
+    generate a more accurate transcription</p>
+    <p>The audio file to be analysed should be passed in on <code>msg.payload</code>.</p>
+    <p>Supported <code>msg.payload</code> types:</b>.</p>
+    <ul>
+        <li><b>String</b> URL to audio</li>
+        <li><b>Buffer</b> Raw Audio Bytes</li>
+    </ul>
+    <p>Audio must be a <b>WAV, FLAC or OGG encoded file</b>.</p>
+    <p>Speech To Text supports decoding speech from three languages: <b>English, Spanish, Japanese, Brazilian Portuguese
+    and Mandarin Chinese</b>. This option can be modified in the configuration panel.</p>
+    <p>Along with the language, you can also configure the source audio quality. The service supports two different
+    source sampling rates, <b>Narrowband (8KHz) and Broadband (16Khz)</b>. Higher sample rates will be downsampled
+    automatically but the is not true in reverse.</p>
+    <p>The returned audio transcription will be returned on <code>msg.transcription</code>.</p>
+    <p>For more information about the Speech To Text service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/speech-to-text.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-speech-to-text', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                lang: {value: "en-US"},
+                band: {value: "BroadbandModel"}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(140, 198, 63)",
+            inputs: 1,
+            outputs: 1,
+            icon: "speech_to_text.png",
+            paletteLabel: "speech to text",
+            label: function() {
+                return this.name || "speech to text";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $.getJSON('watson-speech-to-text/vcap/')
+                  .done(function (service) {
+                    $('.credentials').toggle(!service);
+                  })
+                  .fail(function () {
+                    $('.credentials').show();
+                  }).always(function () {
+                    $('#credentials-check').hide();
+                  })
+            }
+        });
+    })();
+</script>

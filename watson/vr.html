@@ -1,0 +1,84 @@
+<!--
+  Copyright 2015 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-visual-recognition">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-visual-recognition">
+    <p>The Visual Recognition service analyses images to understand their contents.</p>
+    <p>The image to be analysed should be passed in on <code>msg.payload</code>.</p>
+    <p>Supported <code>msg.payload</code> types:</b>.</p>
+    <ul>
+        <li><b>String</b> URL to image</li>
+        <li><b>Buffer</b> Raw Image Bytes</li>
+    </ul>
+    <p>The identified images labels will be returned on <code>msg.labels</code>.</p>
+    <p>For more information about the Visual Recognition service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-visual-recognition', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(32, 178, 239)",
+            inputs: 1,
+            outputs: 1,
+            icon: "visual_recognition.png",
+            paletteLabel: "visual recognition",
+            label: function() {
+                return this.name || "visual recognition";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $.getJSON('watson-visual-recognition/vcap/')
+                  .done(function (service) {
+                    $('.credentials').toggle(!service);
+                  })
+                  .fail(function () {
+                    $('.credentials').show();
+                  }).always(function () {
+                    $('#credentials-check').hide();
+                  })
+            }
+        });
+    })();
+</script>

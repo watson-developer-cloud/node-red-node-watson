@@ -1,0 +1,134 @@
+<!--
+  Copyright 2015 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-text-to-speech">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row">
+        <label for="node-input-lang"><i class="fa fa-language"></i> Language</label>
+        <select type="text" id="node-input-lang" style="display: inline-block; width: 70%;" >
+            <option value="english">English</option>
+            <option value="german">German</option>
+            <option value="french">French</option>
+            <option value="spanish">Spanish</option>
+            <option value="italian">Italian</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-voice"><i class="fa fa-comment"></i> Voice</label>
+        <select type="text" id="node-input-voice" style="display: inline-block; width: 70%;">
+            <option class="english" value="en-US_MichaelVoice">Michael (Male)</option>
+            <option class="english" value="en-US_LisaVoice">Lisa (Female)</option>
+            <option class="english" value="en-US_AllisonVoice">Allison (Female)</option>
+            <option class="spanish" value="es-ES_EnriqueVoice">Enrique (Male)</option>
+            <option class="spanish" value="es-ES_LauraVoice">Laura (Female)</option>
+            <option class="spanish" value="es-US_SofiaVoice">Sofia (Female)</option>
+            <option class="french" value="fr-FR_ReneeVoice">Renee(Female)</option>
+            <option class="italian" value="it-IT_FrancescaVoice">Francesca (Female)</option>
+            <option class="english" value="en-GB_KateVoice">Kate (Female)</option>
+            <option class="german" value="de-DE_DieterVoice">Dieter (Male)</option>
+            <option class="german" value="de-DE_BirgitVoice">Birgit (Female)</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-format"><i class="fa fa-file-audio-o"></i> Format</label>
+        <select type="text" id="node-input-format" style="display: inline-block; width: 70%;" >
+            <option value="audio/wav">WAV</option>
+            <option value="audio/flac">FLAC</option>
+            <option value="audio/ogg; codecs=opus">OGG</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-text-to-speech">
+    <p>The Text To Speech service understands text and natural language to generate synthesized audio output complete
+    with appropriate cadence and intonation.</p>
+    <p>You can choose from eleven different voices from three languages:</b>.</p>
+    <ul>
+        <li><b>English</b> Male and Female.</li>
+        <li><b>Spanish</b> Male and Female.</li>
+        <li><b>German</b> Male and Female.</li>
+        <li><b>French</b> Female.</li>
+        <li><b>Italian</b> Female.</li>
+    </ul>
+    <p>The text to be converted should be passed in on <code>msg.payload</code>.</p>
+    <p><b>The source text must be in the language which matches the chosen voice, i.e. you cannot choose to a Spanish
+    voice with English text.</b>.</p>
+    <p>The returned audio transcription will be returned as a raw buffer containing the audio on <code>msg.speech</code>.</p>
+    <p>For more information about the Text To Speech service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/text-to-speech.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-text-to-speech', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                lang: {value: "english"},
+                voice: {value: "en-US_MichaelVoice"},
+                format: {value: "audio/wav"}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(140, 198, 63)",
+            inputs: 1,
+            outputs: 1,
+            icon: "text_to_speech.png",
+            paletteLabel: "text to speech",
+            label: function() {
+                return this.name || "text to speech";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+              $('#node-input-lang').change(function () {
+                var lang = $('#node-input-lang').val();
+                $('#node-input-voice option.' + lang).show();
+                $('#node-input-voice option:not(.' + lang + ')').hide();
+                var first = $('#node-input-voice option.' + lang + ':first').val();
+                $('#node-input-voice').val(first);
+              })
+              $.getJSON('watson-text-to-speech/vcap/')
+               .done(function (service) {
+                  $('.credentials').toggle(!service);
+                })
+              .fail(function () {
+                $('.credentials').show();
+              }).always(function () {
+                $('#credentials-check').hide();
+              })
+            }
+        });
+     })();
+</script>
