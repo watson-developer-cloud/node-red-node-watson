@@ -1,39 +1,39 @@
 {
-    "name": "node-red-node-watson",
-    "version": "0.3.0",
-    "description": "A collection of Node-RED nodes for IBM Watson services",
-    "dependencies": {
-        "alchemy-api": "^1.3.0",
-        "cfenv": "~1.0.0",
-        "file-type": "^2.7.0",
-        "request": "~2.53.0",
-        "temp": "^0.8.3",
-        "watson-developer-cloud": "^1.2.4"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/node-red/node-red-node-watson"
-    },
-    "license": "Apache-2.0",
-    "keywords": [
-        "node-red",
-        "bluemix",
-        "watson"
-    ],
-    "node-red": {
-        "nodes": {
-            "alchemy-feature-extract": "alchemy/feature-extract.js",
-            "alchemy-image-analysis": "alchemy/image-analysis.js",
-            "watson-natural-language-classifier": "watson/nlc.js",
-            "watson-language-identification": "watson/lid.js",
-            "watson-translate": "watson/smt.js",
-            "watson-personality-insights": "watson/pi.js",
-            "watson-relationship-extraction": "watson/re.js",
-            "watson-speech-to-text": "watson/s2t.js",
-            "watson-text-to-speech": "watson/t2s.js",
-            "watson-tradeoff-analytics": "watson/ta.js",
-            "watson-tone-analyzer": "watson/tone_analyzer.js",
-            "watson-visual-recognition": "watson/vr.js"
-        }
+  "name": "node-red-node-watson",
+  "version": "0.3.0",
+  "description": "A collection of Node-RED nodes for IBM Watson services",
+  "dependencies": {
+    "alchemy-api": "^1.3.0",
+    "cfenv": "~1.0.0",
+    "file-type": "^2.7.0",
+    "request": "~2.53.0",
+    "temp": "^0.8.3",
+    "watson-developer-cloud": "^1.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/node-red/node-red-node-watson"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "node-red",
+    "bluemix",
+    "watson"
+  ],
+  "node-red": {
+    "nodes": {
+      "alchemy-feature-extract": "alchemy/feature-extract.js",
+      "alchemy-image-analysis": "alchemy/image-analysis.js",
+      "watson-natural-language-classifier": "watson/nlc.js",
+      "watson-language-identification": "watson/lid.js",
+      "watson-translate": "watson/smt.js",
+      "watson-personality-insights": "watson/pi.js",
+      "watson-relationship-extraction": "watson/re.js",
+      "watson-speech-to-text": "watson/s2t.js",
+      "watson-text-to-speech": "watson/t2s.js",
+      "watson-tradeoff-analytics": "watson/ta.js",
+      "watson-tone-analyzer": "watson/tone_analyzer.js",
+      "watson-visual-recognition": "watson/vr.js"
     }
+  }
 }

@@ -103,6 +103,14 @@
             })
         }
 
+        language_translation.getIdentifiableLanguages(null,
+          function(err, languages) {
+            if (err)
+              console.log(err)
+            else
+              console.log(languages);
+        });
+
         RED.nodes.registerType('watson-translate',{
             category: 'IBM Watson',
             defaults: {
