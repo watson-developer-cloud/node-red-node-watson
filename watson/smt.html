@@ -103,12 +103,22 @@
             })
         }
 
-        language_translation.getIdentifiableLanguages(null,
-          function(err, languages) {
-            if (err)
-              console.log(err)
-            else
-              console.log(languages);
+
+        $.ajax({
+            url: "https://gateway.watsonplatform.net/language-translation/api/v2/models",
+            beforeSend: function(xhr) { 
+              xhr.setRequestHeader("Authorization", "Basic " + btoa("88e91252-70a9-41d0-a821-888aee858818:W5ojVKltb7aM")); 
+            },
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            processData: true,
+            success: function (data) {
+              console.log(JSON.stringify(data));
+            },
+            error: function(){
+              console.log("Cannot get data");
+            }
         });
 
         RED.nodes.registerType('watson-translate',{
