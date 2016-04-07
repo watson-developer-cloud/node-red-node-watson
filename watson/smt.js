@@ -81,6 +81,19 @@ module.exports = function(RED) {
         version: 'v2'
       });
 
+      var listmodels;
+
+      language_translation.getModels({}, function(err, models) {
+          if (err)
+            listmodels = err
+          else
+            listmodels = models;
+      });
+
+    RED.httpNode.get('/watson-translate/models', function(req, res) {
+      res.json(listmodels);
+    });
+
       var model_id = srclang + '-' + destlang 
         + (domain === 'news' ? '' : '-conversational');
 

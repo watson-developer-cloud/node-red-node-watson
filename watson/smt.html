@@ -33,14 +33,21 @@
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
     <div class="form-row">
-        <label for="node-input-domain"><i class="fa fa-book"></i>Domain</label>
+        <label for="node-input-action"><i class="fa fa-cog"></i> Action</label>
+        <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
+            <option value="news" selected>Translate</option>
+            <option value="conversational">Train</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-domain"><i class="fa fa-book"></i> Domain</label>
         <select type="text" id="node-input-domain" style="display: inline-block; vertical-align:middle; width: 70%;">
             <option value="news" selected>News</option>
             <option value="conversational">Conversational</option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-srclang"><i class="fa fa-comments-o"></i>Source</label>
+        <label for="node-input-srclang"><i class="fa fa-comments-o"></i> Source</label>
         <select type="text" id="node-input-srclang" style="display: inline-block; vertical-align:middle; width: 70%;">
             <option value="en">English</option>
             <option value="fr">French</option>
@@ -50,7 +57,7 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-destlang"><i class="fa fa-comments-o"></i>Target</label>
+        <label for="node-input-destlang"><i class="fa fa-comments-o"></i> Target</label>
         <select type="text" id="node-input-destlang" style="display: inline-block; vertical-align:middle; width: 70%;">
             <option value="en">English</option>
             <option value="fr">French</option>
@@ -72,6 +79,10 @@
 </script>
 
 <script type="text/javascript">
+function onlyUnique(value, index, self) { 
+    return self.indexOf(value) === index;
+}
+
     (function() {
         function oneditprepare() {
             var node = this;
@@ -84,9 +95,20 @@
               }).always(function () {
                 $('#credentials-check').hide();
               })
+
+            $.getJSON('watson-translate/models/').done(function(data) 
+            {
+              console.log(data);
+              var domains = data.models.map(function(a) {return a.domain;});
+              console.log(domains);
+              var domainsunique = domains.filter(onlyUnique);
+              console.log(domainsunique);
+            }).fail(function (err) {
+                console.log(err);
+              }).always(function (osef) {
+              });
             var initial_update = true;
             $('#node-input-srclang').change(function () {
-              console.log(node)
               var source_lang = $('#node-input-srclang').val()
               if (source_lang === 'en') {
                 $('#node-input-destlang option[value=en]').attr('disabled','disabled')
@@ -102,24 +124,6 @@
               initial_update = false
             })
         }
-
-
-        $.ajax({
-            url: "https://gateway.watsonplatform.net/language-translation/api/v2/models",
-            beforeSend: function(xhr) { 
-              xhr.setRequestHeader("Authorization", "Basic " + btoa("88e91252-70a9-41d0-a821-888aee858818:W5ojVKltb7aM")); 
-            },
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json',
-            processData: true,
-            success: function (data) {
-              console.log(JSON.stringify(data));
-            },
-            error: function(){
-              console.log("Cannot get data");
-            }
-        });
 
         RED.nodes.registerType('watson-translate',{
             category: 'IBM Watson',
