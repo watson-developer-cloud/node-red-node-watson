@@ -69,6 +69,10 @@ module.exports = function (RED) {
       } else if (config.mode === 'create') {
         params.training_data = msg.payload;
         params.language = config.language;
+      } else if (config.mode === 'remove') {
+        params.classifier_id = msg.payload;
+      } else if (config.mode === 'list') {
+        params.classifier_id = msg.payload;		
       } else {
         var message = 'Unknown Natural Language Classification mode, ' + config.mode;
         node.error(message, msg);
