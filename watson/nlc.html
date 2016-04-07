@@ -37,6 +37,8 @@
         <select type="text" id="node-input-mode" style="display: inline-block; width: 70%;" >
             <option value="classify">Classify</option>
             <option value="create">Train</option>
+			<option value="remove">Remove</option>
+		    <option value="list">List</option>
         </select>
     </div>
     <div class="form-row mode classify">
@@ -70,7 +72,16 @@
     <p>Set the training data language in the node configuration window.</p>
     <p>The CSV training data should be passed in on <code>msg.payload</code> as a String or String Array. For more details on the training data format, see this <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/nl-classifier/data_format.shtml">link</a></p>
     <p>The returned classification training status will be returned on <code>msg.payload</code>.</p>
-    <p>For more information about the Natural Language Classifier service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/natural-language-classifier.html">documentation</a>.</p>
+	<p><b>List Mode</b>.</p>
+    <p>Set the mode in the node configuration window.</p>
+    <p>The request is triggered by a request to the input node
+    <p>The returned list of classifiers will be returned on <code>msg.payload</code>.</p>
+	<p><b>Remove Mode</b>.</p>
+    <p>Set the mode in the node configuration window.</p>
+    <p>The Classifier ID should be passed in on <code>msg.payload</code> as a String<p>
+    <p>The status of the delete be returned on <code>msg.payload</code>.  It will contain {} if successful</p>
+	<p><b>More Information<b>.</p>
+    <p>For more information about the Natural Language Classifier service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/natural-language-classifier">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
