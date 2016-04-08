@@ -23,17 +23,20 @@
     "node-red": {
         "nodes": {
             "alchemy-feature-extract": "alchemy/feature-extract.js",
-            "alchemy-image-analysis": "alchemy/image-analysis.js",
-            "watson-natural-language-classifier": "watson/nlc.js",
-            "watson-language-identification": "watson/lid.js",
-            "watson-translate": "watson/smt.js",
-            "watson-personality-insights": "watson/pi.js",
-            "watson-relationship-extraction": "watson/re.js",
-            "watson-speech-to-text": "watson/s2t.js",
-            "watson-text-to-speech": "watson/t2s.js",
-            "watson-tradeoff-analytics": "watson/ta.js",
-            "watson-tone-analyzer": "watson/tone_analyzer.js",
-            "watson-visual-recognition": "watson/vr.js"
+            "alchemy-image-analysis": "alchemy/image-analysis.js",		
+            "watson-natural-language-classifier": "services/natural_language_classifier/v1.js",
+            "watson-concept-insights": "services/concept_insights/v2.js",
+            "watson-dialog": "services/dialog/v1.js",
+			"watson-document-conversion": "services/document_conversion/v1.js",
+            "watson-language-identification": "/services/language_identification/v1.js",
+            "watson-language-translate": "services/language_translation/v1.js",
+		    "watson-personality-insights": "services/personality_insights/v1.js",
+            "watson-relationship-extraction": "services/relationship_extraction/v1.js",	
+            "watson-speech-to-text": "services/speech_to_text/v1.js",	
+            "watson-text-to-speech": "services/text_to_speech/v1.js",	
+            "watson-tradeoff-analytics": "services/tradeoff_analytics/v1.js",	
+            "watson-tone-analyzer": "services/tone_analyzer/v1.js",		
+            "watson-visual-recognition": "services/visual_recognition/v1.js"	
         }
     }
 }
