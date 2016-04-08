@@ -22,8 +22,8 @@
     ],
     "node-red": {
         "nodes": {
-            "alchemy-feature-extract": "alchemy/feature-extract.js",
-            "alchemy-image-analysis": "alchemy/image-analysis.js",		
+            "alchemy_language": "services/alchemy_language/v1.js",
+            "alchemy-vision": "services/alchemy_vision/v1.js",		
             "watson-natural-language-classifier": "services/natural_language_classifier/v1.js",
             "watson-concept-insights": "services/concept_insights/v2.js",
             "watson-dialog": "services/dialog/v1.js",
