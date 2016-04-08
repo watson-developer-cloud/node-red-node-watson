@@ -1,0 +1,426 @@
+<!--
+  Copyright 2015 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!-- Configure Corpus -->
+
+<script type="text/x-red" data-template-name="watson-concept-insights-corpus">
+    <div class="form-row">
+        <label for="node-config-input-cname"><i class="fa fa-tag"></i> Corpus Name</label>
+        <input type="text" id="node-config-input-cname" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-access"><i class="fa fa-tag"></i> Access</label>
+        <select type="text" id="node-config-input-access">
+            <option value="private">Private</option>
+            <option value="public">Public</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/javascript">
+(function() {
+    RED.nodes.registerType('watson-concept-insights-corpus',{
+        category: 'config',
+        defaults: { 
+            cname:{type: "text", required: true},
+            access:{value: "private", required: true}
+        },
+        label: function() {
+            return 'Corpus: '+this.cname;
+        }
+    });
+})();
+</script>
+
+<!-- Upload Document -->
+
+<script type="text/x-red" data-template-name="watson-concept-insights">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+
+
+    <div class="form-row">
+        <label for="node-input-corpus"><i class="fa fa-user"></i> Corpus</label>
+        <input type="text" id="node-input-corpus">
+    </div>
+
+
+    <div class="form-row">
+        <label for="node-input-documentname"><i class="fa fa-tag"></i> Document Name</label>
+        <input type="text" id="node-input-documentname" placeholder="Document Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-documentlabel"><i class="fa fa-tag"></i> Document Label</label>
+        <input type="text" id="node-input-documentlabel" placeholder="Document Label">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-contenttype"><i class="fa fa-tag"></i> Content Type</label>
+        <select type="text" id="node-input-contenttype" style="display: inline-block; width: 70%;">
+            <option value="text/plain">Text</option>
+            <option value="text/html">HTML</option>
+            <option value="text/x-wiki">Wikitext</option>
+        </select>
+    </div>
+    
+</script>
+
+<script type="text/x-red" data-help-name="watson-concept-insights">
+    <p>TODO: FILL CONCEPT INSIGHTS INFO HERE!!!!! The Speech To Text converts the human voice into the written word. This service uses machine intelligence to
+    combine information about grammar and language structure with knowledge of the composition of the audio signal to
+    generate a more accurate transcription</p>
+    <p>The audio file to be analysed should be passed in on <code>msg.payload</code>.</p>
+    <p>Supported <code>msg.payload</code> types:</b>.</p>
+    <ul>
+        <li><b>String</b> URL to audio</li>
+        <li><b>Buffer</b> Raw Audio Bytes</li>
+    </ul>
+    <p>Audio must be a <b>WAV, FLAC or OGG encoded file</b>.</p>
+    <p>Speech To Text supports decoding speech from three languages: <b>English, Spanish, Japanese, Brazilian Portuguese
+    and Mandarin Chinese</b>. This option can be modified in the configuration panel.</p>
+    <p>Along with the language, you can also configure the source audio quality. The service supports two different
+    source sampling rates, <b>Narrowband (8KHz) and Broadband (16Khz)</b>. Higher sample rates will be downsampled
+    automatically but the is not true in reverse.</p>
+    <p>The returned audio transcription will be returned on <code>msg.transcription</code>.</p>
+    <p>For more information about the Speech To Text service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/speech-to-text.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-concept-insights', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                corpus: {value: "", type: 'watson-concept-insights-corpus'},
+                documentname: {value: ""},
+                documentlabel: {value: ""},
+                contenttype: {value: ""}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(140, 198, 63)",
+            inputs: 1,
+            outputs: 0,
+            icon: "speech_to_text.png.png",
+            paletteLabel: "concept insights corpora",
+            label: function() {
+                return this.name || "concept insights";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $.getJSON('watson-concept-insights/vcap/')
+                  .done(function (service) {
+                    $('.credentials').toggle(!service);
+                  })
+                  .fail(function () {
+                    $('.credentials').show();
+                  }).always(function () {
+                    $('#credentials-check').hide();
+                  })
+            }
+        });
+    })();
+</script>
+
+
+<!-- Searching functions-->
+
+<script type="text/x-red" data-template-name="watson-concept-insights-search">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+
+
+    <div class="form-row">
+        <label for="node-input-corpus"><i class="fa fa-user"></i> Corpus</label>
+        <input type="text" id="node-input-corpus">
+    </div>
+
+
+    <div class="form-row">
+        <label for="node-input-mode"><i class="fa fa-question"></i> Mode</label>
+        <select type="text" id="node-input-mode" style="display: inline-block; width: 70%;" >
+            <option value="corpus">Corpus</option>
+            <option value="document">Document</option>
+        </select>
+    </div>
+    <div class="form-row mode corpus">
+        <label for="node-input-corpusapicall"><i class="fa fa-language"></i> API Call</label>
+        <select type="text" id="node-input-corpusapicall" style="display: inline-block; width: 70%;" >
+            <option value="statistics">Corpus Statistics</option>
+            <option value="relatedconcepts">Related Concepts</option>
+            <option value="relationscores">Relation Scores</option>
+            <option value="conceptualsearch">Conceptual Search</option>
+            <option value="documentlabel">Search Document Labels</option>
+        </select>
+    </div>
+    <div class="form-row mode corpus query">
+        <label for="node-input-query"><i class="fa fa-tag"></i> Query</label>
+        <input type="text" id="node-input-query">
+    </div>
+
+    <div class="form-row mode document">
+        <label for="node-input-docapicall"><i class="fa fa-language"></i> API Call</label>
+        <select type="text" id="node-input-docapicall" style="display: inline-block; width: 70%;" >
+            <option value="annotations">Document Annotations</option>
+            <option value="relatedconcepts">Related Concepts</option>
+            <option value="relationscores">Relation Scores</option>
+        </select>
+
+        <div class="form-row">
+            <label for="node-input-docname"><i class="fa fa-tag"></i> Document Name</label>
+            <input type="text" id="node-input-docname" placeholder="Document Name">
+        </div>
+    </div>
+    
+</script>
+
+<script type="text/x-red" data-help-name="watson-concept-insights-search">
+    <p>TODO: FILL CONCEPT INSIGHTS INFO HERE!!!!! The Speech To Text converts the human voice into the written word. This service uses machine intelligence to
+    combine information about grammar and language structure with knowledge of the composition of the audio signal to
+    generate a more accurate transcription</p>
+    <p>The audio file to be analysed should be passed in on <code>msg.payload</code>.</p>
+    <p>Supported <code>msg.payload</code> types:</b>.</p>
+    <ul>
+        <li><b>String</b> URL to audio</li>
+        <li><b>Buffer</b> Raw Audio Bytes</li>
+    </ul>
+    <p>Audio must be a <b>WAV, FLAC or OGG encoded file</b>.</p>
+    <p>Speech To Text supports decoding speech from three languages: <b>English, Spanish, Japanese, Brazilian Portuguese
+    and Mandarin Chinese</b>. This option can be modified in the configuration panel.</p>
+    <p>Along with the language, you can also configure the source audio quality. The service supports two different
+    source sampling rates, <b>Narrowband (8KHz) and Broadband (16Khz)</b>. Higher sample rates will be downsampled
+    automatically but the is not true in reverse.</p>
+    <p>The returned audio transcription will be returned on <code>msg.transcription</code>.</p>
+    <p>For more information about the Speech To Text service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/speech-to-text.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-concept-insights-search', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                corpus: {value: "", type: 'watson-concept-insights-corpus'},
+                mode: {value: "corpus"},
+                docapicall: {value: "annotations"},
+                corpusapicall: {value: "statistics"},
+                docname: {value: ""},
+                query: {value: ""}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(140, 198, 63)",
+            inputs: 1,
+            outputs: 1,
+            icon: "speech_to_text.png.png",
+            paletteLabel: "concept insights search",
+            label: function() {
+                return this.name || "concept insights search";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+
+                $('#node-input-mode').change(function () {
+                    var mode = $('#node-input-mode').val();
+                    $('.form-row.mode.' + mode +':not(.query)').show();
+                    $('.form-row.mode:not(.' + mode + ')').hide();  
+                })
+                
+                $('#node-input-corpusapicall').change(function () {
+                    
+                    $('#node-input-corpusapicall').change(function () {
+                        var mode = $('#node-input-corpusapicall').val();
+                        if (mode == 'documentlabel') {
+                          $('.form-row.mode.corpus.query').show();  
+                        } else {
+                          $('.form-row.mode.corpus.query').hide();
+                        }  
+                    }); 
+                })
+
+                $.getJSON('watson-concept-insights/vcap/')
+                  .done(function (service) {
+                    $('.credentials').toggle(!service);
+                  })
+                  .fail(function () {
+                    $('.credentials').show();
+                  }).always(function () {
+                    $('#credentials-check').hide();
+                  })
+            }
+        });
+    })();
+</script>
+
+
+<!-- Search Concepts -->
+
+<script type="text/x-red" data-template-name="watson-concept-insights-search-concepts">
+
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row">
+        <label for="node-input-query"><i class="fa fa-tag"></i> Query</label>
+        <input type="text" id="node-input-query" placeholder="Query">
+    </div>
+</script>
+
+<script type="text/javascript">
+(function() {
+    RED.nodes.registerType('watson-concept-insights-search-concepts',{
+        category: 'IBM Watson',
+            defaults: {
+                query: {value: ""},
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(140, 198, 63)",
+            inputs: 1,
+            outputs: 1,
+            icon: "speech_to_text.png.png",
+            paletteLabel: "concept insights search concepts",
+            label: function() {
+                return this.name || "concept insights search concepts";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $.getJSON('watson-concept-insights/vcap/')
+                  .done(function (service) {
+                    $('.credentials').toggle(!service);
+                  })
+                  .fail(function () {
+                    $('.credentials').show();
+                  }).always(function () {
+                    $('#credentials-check').hide();
+                  })
+            }
+        });
+})();
+</script>
+
+<!-- Related Concepts -->
+
+<script type="text/x-red" data-template-name="watson-concept-insights-related-concepts">
+
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+</script>
+
+<script type="text/javascript">
+(function() {
+    RED.nodes.registerType('watson-concept-insights-related-concepts',{
+        category: 'IBM Watson',
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(140, 198, 63)",
+            inputs: 1,
+            outputs: 1,
+            icon: "speech_to_text.png.png",
+            paletteLabel: "concept insights related concepts",
+            label: function() {
+                return this.name || "concept insights related concepts";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $.getJSON('watson-concept-insights/vcap/')
+                  .done(function (service) {
+                    $('.credentials').toggle(!service);
+                  })
+                  .fail(function () {
+                    $('.credentials').show();
+                  }).always(function () {
+                    $('#credentials-check').hide();
+                  })
+            }
+        });
+})();
+</script>
