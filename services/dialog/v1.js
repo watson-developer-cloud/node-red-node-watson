@@ -314,7 +314,7 @@ module.exports = function (RED) {
 
         async.parallel(asyncTasks, function(){
           // All tasks are done now
-          console.log("Deleted "+nbdeleted + "" dialog ID on "" + nb_todelete );
+          console.log("Deleted "+nbdeleted + " dialog ID on " + nb_todelete );
           
           if (nbdeleted==nb_todelete)
             msg.payload = "All Dialogs have been deleted";
