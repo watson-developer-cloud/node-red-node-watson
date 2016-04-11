@@ -36,6 +36,7 @@
     RED.nodes.createNode(this,config);
     this.cname = config.cname;
     this.access = config.access;
+    this.publiccorpus = config.publiccorpus;
   }
 
   RED.nodes.registerType("watson-concept-insights-corpus",ConceptInsightsNode);
@@ -51,7 +52,14 @@
         this.corpus = RED.nodes.getNode(config.corpus);
         if (this.corpus) {
 
-          var corpus_name = this.corpus.cname;        
+          var corpus_name;
+          if (this.corpus.cname) {
+            corpus_name = this.corpus.cname;
+          } else {
+            console.log(this.corpus);
+            corpus_name = this.corpus.publiccorpus;
+            account_id = 'public';
+          }        
           var document_name = config.docname;
 
           node.status({fill:"blue",shape:"ring",text:"requesting..."});
@@ -65,7 +73,7 @@
               case 'annotations':
 
                 params.id = params.id+'/annotations';
-                console.log("HELLOW WORLD");
+                
                 //Request annotations from concept insights api
                 concept_insights.corpora.getDocumentAnnotations(params, function(err,res) {
                   handleWatsonCallback(node,msg,err,res);
@@ -112,7 +120,6 @@
               case 'conceptualsearch':
                 if (msg.concepts) {
                   params.ids = msg.concepts;
-                
                   concept_insights.corpora.getRelatedDocuments(params, function(err,res) {
                     handleWatsonCallback(node,msg,err,res);
                   });

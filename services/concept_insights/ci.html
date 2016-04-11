@@ -17,15 +17,33 @@
 <!-- Configure Corpus -->
 
 <script type="text/x-red" data-template-name="watson-concept-insights-corpus">
+
     <div class="form-row">
+        <label for="node-config-input-corpusmode"><i class="fa fa-question"></i> Mode</label>
+        <select type="text" id="node-config-input-corpusmode" style="display: inline-block; width: 70%;" >
+            <option value="user">User defined Corpus</option>
+            <option value="public">Public Corpus</option>
+        </select>
+    </div>
+
+
+    <div class="form-row corpusmode user">
         <label for="node-config-input-cname"><i class="fa fa-tag"></i> Corpus Name</label>
         <input type="text" id="node-config-input-cname" placeholder="Name">
     </div>
-    <div class="form-row">
+    <div class="form-row corpusmode user">
         <label for="node-config-input-access"><i class="fa fa-tag"></i> Access</label>
         <select type="text" id="node-config-input-access">
             <option value="private">Private</option>
             <option value="public">Public</option>
+        </select>
+    </div>
+
+    <div class="form-row corpusmode public">
+        <label for="node-config-input-publiccorpus"><i class="fa fa-tag"></i> Public Corpus</label>
+        <select type="text" id="node-config-input-publiccorpus">
+            <option value="TEDTalks">TED Talks</option>
+            
         </select>
     </div>
 </script>
@@ -35,11 +53,21 @@
     RED.nodes.registerType('watson-concept-insights-corpus',{
         category: 'config',
         defaults: { 
-            cname:{type: "text", required: true},
-            access:{value: "private", required: true}
+            cname:{value: ""},
+            access:{value: "private"},
+            corpusmode: {value: "user"},
+            publiccorpus: {value: "TEDTalks"}
         },
         label: function() {
-            return 'Corpus: '+this.cname;
+            return this.cname || this.publiccorpus;
+        },
+        oneditprepare: function() {
+
+            $('#node-config-input-corpusmode').change(function () {
+                var mode = $('#node-config-input-corpusmode').val();
+                $('.form-row.corpusmode.' + mode).show();
+                $('.form-row.corpusmode:not(.' + mode + ')').hide();
+            })
         }
     });
 })();
@@ -132,7 +160,7 @@
             inputs: 1,
             outputs: 0,
             icon: "speech_to_text.png.png",
-            paletteLabel: "concept insights corpora",
+            paletteLabel: "concept insights upload document",
             label: function() {
                 return this.name || "concept insights";
             },
