@@ -41,7 +41,7 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
 ### Contributing
 
 For simple typos and fixes please just raise an issue pointing out our mistakes.
-If you need to raise a pull request please read our [contribution guidelines](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md)
+If you need to raise a pull request please read our [contribution guidelines](https://github.com/watson-developer-cloud/node-red-node-watson/blob/master/CONTRIBUTING.md)
 before doing so.
 
 ### Copyright and license
