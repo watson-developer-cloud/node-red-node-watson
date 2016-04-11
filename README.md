@@ -32,6 +32,9 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
 - Image Analysis
     - Upload an image to detect either faces, URL text or
       content present in the image.
+- Dialog
+    - Automate branching conversation between a user and your application.
+    - Use natural language to automatically respond to user questions, cross-sell and up-sell, walk users through processes or applications, or even hand-hold users through difficult tasks.
 
 ### Contributing
 
