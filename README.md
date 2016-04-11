@@ -1,6 +1,8 @@
 Node-RED Watson Nodes for IBM Bluemix
 =====================================
 
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/e157cf8407f2442396789dc78075340a)](https://www.codacy.com/app/rezgui-y/node-red-node-watson)
+
 A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](http://bluemix.net).
 
 # Nodes
