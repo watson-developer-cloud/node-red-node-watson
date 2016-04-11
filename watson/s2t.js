@@ -74,6 +74,12 @@ module.exports = function (RED) {
         return;
       }
 
+      if (!config.continuous) {
+        var message = 'Missing continuous details, unable to process speech.';
+        node.error(message, msg)
+        return;
+      }
+
       var model = config.lang + '_' + config.band;
 
       var speech_to_text = watson.speech_to_text({
@@ -91,11 +97,12 @@ module.exports = function (RED) {
         }
 
         if (format === 'ogg') format += ';codecs=opus';
-
+console.log(config.continuous);
         var params = {
           audio: audio,
+          content_type: 'audio/' + format,
           model: model,
-          content_type: 'audio/' + format 
+          continuous: config.continuous
         };
 
         node.status({fill:"blue", shape:"dot", text:"requesting"});
