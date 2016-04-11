@@ -272,6 +272,10 @@
           var corpus_name = this.corpus.cname;
           var access = this.corpus.access;
 
+          if (this.corpus.publiccorpus) {
+            corpus_name = this.corpus.publiccorpus;
+            account_id = 'public';
+          }
           var params = {
             corpus: '/corpora/'+account_id+'/'+corpus_name,              
           }
@@ -295,7 +299,7 @@
 
               } else {
                 node.status({fill:"blue",shape:"ring",text:"Using existing corpus "+corpus_name});
-                addDocument(checkStatus);
+                addDocument(checkStatus(msg.payload.length));
               }
             });
         } else {
@@ -337,8 +341,14 @@
           });
         }
 
-        function checkStatus() {
-          //Loop every 10 secs and check the status of the document 
+        function checkStatus(fileLength) {
+
+          //Calculate interval based on length of file, default to 10 seconds
+          var interval = 10000;
+          if (fileLength > 0) interval = (2*fileLength) + 5;
+          
+
+          //Loop every X secs and check the status of the document 
           var statusInterval = setInterval(function(){
             concept_insights.corpora.getDocumentProcessingState(params, function(err,res) {
               if (err) {
@@ -355,7 +365,7 @@
 
               }
             });
-          },10000);
+          },interval);
         }
       });
     });
