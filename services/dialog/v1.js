@@ -16,12 +16,12 @@
 
 module.exports = function (RED) {
 
-  var request = require('request');
-  var cfenv = require('cfenv');
-  var fs = require('fs');
-  var temp = require('temp');
-  var async = require('async');
-  var watson = require('watson-developer-cloud');
+  var request = require("request");
+  var cfenv = require("cfenv");
+  var fs = require("fs");
+  var temp = require("temp");
+  var async = require("async");
+  var watson = require("watson-developer-cloud");
   temp.track();
 
   // Require the Cloud Foundry Module to pull credentials from bound service 
@@ -35,14 +35,14 @@ module.exports = function (RED) {
   var services = cfenv.getAppEnv().services;
 
   var username, password, sUsername, sPassword;
-  var service = cfenv.getAppEnv().getServiceCreds(/dialog/i)
+  var service = cfenv.getAppEnv().getServiceCreds(/dialog/i);
   
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
   }
   
-  RED.httpAdmin.get('/service-dialog/vcap', function (req, res) {
+  RED.httpAdmin.get("/service-dialog/vcap", function (req, res) {
 		res.json(service ? {bound_service: true} : null);
   });  
   
@@ -60,24 +60,25 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
    
-    this.log('Watson Developer Cloud Contribution - Dialog Node Instantiated') 
+    this.log("Watson Developer Cloud Contribution - Dialog Node Instantiated") ;
 	
-    this.on('input', function (msg) {
-      this.log('Watson Developer Cloud Contribution - Input received') 
+    this.on("input", function (msg) {
+      this.log("Watson Developer Cloud Contribution - Input received");
 		
+      var message = "";
       if (!msg.payload) {
-			var message = 'Missing property: msg.payload';
-			node.error(message, msg);
-			return;
+			 message = "Missing property: msg.payload";
+			 node.error(message, msg);
+			 return;
       }
 
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password;
+      var username = sUsername || this.credentials.username;
+      var password = sPassword || this.credentials.password;
       this.status({});  
 			
       if (!username || !password) {
         this.status({fill:"red", shape:"ring", text:"missing credentials"});  
-        var message = 'Missing Watson Dialog service credentials';
+        message = 'Missing Watson Dialog service credentials';
         this.error(message, msg);
         return;
       } 
@@ -85,39 +86,39 @@ module.exports = function (RED) {
       var dialog = watson.dialog({
         username: username,
         password: password,
-        version: 'v1'
+        version: "v1"
       });	  
 
-      var params = {}
-      if (config.mode === 'create') {
+      var params = {};
+      if (config.mode === "create") {
         performCreate(node,dialog,msg);
       }
-      else if (config.mode === 'delete') {
+      else if (config.mode === "delete") {
         performDelete(node,dialog,msg,config);
       }
-      else if (config.mode === 'deleteall') {
+      else if (config.mode === "deleteall") {
         performDeleteAll(node,dialog,msg,config);
       }
-       else if (config.mode === 'list') {
+       else if (config.mode === "list") {
         performList(node,dialog,msg);
-      } else if (config.mode === 'startconverse' || config.mode === 'converse' || config.mode === 'getprofile') {
-          dialogid = config.dialog;
-          clientid = config.clientid;
-          converseid = config.converse;
+      } else if (config.mode === "startconverse" || config.mode === "converse" || config.mode === "getprofile") {
+          var dialogid = config.dialog;
+          var clientid = config.clientid;
+          var converseid = config.converse;
 
           if (!dialogid || "" == dialogid) {
             if (msg.dialog_params && "dialog_id" in msg.dialog_params) {
               dialogid = msg.dialog_params["dialog_id"];
             }	
-          }				  
+          }
 		  
           if (!dialogid || "" == dialogid) {
-            var message = "Missing Dialog ID";
+            message = "Missing Dialog ID";
             node.status({fill:"red", shape:"dot", text:message});	
             node.error(message, msg);	
           }			
 			
-          if (config.mode === 'converse'  || config.mode === 'getprofile') {
+          if (config.mode === "converse"  || config.mode === "getprofile") {
             if (!clientid || "" == clientid) {
               if (msg.dialog_params && "client_id" in msg.dialog_params) {
                 clientid = msg.dialog_params["client_id"];
@@ -129,7 +130,7 @@ module.exports = function (RED) {
               }	
             }				  
 		    if (!clientid || "" === clientid) {
-              var message = "Missing Client ID";
+              message = "Missing Client ID";
               node.status({fill:"red", shape:"dot", text:message});	
               node.error(message, msg);	
             }
@@ -145,7 +146,7 @@ module.exports = function (RED) {
           params.dialog_id = dialogid;
           params.input = msg.payload;
 		  
-          if (config.mode === 'startconverse' || config.mode === 'converse') {			  
+          if (config.mode === "startconverse" || config.mode === "converse") {			  
             node.status({fill:"blue", shape:"dot", text:"Starting Dialog Conversation"});
             dialog.conversation (params, function (err, dialog_data) {
               if (err) {
@@ -183,20 +184,20 @@ module.exports = function (RED) {
   function performCreate(node,dialog,msg) {
     var params = {}
     node.status({fill:"blue", shape:"dot", text:"requesting create of new dialog template"});	 
-    if ('file' in msg.dialog_params && 'dialog_name' in msg.dialog_params) {
+    if ("file" in msg.dialog_params && "dialog_name" in msg.dialog_params) {
 		
       // extension supported : only XML
-      temp.open({suffix: '.xml'}, function (err, info) {
+      temp.open({suffix: ".xml"}, function (err, info) {
         if (err) throw err;
-        fileBuffer = msg.dialog_params["file"];
+        var fileBuffer = msg.dialog_params["file"];
         fs.writeFile(info.path, fileBuffer, function (err) {
             if (err) {
               console.error(err);
               throw err;
             }
-            aFileStream = fs.createReadStream(info.path);
+            var aFileStream = fs.createReadStream(info.path);
             params.file = aFileStream;
-            params.name = msg.dialog_params['dialog_name'];
+            params.name = msg.dialog_params["dialog_name"];
             // Watson SDK call
             dialog.createDialog(params, function(err, dialog_data){
                   if (err) {
@@ -224,7 +225,8 @@ module.exports = function (RED) {
 
 // This function delete an existing dialog instance.
   function performDelete(node,dialog,msg, config) {
-    var params = {}
+    var params = {};
+    var message = "";
     node.status({fill:"blue", shape:"dot", text:"requesting delete of a dialog instance"}); 
 
     if (!config.dialog || "" != config.dialog) {
@@ -234,18 +236,17 @@ module.exports = function (RED) {
       dialog.deleteDialog(params, function(err, dialog_data){
             
           if (!err) {
-              mess200="Dialog deleted successfully";
-              node.status({fill:"green", shape:"dot", text:mess200});      
+              message="Dialog deleted successfully";
+              node.status({fill:"green", shape:"dot", text:message});      
               msg.dialog = dialog_data;     
-              msg.payload = mess200;
+              msg.payload = message;
               node.send(msg);
           } else if (err && err.code==404) {
-
-              mess404="Dialog already deleted or not existing (404)";
-              node.status({fill:"green", shape:"dot", text:mess404});      
-              msg.payload = mess404;
-              console.log(mess404);
-              node.error(mess404, msg);
+              message="Dialog already deleted or not existing (404)";
+              node.status({fill:"green", shape:"dot", text:message});      
+              msg.payload = message;
+              console.log(err);
+              node.error(message, msg);
           } else {
               node.status({fill:"red", shape:"ring", text:"call to dialog service failed"}); 
               node.error(err, msg);
@@ -253,9 +254,9 @@ module.exports = function (RED) {
           }
       });  
     } else {
-      errtxt = "Dialog Id not specified";
-      node.status({fill:"red", shape:"ring", text:errtxt});     
-      node.error(errtxt, msg); 
+      message = "Dialog Id not specified";
+      node.status({fill:"red", shape:"ring", text:message});    
+      node.error(errmessage, msg); 
     }   
   }
 
@@ -313,7 +314,7 @@ module.exports = function (RED) {
 
         async.parallel(asyncTasks, function(){
           // All tasks are done now
-          console.log('Deleted '+nbdeleted + ' dialog ID on ' + nb_todelete );
+          console.log("Deleted "+nbdeleted + "" dialog ID on "" + nb_todelete );
           
           if (nbdeleted==nb_todelete)
             msg.payload = "All Dialogs have been deleted";
@@ -329,7 +330,7 @@ module.exports = function (RED) {
 
   
   //Register the node as service-dialog to nodeRED 
-  RED.nodes.registerType('service-dialog', 
+  RED.nodes.registerType("service-dialog", 
                          WatsonDialogNode, 
                          {credentials: { username: {type:"text"},
                                          password: {type:"password"}
