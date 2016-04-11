@@ -1,43 +1,42 @@
 {
-  "name": "node-red-node-watson",
-  "version": "0.3.0",
-  "description": "A collection of Node-RED nodes for IBM Watson services",
-  "dependencies": {
-    "alchemy-api": "^1.3.0",
-    "async": "^1.5.2",
-    "cfenv": "~1.0.0",
-    "file-type": "^2.7.0",
-    "request": "~2.53.0",
-    "temp": "^0.8.3",
-    "watson-developer-cloud": "^1.2.4"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/node-red/node-red-node-watson"
-  },
-  "license": "Apache-2.0",
-  "keywords": [
-    "node-red",
-    "bluemix",
-    "watson"
-  ],
-  "node-red": {
-    "nodes": {
-      "alchemy-feature-extract": "alchemy/feature-extract.js",
-      "alchemy-image-analysis": "alchemy/image-analysis.js",
-      "watson-natural-language-classifier": "services/natural_language_classifier/v1.js",
-      "watson-concept-insights": "services/concept_insights/v2.js",
-      "watson-dialog": "services/dialog/v1.js",
-      "watson-document-conversion": "services/document_conversion/v1.js",
-      "watson-language-identification": "/services/language_identification/v1.js",
-      "watson-language-translate": "services/language_translation/v1.js",
-      "watson-personality-insights": "services/personality_insights/v1.js",
-      "watson-relationship-extraction": "services/relationship_extraction/v1.js",
-      "watson-speech-to-text": "services/speech_to_text/v1.js",
-      "watson-text-to-speech": "services/text_to_speech/v1.js",
-      "watson-tradeoff-analytics": "services/tradeoff_analytics/v1.js",
-      "watson-tone-analyzer": "services/tone_analyzer/v1.js",
-      "watson-visual-recognition": "services/visual_recognition/v1.js"
+    "name": "node-red-node-watson",
+    "version": "0.3.0",
+    "description": "A collection of Node-RED nodes for IBM Watson services",
+    "dependencies": {
+        "alchemy-api": "^1.3.0",
+        "cfenv": "~1.0.0",
+        "file-type": "^2.7.0",
+        "request": "~2.53.0",
+        "temp": "^0.8.3",
+        "watson-developer-cloud": "^1.2.4"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/node-red/node-red-node-watson"
+    },
+    "license": "Apache-2.0",
+    "keywords": [
+        "node-red",
+        "bluemix",
+        "watson"
+    ],
+    "node-red": {
+        "nodes": {
+            "alchemy_language-v1": "services/alchemy_language/v1.js",
+            "alchemy-vision-v1": "services/alchemy_vision/v1.js",   
+            "watson-natural-language-classifier-v1": "services/natural_language_classifier/v1.js",
+            "watson-concept-insights-v2": "services/concept_insights/v2.js",
+            "watson-dialog-v1": "services/dialog/v1.js",
+            "watson-document-conversion-v1": "services/document_conversion/v1.js",
+            "watson-language-identification-v1": "/services/language_identification/v1.js",
+            "watson-language-translate-v1": "services/language_translation/v1.js",
+            "watson-personality-insights-v1": "services/personality_insights/v1.js",
+            "watson-relationship-extraction-v1": "services/relationship_extraction/v1.js",  
+            "watson-speech-to-text-v1": "services/speech_to_text/v1.js",  
+            "watson-text-to-speech-v1": "services/text_to_speech/v1.js",  
+            "watson-tradeoff-analytics-v1": "services/tradeoff_analytics/v1.js",  
+            "watson-tone-analyzer-v1": "services/tone_analyzer/v1.js",    
+            "watson-visual-recognition-v1": "services/visual_recognition/v1.js" 
+        }
     }
-  }
 }
