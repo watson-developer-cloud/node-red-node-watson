@@ -133,7 +133,7 @@ module.exports = function(RED) {
         return;
       }
 
-      var action = msg.action || msg.action;
+      var action = msg.action || config.action;
       if (!action) {
         node.warn("Missing action, please select one");
         node.send(msg);
