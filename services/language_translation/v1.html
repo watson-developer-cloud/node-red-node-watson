@@ -113,6 +113,7 @@ var first_launch = true;
 
   function selectAction()
   {
+    action = $('#node-input-action').val();
     if (action === "train")
     {
       $('select#node-input-srclang, select#node-input-destlang').parent().hide();
@@ -259,9 +260,7 @@ var first_launch = true;
     }).fail(function (err)
     {
       console.log(err);
-    }).always(function (osef)
-    {
-    });
+    }).always(function (osef) {});
   }
 
   function oneditprepare()
@@ -364,5 +363,4 @@ var first_launch = true;
     oneditprepare: oneditprepare
   });
 })();
-
 </script>
