@@ -306,7 +306,7 @@ var first_launch = true;
 
   RED.nodes.registerType('watson-translate',
   {
-    category: 'Tests',
+    category: 'IBM Watson',
     defaults:
     {
       name:
@@ -345,10 +345,10 @@ var first_launch = true;
     inputs: 1,
     outputs: 1,
     icon: "translation.png",
-    paletteLabel: "Translate and Train",
+    paletteLabel: "Language translation",
     label: function ()
     {
-      return this.name || "Translate and Train";
+      return this.name || "Language translation";
     },
     labelStyle: function ()
     {
