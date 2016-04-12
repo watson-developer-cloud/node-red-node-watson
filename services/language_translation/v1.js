@@ -18,6 +18,10 @@ module.exports = function(RED) {
   var watson = require('watson-developer-cloud');
   var cfenv = require('cfenv');
   var fs = require('fs');
+  var fileType = require('file-type');
+  var request = require('request');
+  var temp = require('temp');
+  temp.track();
 
   var services = cfenv.getAppEnv().services;
 
@@ -106,6 +110,8 @@ module.exports = function(RED) {
     }
 
     this.on('input', function(msg) {
+      node.warn(msg);
+      console.log(msg);
       if (!msg.payload) {
         var message = 'Missing property: msg.payload';
         node.error(message, msg)
@@ -157,13 +163,19 @@ module.exports = function(RED) {
 
       var model_id = srclang + '-' + destlang 
         + (domain === 'news' ? '' : '-conversational');
-        node.log(action);
+
+      var params = {
+        name: 'custom-english-to-spanish',
+        base_model_id: model_id,
+        forced_glossary: fs.createReadStream('glossary.tmx')
+      };
+
       switch(action) {
         case 'translate':
           this.doTranslate(msg, model_id);
           break;
         case 'train':
-          this.doTrain(msg);
+          this.doTrain(msg, params);
           break;
       }
     });
