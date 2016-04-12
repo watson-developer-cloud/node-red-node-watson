@@ -67,14 +67,40 @@ module.exports = function(RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.doTranslate = function() 
+    this.doTranslate = function(msg, model_id) 
     {
-      //do this
+      var language_translation = watson.language_translation({
+        username: username,
+        password: password,
+        version: 'v2'
+      });
+      node.status({fill:"blue", shape:"dot", text:"requesting"});
+      language_translation.translate({
+        text: msg.payload, model_id: model_id},
+        function (err, response) {
+          node.status({})
+          if (err) { node.error(err, msg); }
+          else { msg.payload = response.translations[0].translation; }
+          node.send(msg);
+        });
     };
 
-    this.doTrain = function() 
+    this.doTrain = function(msg) 
     {
-      //do that
+      var language_translation = watson.language_translation({
+        username: username,
+        password: password,
+        version: 'v2'
+      });
+      node.status({fill:"red", shape:"dot", text:"not deployed yet"});
+      language_translation.createModel(params,
+        function(err, model) {
+          node.status({});
+          if (err)
+            console.log('error:', err);
+          else
+            console.log(JSON.stringify(model, null, 2));
+        });
     }
 
     this.on('input', function(msg) {
@@ -130,29 +156,13 @@ module.exports = function(RED) {
       var model_id = srclang + '-' + destlang 
         + (domain === 'news' ? '' : '-conversational');
 
-      if(action === "translate") 
-      {
-        node.status({fill:"blue", shape:"dot", text:"requesting"});
-        language_translation.translate({
-          text: msg.payload, model_id: model_id},
-          function (err, response) {
-            node.status({})
-            if (err) { node.error(err, msg); }
-            else { msg.payload = response.translations[0].translation; }
-            node.send(msg);
-          });
-      } 
-      else if(action === "train")
-      {
-        node.status({fill:"red", shape:"dot", text:"not deployed yet"});
-        language_translation.createModel(params,
-          function(err, model) {
-            node.status({});
-            if (err)
-              console.log('error:', err);
-            else
-              console.log(JSON.stringify(model, null, 2));
-          });
+      switch(this.action) {
+        case 'translate':
+          this.doTranslate(msg, model_id);
+          break;
+        case 'train':
+          this.doTrain(msg);
+          break;
       }
     });
   }
