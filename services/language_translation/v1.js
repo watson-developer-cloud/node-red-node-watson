@@ -73,8 +73,6 @@ module.exports = function(RED) {
 
     this.doTranslate = function(msg, model_id) 
     {
-      node.warn("dotranslate");
-
       var language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -94,8 +92,6 @@ module.exports = function(RED) {
 
     this.doTrain = function(msg, model_id) 
     {
-      node.warn("dotrain");
-
       var language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -105,14 +101,12 @@ module.exports = function(RED) {
       var params = {};
 
       node.status({fill:"blue", shape:"dot", text:"requesting training"}); 
-      console.log("messag", msg);
 
       temp.open({suffix: ".xml"}, function(err, info) {
-        console.log("ingo", info);
         if (!err) {
           fs.write(info.fd, msg.payload);
           var params = {
-            name: 'osef',
+            name: msg.filename.replace(/[^0-9a-z]/gi, ''),
             base_model_id: 'en-es',
             forced_glossary: fs.createReadStream(info.path)
           };
@@ -124,10 +118,9 @@ module.exports = function(RED) {
               node.status({fill:"red", shape:"ring", text:"call to translation service failed"}); 
               node.error(err, msg);                
             } else {
-                  node.status({fill:"green", shape:"dot", text:"New model has been created"});          
-                  msg.payload = "Done";
-                  node.send(msg);
-                  console.log(JSON.stringify(model, null, 2));
+                  node.status({fill:"green", shape:"dot", text:"model sent to training"});     
+                  msg.payload = "Model " + model.name + " successfully created with id: " + model.model_id;
+                  node.send(msg); 
                 }       
           });
         }
@@ -135,8 +128,6 @@ module.exports = function(RED) {
     }
 
     this.on('input', function(msg) {
-      node.warn(msg);
-      console.log(msg);
       if (!msg.payload) {
         var message = 'Missing property: msg.payload';
         node.error(message, msg)

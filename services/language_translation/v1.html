@@ -54,6 +54,14 @@
         <select type="text" id="node-input-destlang" style="display: inline-block; vertical-align:middle; width: 70%;">
         </select>
     </div>
+    <div class="form-row">
+        <label for="node-input-type"><i class="fa fa-comments-o"></i> Target</label>
+        <select type="text" id="node-input-type" style="display: inline-block; vertical-align:middle; width: 70%;">
+            <option value="forced_glossary" selected>Forced glossary</option>
+            <option value="parallel_corpus">Parallel corpus</option>
+            <option value="monolingual_corpus">Monolingual corpus</option>
+        </select>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="watson-translate">
@@ -81,23 +89,43 @@ var first_launch = true;
     return self.indexOf(value) === index;
   }
 
+  function handlersUI()
+  {
+    $('#node-input-action').change(function (val)
+    {
+      action = $('#node-input-action').val();
+      selectAction();
+    });
+
+    $('#node-input-domain').change(function (val)
+    {
+      domain_selected = $('#node-input-domain').val();
+      selectDomain();
+    });
+
+    // check availability 
+    $('#node-input-srclang').change(function ()
+    {
+      srclang_selected = $('#node-input-srclang').val();
+      destlangAvailable();
+    });
+  }
+
   function selectAction()
   {
-    console.log('Changement d action');
     if (action === "train")
     {
-      $('select#node-input-srclang, select#node-input-destlang').parent().hide();
+      $('select#node-input-srclang, select#node-input-destlang, select#node-input-type').parent().hide();
     }
     else
     {
-      $('select#node-input-srclang, select#node-input-destlang').parent().show();
+      $('select#node-input-srclang, select#node-input-destlang, select#node-input-type').parent().show();
     }
     domainsAvailable();
   }
 
   function domainsAvailable()
   {
-    console.log('regarde les domaines disponibles en fonction de l action');
     $('select#node-input-domain').empty();
     if (action === "train")
     {
@@ -135,7 +163,6 @@ var first_launch = true;
 
   function selectDomain()
   {
-    console.log('changement de domaine');
     $('#node-input-srclang').empty();
     $('#node-input-destlang').empty();
     domain_selected = $('#node-input-domain').val();
@@ -205,7 +232,6 @@ var first_launch = true;
 
   function destlangAvailable()
   {
-    console.log('regarde les langues dest disponibles en fonction des langues sources');
     var pair_lang = domain_type.map(function (a)
     {
       return a.model_id;
@@ -221,37 +247,13 @@ var first_launch = true;
     });
   }
 
-  function handlersUI()
-  {
-    console.log('handlers de l UI lancés');
-    $('#node-input-action').change(function (val)
-    {
-      action = $('#node-input-action').val();
-      selectAction();
-    });
-
-    $('#node-input-domain').change(function (val)
-    {
-      domain_selected = $('#node-input-domain').val();
-      selectDomain();
-    });
-
-    // check availability 
-    $('#node-input-srclang').change(function ()
-    {
-      srclang_selected = $('#node-input-srclang').val();
-      destlangAvailable();
-    });
-  }
-
   function getModels()
   {
     $.getJSON('watson-translate/models/').done(function (data)
     {
       models = data.models;
-      console.log(models);
       handlersUI();
-      domainsAvailable();
+      selectAction();
     }).fail(function (err)
     {
       console.log(err);
@@ -262,7 +264,6 @@ var first_launch = true;
 
   function oneditprepare()
   {
-    console.log('call du oneditprepare');
     var node = this;
     $.getJSON('watson-translate/vcap/')
       .done(function (sids)
@@ -285,7 +286,7 @@ var first_launch = true;
     else
     {
       handlersUI();
-      domainsAvailable();
+      selectAction();
     }
 
     /*        $.getJSON('watson-translate/languages/')
@@ -328,6 +329,10 @@ var first_launch = true;
       action:
       {
         value: "translate"
+      },
+      type:
+      {
+        value: "forced_glossary"
       }
     },
     credentials:
