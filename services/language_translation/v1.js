@@ -69,6 +69,7 @@ module.exports = function(RED) {
 
     this.doTranslate = function(msg, model_id) 
     {
+      node.log("dotranslate");
       var language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -87,6 +88,7 @@ module.exports = function(RED) {
 
     this.doTrain = function(msg) 
     {
+      node.log("dotrain");
       var language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -155,8 +157,8 @@ module.exports = function(RED) {
 
       var model_id = srclang + '-' + destlang 
         + (domain === 'news' ? '' : '-conversational');
-
-      switch(this.action) {
+        node.log(action);
+      switch(action) {
         case 'translate':
           this.doTranslate(msg, model_id);
           break;

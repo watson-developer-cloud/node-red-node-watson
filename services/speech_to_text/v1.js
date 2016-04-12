@@ -102,7 +102,9 @@ module.exports = function (RED) {
           audio: audio,
           content_type: 'audio/' + format,
           model: model,
-          continuous: config.continuous
+          continuous: true,
+          inactivity_timeout: -1,
+          interim_results: false
         };
 
         node.status({fill:"blue", shape:"dot", text:"requesting"});
