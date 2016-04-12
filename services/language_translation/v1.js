@@ -124,9 +124,8 @@ module.exports = function(RED) {
               node.status({fill:"red", shape:"ring", text:"call to translation service failed"}); 
               node.error(err, msg);                
             } else {
-                  node.status({fill:"green", shape:"dot", text:"Dialog template created successfully"});      
-                  msg.dialog = dialog_data;     
-                  msg.payload = "Check msg.dialog dialog data";
+                  node.status({fill:"green", shape:"dot", text:"New model has been created"});          
+                  msg.payload = "Done";
                   node.send(msg);
                   console.log(JSON.stringify(model, null, 2));
                 }       
