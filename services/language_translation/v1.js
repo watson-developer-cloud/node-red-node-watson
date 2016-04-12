@@ -39,7 +39,7 @@ module.exports = function(RED) {
   });
 
   RED.httpAdmin.get('/watson-translate/models', function(req, res) {
-    var language_translation = watson.language_translation({
+    language_translation = watson.language_translation({
       username: username,
       password: password,
       version: 'v2'
@@ -53,7 +53,7 @@ module.exports = function(RED) {
   });
 
   RED.httpAdmin.get('/watson-translate/languages', function(req, res) {
-    var language_translation = watson.language_translation({
+    language_translation = watson.language_translation({
       username: username,
       password: password,
       version: 'v2'
@@ -73,7 +73,7 @@ module.exports = function(RED) {
 
     this.doTranslate = function(msg, model_id) 
     {
-      var language_translation = watson.language_translation({
+      language_translation = watson.language_translation({
         username: username,
         password: password,
         version: 'v2'
@@ -90,21 +90,43 @@ module.exports = function(RED) {
         });
     };
 
-    this.doTrain = function(msg, model_id) 
+    this.doTrain = function(msg, model_id, filetype) 
     {
-      var language_translation = watson.language_translation({
+      language_translation = watson.language_translation({
         username: username,
         password: password,
         version: 'v2'
       });
 
       var params = {};
-
       node.status({fill:"blue", shape:"dot", text:"requesting training"}); 
-      console.log("message", msg);
+
       temp.open({suffix: ".xml"}, function(err, info) {
         if (!err) {
           fs.write(info.fd, msg.payload);
+          switch(fileType) {
+            case 'forced_glossary':
+              params = {
+                name: msg.filename.replace(/[^0-9a-z]/gi, ''),
+                base_model_id: 'en-es',
+                forced_glossary: fs.createReadStream(info.path)
+              };
+              break;
+            case 'parallel_corpus':
+              params = {
+                name: msg.filename.replace(/[^0-9a-z]/gi, ''),
+                base_model_id: 'en-es',
+                parallel_corpus: fs.createReadStream(info.path)
+              };
+              break;
+            case 'monolingual_corpus':
+              params = {
+                name: msg.filename.replace(/[^0-9a-z]/gi, ''),
+                base_model_id: 'en-es',
+                monolingual_corpus: fs.createReadStream(info.path)
+              };
+              break;
+          }
           var params = {
             name: msg.filename.replace(/[^0-9a-z]/gi, ''),
             base_model_id: 'en-es',
@@ -119,7 +141,7 @@ module.exports = function(RED) {
               node.error(err, msg);                
             } else {
                   node.status({fill:"green", shape:"dot", text:"model sent to training"});     
-                  msg.payload = "Model " + model.name + " successfully created with id: " + model.model_id;
+                  msg.payload = "Model " + model.name + " successfully sent for training with id: " + model.model_id;
                   node.send(msg); 
                 }       
           });
@@ -128,8 +150,9 @@ module.exports = function(RED) {
     }
 
     this.on('input', function(msg) {
+      var message = "";
       if (!msg.payload) {
-        var message = 'Missing property: msg.payload';
+        message = 'Missing property: msg.payload';
         node.error(message, msg)
         return;
       }
@@ -162,12 +185,19 @@ module.exports = function(RED) {
         return;
       }
 
+      var filetype = msg.filetype || config.filetype;
+      if (!filetype) {
+        node.warn("Missing file type, please select one");
+        node.send(msg);
+        return;
+      }
+
       username = username || this.credentials.username;
       password = password || this.credentials.password;
 
       if (!username || !password) {
         this.status({fill:"red", shape:"ring", text:"missing credentials"});
-        var message = 'Missing Language Translation service credentials';
+        message = 'Missing Language Translation service credentials';
         node.error(message, msg)
         return;
       }
@@ -186,7 +216,7 @@ module.exports = function(RED) {
           this.doTranslate(msg, model_id);
           break;
         case 'train':
-          this.doTrain(msg, model_id);
+          this.doTrain(msg, model_id, filetype);
           break;
       }
     });
