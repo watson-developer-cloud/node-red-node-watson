@@ -76,87 +76,67 @@
 
 <script type="text/javascript">
 var first_launch = true;
-(function ()
-{
+(function () {
   var models, domain_type, languages;
   var domain_selected = $('#node-input-domain').val();
   var srclang_selected = $('#node-input-srclang').val();
   var action = $('#node-input-action').val();
 
   // sorting functions
-  function onlyUnique(value, index, self)
-  {
+  function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
   }
 
-  function handlersUI()
-  {
-    $('#node-input-action').change(function (val)
-    {
+  function handlersUI() {
+    $('#node-input-action').change(function (val) {
       action = $('#node-input-action').val();
       selectAction();
     });
 
-    $('#node-input-domain').change(function (val)
-    {
+    $('#node-input-domain').change(function (val) {
       domain_selected = $('#node-input-domain').val();
       selectDomain();
     });
 
     // check availability 
-    $('#node-input-srclang').change(function ()
-    {
+    $('#node-input-srclang').change(function () {
       srclang_selected = $('#node-input-srclang').val();
       destlangAvailable();
     });
   }
 
-  function selectAction()
-  {
+  function selectAction() {
     action = $('#node-input-action').val();
-    if (action === "train")
-    {
+    if (action === "train") {
       $('select#node-input-srclang, select#node-input-destlang').parent().hide();
       $('select#node-input-type').parent().show();
-    }
-    else
-    {
+    } else {
       $('select#node-input-srclang, select#node-input-destlang').parent().show();
       $('select#node-input-type').parent().hide();
     }
     domainsAvailable();
   }
 
-  function domainsAvailable()
-  {
+  function domainsAvailable() {
     $('select#node-input-domain').empty();
-    if (action === "train")
-    {
-      var models_with_domains_available = models.filter(function (model)
-      {
+    if (action === "train") {
+      var models_with_domains_available = models.filter(function (model) {
         return model.customizable === true;
       });
-    }
-    else
-    {
+    } else {
       var models_with_domains_available = models;
     }
-    domains = models_with_domains_available.map(function (a)
-    {
+    domains = models_with_domains_available.map(function (a) {
       return a.domain;
     });
 
 
     var unique_domains = domains.filter(onlyUnique);
     var domain_first_iteration = true;
-    unique_domains.forEach(function (domain)
-    {
-      if (domain_first_iteration)
-      {
+    unique_domains.forEach(function (domain) {
+      if (domain_first_iteration) {
         $('select#node-input-domain').append('<option value="' + domain + '" selected>' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
-      }
-      else
-      {
+      } else {
         $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
       }
       domain_first_iteration = false;
@@ -164,57 +144,45 @@ var first_launch = true;
     selectDomain();
   }
 
-  function selectDomain()
-  {
+  function selectDomain() {
     $('#node-input-srclang').empty();
     $('#node-input-destlang').empty();
     domain_selected = $('#node-input-domain').val();
-    domain_type = models.filter(function (model)
-    {
+    domain_type = models.filter(function (model) {
       return model.domain === domain_selected && model.status === "available";
     });
-    input_lang = domain_type.map(function (a)
-    {
+    input_lang = domain_type.map(function (a) {
       return a.source;
     });
-    output_lang = domain_type.map(function (a)
-    {
+    output_lang = domain_type.map(function (a) {
       return a.target;
     });
     input_lang_unique = input_lang.filter(onlyUnique);
     output_lang_unique = output_lang.filter(onlyUnique);
     var langsrc_first_iteration = true;
-    input_lang_unique.forEach(function (lang)
-    {
+    input_lang_unique.forEach(function (lang) {
       /*var lang_fullname = languages.filter(function(language) {
           return language.language === lang;
       });*/
-      if (langsrc_first_iteration)
-      {
+      if (langsrc_first_iteration) {
         //$('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang_fullname[0].name + '</option>');
         $('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang + '</option>');
-      }
-      else
-      {
+      } else {
         //$('select#node-input-srclang').append('<option value="' + lang + '">' + lang_fullname[0].name + '</option>');
         $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
       }
       langsrc_first_iteration = false;
     });
     var langdest_first_iteration = true;
-    output_lang_unique.forEach(function (lang)
-    {
+    output_lang_unique.forEach(function (lang) {
       /*         var lang_fullname = languages.filter(function(language) {
                    return language.language === lang;
                });*/
       //if (lang_fullname[0]) {
-      if (langdest_first_iteration)
-      {
+      if (langdest_first_iteration) {
         //$('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
         $('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
-      }
-      else
-      {
+      } else {
         //$('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
         $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
       }
@@ -233,59 +201,45 @@ var first_launch = true;
     destlangAvailable();
   }
 
-  function destlangAvailable()
-  {
-    var pair_lang = domain_type.map(function (a)
-    {
+  function destlangAvailable() {
+    var pair_lang = domain_type.map(function (a) {
       return a.model_id;
     });
-    var available_destlang = pair_lang.filter(function (model_id)
-    {
+    var available_destlang = pair_lang.filter(function (model_id) {
       return model_id.match("^" + srclang_selected);
     });
     $('#node-input-destlang option').attr('disabled', 'disabled');
-    available_destlang.forEach(function (val)
-    {
+    available_destlang.forEach(function (val) {
       $('#node-input-destlang option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
     });
   }
 
-  function getModels()
-  {
-    $.getJSON('watson-translate/models/').done(function (data)
-    {
+  function getModels() {
+    $.getJSON('watson-translate/models/').done(function (data) {
       models = data.models;
       handlersUI();
       selectAction();
-    }).fail(function (err)
-    {
+    }).fail(function (err) {
       console.log(err);
     }).always(function (osef) {});
   }
 
-  function oneditprepare()
-  {
+  function oneditprepare() {
     var node = this;
     $.getJSON('watson-translate/vcap/')
-      .done(function (sids)
-      {
+      .done(function (sids) {
         $('.credentials').toggle(!sids);
       })
-      .fail(function ()
-      {
+      .fail(function () {
         $('.credentials').show();
-      }).always(function ()
-      {
+      }).always(function () {
         $('#credentials-check').hide();
       })
 
-    if (first_launch || !models)
-    {
+    if (first_launch || !models) {
       getModels();
       first_launch = false;
-    }
-    else
-    {
+    } else {
       handlersUI();
       selectAction();
     }
@@ -306,44 +260,33 @@ var first_launch = true;
 
   }
 
-  RED.nodes.registerType('watson-translate',
-  {
+  RED.nodes.registerType('watson-translate', {
     category: 'IBM Watson',
-    defaults:
-    {
-      name:
-      {
+    defaults: {
+      name: {
         value: ""
       },
-      srclang:
-      {
+      srclang: {
         value: "en"
       },
-      destlang:
-      {
+      destlang: {
         value: "fr"
       },
-      domain:
-      {
+      domain: {
         value: "news"
       },
-      action:
-      {
+      action: {
         value: "translate"
       },
-      filetype:
-      {
+      filetype: {
         value: "forcedglossary"
       }
     },
-    credentials:
-    {
-      username:
-      {
+    credentials: {
+      username: {
         type: "text"
       },
-      password:
-      {
+      password: {
         type: "password"
       }
     },
@@ -352,15 +295,14 @@ var first_launch = true;
     outputs: 1,
     icon: "translation.png",
     paletteLabel: "Language translation",
-    label: function ()
-    {
+    label: function () {
       return this.name || "Language translation";
     },
-    labelStyle: function ()
-    {
+    labelStyle: function () {
       return this.name ? "node_label_italic" : "";
     },
     oneditprepare: oneditprepare
   });
 })();
+
 </script>
