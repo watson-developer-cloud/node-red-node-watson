@@ -108,7 +108,7 @@ module.exports = function(RED) {
           var params = {
             name: msg.filename,
             base_model_id: 'en-es',
-            forced_glossary: fs.createReadStream(info.path)
+            forced_glossary_test: fs.createReadStream(info.path)
           };
           // Watson SDK call
           language_translation.createModel(params,
