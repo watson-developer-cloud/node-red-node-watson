@@ -106,7 +106,7 @@ module.exports = function(RED) {
         if (!err) {
           fs.write(info.fd, msg.payload);
           var params = {
-            name: msg.filename.replace(/[^0-9a-z]/gi, ''),
+            name: msg.filename,
             base_model_id: 'en-es',
             forced_glossary: fs.createReadStream(info.path)
           };
