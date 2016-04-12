@@ -98,12 +98,23 @@ module.exports = function (RED) {
 
         if (format === 'ogg') format += ';codecs=opus';
 
-        var params = {
-          audio: audio,
-          content_type: 'audio/' + format,
-          model: model,
-          continuous: true
-        };
+        if(config.continuous === "true")
+        {
+          var params = {
+            audio: audio,
+            content_type: 'audio/' + format,
+            model: model,
+            continuous: true
+          };          
+        } else {
+          var params = {
+            audio: audio,
+            content_type: 'audio/' + format,
+            model: model,
+            continuous: false
+          };                    
+        }
+
 
         node.status({fill:"blue", shape:"dot", text:"requesting"});
         speech_to_text.recognize(params, function (err, res) {

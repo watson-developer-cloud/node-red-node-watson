@@ -74,6 +74,11 @@ module.exports = function(RED) {
     this.doTranslate = function(msg, model_id) 
     {
       node.log("dotranslate");
+      node.warn("dotranslate");
+      node.log("msg");
+      node.warn("msg");
+      node.log("model_id");
+      node.warn("model_id");
       var language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -93,6 +98,11 @@ module.exports = function(RED) {
     this.doTrain = function(msg) 
     {
       node.log("dotrain");
+      node.warn("dotrain");
+      node.log("msg");
+      node.warn("msg");
+      node.log("params");
+      node.warn("params");
       var language_translation = watson.language_translation({
         username: username,
         password: password,

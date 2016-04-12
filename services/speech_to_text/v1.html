@@ -52,8 +52,8 @@
     <div class="form-row">
         <label for="node-input-continuous"><i class="fa fa-audio-o"></i> Continuous</label>
         <select type="text" id="node-input-continuous" style="display: inline-block; width: 70%;">
-            <option value="true">Yes</option>
-            <option value="false">No</option>
+            <option value="true" selected>True</option>
+            <option value="false">False</option>
         </select>
     </div>
 </script>
@@ -74,6 +74,7 @@
     <p>Along with the language, you can also configure the source audio quality. The service supports two different
     source sampling rates, <b>Narrowband (8KHz) and Broadband (16Khz)</b>. Higher sample rates will be downsampled
     automatically but the is not true in reverse.</p>
+    <p>Use the continuous property to choose whether the decoding should stop at the first pause or wait until the end of the file.</p>
     <p>The returned audio transcription will be returned on <code>msg.transcription</code>.</p>
     <p>For more information about the Speech To Text service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/speech-to-text.html">documentation</a>.</p>
 </script>
@@ -86,7 +87,7 @@
                 name: {value: ""},
                 lang: {value: "en-US"},
                 band: {value: "BroadbandModel"},
-                continuous: {value: true}
+                continuous: {value: "true"}
             },
             credentials: {
               username: {type:"text"},
