@@ -101,7 +101,7 @@ module.exports = function(RED) {
       var params = {};
 
       node.status({fill:"blue", shape:"dot", text:"requesting training"}); 
-
+      console.log("message", msg);
       temp.open({suffix: ".xml"}, function(err, info) {
         if (!err) {
           fs.write(info.fd, msg.payload);
