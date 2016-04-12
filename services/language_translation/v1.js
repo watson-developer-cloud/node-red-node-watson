@@ -73,17 +73,14 @@ module.exports = function(RED) {
 
     this.doTranslate = function(msg, model_id) 
     {
-      node.log("dotranslate");
       node.warn("dotranslate");
-      node.log("msg");
-      node.warn("msg");
-      node.log("model_id");
-      node.warn("model_id");
+
       var language_translation = watson.language_translation({
         username: username,
         password: password,
         version: 'v2'
       });
+
       node.status({fill:"blue", shape:"dot", text:"requesting"});
       language_translation.translate({
         text: msg.payload, model_id: model_id},
@@ -95,28 +92,47 @@ module.exports = function(RED) {
         });
     };
 
-    this.doTrain = function(msg) 
+    this.doTrain = function(msg, model_id) 
     {
-      node.log("dotrain");
       node.warn("dotrain");
-      node.log("msg");
-      node.warn("msg");
-      node.log("params");
-      node.warn("params");
+
       var language_translation = watson.language_translation({
         username: username,
         password: password,
         version: 'v2'
       });
-      node.status({fill:"red", shape:"dot", text:"not deployed yet"});
-      language_translation.createModel(params,
-        function(err, model) {
-          node.status({});
-          if (err)
-            console.log('error:', err);
-          else
-            console.log(JSON.stringify(model, null, 2));
-        });
+
+      var params = {};
+
+      node.status({fill:"blue", shape:"dot", text:"requesting training"}); 
+      console.log("messag", msg);
+
+      temp.open({suffix: ".xml"}, function(err, info) {
+        console.log("ingo", info);
+        if (!err) {
+          fs.write(info.fd, msg.payload);
+          var params = {
+            name: 'osef',
+            base_model_id: 'en-es',
+            forced_glossary: fs.createReadStream(info.path)
+          };
+          // Watson SDK call
+          language_translation.createModel(params,
+          function(err, model) {
+            node.status({});
+            if (err) {
+              node.status({fill:"red", shape:"ring", text:"call to translation service failed"}); 
+              node.error(err, msg);                
+            } else {
+                  node.status({fill:"green", shape:"dot", text:"Dialog template created successfully"});      
+                  msg.dialog = dialog_data;     
+                  msg.payload = "Check msg.dialog dialog data";
+                  node.send(msg);
+                  console.log(JSON.stringify(model, null, 2));
+                }       
+          });
+        }
+      });
     }
 
     this.on('input', function(msg) {
@@ -160,6 +176,7 @@ module.exports = function(RED) {
       password = password || this.credentials.password;
 
       if (!username || !password) {
+        this.status({fill:"red", shape:"ring", text:"missing credentials"});
         var message = 'Missing Language Translation service credentials';
         node.error(message, msg)
         return;
@@ -174,18 +191,12 @@ module.exports = function(RED) {
       var model_id = srclang + '-' + destlang 
         + (domain === 'news' ? '' : '-conversational');
 
-      var params = {
-        name: 'custom-english-to-spanish',
-        base_model_id: model_id,
-        forced_glossary: fs.createReadStream('glossary.tmx')
-      };
-
       switch(action) {
         case 'translate':
           this.doTranslate(msg, model_id);
           break;
         case 'train':
-          this.doTrain(msg, params);
+          this.doTrain(msg, model_id);
           break;
       }
     });

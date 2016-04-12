@@ -1,0 +1,8 @@
+{
+  "client": {
+    "host": "192.168.59.103",
+    "port": 8983,
+    "path": "/solr",
+    "core": null
+  }
+}

@@ -1,0 +1,8 @@
+node_modules
+examples
+docs
+jshint
+output.txt
+coverage.html
+lib-cov
+report
