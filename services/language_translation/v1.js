@@ -1,5 +1,5 @@
 /**
- * Copyright 2013,2015 IBM Corp.
+ * Copyright 2013,2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 module.exports = function(RED) {
   var watson = require('watson-developer-cloud');
   var cfenv = require('cfenv');
+  var fs = require('fs');
 
-  var services = cfenv.getAppEnv().services,
-    service;
+  var services = cfenv.getAppEnv().services;
 
-  var username, password;
+  var username, password, language_translation;
 
-  var service = cfenv.getAppEnv().getServiceCreds(/language translation/i)
+  var service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
 
   if (service) {
     username = service.username;
@@ -34,9 +34,76 @@ module.exports = function(RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
+  RED.httpAdmin.get('/watson-translate/models', function(req, res) {
+    var language_translation = watson.language_translation({
+      username: username,
+      password: password,
+      version: 'v2'
+    });
+    language_translation.getModels({}, function(err, models) {
+        if (err)
+          res.json(err);
+        else
+          res.json(models);
+    });  
+  });
+
+  RED.httpAdmin.get('/watson-translate/languages', function(req, res) {
+    var language_translation = watson.language_translation({
+      username: username,
+      password: password,
+      version: 'v2'
+    });
+      language_translation.getIdentifiableLanguages(null,
+        function(err, languages) {
+          if (err)
+          res.json(err);
+        else
+          res.json(languages);
+      });
+  });
+
   function SMTNode(config) {
     RED.nodes.createNode(this, config);
     var node = this;
+
+    this.doTranslate = function(msg, model_id) 
+    {
+      node.log("dotranslate");
+      var language_translation = watson.language_translation({
+        username: username,
+        password: password,
+        version: 'v2'
+      });
+      node.status({fill:"blue", shape:"dot", text:"requesting"});
+      language_translation.translate({
+        text: msg.payload, model_id: model_id},
+        function (err, response) {
+          node.status({})
+          if (err) { node.error(err, msg); }
+          else { msg.payload = response.translations[0].translation; }
+          node.send(msg);
+        });
+    };
+
+    this.doTrain = function(msg) 
+    {
+      node.log("dotrain");
+      var language_translation = watson.language_translation({
+        username: username,
+        password: password,
+        version: 'v2'
+      });
+      node.status({fill:"red", shape:"dot", text:"not deployed yet"});
+      language_translation.createModel(params,
+        function(err, model) {
+          node.status({});
+          if (err)
+            console.log('error:', err);
+          else
+            console.log(JSON.stringify(model, null, 2));
+        });
+    }
 
     this.on('input', function(msg) {
       if (!msg.payload) {
@@ -66,6 +133,13 @@ module.exports = function(RED) {
         return;
       }
 
+      var action = msg.action || msg.action;
+      if (!action) {
+        node.warn("Missing action, please select one");
+        node.send(msg);
+        return;
+      }
+
       username = username || this.credentials.username;
       password = password || this.credentials.password;
 
@@ -75,7 +149,7 @@ module.exports = function(RED) {
         return;
       }
 
-      var language_translation = watson.language_translation({
+      language_translation = watson.language_translation({
         username: username,
         password: password,
         version: 'v2'
@@ -83,19 +157,18 @@ module.exports = function(RED) {
 
       var model_id = srclang + '-' + destlang 
         + (domain === 'news' ? '' : '-conversational');
-
-      node.status({fill:"blue", shape:"dot", text:"requesting"});
-      language_translation.translate({
-        text: msg.payload, model_id: model_id},
-        function (err, response) {
-          node.status({})
-          if (err) { node.error(err, msg); }
-          else { msg.payload = response.translations[0].translation; }
-          node.send(msg);
-        });
-
+        node.log(action);
+      switch(action) {
+        case 'translate':
+          this.doTranslate(msg, model_id);
+          break;
+        case 'train':
+          this.doTrain(msg);
+          break;
+      }
     });
   }
+
   RED.nodes.registerType("watson-translate",SMTNode, {
     credentials: {
       username: {type:"text"},

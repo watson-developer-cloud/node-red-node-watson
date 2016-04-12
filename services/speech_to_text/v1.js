@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ module.exports = function (RED) {
 
     this.on('input', function (msg) {
       if (!msg.payload) {
-        var message = 'Missing property: msg.payload';
-        node.error(message, msg)
+        var message_err_payload = 'Missing property: msg.payload';
+        node.error(message_err_payload, msg)
         return;
       }
 
@@ -51,8 +51,8 @@ module.exports = function (RED) {
       password = password || this.credentials.password;
 
       if (!username || !password) {
-        var message = 'Missing Speech To Text service credentials';
-        node.error(message, msg)
+        var message_err_credentials = 'Missing Speech To Text service credentials';
+        node.error(message_err_credentials, msg)
         return;
       }
 
@@ -63,14 +63,20 @@ module.exports = function (RED) {
       }
 
       if (!config.lang) {
-        var message = 'Missing audio language configuration, unable to process speech.';
-        node.error(message, msg)
+        var message_err_lang = 'Missing audio language configuration, unable to process speech.';
+        node.error(message_err_lang, msg)
         return;
       }
 
       if (!config.band) {
-        var message = 'Missing audio band configuration, unable to process speech.';
-        node.error(message, msg)
+        var message_err_band = 'Missing audio band configuration, unable to process speech.';
+        node.error(message_err_band, msg)
+        return;
+      }
+
+      if (!config.continuous) {
+        var message_err_continuous = 'Missing continuous details, unable to process speech.';
+        node.error(message_err_continuous, msg)
         return;
       }
 
@@ -85,8 +91,8 @@ module.exports = function (RED) {
 
       var s2t = function (audio, format, cb) {
         if (format !== 'wav' && format !== 'flac' && format !== 'ogg') {
-          var message = 'Audio format (' + format + ') not supported, must be encoded as WAV, FLAC or OGG.';
-          node.error(message, msg)
+          var message_err_format = 'Audio format (' + format + ') not supported, must be encoded as WAV, FLAC or OGG.';
+          node.error(message_err_format, msg)
           return;
         }
 
@@ -94,8 +100,11 @@ module.exports = function (RED) {
 
         var params = {
           audio: audio,
+          content_type: 'audio/' + format,
           model: model,
-          content_type: 'audio/' + format 
+          continuous: true,
+          inactivity_timeout: -1,
+          interim_results: false
         };
 
         node.status({fill:"blue", shape:"dot", text:"requesting"});
