@@ -62,26 +62,44 @@ module.exports = function (RED) {
         version_date: '2016-02-11'
       });
 
-      var options = {
+      // Payload (text to be analysed) must be either a string or a Buffer
+      if (typeof msg.payload === 'string' || typeof msg.payload === 'Buffer')
+      {
+        // debug
+        console.log('debug:'+typeof msg.payload);
+        // end debug
+
+        
+         var options = {
         text: msg.payload,
         sentences: config.sentences
-      };
+        };
 
-      if (config.tones !== 'all') {
-        options.tones = config.tones;
-      }
-
-      node.status({fill:"blue", shape:"dot", text:"requesting"});
-      tone_analyzer.tone(options, function (err, response) {
-        node.status({})
-        if (err) {
-          node.error(err, msg);
-        } else {
-          msg.response = response;
+        if (config.tones !== 'all') {
+          options.tones = config.tones;
         }
 
-        node.send(msg);
-      });
+        node.status({fill:"blue", shape:"dot", text:"requesting"});
+        tone_analyzer.tone(options, function (err, response) {
+          node.status({})
+          if (err) {
+            node.error(err, msg);
+          } else {
+            msg.response = response;
+          }
+
+          node.send(msg);
+        });
+      }
+      else {
+        // debug
+        console.log('debug:'+typeof msg.payload);
+        // end debug
+
+        var message = "The payload must be either a string or a Buffer";
+        node.status({fill:"red", shape:"dot", text:message}); 
+        node.error(message, msg);         
+      }
     });
   }
   RED.nodes.registerType('watson-tone-analyzer', Node, {
