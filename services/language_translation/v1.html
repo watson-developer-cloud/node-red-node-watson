@@ -55,8 +55,8 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-type"><i class="fa fa-comments-o"></i> File type</label>
-        <select type="text" id="node-input-type" style="display: inline-block; vertical-align:middle; width: 70%;">
+        <label for="node-input-filetype"><i class="fa fa-comments-o"></i> File type</label>
+        <select type="text" id="node-input-filetype" style="display: inline-block; vertical-align:middle; width: 70%;">
             <option value="forcedglossary" selected="selected">Forced glossary</option>
             <option value="parallelcorpus">Parallel corpus</option>
             <option value="monolingualcorpus">Monolingual corpus</option>
@@ -331,10 +331,6 @@ var first_launch = true;
       action:
       {
         value: "translate"
-      },
-      type:
-      {
-        value: "forced_glossary"
       }
     },
     credentials:
