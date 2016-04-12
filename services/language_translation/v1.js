@@ -100,26 +100,26 @@ module.exports = function(RED) {
 
       var params = {};
       node.status({fill:"blue", shape:"dot", text:"requesting training"}); 
-
+      console.log("filetype", filetype);
       temp.open({suffix: ".xml"}, function(err, info) {
         if (!err) {
           fs.write(info.fd, msg.payload);
           switch(fileType) {
-            case 'forced_glossary':
+            case 'forcedglossary':
               params = {
                 name: msg.filename.replace(/[^0-9a-z]/gi, ''),
                 base_model_id: 'en-es',
                 forced_glossary: fs.createReadStream(info.path)
               };
               break;
-            case 'parallel_corpus':
+            case 'parallelcorpus':
               params = {
                 name: msg.filename.replace(/[^0-9a-z]/gi, ''),
                 base_model_id: 'en-es',
                 parallel_corpus: fs.createReadStream(info.path)
               };
               break;
-            case 'monolingual_corpus':
+            case 'monolingualcorpus':
               params = {
                 name: msg.filename.replace(/[^0-9a-z]/gi, ''),
                 base_model_id: 'en-es',
