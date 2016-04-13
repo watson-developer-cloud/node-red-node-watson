@@ -108,9 +108,11 @@ module.exports = function (RED) {
           format += ';codecs=opus';
         }
 
+        var params = {};
+        
         if(config.continuous === 'true')
         {
-          var params = {
+          params = {
             audio: audio,
             content_type: 'audio/' + format,
             model: model,
@@ -118,7 +120,7 @@ module.exports = function (RED) {
           };
 
         } else {
-          var params = {
+          params = {
             audio: audio,
             content_type: 'audio/' + format,
             model: model,

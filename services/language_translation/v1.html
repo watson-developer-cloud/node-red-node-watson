@@ -110,10 +110,10 @@ var first_launch = true;
     action = $('#node-input-action').val();
     if (action === 'train') {
       $('select#node-input-srclang, select#node-input-destlang').parent().hide();
-      $('select#node-input-type').parent().show();
+      $('select#node-input-filetype').parent().show();
     } else {
       $('select#node-input-srclang, select#node-input-destlang').parent().show();
-      $('select#node-input-type').parent().hide();
+      $('select#node-input-filetype').parent().hide();
     }
     domainsAvailable();
   }
@@ -213,7 +213,7 @@ var first_launch = true;
 
   function oneditprepare() {
     var node = this;
-    
+
     $.getJSON('watson-translate/vcap/')
       .done(function (sids) {
         $('.credentials').toggle(!sids);

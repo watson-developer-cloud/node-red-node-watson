@@ -17,7 +17,6 @@ module.exports = function (RED) {
   var watson = require('watson-developer-cloud');
   var cfenv = require('cfenv');
   var fs = require('fs');
-  var fileType = require('file-type');
   var temp = require('temp');
 
   temp.track();
@@ -120,7 +119,7 @@ module.exports = function (RED) {
         if (!err) {
           fs.write(info.fd, msg.payload);
           var params = {};
-          
+
           switch (filetype) {
           case 'forcedglossary':
             params = {
