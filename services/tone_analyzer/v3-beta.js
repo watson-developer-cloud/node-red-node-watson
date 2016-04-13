@@ -16,7 +16,7 @@
 
 module.exports = function (RED) {
   var cfenv = require('cfenv');
-
+  
   var services = cfenv.getAppEnv().services,
     service;
 
@@ -62,32 +62,49 @@ module.exports = function (RED) {
         version_date: '2016-02-11'
       });
 
-      var options = {
-        text: msg.payload,
-        sentences: config.sentences
-      };
-
-      if (config.tones !== 'all') {
-        options.tones = config.tones;
+      var hasJSONmethod = (typeof msg.payload.toJSON === 'function') ;
+      var isBuffer = false;
+      if (hasJSONmethod==true)
+      {
+        if (msg.payload.toJSON().type == 'Buffer')
+            isBuffer=true;
       }
 
-      node.status({fill:"blue", shape:"dot", text:"requesting"});
-      tone_analyzer.tone(options, function (err, response) {
-        node.status({})
-        if (err) {
-          node.error(err, msg);
-        } else {
-          msg.response = response;
+      // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
+      if (typeof msg.payload == 'string' ||  isBuffer == true )
+      {
+         var options = {
+        text: msg.payload,
+        sentences: config.sentences
+        };
+
+        if (config.tones !== 'all') {
+          options.tones = config.tones;
         }
 
-        node.send(msg);
-      });
+        node.status({fill:'blue', shape:'dot', text:'requesting'});
+        tone_analyzer.tone(options, function (err, response) {
+          node.status({})
+          if (err) {
+            node.error(err, msg);
+          } else {
+            msg.response = response;
+          }
+
+          node.send(msg);
+        });
+      }
+      else {
+        var message = 'The payload must be either a string or a Buffer';
+        node.status({fill:'red', shape:'dot', text:message}); 
+        node.error(message, msg);         
+      }
     });
   }
   RED.nodes.registerType('watson-tone-analyzer', Node, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
+      username: {type:'text'},
+      password: {type:'password'}
     }
   });
 };
