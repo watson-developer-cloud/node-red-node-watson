@@ -120,7 +120,8 @@ module.exports = function (RED) {
         if (!err) {
           fs.write(info.fd, msg.payload);
           var params = {};
-          switch (fileType) {
+          
+          switch (filetype) {
           case 'forcedglossary':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
@@ -211,7 +212,7 @@ module.exports = function (RED) {
       }
 
       var filetype = msg.filetype || config.filetype;
-      
+
       if (!filetype) {
         node.warn('Missing file type, please select one');
         node.send(msg);
