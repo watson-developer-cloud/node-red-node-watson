@@ -76,6 +76,7 @@
 
 <script type="text/javascript">
 var first_launch = true;
+
 (function () {
   var models, domain_type, languages;
   var domain_selected = $('#node-input-domain').val();
@@ -107,7 +108,7 @@ var first_launch = true;
 
   function selectAction() {
     action = $('#node-input-action').val();
-    if (action === "train") {
+    if (action === 'train') {
       $('select#node-input-srclang, select#node-input-destlang').parent().hide();
       $('select#node-input-type').parent().show();
     } else {
@@ -119,12 +120,13 @@ var first_launch = true;
 
   function domainsAvailable() {
     $('select#node-input-domain').empty();
-    if (action === "train") {
+    if (action === 'train') {
       var models_with_domains_available = models.filter(function (model) {
         return model.customizable === true;
       });
     } else {
       var models_with_domains_available = models;
+
     }
     domains = models_with_domains_available.map(function (a) {
       return a.domain;
@@ -133,6 +135,7 @@ var first_launch = true;
 
     var unique_domains = domains.filter(onlyUnique);
     var domain_first_iteration = true;
+
     unique_domains.forEach(function (domain) {
       if (domain_first_iteration) {
         $('select#node-input-domain').append('<option value="' + domain + '" selected>' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
@@ -149,7 +152,7 @@ var first_launch = true;
     $('#node-input-destlang').empty();
     domain_selected = $('#node-input-domain').val();
     domain_type = models.filter(function (model) {
-      return model.domain === domain_selected && model.status === "available";
+      return model.domain === domain_selected && model.status === 'available';
     });
     input_lang = domain_type.map(function (a) {
       return a.source;
@@ -160,41 +163,23 @@ var first_launch = true;
     input_lang_unique = input_lang.filter(onlyUnique);
     output_lang_unique = output_lang.filter(onlyUnique);
     var langsrc_first_iteration = true;
+
     input_lang_unique.forEach(function (lang) {
-      /*var lang_fullname = languages.filter(function(language) {
-          return language.language === lang;
-      });*/
       if (langsrc_first_iteration) {
-        //$('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang_fullname[0].name + '</option>');
         $('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang + '</option>');
       } else {
-        //$('select#node-input-srclang').append('<option value="' + lang + '">' + lang_fullname[0].name + '</option>');
         $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
       }
       langsrc_first_iteration = false;
     });
     var langdest_first_iteration = true;
+
     output_lang_unique.forEach(function (lang) {
-      /*         var lang_fullname = languages.filter(function(language) {
-                   return language.language === lang;
-               });*/
-      //if (lang_fullname[0]) {
       if (langdest_first_iteration) {
-        //$('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
         $('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
       } else {
-        //$('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
         $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
       }
-      /*} else {
-          if (langdest_first_iteration) {
-              $('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang_fullname[0].name + '</option>');
-              //$('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
-          } else {
-              $('select#node-input-destlang').append('<option value="' + lang + '">' + lang_fullname[0].name + '</option>');
-              //$('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
-          }
-      }*/
 
       langdest_first_iteration = false;
     });
@@ -205,9 +190,11 @@ var first_launch = true;
     var pair_lang = domain_type.map(function (a) {
       return a.model_id;
     });
+
     var available_destlang = pair_lang.filter(function (model_id) {
-      return model_id.match("^" + srclang_selected);
+      return model_id.match('^' + srclang_selected);
     });
+
     $('#node-input-destlang option').attr('disabled', 'disabled');
     available_destlang.forEach(function (val) {
       $('#node-input-destlang option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
@@ -226,6 +213,7 @@ var first_launch = true;
 
   function oneditprepare() {
     var node = this;
+    
     $.getJSON('watson-translate/vcap/')
       .done(function (sids) {
         $('.credentials').toggle(!sids);
@@ -243,63 +231,48 @@ var first_launch = true;
       handlersUI();
       selectAction();
     }
-
-    /*        $.getJSON('watson-translate/languages/')
-                .done(function(data) {
-                    languages = data.languages;
-                    llll = languages.map(function(a) {
-                        return a.language;
-                    });
-                })
-                .fail(function(err) {
-                    console.log(err);
-                }).always(function() {
-                    // nothing
-                })
-    */
-
   }
 
   RED.nodes.registerType('watson-translate', {
     category: 'IBM Watson',
     defaults: {
       name: {
-        value: ""
+        value: ''
       },
       srclang: {
-        value: "en"
+        value: 'en'
       },
       destlang: {
-        value: "fr"
+        value: 'fr'
       },
       domain: {
-        value: "news"
+        value: 'news'
       },
       action: {
-        value: "translate"
+        value: 'translate'
       },
       filetype: {
-        value: "forcedglossary"
+        value: 'forcedglossary'
       }
     },
     credentials: {
       username: {
-        type: "text"
+        type: 'text'
       },
       password: {
-        type: "password"
+        type: 'password'
       }
     },
-    color: "rgb(140, 198, 63)",
+    color: 'rgb(140, 198, 63)',
     inputs: 1,
     outputs: 1,
-    icon: "translation.png",
-    paletteLabel: "Language translation",
+    icon: 'translation.png',
+    paletteLabel: 'language translation',
     label: function () {
-      return this.name || "Language translation";
+      return this.name || 'language translation';
     },
     labelStyle: function () {
-      return this.name ? "node_label_italic" : "";
+      return this.name ? 'node_label_italic' : '';
     },
     oneditprepare: oneditprepare
   });
