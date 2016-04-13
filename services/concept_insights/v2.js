@@ -15,7 +15,6 @@
  **/
 
 module.exports = function (RED) {
-  var request = require('request');
   var cfenv = require('cfenv');
   var watson = require('watson-developer-cloud');
 
@@ -53,7 +52,6 @@ module.exports = function (RED) {
           if (this.corpus.cname) {
             corpus_name = this.corpus.cname;
           } else {
-            console.log(this.corpus);
             corpus_name = this.corpus.publiccorpus;
             account_id = 'public';
           }        
@@ -97,7 +95,7 @@ module.exports = function (RED) {
             }
           } else {
             //Corpus mode
-            var params = {
+            params = {
               corpus: '/corpora/'+account_id+'/'+corpus_name
             }
             switch (config.corpusapicall) {
@@ -143,7 +141,7 @@ module.exports = function (RED) {
                   });
                 } else {
                   node.status({});
-                  var message = 'No query term specified';
+                  message = 'No query term specified';
                   node.error(message, msg);
                 }
                 break;
@@ -153,7 +151,7 @@ module.exports = function (RED) {
             }
           }
         } else {
-          var message = 'No corpus configuration specified';
+          message = 'No corpus configuration specified';
           return node.error(message, msg);
         }
       });
@@ -175,13 +173,13 @@ module.exports = function (RED) {
       setupConceptInsightsNode(msg,config,this,function(concept_insights,account_id) {
         
         //Set up parameters, searching the latest wikipedia graph
-        if (!config.query) {
+        if (!msg.payload || typeof(msg.payload) != 'string') {
           var message = "No query term specified";
           return node.error(message, msg);
         }
         var params = {
           graph: '/graphs/wikipedia/en-latest',
-          query: config.query,
+          query: msg.payload,
           prefix: true,
           concept_fields: '{"link":1}'
         }
@@ -285,7 +283,7 @@ module.exports = function (RED) {
               });
             } else {
               node.status({fill:"blue",shape:"ring",text:"Using existing corpus "+corpus_name});
-              if (account_id != "public") {
+              if (account_id !== "public") {
                 addDocument(checkStatus(msg.payload.length));
               } else {
                 node.status({});
@@ -303,6 +301,7 @@ module.exports = function (RED) {
           var document_name= config.documentname;
           var document_label= config.documentlabel;
           var content_type = config.contenttype;
+
           //Check fields are populated
           if (document_name && document_label && content_type) {
             params = {
@@ -333,9 +332,10 @@ module.exports = function (RED) {
             var message = "Creating document error: Missing document name, label or content type";
             return node.error(message, msg);
           }
-        }          
+        }    
 
         function checkStatus(fileLength) {
+
           //Calculate interval based on length of file, default to 10 seconds
           var interval = 10000;
           if (fileLength > 0) interval = (2*fileLength) + 5;
@@ -383,7 +383,7 @@ module.exports = function (RED) {
     password = password || node.credentials.password;
 
     if (!username || !password) {
-      var message = 'Missing Concept Insights service credentials';
+      message = 'Missing Concept Insights service credentials';
       return node.error(message, msg);
     }
 
