@@ -62,8 +62,7 @@ module.exports = function (RED) {
       function (err, languages) {
         if (err) {
           res.json(err);
-        }
-        else {
+        } else {
           res.json(languages);
         }
       });
