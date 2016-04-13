@@ -1,6 +1,8 @@
 Node-RED Watson Nodes for IBM Bluemix
 =====================================
 
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/e157cf8407f2442396789dc78075340a)](https://www.codacy.com/app/rezgui-y/node-red-node-watson)
+
 A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](http://bluemix.net).
 
 # Nodes
@@ -32,11 +34,14 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
 - Image Analysis
     - Upload an image to detect either faces, URL text or
       content present in the image.
+- Dialog
+    - Automate branching conversation between a user and your application.
+    - Use natural language to automatically respond to user questions, cross-sell and up-sell, walk users through processes or applications, or even hand-hold users through difficult tasks.
 
 ### Contributing
 
 For simple typos and fixes please just raise an issue pointing out our mistakes.
-If you need to raise a pull request please read our [contribution guidelines](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md)
+If you need to raise a pull request please read our [contribution guidelines](https://github.com/watson-developer-cloud/node-red-node-watson/blob/master/CONTRIBUTING.md)
 before doing so.
 
 ### Copyright and license

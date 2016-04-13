@@ -1,0 +1,281 @@
+<!--
+  Copyright 2013,2016 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-translate">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row">
+        <label for="node-input-action"><i class="fa fa-cog"></i> Action</label>
+        <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
+            <option value="translate" selected="selected">Translate</option>
+            <option value="train">Train</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-domain"><i class="fa fa-book"></i> Domains</label>
+        <select type="text" id="node-input-domain" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-srclang"><i class="fa fa-comments-o"></i> Source</label>
+        <select type="text" id="node-input-srclang" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-destlang"><i class="fa fa-comments-o"></i> Target</label>
+        <select type="text" id="node-input-destlang" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-filetype"><i class="fa fa-comments-o"></i> File type</label>
+        <select type="text" id="node-input-filetype" style="display: inline-block; vertical-align:middle; width: 70%;">
+            <option value="forcedglossary" selected="selected">Forced glossary</option>
+            <option value="parallelcorpus">Parallel corpus</option>
+            <option value="monolingualcorpus">Monolingual corpus</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-translate">
+    <p>The Language Translation service enables you to translate text from one language to another.</p>
+    <p>The text to translate should be passed in on <code>msg.payload</code>.</p>
+    <p>The translated text will be returned on <code>msg.payload</code>.</p>
+    <p>Source and destination language parameters can be configured through the editor panel or set dynamically using
+    the language codes in the following properties, <code>msg.srclang</code> and <code>msg.destlang</code>. Please see
+    the documentation linked below for the currently supported source and destination language codes.</p>
+    <p>For more information about the Language Translation service, read the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/language-translation.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+var first_launch = true;
+
+(function () {
+  var models, domain_type, languages;
+  var domain_selected = $('#node-input-domain').val();
+  var srclang_selected = $('#node-input-srclang').val();
+  var action = $('#node-input-action').val();
+
+  // sorting functions
+  function onlyUnique(value, index, self) {
+    return self.indexOf(value) === index;
+  }
+
+  function handlersUI() {
+    $('#node-input-action').change(function (val) {
+      action = $('#node-input-action').val();
+      selectAction();
+    });
+
+    $('#node-input-domain').change(function (val) {
+      domain_selected = $('#node-input-domain').val();
+      selectDomain();
+    });
+
+    // check availability 
+    $('#node-input-srclang').change(function () {
+      srclang_selected = $('#node-input-srclang').val();
+      destlangAvailable();
+    });
+  }
+
+  function selectAction() {
+    action = $('#node-input-action').val();
+    if (action === 'train') {
+      $('select#node-input-srclang, select#node-input-destlang').parent().hide();
+      $('select#node-input-filetype').parent().show();
+    } else {
+      $('select#node-input-srclang, select#node-input-destlang').parent().show();
+      $('select#node-input-filetype').parent().hide();
+    }
+    domainsAvailable();
+  }
+
+  function domainsAvailable() {
+    $('select#node-input-domain').empty();
+    if (action === 'train') {
+      var models_with_domains_available = models.filter(function (model) {
+        return model.customizable === true;
+      });
+    } else {
+      var models_with_domains_available = models;
+
+    }
+    domains = models_with_domains_available.map(function (a) {
+      return a.domain;
+    });
+
+
+    var unique_domains = domains.filter(onlyUnique);
+    var domain_first_iteration = true;
+
+    unique_domains.forEach(function (domain) {
+      if (domain_first_iteration) {
+        $('select#node-input-domain').append('<option value="' + domain + '" selected>' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
+      } else {
+        $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
+      }
+      domain_first_iteration = false;
+    });
+    selectDomain();
+  }
+
+  function selectDomain() {
+    $('#node-input-srclang').empty();
+    $('#node-input-destlang').empty();
+    domain_selected = $('#node-input-domain').val();
+    domain_type = models.filter(function (model) {
+      return model.domain === domain_selected && model.status === 'available';
+    });
+    input_lang = domain_type.map(function (a) {
+      return a.source;
+    });
+    output_lang = domain_type.map(function (a) {
+      return a.target;
+    });
+    input_lang_unique = input_lang.filter(onlyUnique);
+    output_lang_unique = output_lang.filter(onlyUnique);
+    var langsrc_first_iteration = true;
+
+    input_lang_unique.forEach(function (lang) {
+      if (langsrc_first_iteration) {
+        $('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang + '</option>');
+      } else {
+        $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
+      }
+      langsrc_first_iteration = false;
+    });
+    var langdest_first_iteration = true;
+
+    output_lang_unique.forEach(function (lang) {
+      if (langdest_first_iteration) {
+        $('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
+      } else {
+        $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
+      }
+
+      langdest_first_iteration = false;
+    });
+    destlangAvailable();
+  }
+
+  function destlangAvailable() {
+    var pair_lang = domain_type.map(function (a) {
+      return a.model_id;
+    });
+
+    var available_destlang = pair_lang.filter(function (model_id) {
+      return model_id.match('^' + srclang_selected);
+    });
+
+    $('#node-input-destlang option').attr('disabled', 'disabled');
+    available_destlang.forEach(function (val) {
+      $('#node-input-destlang option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
+    });
+  }
+
+  function getModels() {
+    $.getJSON('watson-translate/models/').done(function (data) {
+      models = data.models;
+      handlersUI();
+      selectAction();
+    }).fail(function (err) {
+      console.log(err);
+    }).always(function (osef) {});
+  }
+
+  function oneditprepare() {
+    var node = this;
+
+    $.getJSON('watson-translate/vcap/')
+      .done(function (sids) {
+        $('.credentials').toggle(!sids);
+      })
+      .fail(function () {
+        $('.credentials').show();
+      }).always(function () {
+        $('#credentials-check').hide();
+      })
+
+    if (first_launch || !models) {
+      getModels();
+      first_launch = false;
+    } else {
+      handlersUI();
+      selectAction();
+    }
+  }
+
+  RED.nodes.registerType('watson-translate', {
+    category: 'IBM Watson',
+    defaults: {
+      name: {
+        value: ''
+      },
+      srclang: {
+        value: 'en'
+      },
+      destlang: {
+        value: 'fr'
+      },
+      domain: {
+        value: 'news'
+      },
+      action: {
+        value: 'translate'
+      },
+      filetype: {
+        value: 'forcedglossary'
+      }
+    },
+    credentials: {
+      username: {
+        type: 'text'
+      },
+      password: {
+        type: 'password'
+      }
+    },
+    color: 'rgb(140, 198, 63)',
+    inputs: 1,
+    outputs: 1,
+    icon: 'translation.png',
+    paletteLabel: 'language translation',
+    label: function () {
+      return this.name || 'language translation';
+    },
+    labelStyle: function () {
+      return this.name ? 'node_label_italic' : '';
+    },
+    oneditprepare: oneditprepare
+  });
+})();
+
+</script>
