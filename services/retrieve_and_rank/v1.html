@@ -1,0 +1,263 @@
+<!--
+  Copyright 2016 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!-- Create Ranker Node -->
+<script type="text/x-red" data-template-name="watson-retrieve-rank-create-ranker">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row rankername">
+        <label for="node-input-rankername"><i class="fa fa-tag"></i> Ranker Name</label>
+        <input type="text" id="node-input-rankername" placeholder="Ranker Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-retrieve-rank-create-ranker">
+    <p>The IBM Watson™ Retrieve and Rank service combines two information retrieval components in a single service: the power of Apache Solr and a sophisticated machine learning capability. This combination provides users with more relevant results by automatically reranking them by using these machine learning algorithms.</p>
+    <p>The create ranker node allows a ranker to be trained from <code>.csv</code> training data. The training data should be passed in as a <b>Buffer</b> on <code>msg.payload</code>. </p>
+    
+    <p>Once triggered, the ranker will then begin training. Once the ranker is available, the status underneath the node will change to <b>“Ranker Available”</b>.</p>
+    
+    <p>The ranker id is returned on <code>msg.payload</code>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-retrieve-rank-create-ranker', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                rankername: {value: ""}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(85, 150, 230)",
+            inputs: 1,
+            outputs: 1,
+            icon: "concept_insights.png",
+            paletteLabel: "retrieve and rank create ranker",
+            label: function() {
+                return this.name || "retrieve and rank create ranker";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $.getJSON('watson-retrieve-rank/vcap/').done(function (service) {
+                    $('.credentials').toggle(!service);
+                }).fail(function () {
+                    $('.credentials').show();
+                }).always(function () {
+                    $('#credentials-check').hide();
+                })
+            }
+        });
+    })();
+</script>
+
+<!-- Ranker settings node -->
+<script type="text/x-red" data-template-name="watson-retrieve-rank-ranker-settings">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row">
+        <label for="node-input-mode"><i class="fa fa-question"></i> Mode</label>
+        <select type="text" id="node-input-mode" style="display: inline-block; width: 70%;" >
+            <option value="list">List Rankers</option>
+            <option value="info">Ranker Information</option>
+            <option value="delete">Delete Ranker</option>
+        </select>
+    </div>
+    <div class="form-row mode rankerid">
+        <label for="node-input-rankerid"><i class="fa fa-tag"></i> Ranker ID</label>
+        <input type="text" id="node-input-rankerid" placeholder="Ranker ID">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-retrieve-rank-ranker-settings">
+    <p>The IBM Watson™ Retrieve and Rank service combines two information retrieval components in a single service: the power of Apache Solr and a sophisticated machine learning capability. This combination provides users with more relevant results by automatically reranking them by using these machine learning algorithms.</p>
+    <p>The ranker settings node provides information regarding the status of rankers within a service. The following queries are available:</p>
+    
+    <ul>
+        <li><b>List Rankers</b> Retrieves the list of rankers for the service instance.</li>
+        <li><b>Ranker Information</b> Returns status and other information about a ranker. The <code>ranker_id</code> is specified in the node configuration panel.</li>
+        <li><b>Delete Ranker</b> Deletes a ranker. The <code>ranker_id</code> is specified in the node configuration panel.</li>
+    </ul>
+    
+    <p>The result is returned on <code>msg.payload</code>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-retrieve-rank-ranker-settings', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                mode: {value: "list"},
+                rankerid: {value: ""}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(85, 150, 230)",
+            inputs: 1,
+            outputs: 1,
+            icon: "concept_insights.png",
+            paletteLabel: "retrieve and rank ranker settings",
+            label: function() {
+                return this.name || "retrieve and rank ranker settings";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $('#node-input-mode').change(function () {
+                    var mode = $('#node-input-mode').val();
+                    if (mode == 'list') {
+                        $('.form-row.mode.rankerid').hide();
+                    } else {
+                        $('.form-row.mode.rankerid').show();
+                    } 
+                });
+                $.getJSON('watson-retrieve-rank/vcap/').done(function (service) {
+                    $('.credentials').toggle(!service);
+                }).fail(function () {
+                    $('.credentials').show();
+                }).always(function () {
+                    $('#credentials-check').hide();
+                })
+            }
+        });
+    })();
+</script>
+
+<!-- Search and Rank node -->
+<script type="text/x-red" data-template-name="watson-retrieve-rank-search-and-rank">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row mode clusterid">
+        <label for="node-input-clusterid"><i class="fa fa-tag"></i> Cluster ID</label>
+        <input type="text" id="node-input-clusterid" placeholder="Cluster ID">
+    </div>
+    <div class="form-row mode collectionname">
+        <label for="node-input-collectionname"><i class="fa fa-tag"></i> Collection Name</label>
+        <input type="text" id="node-input-collectionname" placeholder="Collection Name">
+    </div>
+    <div class="form-row mode rankerid">
+        <label for="node-input-rankerid"><i class="fa fa-tag"></i> Ranker ID</label>
+        <input type="text" id="node-input-rankerid" placeholder="Ranker ID">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-retrieve-rank-search-and-rank">
+    <p>The IBM Watson™ Retrieve and Rank service combines two information retrieval components in a single service: the power of Apache Solr and a sophisticated machine learning capability. This combination provides users with more relevant results by automatically reranking them by using these machine learning algorithms.</p>
+    <p>The search and rank node returns reranked results for your query, where the query matches the <a href="https://cwiki.apache.org/confluence/display/solr/The+Standard+Query+Parser">Solr Standard Query Parser</a>. In the node configuration, you must specify:</p>
+    
+    <ul>
+        <li><b>Cluster ID</b></li>
+        <li><b>Collection Name</b></li>
+        <li><b>Ranker ID</b></li>
+    </ul>
+    <p>The search query is passed in on  <code>msg.payload</code> starting with <code>q=</code> to match the Solr Standard Query Parser.</p>
+    <p>The result is returned on <code>msg.payload</code>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-retrieve-rank-search-and-rank', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                clusterid: {value: "", required: true},
+                collectionname: {value: "", required: true},
+                rankerid: {value: "", required: true}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(85, 150, 230)",
+            inputs: 1,
+            outputs: 1,
+            icon: "concept_insights.png",
+            paletteLabel: "retrieve and rank search and rank",
+            label: function() {
+                return this.name || "retrieve and rank search and rank";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $.getJSON('watson-retrieve-rank/vcap/').done(function (service) {
+                    $('.credentials').toggle(!service);
+                }).fail(function () {
+                    $('.credentials').show();
+                }).always(function () {
+                    $('#credentials-check').hide();
+                })
+            }
+        });
+    })();
+</script>
