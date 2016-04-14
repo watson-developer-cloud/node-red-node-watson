@@ -143,7 +143,14 @@ module.exports = function (RED) {
 
         var ranker_id = config.rankerid;
         var question = msg.payload;
-        var query = qs.stringify({q: question, ranker_id: ranker_id, fl: 'id,title'});
+
+        var query;
+
+        if(config.searchmode === 'search') {
+          var query = qs.stringify({q: question, fl: 'id,title'});
+        } else {
+          var query = qs.stringify({q: question, ranker_id: ranker_id, fl: 'id,title'});
+        }
 
         solrClient.get('fcselect', query, function(err, searchResponse) {
           handleWatsonCallback(null,node,msg,err,searchResponse);
@@ -151,6 +158,35 @@ module.exports = function (RED) {
 
       });      
     });
+  }
+
+  function createClusterNode(config) {
+    RED.nodes.createNode(this, config)
+    var node = this
+
+    this.on('input', function(msg) {
+      setupRankRetrieveNode(msg, config, this, function (retrieve_and_rank) {
+
+        var params = {
+          cluster_name: config.clustername,
+          cluster_size: config.clustersize !== 'free' ? config.clustersize : null,
+        }
+
+        node.status({ fill: 'blue', shape: 'ring', text: 'Creating cluster' });
+
+        retrieve_and_rank.createCluster(params, function(err, res) {
+
+          node.status({fill: 'blue', shape: 'ring', text: 'Cluster is getting ready' });
+
+            handleWatsonCallback(null, node, msg, err, res, function() {
+              // Now check the status of the cluster
+              var cluster_id = res.cluster_id
+
+              checkClusterStatus(retrieve_and_rank, msg, node, cluster_id)
+            })
+        })
+      })
+    })
   }
 
   RED.nodes.registerType('watson-retrieve-rank-create-ranker', createRankerNode, {
@@ -166,6 +202,12 @@ module.exports = function (RED) {
     }
   });
   RED.nodes.registerType('watson-retrieve-rank-search-and-rank', searchAndRankNode, {
+    credentials: {
+      username: {type:"text"},
+      password: {type:"password"}
+    }
+  });
+  RED.nodes.registerType('watson-retrieve-rank-create-cluster', createClusterNode, {
     credentials: {
       username: {type:"text"},
       password: {type:"password"}
@@ -246,6 +288,36 @@ module.exports = function (RED) {
       });
     },interval);
   }
+
+
+    function checkClusterStatus(retrieve_and_rank,msg,node,cluster_id) {
+      var interval = 10000;
+      //Loop and check the status of the ranker
+      var statusInterval = setInterval(function(){
+        var params = {
+          cluster_id: cluster_id
+        };
+        retrieve_and_rank.pollCluster(params, function(err, res) {
+            if (err) {
+              node.status({});
+              var message = "Cluster creation state error: "+err.error;
+              clearInterval(statusInterval);
+              return node.error(message, msg);
+            } else {
+              switch (res.status) {
+                case 'Available':
+                  node.status({fill:"green",shape:"ring",text:"Cluster available"});
+                  return clearInterval(statusInterval);
+                  break;
+
+                default:
+                  node.status({});
+                  var message = "Cluster status: "+res.status+", description: "+res.status_description;
+                  clearInterval(statusInterval);
+                  return node.error(message, msg);
+              }
+            }
+        });
+      },interval);
+    }
 };
-
-
