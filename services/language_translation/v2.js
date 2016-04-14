@@ -279,6 +279,7 @@ module.exports = function (RED) {
       }
 
       var trainid = msg.trainid || config.trainid;
+      var basemodel = msg.basemodel || config.basemodel;
 
       username = username || this.credentials.username;
       password = password || this.credentials.password;

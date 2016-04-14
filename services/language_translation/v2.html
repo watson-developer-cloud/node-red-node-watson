@@ -47,7 +47,7 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-basemodel"><i class="fa fa-book"></i> Domains</label>
+        <label for="node-input-basemodel"><i class="fa fa-book"></i> Base model</label>
         <select type="text" id="node-input-basemodel" style="display: inline-block; vertical-align:middle; width: 70%;">
         </select>
     </div>
@@ -170,7 +170,7 @@ var base_model_selected = $('#node-input-basemodel').val();
 
       base_models_available_ids.forEach(function (base_model) {
         if (base_model_first_iteration) {
-          $('select#node-input-basemodel').append('<option value="' + base_model + '" selected="selected">' + dbase_model + '</option>');
+          $('select#node-input-basemodel').append('<option value="' + base_model + '" selected="selected">' + base_model + '</option>');
         } else {
           $('select#node-input-basemodel').append('<option value="' + base_model + '">' + base_model + '</option>');
         }
@@ -347,6 +347,9 @@ var base_model_selected = $('#node-input-basemodel').val();
       domain: {
         value: 'news'
       },
+      dbase_model: {
+        value: ''
+      }
       action: {
         value: 'translate'
       },
