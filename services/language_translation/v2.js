@@ -123,21 +123,21 @@ module.exports = function (RED) {
           case 'forcedglossary':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: model_id,
+              base_model_id: '' + model_id + '',
               forced_glossary: fs.createReadStream(info.path)
             };
             break;
           case 'parallelcorpus':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: model_id,
+              base_model_id: '' + model_id + '', 
               parallel_corpus: fs.createReadStream(info.path)
             };
             break;
           case 'monolingualcorpus':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: model_id,
+              base_model_id: '' + model_id + '',
               monolingual_corpus: fs.createReadStream(info.path)
             };
             break;
