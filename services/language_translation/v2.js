@@ -112,7 +112,9 @@ module.exports = function (RED) {
         text: 'requesting training'
       });
 
-      temp.open('myprefix', function (err, info) {
+      temp.open({
+        suffix: '.xml'
+      }, function (err, info) {
         if (!err) {
           fs.write(info.fd, msg.payload);
           var params = {};
