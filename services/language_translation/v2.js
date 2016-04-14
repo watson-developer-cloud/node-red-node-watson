@@ -168,7 +168,7 @@ module.exports = function (RED) {
       });
     }
 
-    this.doGetStatus = function(trainid) {
+    this.doGetStatus = function(msg, trainid) {
       language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -200,7 +200,7 @@ module.exports = function (RED) {
       );
     }
 
-    this.doDelete = function(trainid) {
+    this.doDelete = function(msg, trainid) {
       language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -310,10 +310,10 @@ module.exports = function (RED) {
         this.doTrain(msg, model_id, filetype);
         break;
       case 'getstatus':
-        this.doGetStatus(trainid);
+        this.doGetStatus(msg, trainid);
         break;
       case 'delete':
-        this.doDelete(trainid);
+        this.doDelete(msg, trainid);
         break;
       }
     });
