@@ -173,15 +173,27 @@ var action = $('#node-input-action').val();
     output_lang_unique = output_lang.filter(onlyUnique);
     var langsrc_first_iteration = true;
 
+    if(!srclang_selected)
+    {
+      input_lang_unique.forEach(function (lang) {
+        if (langsrc_first_iteration) {
+          $('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang + '</option>');
+        } else {
+          $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
+        }
+        langsrc_first_iteration = false;
+      });
+    } else {
+      input_lang_unique.forEach(function (lang) {
+        if (srclang_selected == lang) {
+          $('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang + '</option>');
+        } else {
+          $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
+        }
+        langsrc_first_iteration = false;
+      });
+    }
     console.log('switch src lang' , srclang_selected);
-    input_lang_unique.forEach(function (lang) {
-      if (langsrc_first_iteration) {
-        $('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang + '</option>');
-      } else {
-        $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
-      }
-      langsrc_first_iteration = false;
-    });
     var langdest_first_iteration = true;
 
     console.log('switch dest lang' , destlang_selected);
