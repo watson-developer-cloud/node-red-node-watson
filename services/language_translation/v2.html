@@ -155,6 +155,7 @@ var base_model_selected = $('#node-input-basemodel').val();
   }
 
   function basemodelsAvailable() {
+    $('select#node-input-basemodel').empty();
     var base_models_available = models.filter(function (model) {
       return model.customizable === true;
     });
@@ -163,8 +164,6 @@ var base_model_selected = $('#node-input-basemodel').val();
       return a.model_id;
     });
     
-    console.log(base_models_available_ids);
-
     if(!base_model_selected) {
       var base_model_first_iteration = true;
 
@@ -178,7 +177,7 @@ var base_model_selected = $('#node-input-basemodel').val();
       });
     } else {
       base_models_available_ids.forEach(function (base_model) {
-        if (base_model_selected === domain) {
+        if (base_model_selected === base_model) {
           $('select#node-input-basemodel').append('<option value="' + base_model + '" selected="selected">' + base_model + '</option>');
         } else {
           $('select#node-input-basemodel').append('<option value="' + base_model + '">' + base_model + '</option>');
@@ -303,7 +302,6 @@ var base_model_selected = $('#node-input-basemodel').val();
   function getModels() {
     $.getJSON('watson-translate/models/').done(function (data) {
       models = data.models;
-      console.log(models);
       handlersUI();
       selectAction();
     }).fail(function (err) {
