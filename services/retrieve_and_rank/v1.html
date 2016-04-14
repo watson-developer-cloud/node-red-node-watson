@@ -204,7 +204,14 @@
         <label for="node-input-collectionname"><i class="fa fa-tag"></i> Collection Name</label>
         <input type="text" id="node-input-collectionname" placeholder="Collection Name">
     </div>
-    <div class="form-row mode rankerid">
+    <div class="form-row mode searchmode" id="rr-searchmode">
+        <label for="node-input-searchmode"><i class="fa fa-tag"></i> Search mode</label>
+        <select id="node-input-searchmode">
+          <option value="search">Search</option>
+          <option value="search-and-rank">Search and Rank</option>
+        </select>
+    </div>
+    <div class="form-row mode rankerid" id="rr-rankerid">
         <label for="node-input-rankerid"><i class="fa fa-tag"></i> Ranker ID</label>
         <input type="text" id="node-input-rankerid" placeholder="Ranker ID">
     </div>
@@ -232,7 +239,8 @@
                 name: {value: ""},
                 clusterid: {value: "", required: true},
                 collectionname: {value: "", required: true},
-                rankerid: {value: "", required: true}
+                searchmode: {value: "search-and-rank"},
+                rankerid: {value: ""}
             },
             credentials: {
               username: {type:"text"},
@@ -257,6 +265,22 @@
                 }).always(function () {
                     $('#credentials-check').hide();
                 })
+
+                function toggleRankerInput() {
+                  if($('#rr-searchmode select').val() === 'search') {
+                    $('#rr-rankerid').hide()
+                  } else {
+                    $('#rr-rankerid').show()
+                  }
+                }
+
+                $('#rr-searchmode select').change(toggleRankerInput)
+
+                toggleRankerInput()
+            }
+        });
+    })();
+</script>
             }
         });
     })();

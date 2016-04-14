@@ -143,7 +143,14 @@ module.exports = function (RED) {
 
         var ranker_id = config.rankerid;
         var question = msg.payload;
-        var query = qs.stringify({q: question, ranker_id: ranker_id, fl: 'id,title'});
+
+        var query;
+
+        if(config.searchmode === 'search') {
+          var query = qs.stringify({q: question, fl: 'id,title'});
+        } else {
+          var query = qs.stringify({q: question, ranker_id: ranker_id, fl: 'id,title'});
+        }
 
         solrClient.get('fcselect', query, function(err, searchResponse) {
           handleWatsonCallback(null,node,msg,err,searchResponse);

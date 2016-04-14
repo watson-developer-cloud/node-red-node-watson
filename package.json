@@ -37,7 +37,8 @@
       "watson-text-to-speech-v1": "services/text_to_speech/v1.js",
       "watson-tradeoff-analytics-v1": "services/tradeoff_analytics/v1.js",
       "watson-tone-analyzer-v3-beta": "services/tone_analyzer/v3-beta.js",
-      "watson-visual-recognition-v1": "services/visual_recognition/v1.js"
+      "watson-visual-recognition-v1": "services/visual_recognition/v1.js",
+      "watson-retrieve-and-rank-v1": "services/retrieve_and_rank/v1.js"
     }
   }
 }
