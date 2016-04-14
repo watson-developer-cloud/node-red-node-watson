@@ -226,12 +226,10 @@ var action = $('#node-input-action').val();
       })
 
     if (first_launch || !models) {
-      node.warn('getmodels');
       console.log('getmodels');
       getModels();
       first_launch = false;
     } else {
-      node.warn('don t get models');
       console.log('don t get models');
       handlersUI();
       selectAction();
