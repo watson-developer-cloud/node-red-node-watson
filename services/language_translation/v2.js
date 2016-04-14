@@ -118,26 +118,25 @@ module.exports = function (RED) {
         if (!err) {
           fs.write(info.fd, msg.payload);
           var params = {};
-
           switch (filetype) {
           case 'forcedglossary':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: 'en-es',
+              base_model_id: model_id,
               forced_glossary: fs.createReadStream(info.path)
             };
             break;
           case 'parallelcorpus':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: 'en-es',
+              base_model_id: model_id,
               parallel_corpus: fs.createReadStream(info.path)
             };
             break;
           case 'monolingualcorpus':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: 'en-es',
+              base_model_id: model_id,
               monolingual_corpus: fs.createReadStream(info.path)
             };
             break;
@@ -160,12 +159,73 @@ module.exports = function (RED) {
                   text: 'model sent to training'
                 });
                 msg.payload = 'Model ' + model.name + ' successfully sent for training with id: ' + model.model_id;
+                msg.id = model_id;
                 node.send(msg);
                 node.status({});
               }
             });
         }
       });
+    }
+
+    this.doGetStatus = function(msg, trainid) {
+      language_translation = watson.language_translation({
+        username: username,
+        password: password,
+        version: 'v2'
+      });
+
+      node.status({
+        fill: 'blue',
+        shape: 'dot',
+        text: 'requesting status'
+      });
+
+      language_translation.getModel({ model_id: trainid},
+        function(err, model) {
+          node.status({});
+          if (err) { 
+            node.status({
+              fill: 'red',
+              shape: 'ring',
+              text: 'call to translation service failed'
+            });
+            node.error(err, msg);
+          } else {
+            msg.payload = model.status;
+            node.send(msg);
+            node.status({});
+          }
+        }
+      );
+    }
+
+    this.doDelete = function(msg, trainid) {
+      language_translation = watson.language_translation({
+        username: username,
+        password: password,
+        version: 'v2'
+      });
+
+      node.status({
+        fill: 'blue',
+        shape: 'dot',
+        text: 'deleting'
+      });
+
+      language_translation.deleteModel({ model_id:'{model_id}'},
+        function(err) {
+          node.status({});
+          if (err) { 
+            node.status({
+              fill: 'red',
+              shape: 'ring',
+              text: 'could not delete'
+            });
+            node.error(err, msg);
+          }
+        }
+      );      
     }
 
     this.on('input', function (msg) {
@@ -217,6 +277,9 @@ module.exports = function (RED) {
         return;
       }
 
+      var trainid = msg.trainid || config.trainid;
+      var basemodel = msg.basemodel || config.basemodel;
+
       username = username || this.credentials.username;
       password = password || this.credentials.password;
 
@@ -237,8 +300,12 @@ module.exports = function (RED) {
         version: 'v2'
       });
 
-      var model_id = srclang + '-' + destlang +
-        (domain === 'news' ? '' : '-conversational');
+      var model_id = "";
+      if(domain === "news") {
+        model_id = srclang + '-' + destlang;
+      } else {
+        model_id = srclang + '-' + destlang + '-' + domain;
+      }
 
       switch (action) {
       case 'translate':
@@ -246,6 +313,12 @@ module.exports = function (RED) {
         break;
       case 'train':
         this.doTrain(msg, model_id, filetype);
+        break;
+      case 'getstatus':
+        this.doGetStatus(msg, trainid);
+        break;
+      case 'delete':
+        this.doDelete(msg, trainid);
         break;
       }
     });
