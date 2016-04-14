@@ -227,20 +227,42 @@ module.exports = function (RED) {
 
     this.on('input', function(msg) {
       setupRankRetrieveNode(msg,config,this,function(retrieve_and_rank) {
-        var params = {
-          cluster_id: config.clusterid,
-          config_name: config.configname,
-          config_zip_path: config.configzippath
-        };
-        if (!params.cluster_id || !params.config_name || !params.config_zip_path) {
-          var message = 'No cluster id, configuration name or .zip file path specified';
-          node.error(message, msg)
+
+        //zip file comes in on msg.payload as buffer
+        if (!msg.payload instanceof Buffer) {
+          var message = 'Invalid property: msg.payload, must be a Buffer.';
+          node.error(message, msg);
           return;
         }
-        node.status({fill: 'blue', shape: 'ring', text: 'Uploading solr configuration...' });
-        retrieve_and_rank.uploadConfig(params, function (err, res) {
-          node.status({});
-          handleWatsonCallback(null,node,msg,err,res);
+
+        var uploadConfig = function(filePath,cb) {
+          var params = {
+            cluster_id: config.clusterid,
+            config_name: config.configname,
+            config_zip_path: filePath
+          };
+          if (!params.cluster_id || !params.config_name) {
+            var message = 'No cluster id or configuration name specified';
+            return node.error(message, msg);
+          }
+          node.status({fill: 'blue', shape: 'ring', text: 'Uploading solr configuration...' });
+          retrieve_and_rank.uploadConfig(params, function (err, res) {
+            node.status({});
+            handleWatsonCallback(null,node,msg,err,res);
+          });
+        }
+
+        var stream_buffer = function (file, contents, cb) {
+          fs.writeFile(file, contents, function (err) {
+            if (err) throw err;
+            cb(file);
+          });
+        };
+        temp.open({suffix: '.zip'}, function (err, info) {
+          if (err) throw err;
+          stream_buffer(info.path, msg.payload, function (file) {
+            uploadConfig(file, temp.cleanup);
+          });
         });
       });      
     });
