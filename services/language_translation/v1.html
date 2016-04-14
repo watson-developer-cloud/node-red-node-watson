@@ -150,8 +150,8 @@ var action = $('#node-input-action').val();
         } else {
           $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
         }
+        domain_first_iteration = false;
       });
-      domain_first_iteration = false;
     } else {
       unique_domains.forEach(function (domain) {
         if (domain_selected === domain) {
@@ -195,6 +195,7 @@ var action = $('#node-input-action').val();
           console.log('and this is not the first iteration');
           $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
         }
+        langsrc_first_iteration = false;
       });
       output_lang_unique.forEach(function (lang) {
         console.log('the lang is', lang);
@@ -205,9 +206,10 @@ var action = $('#node-input-action').val();
           console.log('and this is not the first iteration');
           $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
         }
+        langdest_first_iteration = false;
       });
-      langsrc_first_iteration = false;
-      langdest_first_iteration = false;
+      
+      
     } else {
       console.log('src lang exists and is equal to ', srclang_selected);
       input_lang_unique.forEach(function (lang) {
