@@ -398,7 +398,15 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-retrieve-rank-cluster-settings">
-
+<p>The IBM Watson™ Retrieve and Rank service combines two information retrieval components in a single service: the power of Apache Solr and a sophisticated machine learning capability. This combination provides users with more relevant results by automatically reranking them by using these machine learning algorithms.</p>
+    <p>The cluster settings node provides the following functionality configurable in the node configuration panel:</p>
+    <ul>
+        <li><b>List Clusters </b>Returns a list of all clusters in the service. Note there is a maximum of <b>5</b> clusters.</li>
+        <li><b>Cluster Information </b>Returns status and other information about a cluster. The <code>cluster_id</code> is specified in the node configuration panel.</li>
+        <li><b>Delete Cluster </b>Delete a cluster from the service. The <code>cluster_id</code> is specified in the node configuration panel.</li>
+    </ul>
+    <p>The response from each query is returned on <code>msg.payload</code>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">

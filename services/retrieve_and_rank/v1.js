@@ -43,47 +43,27 @@ module.exports = function (RED) {
 
     this.on('input', function(msg) {
       setupRankRetrieveNode(msg,config,this,function(retrieve_and_rank) {
-
-        if (!msg.payload instanceof Buffer) {
-          var message = 'Invalid property: msg.payload, must be a Buffer.';
+        if (!msg.payload instanceof String) {
+          var message = 'Invalid property: msg.payload, must be a String.';
           node.error(message, msg);
           return;
         }
-
-        var createRanker = function(training_data, cb) {
-          var params = {
-            training_data: training_data
-          };
-          console.log(training_data);
-
-          if (config.rankername) {
-            params.training_metadata = "{\"name\": \""+config.rankername+"\"}";
-          }
-          node.status({fill:"blue",shape:"ring",text:"Uploading training data"});
-          retrieve_and_rank.createRanker(params, function(err, res) {
-              handleWatsonCallback(null,node,msg,err,res,function() {
-                node.status({fill:"blue",shape:"ring",text:"Training data uploaded. Ranker is training"});
-                //Now check the status of the ranker
-                var ranker_id = res.ranker_id;
-                checkRankerStatus(retrieve_and_rank,msg,node,ranker_id);
-              });;
-          });
+        var params = {
+          training_data: msg.payload
+        };
+      
+        if (config.rankername) {
+          params.training_metadata = "{\"name\": \""+config.rankername+"\"}";
         }
-        createRanker(msg.payload);
-        //csv training file comes in on msg.payload as a buffer
-        // var stream_buffer = function (file, contents, cb) {
-        //   fs.writeFile(file, contents, function (err) {
-        //     if (err) throw err;
-        //     cb();
-        //   });
-        // };
-
-        // temp.open({suffix: '.csv'}, function (err, info) {
-        //   if (err) throw err;
-        //   stream_buffer(info.path, msg.payload, function () {
-        //     createRanker(fs.createReadStream(info.path), temp.cleanup);
-        //   });
-        // });
+        node.status({fill:"blue",shape:"ring",text:"Uploading training data"});
+        retrieve_and_rank.createRanker(params, function(err, res) {
+            handleWatsonCallback(null,node,msg,err,res,function() {
+              node.status({fill:"blue",shape:"ring",text:"Training data uploaded. Ranker is training"});
+              //Now check the status of the ranker
+              var ranker_id = res.ranker_id;
+              checkRankerStatus(retrieve_and_rank,msg,node,ranker_id);
+            });;
+        });
       });      
     });
   }
@@ -525,6 +505,7 @@ module.exports = function (RED) {
       retrieve_and_rank.rankerStatus(params, function(err, res) {
           if (err) {
             node.status({});
+            console.log(err);
             var message = "Ranker training state error: "+err.error;
             clearInterval(statusInterval);
             return node.error(message, msg);
