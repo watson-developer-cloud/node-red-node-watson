@@ -303,6 +303,7 @@ var base_model_selected = $('#node-input-basemodel').val();
   function getModels() {
     $.getJSON('watson-translate/models/').done(function (data) {
       models = data.models;
+      console.log(models);
       handlersUI();
       selectAction();
     }).fail(function (err) {
@@ -349,7 +350,7 @@ var base_model_selected = $('#node-input-basemodel').val();
       },
       dbase_model: {
         value: ''
-      }
+      },
       action: {
         value: 'translate'
       },

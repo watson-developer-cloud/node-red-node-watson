@@ -301,8 +301,8 @@ module.exports = function (RED) {
         version: 'v2'
       });
 
-      var model_id = srclang + '-' + destlang +
-        (domain === 'news' ? '' : '-conversational');
+      //var model_id = srclang + '-' + destlang + (domain === 'news' ? '' : '-conversational');
+      var model_id = srclang + '-' + destlang + '-' + domain;
 
       switch (action) {
       case 'translate':
