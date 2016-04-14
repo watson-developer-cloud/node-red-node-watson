@@ -103,11 +103,13 @@ var action = $('#node-input-action').val();
 
     // check availability 
     $('#node-input-srclang').change(function () {
+      console.log('#srclang_selected');
       srclang_selected = $('#node-input-srclang').val();
       destlangAvailable();
     });
 
     $('#node-input-destlang').change(function () {
+      console.log('#destlang_selected');
       destlang_selected = $('#node-input-destlang').val();
       destlangAvailable();
     });
