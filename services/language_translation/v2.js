@@ -118,25 +118,26 @@ module.exports = function (RED) {
         if (!err) {
           fs.write(info.fd, msg.payload);
           var params = {};
+
           switch (filetype) {
           case 'forcedglossary':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: 'es-en',
+              base_model_id: 'en-es',
               forced_glossary: fs.createReadStream(info.path)
             };
             break;
           case 'parallelcorpus':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: model_id,
+              base_model_id: 'en-es',
               parallel_corpus: fs.createReadStream(info.path)
             };
             break;
           case 'monolingualcorpus':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: model_id,
+              base_model_id: 'en-es',
               monolingual_corpus: fs.createReadStream(info.path)
             };
             break;
@@ -300,12 +301,8 @@ module.exports = function (RED) {
         version: 'v2'
       });
 
-      var model_id = "";
-      if(domain === "news") {
-        model_id = srclang + '-' + destlang;
-      } else {
-        model_id = srclang + '-' + destlang + '-' + domain;
-      }
+      var model_id = srclang + '-' + destlang +
+        (domain === 'news' ? '' : '-conversational');
 
       switch (action) {
       case 'translate':
