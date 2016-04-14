@@ -54,10 +54,16 @@ module.exports = function (RED) {
           };
 
           if (config.rankername) {
-            params.training_metadata = '{\"name\": \"'+config.rankername+'\"}';
+            params.training_metadata = "{\"name\": \""+config.rankername+"\"}";
           }
           node.status({fill:"blue",shape:"ring",text:"Uploading training data"});
           retrieve_and_rank.createRanker(params, function(err, res) {
+            if (err) {
+              node.status({});
+              var message = "";
+              (err.error) ? message = err.error : message = err.message;
+              return node.error(message, msg);
+            }
             node.status({fill:"blue",shape:"ring",text:"Training data uploaded. Ranker is training"});
               handleWatsonCallback(null,node,msg,err,res,function() {
                 //Now check the status of the ranker
@@ -176,17 +182,230 @@ module.exports = function (RED) {
 
         retrieve_and_rank.createCluster(params, function(err, res) {
 
-          node.status({fill: 'blue', shape: 'ring', text: 'Cluster is getting ready' });
+          if (err) {
+            node.status({});
+            var message = "";
+            (err.error) ? message = err.error : message = err.message;
+            return node.error(message, msg);
+          }
 
+          node.status({fill: 'blue', shape: 'ring', text: 'Preparing cluster' });
             handleWatsonCallback(null, node, msg, err, res, function() {
               // Now check the status of the cluster
-              var cluster_id = res.cluster_id
-
+              var cluster_id = res.solr_cluster_id;
               checkClusterStatus(retrieve_and_rank, msg, node, cluster_id)
             })
         })
       })
     })
+  }
+
+  function clusterSettingsNode(config) {
+    RED.nodes.createNode(this, config);
+    var node = this;
+
+    this.on('input', function(msg) {
+      setupRankRetrieveNode(msg,config,this,function(retrieve_and_rank) {
+        var params = {
+          cluster_id: config.clusterid
+        }
+        switch (config.mode) {
+          case 'list':
+            node.status({fill: 'blue', shape: 'ring', text: 'Getting clusters...' });
+            retrieve_and_rank.listClusters({},function(err,res) {
+              node.status({});
+              handleWatsonCallback(config.mode,node,msg,err,res);
+            });
+            break;
+          case 'info':
+            if (params.cluster_id) {
+              retrieve_and_rank.pollCluster(params,function(err,res) {
+                handleWatsonCallback(config.mode,node,msg,err,res);
+              });
+            } else {
+              var message = 'No cluster id specified';
+              node.error(message, msg)
+              return;
+            }           
+            break;
+          case 'delete':
+            if (params.cluster_id) {
+              retrieve_and_rank.deleteCluster(params,function(err,res) {
+                handleWatsonCallback(config.mode,node,msg,err,res);
+              });
+            } else {
+              var message = 'No cluster id specified';
+              node.error(message, msg)
+              return;
+            }
+            break;
+        }
+      });      
+    });
+  }
+
+  function uploadSolrConfigurationNode(config) {
+    RED.nodes.createNode(this, config);
+    var node = this;
+
+    this.on('input', function(msg) {
+      setupRankRetrieveNode(msg,config,this,function(retrieve_and_rank) {
+        var params = {
+          cluster_id: config.clusterid,
+          config_name: config.configname,
+          config_zip_path: config.configzippath
+        };
+        if (!params.cluster_id || !params.config_name || !params.config_zip_path) {
+          var message = 'No cluster id, configuration name or .zip file path specified';
+          node.error(message, msg)
+          return;
+        }
+        node.status({fill: 'blue', shape: 'ring', text: 'Uploading solr configuration...' });
+        retrieve_and_rank.uploadConfig(params, function (err, res) {
+          node.status({});
+          handleWatsonCallback(null,node,msg,err,res);
+        });
+      });      
+    });
+  }
+
+  function solrConfigurationSettingsNode(config) {
+    RED.nodes.createNode(this, config);
+    var node = this;
+
+    this.on('input', function(msg) {
+      setupRankRetrieveNode(msg,config,this,function(retrieve_and_rank) {
+        var params = {
+          cluster_id: config.clusterid,
+          config_name: config.configname
+        }
+        switch (config.mode) {
+          case 'list':
+            node.status({fill: 'blue', shape: 'ring', text: 'Getting solr configurations...' });
+            retrieve_and_rank.listConfigs(params,function(err,res) {
+              node.status({});
+              handleWatsonCallback(config.mode,node,msg,err,res);
+            });
+            break;
+          case 'info':
+            if (params.cluster_id && params.config_name) {
+              // retrieve_and_rank.getConfig(params, function(err,res) {
+              //   console.log("HELLO LADS GET CONFIG BACK");
+              //   console.log(err);
+              //   console.log(res);
+              // });
+              var configZipResponse = "hello world";
+              console.log("***********");
+              console.log(configZipResponse);
+              //Pass on response to payload as buffer
+              if (typeof(configZipResponse) == 'Buffer') {
+                handleWatsonCallback(null,node,msg,null,configZipResponse);
+              } else {
+                var error = {
+                  message: "No configuration recieved from the rank and retrieve service"
+                }
+                handleWatsonCallback(null,node,msg,error,null);
+              }
+              
+            } else {
+              var message = 'Missing cluster id or config name';
+              node.error(message, msg)
+              return;
+            }           
+            break;
+          case 'delete':
+            if (params.cluster_id && params.config_name) {
+              retrieve_and_rank.deleteConfig(params,function(err,res) {
+                handleWatsonCallback(config.mode,node,msg,err,res);
+              });
+            } else {
+              var message = 'Missing cluster id or config name';
+              node.error(message, msg)
+              return;
+            }
+            break;
+        }
+      });      
+    });
+  }
+
+  function solrCollectionNode(config) {
+    RED.nodes.createNode(this, config);
+    var node = this;
+
+    this.on('input', function(msg) {
+      setupRankRetrieveNode(msg,config,this,function(retrieve_and_rank) {
+        var params = {
+          cluster_id: config.clusterid,
+          collection_name: config.collectionname
+        }
+        if (!params.cluster_id || !params.collection_name) {
+          var message = 'Missing cluster id or collection name';
+          node.error(message, msg)
+          return;
+        }
+
+        switch (config.mode) {
+          case 'create':
+            if (!config.configname) {
+              var message = 'Missing configuration name';
+              return node.error(message, msg);
+            } else {
+              params.config_name = config.configname;
+              node.status({fill: 'blue', shape: 'ring', text: 'Creating solr collection' });
+              retrieve_and_rank.createCollection(params,function(err,res) {
+                node.status({});
+                handleWatsonCallback(config.mode,node,msg,err,res);
+              });
+            }
+            break;
+          case 'delete':
+            retrieve_and_rank.deleteCollection(params,function(err,res) {
+              handleWatsonCallback(config.mode,node,msg,err,res);
+            });
+            break;
+          case 'index':
+            if (msg.doc && typeof(msg.doc) == 'object') {
+
+              var solrClient = retrieve_and_rank.createSolrClient(params);
+              node.status({fill: 'blue', shape: 'ring', text: 'Indexing document' });
+              solrClient.add(msg.doc,function(err,res) {
+                node.status({});
+                handleWatsonCallback(config.mode,node,msg,err,res,function(){
+                  solrClient.commit(function(err) {
+                    if (err) {
+                      var message = 'Error committing change: ' + err;
+                      return node.error(message, msg);
+                    } else {
+                        msg.payload = 'Document indexed successfully';
+                        node.send(msg);
+                    }
+                  });
+                });
+              });
+            } else {
+              var message = 'Missing or invalid document object';
+              return node.error(message, msg);
+            }
+            break;
+
+          case 'search':
+            if (msg.payload && typeof(msg.payload) == 'string') {
+              var solrClient = retrieve_and_rank.createSolrClient(params);
+              var query = qs.stringify({q: msg.payload});
+              node.status({fill: 'blue', shape: 'ring', text: 'Searching' });
+              solrClient.search(query,function(err,res) {
+                node.status({});
+                handleWatsonCallback(config.mode,node,msg,err,res);
+              });
+            } else {
+              var message = 'Missing or invalid search query';
+              return node.error(message, msg);
+            }
+            break;
+        }
+      });      
+    });
   }
 
   RED.nodes.registerType('watson-retrieve-rank-create-ranker', createRankerNode, {
@@ -208,6 +427,30 @@ module.exports = function (RED) {
     }
   });
   RED.nodes.registerType('watson-retrieve-rank-create-cluster', createClusterNode, {
+    credentials: {
+      username: {type:"text"},
+      password: {type:"password"}
+    }
+  });
+  RED.nodes.registerType('watson-retrieve-rank-cluster-settings', clusterSettingsNode, {
+    credentials: {
+      username: {type:"text"},
+      password: {type:"password"}
+    }
+  });
+  RED.nodes.registerType('watson-retrieve-rank-upload-solr-configuration', uploadSolrConfigurationNode, {
+    credentials: {
+      username: {type:"text"},
+      password: {type:"password"}
+    }
+  });
+  RED.nodes.registerType('watson-retrieve-rank-solr-configuration-settings', solrConfigurationSettingsNode, {
+    credentials: {
+      username: {type:"text"},
+      password: {type:"password"}
+    }
+  });
+  RED.nodes.registerType('watson-retrieve-rank-solr-collection', solrCollectionNode, {
     credentials: {
       username: {type:"text"},
       password: {type:"password"}
@@ -250,7 +493,9 @@ module.exports = function (RED) {
       return node.error(message, msg);
     } else {
       (mode == 'delete' && Object.keys(res).length == 0) ? msg.payload = "Ranker deleted" : msg.payload = res;
-      node.send(msg);
+      if (mode != 'index') {
+        node.send(msg);
+      }
       if (cb) cb();
     }
   }
@@ -291,7 +536,7 @@ module.exports = function (RED) {
 
 
     function checkClusterStatus(retrieve_and_rank,msg,node,cluster_id) {
-      var interval = 10000;
+      var interval = 60000;
       //Loop and check the status of the ranker
       var statusInterval = setInterval(function(){
         var params = {
@@ -304,10 +549,14 @@ module.exports = function (RED) {
               clearInterval(statusInterval);
               return node.error(message, msg);
             } else {
-              switch (res.status) {
-                case 'Available':
+
+              switch (res.solr_cluster_status) {
+                case 'READY':
                   node.status({fill:"green",shape:"ring",text:"Cluster available"});
                   return clearInterval(statusInterval);
+                  break;
+
+                case 'NOT_AVAILABLE':
                   break;
 
                 default:

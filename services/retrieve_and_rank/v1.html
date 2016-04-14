@@ -321,13 +321,7 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-retrieve-rank-create-cluster">
-    <p>The IBM Watson™ Retrieve and Rank service combines two information retrieval components in a single service: the power of Apache Solr and a sophisticated machine learning capability. This combination provides users with more relevant results by automatically reranking them by using these machine learning algorithms.</p>
-    <p>The create cluster node allows a cluster to be created.</p>
 
-    <p>Once triggered, the cluster will then be created. Once the cluster is available, the status underneath the node will change to <b>“Cluster Available”</b>.</p>
-
-    <p>The cluster id is returned on <code>msg.payload</code>.</p>
-    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
@@ -355,6 +349,347 @@
                 return this.name ? "node_label_italic" : "";
             },
             oneditprepare: function() {
+                $.getJSON('watson-retrieve-rank/vcap/').done(function (service) {
+                    $('.credentials').toggle(!service);
+                }).fail(function () {
+                    $('.credentials').show();
+                }).always(function () {
+                    $('#credentials-check').hide();
+                })
+            }
+        });
+    })();
+</script>
+
+<!-- Cluster settings node -->
+<script type="text/x-red" data-template-name="watson-retrieve-rank-cluster-settings">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row">
+        <label for="node-input-mode"><i class="fa fa-question"></i> Mode</label>
+        <select type="text" id="node-input-mode" style="display: inline-block; width: 70%;" >
+            <option value="list">List Clusters</option>
+            <option value="info">Cluster Information</option>
+            <option value="delete">Delete Cluster</option>
+        </select>
+    </div>
+    <div class="form-row mode clusterid">
+        <label for="node-input-clusterid"><i class="fa fa-tag"></i> Cluster ID</label>
+        <input type="text" id="node-input-clusterid" placeholder="Cluster ID">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-retrieve-rank-cluster-settings">
+
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-retrieve-rank-cluster-settings', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                mode: {value: "list"},
+                clusterid: {value: ""}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(85, 150, 230)",
+            inputs: 1,
+            outputs: 1,
+            icon: "RetrieveRank.png",
+            paletteLabel: "retrieve and rank cluster settings",
+            label: function() {
+                return this.name || "retrieve and rank cluster settings";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $('#node-input-mode').change(function () {
+                    var mode = $('#node-input-mode').val();
+                    if (mode == 'list') {
+                        $('.form-row.mode.clusterid').hide();
+                    } else {
+                        $('.form-row.mode.clusterid').show();
+                    } 
+                });
+                $.getJSON('watson-retrieve-rank/vcap/').done(function (service) {
+                    $('.credentials').toggle(!service);
+                }).fail(function () {
+                    $('.credentials').show();
+                }).always(function () {
+                    $('#credentials-check').hide();
+                })
+            }
+        });
+    })();
+</script>
+
+<!-- Upload Solr Configuration node -->
+<script type="text/x-red" data-template-name="watson-retrieve-rank-upload-solr-configuration">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row mode clusterid">
+        <label for="node-input-clusterid"><i class="fa fa-tag"></i> Cluster ID</label>
+        <input type="text" id="node-input-clusterid" placeholder="Cluster ID">
+    </div>
+    <div class="form-row mode configname">
+        <label for="node-input-configname"><i class="fa fa-tag"></i> Configuration Name</label>
+        <input type="text" id="node-input-configname" placeholder="Configuration Name">
+    </div>
+    <div class="form-row mode configzippath">
+        <label for="node-input-configzippath"><i class="fa fa-tag"></i> Configuration .zip File Path</label>
+        <input type="text" id="node-input-configzippath" placeholder="Configuration .zip File Path">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-retrieve-rank-upload-solr-configuration">
+
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-retrieve-rank-upload-solr-configuration', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                clusterid: {value: "", required: true},
+                configname: {value: "", required: true},
+                configzippath: {value: "", required: true}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(85, 150, 230)",
+            inputs: 1,
+            outputs: 1,
+            icon: "RetrieveRank.png",
+            paletteLabel: "retrieve and rank upload solr configuration",
+            label: function() {
+                return this.name || "retrieve and rank upload solr configuration";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $.getJSON('watson-retrieve-rank/vcap/').done(function (service) {
+                    $('.credentials').toggle(!service);
+                }).fail(function () {
+                    $('.credentials').show();
+                }).always(function () {
+                    $('#credentials-check').hide();
+                })
+            }
+        });
+    })();
+</script>
+
+<!-- Solr Configuration Settings node -->
+<script type="text/x-red" data-template-name="watson-retrieve-rank-solr-configuration-settings">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row clusterid">
+        <label for="node-input-clusterid"><i class="fa fa-tag"></i> Cluster ID</label>
+        <input type="text" id="node-input-clusterid" placeholder="Cluster ID">
+    </div>
+    <div class="form-row">
+        <label for="node-input-mode"><i class="fa fa-question"></i> Mode</label>
+        <select type="text" id="node-input-mode" style="display: inline-block; width: 70%;" >
+            <option value="list">List Solr Configurations</option>
+            <option value="info">Solr Configuration Information</option>
+            <option value="delete">Delete Solr Configuration</option>
+        </select>
+    </div>
+    <div class="form-row mode configname">
+        <label for="node-input-configname"><i class="fa fa-tag"></i> Configuration Name</label>
+        <input type="text" id="node-input-configname" placeholder="Configuration Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-retrieve-rank-solr-configuration-settings">
+
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-retrieve-rank-solr-configuration-settings', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                clusterid: {value: "", required: true},
+                mode: {value: "list"},
+                configname: {value: ""}
+                
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(85, 150, 230)",
+            inputs: 1,
+            outputs: 1,
+            icon: "RetrieveRank.png",
+            paletteLabel: "retrieve and rank solr configuration settings",
+            label: function() {
+                return this.name || "retrieve and rank solr configuration settings";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $('#node-input-mode').change(function () {
+                    var mode = $('#node-input-mode').val();
+                    if (mode == 'list') {
+                        $('.form-row.mode.configname').hide();
+                    } else {
+                        $('.form-row.mode.configname').show();
+                    } 
+                });
+                $.getJSON('watson-retrieve-rank/vcap/').done(function (service) {
+                    $('.credentials').toggle(!service);
+                }).fail(function () {
+                    $('.credentials').show();
+                }).always(function () {
+                    $('#credentials-check').hide();
+                })
+            }
+        });
+    })();
+</script>
+
+<!-- Solr Collection node -->
+<script type="text/x-red" data-template-name="watson-retrieve-rank-solr-collection">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row clusterid">
+        <label for="node-input-clusterid"><i class="fa fa-tag"></i> Cluster ID</label>
+        <input type="text" id="node-input-clusterid" placeholder="Cluster ID">
+    </div>
+    <div class="form-row collectionname">
+        <label for="node-input-collectionname"><i class="fa fa-tag"></i> Collection Name</label>
+        <input type="text" id="node-input-collectionname" placeholder="Collection Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-mode"><i class="fa fa-question"></i> Mode</label>
+        <select type="text" id="node-input-mode" style="display: inline-block; width: 70%;" >
+            <option value="create">Create Solr Collection</option>
+            <option value="delete">Delete Solr Collection</option>
+            <option value="index">Index Documents</option>
+            <option value="search">Search</option>
+        </select>
+    </div>
+
+    <div class="form-row mode configname">
+        <label for="node-input-configname"><i class="fa fa-tag"></i> Configuration Name</label>
+        <input type="text" id="node-input-configname" placeholder="Configuration Name">
+    </div>
+    
+</script>
+
+<script type="text/x-red" data-help-name="watson-retrieve-rank-solr-collection">
+
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-retrieve-rank-solr-collection', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                clusterid: {value: "", required: true},
+                collectionname: {value: "", required: true},
+                mode: {value: "create"},
+                configname: {value: ""}
+                
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(85, 150, 230)",
+            inputs: 1,
+            outputs: 1,
+            icon: "RetrieveRank.png",
+            paletteLabel: "retrieve and rank solr collection",
+            label: function() {
+                return this.name || "retrieve and rank solr collection";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $('#node-input-mode').change(function () {
+                    var mode = $('#node-input-mode').val();
+                    if (mode == 'create') {
+                        $('.form-row.mode.configname').show();
+                    } else {
+                        $('.form-row.mode.configname').hide();
+                    } 
+                });
                 $.getJSON('watson-retrieve-rank/vcap/').done(function (service) {
                     $('.credentials').toggle(!service);
                 }).fail(function () {
