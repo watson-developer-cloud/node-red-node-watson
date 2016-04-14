@@ -128,7 +128,7 @@ var action = $('#node-input-action').val();
     action = $('#node-input-action').val();
     switch (action) {
       case 'train':
-        $('select#node-input-srclang, select#node-input-destlang, #node-input-trainid, , select#node-input-domain').parent().hide();
+        $('select#node-input-srclang, select#node-input-destlang, #node-input-trainid, select#node-input-domain').parent().hide();
         $('select#node-input-filetype, select#node-input-basemodel').parent().show();
         basemodelsAvailable();
         break;
