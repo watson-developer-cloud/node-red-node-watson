@@ -32,7 +32,7 @@ module.exports = function (RED) {
     password = service.password;
   }
 
-  RED.httpAdmin.get('/watson-retrieve-rank/vcap', function (req, res) {
+  RED.httpAdmin.get('/watson-retrieve-and-rank/vcap', function (req, res) {
     res.json(service ? {bound_service: true} : null);
   });
 
