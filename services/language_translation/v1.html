@@ -76,13 +76,14 @@
 
 <script type="text/javascript">
 var first_launch = true;
+var models;
+var domain_type;
+var languages;
+var domain_selected = $('#node-input-domain').val();
+var srclang_selected = $('#node-input-srclang').val();
+var action = $('#node-input-action').val();
 
 (function () {
-  var models, domain_type, languages;
-  var domain_selected = $('#node-input-domain').val();
-  var srclang_selected = $('#node-input-srclang').val();
-  var action = $('#node-input-action').val();
-
   // sorting functions
   function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
@@ -225,9 +226,13 @@ var first_launch = true;
       })
 
     if (first_launch || !models) {
+      node.warn('getmodels');
+      console.log('getmodels');
       getModels();
       first_launch = false;
     } else {
+      node.warn('don t get models');
+      console.log('don t get models');
       handlersUI();
       selectAction();
     }
