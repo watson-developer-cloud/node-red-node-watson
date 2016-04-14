@@ -168,6 +168,66 @@ module.exports = function (RED) {
       });
     }
 
+    this.doGetStatus = function(trainid) {
+      language_translation = watson.language_translation({
+        username: username,
+        password: password,
+        version: 'v2'
+      });
+
+      node.status({
+        fill: 'blue',
+        shape: 'dot',
+        text: 'requesting status'
+      });
+
+      language_translation.getModel({ model_id: trainid},
+        function(err, model) {
+          node.status({});
+          if (err) { 
+            node.status({
+              fill: 'red',
+              shape: 'ring',
+              text: 'call to translation service failed'
+            });
+            node.error(err, msg);
+          } else {
+            msg.payload = model.status;
+            node.send(msg);
+            node.status({});
+          }
+        }
+      );
+    }
+
+    this.doDelete = function(trainid) {
+      language_translation = watson.language_translation({
+        username: username,
+        password: password,
+        version: 'v2'
+      });
+
+      node.status({
+        fill: 'blue',
+        shape: 'dot',
+        text: 'deleting'
+      });
+
+      language_translation.deleteModel({ model_id:'{model_id}'},
+        function(err) {
+          node.status({});
+          if (err) { 
+            node.status({
+              fill: 'red',
+              shape: 'ring',
+              text: 'could not delete'
+            });
+            node.error(err, msg);
+          }
+        }
+      );      
+    }
+
     this.on('input', function (msg) {
       var message = '';
 
@@ -217,6 +277,14 @@ module.exports = function (RED) {
         return;
       }
 
+      var trainid = msg.trainid || config.trainid;
+
+      if (!trainid) {
+        node.warn('Missing ID, please set one');
+        node.send(msg);
+        return;
+      }
+
       username = username || this.credentials.username;
       password = password || this.credentials.password;
 
@@ -246,6 +314,12 @@ module.exports = function (RED) {
         break;
       case 'train':
         this.doTrain(msg, model_id, filetype);
+        break;
+      case 'getstatus':
+        this.doGetStatus(trainid);
+        break;
+      case 'delete':
+        this.doDelete(trainid);
         break;
       }
     });

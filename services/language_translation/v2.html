@@ -33,10 +33,12 @@
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
     <div class="form-row">
-        <label for="node-input-action"><i class="fa fa-cog"></i> Action</label>
+        <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
         <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
             <option value="translate" selected="selected">Translate</option>
             <option value="train">Train</option>
+            <option value="getstatus">Get status</option>
+            <option value="delete">Delete</option>
         </select>
     </div>
     <div class="form-row">
@@ -61,6 +63,10 @@
             <option value="parallelcorpus">Parallel corpus</option>
             <option value="monolingualcorpus">Monolingual corpus</option>
         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-trainid"><i class="fa fa-tag"></i> ID</label>
+        <input type="text" id="node-input-trainid" placeholder="ID">
     </div>
 </script>
 
@@ -115,12 +121,23 @@ var action = $('#node-input-action').val();
 
   function selectAction() {
     action = $('#node-input-action').val();
-    if (action === 'train') {
-      $('select#node-input-srclang, select#node-input-destlang').parent().hide();
-      $('select#node-input-filetype').parent().show();
-    } else {
-      $('select#node-input-srclang, select#node-input-destlang').parent().show();
-      $('select#node-input-filetype').parent().hide();
+    switch (action) {
+      case 'train':
+        $('select#node-input-srclang, select#node-input-destlang, select#node-input-trainid').parent().hide();
+        $('select#node-input-filetype').parent().show();
+        break;
+      case 'translate':
+        $('select#node-input-srclang, select#node-input-destlang').parent().show();
+        $('select#node-input-filetype, select#node-input-trainid').parent().hide();
+        break;
+      case 'getstatus':
+        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype').parent().hide();
+        $('select#node-input-trainid').parent().show();        
+        break;
+      case 'delete':
+        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype').parent().hide();
+        $('select#node-input-trainid').parent().show(); 
+        break;
     }
     domainsAvailable();
   }
@@ -297,6 +314,9 @@ var action = $('#node-input-action').val();
       },
       filetype: {
         value: 'forcedglossary'
+      },
+      trainid: {
+        value: ''
       }
     },
     credentials: {
