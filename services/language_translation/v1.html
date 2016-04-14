@@ -55,7 +55,7 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-filetype"><i class="fa fa-comments-o"></i> File type</label>
+        <label for="node-input-filetype"><i class="fa fa-book"></i> File type</label>
         <select type="text" id="node-input-filetype" style="display: inline-block; vertical-align:middle; width: 70%;">
             <option value="forcedglossary" selected="selected">Forced glossary</option>
             <option value="parallelcorpus">Parallel corpus</option>
@@ -103,13 +103,11 @@ var action = $('#node-input-action').val();
 
     // check availability 
     $('#node-input-srclang').change(function () {
-      console.log('changed src lang' , srclang_selected);
       srclang_selected = $('#node-input-srclang').val();
       destlangAvailable();
     });
 
     $('#node-input-destlang').change(function () {
-      console.log('changed dest lang' , destlang_selected);
       destlang_selected = $('#node-input-destlang').val();
       destlangAvailable();
     });
@@ -141,18 +139,28 @@ var action = $('#node-input-action').val();
       return a.domain;
     });
 
-
     var unique_domains = domains.filter(onlyUnique);
-    var domain_first_iteration = true;
 
-    unique_domains.forEach(function (domain) {
-      if (domain_first_iteration) {
-        $('select#node-input-domain').append('<option value="' + domain + '" selected>' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
-      } else {
-        $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
-      }
-      domain_first_iteration = false;
-    });
+    if(!domain_selected) {
+      var domain_first_iteration = true;
+
+      unique_domains.forEach(function (domain) {
+        if (domain_first_iteration) {
+          $('select#node-input-domain').append('<option value="' + domain + '" selected>' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
+        } else {
+          $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
+        }
+        domain_first_iteration = false;
+      });
+    } else {
+      unique_domains.forEach(function (domain) {
+        if (domain_selected = domain) {
+          $('select#node-input-domain').append('<option value="' + domain + '" selected>' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
+        } else {
+          $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
+        }
+      });      
+    }
     selectDomain();
   }
 
@@ -171,10 +179,12 @@ var action = $('#node-input-action').val();
     });
     input_lang_unique = input_lang.filter(onlyUnique);
     output_lang_unique = output_lang.filter(onlyUnique);
-    var langsrc_first_iteration = true;
 
     if(!srclang_selected)
     {
+      var langsrc_first_iteration = true;
+      var langdest_first_iteration = true;
+      
       input_lang_unique.forEach(function (lang) {
         if (langsrc_first_iteration) {
           $('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang + '</option>');
@@ -183,6 +193,14 @@ var action = $('#node-input-action').val();
         }
         langsrc_first_iteration = false;
       });
+      output_lang_unique.forEach(function (lang) {
+        if (langdest_first_iteration) {
+          $('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
+        } else {
+          $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
+        }
+        langdest_first_iteration = false;
+      });
     } else {
       input_lang_unique.forEach(function (lang) {
         if (srclang_selected == lang) {
@@ -190,22 +208,15 @@ var action = $('#node-input-action').val();
         } else {
           $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
         }
-        langsrc_first_iteration = false;
+      });
+      output_lang_unique.forEach(function (lang) {
+        if (destlang_selected == lang) {
+          $('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
+        } else {
+          $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
+        }
       });
     }
-    console.log('switch src lang' , srclang_selected);
-    var langdest_first_iteration = true;
-
-    console.log('switch dest lang' , destlang_selected);
-    output_lang_unique.forEach(function (lang) {
-      if (langdest_first_iteration) {
-        $('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
-      } else {
-        $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
-      }
-
-      langdest_first_iteration = false;
-    });
     destlangAvailable();
   }
 
