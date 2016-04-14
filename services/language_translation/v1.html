@@ -146,16 +146,16 @@ var action = $('#node-input-action').val();
 
       unique_domains.forEach(function (domain) {
         if (domain_first_iteration) {
-          $('select#node-input-domain').append('<option value="' + domain + '" selected>' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
+          $('select#node-input-domain').append('<option value="' + domain + '" selected="selected">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
         } else {
           $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
         }
-        domain_first_iteration = false;
       });
+      domain_first_iteration = false;
     } else {
       unique_domains.forEach(function (domain) {
-        if (domain_selected = domain) {
-          $('select#node-input-domain').append('<option value="' + domain + '" selected>' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
+        if (domain_selected === domain) {
+          $('select#node-input-domain').append('<option value="' + domain + '" selected="selected">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
         } else {
           $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
         }
@@ -184,34 +184,34 @@ var action = $('#node-input-action').val();
     {
       var langsrc_first_iteration = true;
       var langdest_first_iteration = true;
-      
+
       input_lang_unique.forEach(function (lang) {
         if (langsrc_first_iteration) {
-          $('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang + '</option>');
+          $('select#node-input-srclang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
         } else {
           $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
         }
-        langsrc_first_iteration = false;
       });
+      langsrc_first_iteration = false;
       output_lang_unique.forEach(function (lang) {
         if (langdest_first_iteration) {
-          $('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
+          $('select#node-input-destlang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
         } else {
           $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
         }
-        langdest_first_iteration = false;
       });
+      langdest_first_iteration = false;
     } else {
       input_lang_unique.forEach(function (lang) {
-        if (srclang_selected == lang) {
-          $('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang + '</option>');
+        if (srclang_selected === lang) {
+          $('select#node-input-srclang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
         } else {
           $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
         }
       });
       output_lang_unique.forEach(function (lang) {
-        if (destlang_selected == lang) {
-          $('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
+        if (destlang_selected === lang) {
+          $('select#node-input-destlang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
         } else {
           $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
         }
@@ -259,11 +259,9 @@ var action = $('#node-input-action').val();
       })
 
     if (first_launch || !models) {
-      console.log('getmodels');
       getModels();
       first_launch = false;
     } else {
-      console.log('don t get models');
       handlersUI();
       selectAction();
     }
