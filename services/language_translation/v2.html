@@ -55,7 +55,7 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-filetype"><i class="fa fa-comments-o"></i> File type</label>
+        <label for="node-input-filetype"><i class="fa fa-book"></i> File type</label>
         <select type="text" id="node-input-filetype" style="display: inline-block; vertical-align:middle; width: 70%;">
             <option value="forcedglossary" selected="selected">Forced glossary</option>
             <option value="parallelcorpus">Parallel corpus</option>
@@ -76,13 +76,15 @@
 
 <script type="text/javascript">
 var first_launch = true;
+var models;
+var domain_type;
+var languages;
+var domain_selected = $('#node-input-domain').val();
+var srclang_selected = $('#node-input-srclang').val();
+var destlang_selected = $('#node-input-destlang').val();
+var action = $('#node-input-action').val();
 
 (function () {
-  var models, domain_type, languages;
-  var domain_selected = $('#node-input-domain').val();
-  var srclang_selected = $('#node-input-srclang').val();
-  var action = $('#node-input-action').val();
-
   // sorting functions
   function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
@@ -102,6 +104,11 @@ var first_launch = true;
     // check availability 
     $('#node-input-srclang').change(function () {
       srclang_selected = $('#node-input-srclang').val();
+      destlangAvailable();
+    });
+
+    $('#node-input-destlang').change(function () {
+      destlang_selected = $('#node-input-destlang').val();
       destlangAvailable();
     });
   }
@@ -132,18 +139,28 @@ var first_launch = true;
       return a.domain;
     });
 
-
     var unique_domains = domains.filter(onlyUnique);
-    var domain_first_iteration = true;
 
-    unique_domains.forEach(function (domain) {
-      if (domain_first_iteration) {
-        $('select#node-input-domain').append('<option value="' + domain + '" selected>' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
-      } else {
-        $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
-      }
-      domain_first_iteration = false;
-    });
+    if(!domain_selected) {
+      var domain_first_iteration = true;
+
+      unique_domains.forEach(function (domain) {
+        if (domain_first_iteration) {
+          $('select#node-input-domain').append('<option value="' + domain + '" selected="selected">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
+        } else {
+          $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
+        }
+        domain_first_iteration = false;
+      });
+    } else {
+      unique_domains.forEach(function (domain) {
+        if (domain_selected === domain) {
+          $('select#node-input-domain').append('<option value="' + domain + '" selected="selected">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
+        } else {
+          $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
+        }
+      });      
+    }
     selectDomain();
   }
 
@@ -162,27 +179,46 @@ var first_launch = true;
     });
     input_lang_unique = input_lang.filter(onlyUnique);
     output_lang_unique = output_lang.filter(onlyUnique);
-    var langsrc_first_iteration = true;
 
-    input_lang_unique.forEach(function (lang) {
-      if (langsrc_first_iteration) {
-        $('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang + '</option>');
-      } else {
-        $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
-      }
-      langsrc_first_iteration = false;
-    });
-    var langdest_first_iteration = true;
+    if(!srclang_selected)
+    {
+      var langsrc_first_iteration = true;
+      var langdest_first_iteration = true;
 
-    output_lang_unique.forEach(function (lang) {
-      if (langdest_first_iteration) {
-        $('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
-      } else {
-        $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
-      }
-
-      langdest_first_iteration = false;
-    });
+      input_lang_unique.forEach(function (lang) {
+        if (langsrc_first_iteration) {
+          $('select#node-input-srclang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
+        } else {
+          $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
+        }
+        langsrc_first_iteration = false;
+      });
+      output_lang_unique.forEach(function (lang) {
+        if (langdest_first_iteration) {
+          $('select#node-input-destlang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
+        } else {
+          $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
+        }
+        langdest_first_iteration = false;
+      });
+      
+      
+    } else {
+      input_lang_unique.forEach(function (lang) {
+        if (srclang_selected === lang) {
+          $('select#node-input-srclang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
+        } else {
+          $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
+        }
+      });
+      output_lang_unique.forEach(function (lang) {
+        if (destlang_selected === lang) {
+          $('select#node-input-destlang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
+        } else {
+          $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
+        }
+      });
+    }
     destlangAvailable();
   }
 
@@ -199,6 +235,14 @@ var first_launch = true;
     available_destlang.forEach(function (val) {
       $('#node-input-destlang option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
     });
+
+    checkPairLang();
+  }
+
+  function checkPairLang() {
+    if($('select#node-input-destlang option:selected').is(':disabled')) {
+      $('select#node-input-destlang').val('en');
+    }
   }
 
   function getModels() {
