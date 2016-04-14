@@ -112,32 +112,30 @@ module.exports = function (RED) {
         text: 'requesting training'
       });
 
-      temp.open({
-        suffix: '.xml'
-      }, function (err, info) {
+      temp.open('myprefix', function (err, info) {
         if (!err) {
           fs.write(info.fd, msg.payload);
           var params = {};
-
+          console.log('filetype', filetype);
           switch (filetype) {
           case 'forcedglossary':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: 'en-es',
+              base_model_id: model_id,
               forced_glossary: fs.createReadStream(info.path)
             };
             break;
           case 'parallelcorpus':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: 'en-es',
+              base_model_id: model_id,
               parallel_corpus: fs.createReadStream(info.path)
             };
             break;
           case 'monolingualcorpus':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: 'en-es',
+              base_model_id: model_id,
               monolingual_corpus: fs.createReadStream(info.path)
             };
             break;
@@ -308,6 +306,7 @@ module.exports = function (RED) {
         model_id = srclang + '-' + destlang + '-' + domain;
       }
 
+      console.log('model id ', model_id);
       switch (action) {
       case 'translate':
         this.doTranslate(msg, model_id);
