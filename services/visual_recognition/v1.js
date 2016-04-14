@@ -137,9 +137,9 @@ module.exports = function(RED) {
 
 	var appenv = cfenv.getAppEnv();
 	var visual = [];
-	for (var i in appEnv.services) {
+	for (var i in appenv.services) {
 		if (i.match(/^(visual_recognition)/i)) {
-			visual = visual.concat(appEnv.services[i].map(function(v) {
+			visual = visual.concat(appenv.services[i].map(function(v) {
 				return {
 					name: v.name, 
 					label: v.label, 
