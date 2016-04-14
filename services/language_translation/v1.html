@@ -182,37 +182,51 @@ var action = $('#node-input-action').val();
 
     if(!srclang_selected)
     {
+      console.log('srclang is not defined');
       var langsrc_first_iteration = true;
       var langdest_first_iteration = true;
 
       input_lang_unique.forEach(function (lang) {
+        console.log('the lang is', lang);
         if (langsrc_first_iteration) {
+          console.log('and this is the first iteration');
           $('select#node-input-srclang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
         } else {
+          console.log('and this is not the first iteration');
           $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
         }
       });
       output_lang_unique.forEach(function (lang) {
+        console.log('the lang is', lang);
         if (langdest_first_iteration) {
+          console.log('and this is the first iteration');
           $('select#node-input-destlang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
         } else {
+          console.log('and this is not the first iteration');
           $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
         }
       });
       langsrc_first_iteration = false;
       langdest_first_iteration = false;
     } else {
+      console.log('src lang exists and is equal to ', srclang_selected);
       input_lang_unique.forEach(function (lang) {
+        console.log('the lang is', lang);
         if (srclang_selected === lang) {
+          console.log('la langue sélectionné ' + srclang_selected + ' est égale a la langue ' + lang);
           $('select#node-input-srclang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
         } else {
+          console.log('la langue selectionne n est pas egale');
           $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
         }
       });
       output_lang_unique.forEach(function (lang) {
+        console.log('the lang is', lang);
         if (destlang_selected === lang) {
+          console.log('la langue sélectionné ' + srclang_selected + ' est égale a la langue ' + lang);
           $('select#node-input-destlang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
         } else {
+          console.log('la langue selectionne n est pas egale');
           $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
         }
       });
