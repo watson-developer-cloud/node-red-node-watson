@@ -25,6 +25,7 @@
     "nodes": {
       "alchemy_language-v1": "services/alchemy_language/v1.js",
       "alchemy-vision-v1": "services/alchemy_vision/v1.js",
+      "alchemy-news-v1": "services/alchemy_data_news/v1.js",
       "watson-natural-language-classifier-v1": "services/natural_language_classifier/v1.js",
       "watson-concept-insights-v2": "services/concept_insights/v2.js",
       "watson-dialog-v1": "services/dialog/v1.js",
@@ -37,7 +38,8 @@
       "watson-text-to-speech-v1": "services/text_to_speech/v1.js",
       "watson-tradeoff-analytics-v1": "services/tradeoff_analytics/v1.js",
       "watson-tone-analyzer-v3-beta": "services/tone_analyzer/v3-beta.js",
-      "watson-visual-recognition-v1": "services/visual_recognition/v1.js"
+      "watson-visual-recognition-v1": "services/visual_recognition/v1.js",
+      "watson-retrieve-and-rank-v1": "services/retrieve_and_rank/v1.js"
     }
   }
 }
