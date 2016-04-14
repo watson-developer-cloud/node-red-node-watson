@@ -25,6 +25,7 @@
     "nodes": {
       "alchemy_language-v1": "services/alchemy_language/v1.js",
       "alchemy-vision-v1": "services/alchemy_vision/v1.js",
+      "alchemy-news-v1": "services/alchemy_data_news/v1.js",
       "watson-natural-language-classifier-v1": "services/natural_language_classifier/v1.js",
       "watson-concept-insights-v2": "services/concept_insights/v2.js",
       "watson-dialog-v1": "services/dialog/v1.js",
