@@ -281,6 +281,87 @@
         });
     })();
 </script>
+
+<!-- Create Cluster Node -->
+<script type="text/x-red" data-template-name="watson-retrieve-rank-create-cluster">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row clustername">
+        <label for="node-input-clustername"><i class="fa fa-tag"></i> Cluster Name</label>
+        <input type="text" id="node-input-clustername" placeholder="Cluster Name">
+    </div>
+    <div class="form-row clustersize">
+        <label for="node-input-clustersize"><i class="fa fa-tag"></i> Cluster Size</label>
+        <select id="node-input-clustersize">
+          <option value="free">Free</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-retrieve-rank-create-cluster">
+    <p>The IBM Watson™ Retrieve and Rank service combines two information retrieval components in a single service: the power of Apache Solr and a sophisticated machine learning capability. This combination provides users with more relevant results by automatically reranking them by using these machine learning algorithms.</p>
+    <p>The create cluster node allows a cluster to be created.</p>
+
+    <p>Once triggered, the cluster will then be created. Once the cluster is available, the status underneath the node will change to <b>“Cluster Available”</b>.</p>
+
+    <p>The cluster id is returned on <code>msg.payload</code>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-retrieve-rank-create-cluster', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                clustername: {value: ""}
+                clustersize: {value: "free"}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(85, 150, 230)",
+            inputs: 1,
+            outputs: 1,
+            icon: "RetrieveRank.png",
+            paletteLabel: "retrieve and rank create cluster",
+            label: function() {
+                return this.name || "retrieve and rank create cluster";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $.getJSON('watson-retrieve-rank/vcap/').done(function (service) {
+                    $('.credentials').toggle(!service);
+                }).fail(function () {
+                    $('.credentials').show();
+                }).always(function () {
+                    $('#credentials-check').hide();
+                })
             }
         });
     })();
