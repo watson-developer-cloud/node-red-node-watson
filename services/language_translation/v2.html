@@ -177,7 +177,7 @@ var base_model_selected = $('#node-input-basemodel').val();
         base_model_first_iteration = false;
       });
     } else {
-      unique_domains.forEach(function (base_model) {
+      base_models_available_ids.forEach(function (base_model) {
         if (base_model_selected === domain) {
           $('select#node-input-basemodel').append('<option value="' + base_model + '" selected="selected">' + base_model + '</option>');
         } else {
