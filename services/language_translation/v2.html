@@ -94,6 +94,7 @@ var domain_selected = $('#node-input-domain').val();
 var srclang_selected = $('#node-input-srclang').val();
 var destlang_selected = $('#node-input-destlang').val();
 var action = $('#node-input-action').val();
+var base_model_selected = $('#node-input-basemodel').val();
 
 (function () {
   // sorting functions
@@ -111,6 +112,11 @@ var action = $('#node-input-action').val();
       domain_selected = $('#node-input-domain').val();
       selectDomain();
     });
+
+    $('#node-input-basemodel').change(function (val) {
+      base_model_selected = $('#node-input-basemodel').val();
+      basemodelsAvailable();
+    })
 
     // check availability 
     $('#node-input-srclang').change(function () {
@@ -152,7 +158,34 @@ var action = $('#node-input-action').val();
     var base_models_available = models.filter(function (model) {
       return model.customizable === true;
     });
-      console.log(base_models_available);
+
+    base_models_available_ids = base_models_available.map(function (a) {
+      return a.model_id;
+    });
+    
+    console.log(base_models_available_ids);
+
+    if(!base_model_selected) {
+      var base_model_first_iteration = true;
+
+      base_models_available_ids.forEach(function (base_model) {
+        if (base_model_first_iteration) {
+          $('select#node-input-basemodel').append('<option value="' + base_model + '" selected="selected">' + dbase_model + '</option>');
+        } else {
+          $('select#node-input-basemodel').append('<option value="' + base_model + '">' + base_model + '</option>');
+        }
+        base_model_first_iteration = false;
+      });
+    } else {
+      unique_domains.forEach(function (base_model) {
+        if (base_model_selected === domain) {
+          $('select#node-input-basemodel').append('<option value="' + base_model + '" selected="selected">' + base_model + '</option>');
+        } else {
+          $('select#node-input-basemodel').append('<option value="' + base_model + '">' + base_model + '</option>');
+        }
+      });      
+    }
+
   }
 
   function domainsAvailable() {
