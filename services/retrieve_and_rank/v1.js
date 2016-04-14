@@ -19,6 +19,8 @@ module.exports = function (RED) {
   var fs = require('fs');
   var temp = require('temp');
   var qs = require('qs');
+  var request = require('request');
+  var fileType = require('file-type');
   var watson = require('watson-developer-cloud');
   temp.track();
 
@@ -52,41 +54,36 @@ module.exports = function (RED) {
           var params = {
             training_data: training_data
           };
+          console.log(training_data);
 
           if (config.rankername) {
             params.training_metadata = "{\"name\": \""+config.rankername+"\"}";
           }
           node.status({fill:"blue",shape:"ring",text:"Uploading training data"});
           retrieve_and_rank.createRanker(params, function(err, res) {
-            if (err) {
-              node.status({});
-              var message = "";
-              (err.error) ? message = err.error : message = err.message;
-              return node.error(message, msg);
-            }
-            node.status({fill:"blue",shape:"ring",text:"Training data uploaded. Ranker is training"});
               handleWatsonCallback(null,node,msg,err,res,function() {
+                node.status({fill:"blue",shape:"ring",text:"Training data uploaded. Ranker is training"});
                 //Now check the status of the ranker
                 var ranker_id = res.ranker_id;
                 checkRankerStatus(retrieve_and_rank,msg,node,ranker_id);
               });;
           });
         }
-
+        createRanker(msg.payload);
         //csv training file comes in on msg.payload as a buffer
-        var stream_buffer = function (file, contents, cb) {
-          fs.writeFile(file, contents, function (err) {
-            if (err) throw err;
-            cb();
-          });
-        };
+        // var stream_buffer = function (file, contents, cb) {
+        //   fs.writeFile(file, contents, function (err) {
+        //     if (err) throw err;
+        //     cb();
+        //   });
+        // };
 
-        temp.open({suffix: '.training'}, function (err, info) {
-          if (err) throw err;
-          stream_buffer(info.path, msg.payload, function () {
-            createRanker(fs.createReadStream(info.path), temp.cleanup);
-          });
-        });
+        // temp.open({suffix: '.csv'}, function (err, info) {
+        //   if (err) throw err;
+        //   stream_buffer(info.path, msg.payload, function () {
+        //     createRanker(fs.createReadStream(info.path), temp.cleanup);
+        //   });
+        // });
       });      
     });
   }
@@ -289,24 +286,35 @@ module.exports = function (RED) {
             break;
           case 'info':
             if (params.cluster_id && params.config_name) {
-              // retrieve_and_rank.getConfig(params, function(err,res) {
-              //   console.log("HELLO LADS GET CONFIG BACK");
-              //   console.log(err);
-              //   console.log(res);
-              // });
-              var configZipResponse = "hello world";
-              console.log("***********");
-              console.log(configZipResponse);
-              //Pass on response to payload as buffer
-              if (typeof(configZipResponse) == 'Buffer') {
-                handleWatsonCallback(null,node,msg,null,configZipResponse);
-              } else {
-                var error = {
-                  message: "No configuration recieved from the rank and retrieve service"
-                }
-                handleWatsonCallback(null,node,msg,error,null);
+
+              //Note. temporary workaround until bug is fixed in Node SDK
+              //Stream zip file from watson api to temp directory,
+              //read from temp directory and pass on in msg.payload as buffer
+              var url = "https://gateway.watsonplatform.net/retrieve-and-rank/api/v1/solr_clusters/"+params.cluster_id+"/config/"+params.config_name;
+              var sendToPayload = function(zipFile, cb) {
+                msg.payload = zipFile;
+                node.send(msg);
+                if (cb) cb();
               }
-              
+
+              var stream_url = function (file, location, cb) {
+                var wstream = fs.createWriteStream(file);
+                wstream.on('finish', function () {
+                  fs.readFile(file, function (err, buf) {
+                    if (err) console.error(err);
+                    cb(buf);
+                  })
+                });
+                request(location).auth(username,password)
+                .pipe(wstream);
+              };
+
+              temp.open({suffix: '.zip'}, function (err, info) {
+                if (err) throw err;
+                stream_url(info.path, url, function (content) {
+                  sendToPayload(content, temp.cleanup);
+                });
+              });    
             } else {
               var message = 'Missing cluster id or config name';
               node.error(message, msg)
@@ -489,7 +497,14 @@ module.exports = function (RED) {
   function handleWatsonCallback(mode,node,msg,err,res,cb) {
     if (err) {
       var message = "";
-      (err.error) ? message = err.error : message = err.message;
+      if (err.description) {
+        message = err.description;
+      } else if (err.message) {
+        message = err.message;
+      } else if (err.error) {
+        message = err.error;
+      }
+      node.status({});
       return node.error(message, msg);
     } else {
       (mode == 'delete' && Object.keys(res).length == 0) ? msg.payload = "Ranker deleted" : msg.payload = res;
