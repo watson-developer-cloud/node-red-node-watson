@@ -1,7 +1,7 @@
 <script type="text/javascript">
 	RED.nodes.registerType('convert',{
 		category: 'IBM_Watson',
-		color: '#FFFF80',
+		color: 'rgb(99, 158, 230)',
 		defaults: {
 			name: {value:""},
 			target: {value:"",required:true},
@@ -11,7 +11,7 @@
 		},		
 		inputs:1,
 		outputs:1,
-		icon: "convert2.png",
+		icon: "DocumentConversion.png",
 		label: function() {
 			return this.name||"convert";
 		},
