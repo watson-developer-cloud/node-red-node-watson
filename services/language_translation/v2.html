@@ -47,6 +47,11 @@
         </select>
     </div>
     <div class="form-row">
+        <label for="node-input-basemodel"><i class="fa fa-book"></i> Domains</label>
+        <select type="text" id="node-input-basemodel" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
         <label for="node-input-srclang"><i class="fa fa-comments-o"></i> Source</label>
         <select type="text" id="node-input-srclang" style="display: inline-block; vertical-align:middle; width: 70%;">
         </select>
@@ -123,36 +128,36 @@ var action = $('#node-input-action').val();
     action = $('#node-input-action').val();
     switch (action) {
       case 'train':
-        $('select#node-input-srclang, select#node-input-destlang, #node-input-trainid').parent().hide();
-        $('select#node-input-filetype').parent().show();
+        $('select#node-input-srclang, select#node-input-destlang, #node-input-trainid, , select#node-input-domain').parent().hide();
+        $('select#node-input-filetype, select#node-input-basemodel').parent().show();
+        basemodelsAvailable();
         break;
       case 'translate':
-        $('select#node-input-srclang, select#node-input-destlang').parent().show();
-        $('select#node-input-filetype, #node-input-trainid').parent().hide();
+        $('select#node-input-srclang, select#node-input-destlang, select#node-input-domain').parent().show();
+        $('select#node-input-filetype, #node-input-trainid, select#node-input-basemodel').parent().hide();
         break;
       case 'getstatus':
-        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype, select#node-input-domain').parent().hide();
+        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype, select#node-input-domain, select#node-input-basemodel').parent().hide();
         $('#node-input-trainid').parent().show();        
         break;
       case 'delete':
-        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype,  select#node-input-domain').parent().hide();
+        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype,  select#node-input-domain, select#node-input-basemodel').parent().hide();
         $('#node-input-trainid').parent().show(); 
         break;
     }
     domainsAvailable();
   }
 
+  function basemodelsAvailable() {
+    var base_models_available = models.filter(function (model) {
+      return model.customizable === true;
+    });
+      console.log(base_models_available);
+  }
+
   function domainsAvailable() {
     $('select#node-input-domain').empty();
-    if (action === 'train') {
-      var models_with_domains_available = models.filter(function (model) {
-        return model.customizable === true;
-      });
-    } else {
-      var models_with_domains_available = models;
-
-    }
-    domains = models_with_domains_available.map(function (a) {
+    domains = models.map(function (a) {
       return a.domain;
     });
 
