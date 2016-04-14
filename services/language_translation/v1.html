@@ -192,7 +192,6 @@ var action = $('#node-input-action').val();
           $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
         }
       });
-      langsrc_first_iteration = false;
       output_lang_unique.forEach(function (lang) {
         if (langdest_first_iteration) {
           $('select#node-input-destlang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
@@ -200,6 +199,7 @@ var action = $('#node-input-action').val();
           $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
         }
       });
+      langsrc_first_iteration = false;
       langdest_first_iteration = false;
     } else {
       input_lang_unique.forEach(function (lang) {
@@ -233,6 +233,14 @@ var action = $('#node-input-action').val();
     available_destlang.forEach(function (val) {
       $('#node-input-destlang option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
     });
+
+    checkPairLang();
+  }
+
+  function checkPairLang() {
+    if($('select#node-input-destlang option:selected').is(':disabled')) {
+      $('select#node-input-destlang').val('en');
+    }
   }
 
   function getModels() {
