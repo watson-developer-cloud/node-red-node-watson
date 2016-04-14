@@ -123,20 +123,20 @@ var action = $('#node-input-action').val();
     action = $('#node-input-action').val();
     switch (action) {
       case 'train':
-        $('select#node-input-srclang, select#node-input-destlang, select#node-input-trainid').parent().hide();
+        $('select#node-input-srclang, select#node-input-destlang, #node-input-trainid').parent().hide();
         $('select#node-input-filetype').parent().show();
         break;
       case 'translate':
         $('select#node-input-srclang, select#node-input-destlang').parent().show();
-        $('select#node-input-filetype, select#node-input-trainid').parent().hide();
+        $('select#node-input-filetype, #node-input-trainid').parent().hide();
         break;
       case 'getstatus':
-        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype').parent().hide();
-        $('select#node-input-trainid').parent().show();        
+        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype, select#node-input-domain').parent().hide();
+        $('#node-input-trainid').parent().show();        
         break;
       case 'delete':
-        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype').parent().hide();
-        $('select#node-input-trainid').parent().show(); 
+        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype,  select#node-input-domain').parent().hide();
+        $('#node-input-trainid').parent().show(); 
         break;
     }
     domainsAvailable();

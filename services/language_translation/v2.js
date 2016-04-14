@@ -279,12 +279,6 @@ module.exports = function (RED) {
 
       var trainid = msg.trainid || config.trainid;
 
-      if (!trainid) {
-        node.warn('Missing ID, please set one');
-        node.send(msg);
-        return;
-      }
-
       username = username || this.credentials.username;
       password = password || this.credentials.password;
 
