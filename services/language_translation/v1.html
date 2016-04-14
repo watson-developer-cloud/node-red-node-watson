@@ -81,6 +81,7 @@ var domain_type;
 var languages;
 var domain_selected = $('#node-input-domain').val();
 var srclang_selected = $('#node-input-srclang').val();
+var destlang_selected = $('#node-input-destlang').val();
 var action = $('#node-input-action').val();
 
 (function () {
@@ -103,6 +104,11 @@ var action = $('#node-input-action').val();
     // check availability 
     $('#node-input-srclang').change(function () {
       srclang_selected = $('#node-input-srclang').val();
+      destlangAvailable();
+    });
+
+    $('#node-input-destlang').change(function () {
+      destlang_selected = $('#node-input-destlang').val();
       destlangAvailable();
     });
   }
@@ -165,6 +171,7 @@ var action = $('#node-input-action').val();
     output_lang_unique = output_lang.filter(onlyUnique);
     var langsrc_first_iteration = true;
 
+    console.log(srclang_selected);
     input_lang_unique.forEach(function (lang) {
       if (langsrc_first_iteration) {
         $('select#node-input-srclang').append('<option value="' + lang + '" selected>' + lang + '</option>');
@@ -175,6 +182,7 @@ var action = $('#node-input-action').val();
     });
     var langdest_first_iteration = true;
 
+    console.log(destlang_selected);
     output_lang_unique.forEach(function (lang) {
       if (langdest_first_iteration) {
         $('select#node-input-destlang').append('<option value="' + lang + '" selected>' + lang + '</option>');
