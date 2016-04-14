@@ -481,10 +481,6 @@
         <label for="node-input-configname"><i class="fa fa-tag"></i> Configuration Name</label>
         <input type="text" id="node-input-configname" placeholder="Configuration Name">
     </div>
-    <div class="form-row mode configzippath">
-        <label for="node-input-configzippath"><i class="fa fa-tag"></i> Configuration .zip File Path</label>
-        <input type="text" id="node-input-configzippath" placeholder="Configuration .zip File Path">
-    </div>
 </script>
 
 <script type="text/x-red" data-help-name="watson-retrieve-rank-upload-solr-configuration">
@@ -498,8 +494,7 @@
             defaults: {
                 name: {value: ""},
                 clusterid: {value: "", required: true},
-                configname: {value: "", required: true},
-                configzippath: {value: "", required: true}
+                configname: {value: "", required: true}
             },
             credentials: {
               username: {type:"text"},
