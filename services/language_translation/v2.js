@@ -99,7 +99,7 @@ module.exports = function (RED) {
       });
     };
 
-    this.doTrain = function (msg, model_id, filetype) {
+    this.doTrain = function (msg, basemodel, filetype) {
       language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -122,21 +122,21 @@ module.exports = function (RED) {
           case 'forcedglossary':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: model_id,
+              base_model_id: basemodel,
               forced_glossary: fs.createReadStream(info.path)
             };
             break;
           case 'parallelcorpus':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: model_id,
+              base_model_id: basemodel,
               parallel_corpus: fs.createReadStream(info.path)
             };
             break;
           case 'monolingualcorpus':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: model_id,
+              base_model_id: basemodel,
               monolingual_corpus: fs.createReadStream(info.path)
             };
             break;
@@ -159,7 +159,6 @@ module.exports = function (RED) {
                   text: 'model sent to training'
                 });
                 msg.payload = 'Model ' + model.name + ' successfully sent for training with id: ' + model.model_id;
-                msg.id = model_id;
                 node.send(msg);
                 node.status({});
               }
@@ -213,7 +212,7 @@ module.exports = function (RED) {
         text: 'deleting'
       });
 
-      language_translation.deleteModel({ model_id:'{model_id}'},
+      language_translation.deleteModel({ model_id: trainid},
         function(err) {
           node.status({});
           if (err) { 
@@ -223,6 +222,10 @@ module.exports = function (RED) {
               text: 'could not delete'
             });
             node.error(err, msg);
+          } else {
+            msg.payload = "model deleted";
+            node.send(msg);
+            node.status({});
           }
         }
       );      
@@ -306,13 +309,12 @@ module.exports = function (RED) {
       } else {
         model_id = srclang + '-' + destlang + '-' + domain;
       }
-
       switch (action) {
       case 'translate':
         this.doTranslate(msg, model_id);
         break;
       case 'train':
-        this.doTrain(msg, model_id, filetype);
+        this.doTrain(msg, basemodel, filetype);
         break;
       case 'getstatus':
         this.doGetStatus(msg, trainid);
