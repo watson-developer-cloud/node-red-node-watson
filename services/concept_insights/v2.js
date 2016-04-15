@@ -20,7 +20,7 @@ module.exports = function (RED) {
 
   var username, password;
   var service = cfenv.getAppEnv().getServiceCreds(/concept insights/i);
-
+  console.log(cfenv).getAppEnv().getServices();
   if (service) {
     username = service.username;
     password = service.password;
