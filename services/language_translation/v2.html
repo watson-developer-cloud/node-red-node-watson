@@ -33,15 +33,22 @@
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
     <div class="form-row">
-        <label for="node-input-action"><i class="fa fa-cog"></i> Action</label>
+        <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
         <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
             <option value="translate" selected="selected">Translate</option>
             <option value="train">Train</option>
+            <option value="getstatus">Get status</option>
+            <option value="delete">Delete</option>
         </select>
     </div>
     <div class="form-row">
         <label for="node-input-domain"><i class="fa fa-book"></i> Domains</label>
         <select type="text" id="node-input-domain" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-basemodel"><i class="fa fa-book"></i> Base model</label>
+        <select type="text" id="node-input-basemodel" style="display: inline-block; vertical-align:middle; width: 70%;">
         </select>
     </div>
     <div class="form-row">
@@ -61,6 +68,10 @@
             <option value="parallelcorpus">Parallel corpus</option>
             <option value="monolingualcorpus">Monolingual corpus</option>
         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-trainid"><i class="fa fa-tag"></i> ID</label>
+        <input type="text" id="node-input-trainid" placeholder="ID">
     </div>
 </script>
 
@@ -83,6 +94,7 @@ var domain_selected = $('#node-input-domain').val();
 var srclang_selected = $('#node-input-srclang').val();
 var destlang_selected = $('#node-input-destlang').val();
 var action = $('#node-input-action').val();
+var base_model_selected = $('#node-input-basemodel').val();
 
 (function () {
   // sorting functions
@@ -101,6 +113,11 @@ var action = $('#node-input-action').val();
       selectDomain();
     });
 
+    $('#node-input-basemodel').change(function (val) {
+      base_model_selected = $('#node-input-basemodel').val();
+      basemodelsAvailable();
+    })
+
     // check availability 
     $('#node-input-srclang').change(function () {
       srclang_selected = $('#node-input-srclang').val();
@@ -115,27 +132,64 @@ var action = $('#node-input-action').val();
 
   function selectAction() {
     action = $('#node-input-action').val();
-    if (action === 'train') {
-      $('select#node-input-srclang, select#node-input-destlang').parent().hide();
-      $('select#node-input-filetype').parent().show();
-    } else {
-      $('select#node-input-srclang, select#node-input-destlang').parent().show();
-      $('select#node-input-filetype').parent().hide();
+    switch (action) {
+      case 'train':
+        $('select#node-input-srclang, select#node-input-destlang, #node-input-trainid, select#node-input-domain').parent().hide();
+        $('select#node-input-filetype, select#node-input-basemodel').parent().show();
+        basemodelsAvailable();
+        break;
+      case 'translate':
+        $('select#node-input-srclang, select#node-input-destlang, select#node-input-domain').parent().show();
+        $('select#node-input-filetype, #node-input-trainid, select#node-input-basemodel').parent().hide();
+        break;
+      case 'getstatus':
+        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype, select#node-input-domain, select#node-input-basemodel').parent().hide();
+        $('#node-input-trainid').parent().show();        
+        break;
+      case 'delete':
+        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype,  select#node-input-domain, select#node-input-basemodel').parent().hide();
+        $('#node-input-trainid').parent().show(); 
+        break;
     }
     domainsAvailable();
   }
 
-  function domainsAvailable() {
-    $('select#node-input-domain').empty();
-    if (action === 'train') {
-      var models_with_domains_available = models.filter(function (model) {
-        return model.customizable === true;
+  function basemodelsAvailable() {
+    $('select#node-input-basemodel').empty();
+    var base_models_available = models.filter(function (model) {
+      return model.customizable === true;
+    });
+
+    base_models_available_ids = base_models_available.map(function (a) {
+      return a.model_id;
+    });
+    
+    if(!base_model_selected) {
+      var base_model_first_iteration = true;
+
+      base_models_available_ids.forEach(function (base_model) {
+        if (base_model_first_iteration) {
+          $('select#node-input-basemodel').append('<option value="' + base_model + '" selected="selected">' + base_model + '</option>');
+        } else {
+          $('select#node-input-basemodel').append('<option value="' + base_model + '">' + base_model + '</option>');
+        }
+        base_model_first_iteration = false;
       });
     } else {
-      var models_with_domains_available = models;
-
+      base_models_available_ids.forEach(function (base_model) {
+        if (base_model_selected === base_model) {
+          $('select#node-input-basemodel').append('<option value="' + base_model + '" selected="selected">' + base_model + '</option>');
+        } else {
+          $('select#node-input-basemodel').append('<option value="' + base_model + '">' + base_model + '</option>');
+        }
+      });      
     }
-    domains = models_with_domains_available.map(function (a) {
+
+  }
+
+  function domainsAvailable() {
+    $('select#node-input-domain').empty();
+    domains = models.map(function (a) {
       return a.domain;
     });
 
@@ -292,11 +346,17 @@ var action = $('#node-input-action').val();
       domain: {
         value: 'news'
       },
+      dbase_model: {
+        value: ''
+      },
       action: {
         value: 'translate'
       },
       filetype: {
         value: 'forcedglossary'
+      },
+      trainid: {
+        value: ''
       }
     },
     credentials: {
