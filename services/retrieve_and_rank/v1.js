@@ -25,7 +25,7 @@ module.exports = function (RED) {
   temp.track();
 
   var username, password;
-  var service = cfenv.getAppEnv().getServiceCreds(/retrieve rank/i);
+  var service = cfenv.getAppEnv().getServiceCreds(/retrieve and rank/i);
 
   if (service) {
     username = service.username;
