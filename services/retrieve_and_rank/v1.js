@@ -130,9 +130,9 @@ module.exports = function (RED) {
         var query;
 
         if(config.searchmode === 'search') {
-          var query = qs.stringify({q: question, fl: 'id,title'});
+          query = qs.stringify({q: question, fl: 'id,title'});
         } else {
-          var query = qs.stringify({q: question, ranker_id: ranker_id, fl: 'id,title'});
+          query = qs.stringify({q: question, ranker_id: ranker_id, fl: 'id,title'});
         }
 
         solrClient.get('fcselect', query, function(err, searchResponse) {
@@ -375,11 +375,12 @@ module.exports = function (RED) {
             });
             break;
           case 'index':
-            if (msg.doc && typeof(msg.doc) == 'object') {
+
+            if (msg.payload && typeof(msg.payload) == 'string') {
 
               var solrClient = retrieve_and_rank.createSolrClient(params);
               node.status({fill: 'blue', shape: 'ring', text: 'Indexing document' });
-              solrClient.add(msg.doc,function(err,res) {
+              solrClient.add(JSON.parse(msg.payload),function(err,res) {
                 node.status({});
                 handleWatsonCallback(config.mode,node,msg,err,res,function(){
                   solrClient.commit(function(err) {
@@ -418,24 +419,6 @@ module.exports = function (RED) {
     });
   }
 
-  RED.nodes.registerType('watson-retrieve-rank-create-ranker', createRankerNode, {
-    credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
-    }
-  });
-  RED.nodes.registerType('watson-retrieve-rank-ranker-settings', rankerSettingsNode, {
-    credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
-    }
-  });
-  RED.nodes.registerType('watson-retrieve-rank-search-and-rank', searchAndRankNode, {
-    credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
-    }
-  });
   RED.nodes.registerType('watson-retrieve-rank-create-cluster', createClusterNode, {
     credentials: {
       username: {type:"text"},
@@ -466,9 +449,25 @@ module.exports = function (RED) {
       password: {type:"password"}
     }
   });
-
-
-
+  RED.nodes.registerType('watson-retrieve-rank-create-ranker', createRankerNode, {
+    credentials: {
+      username: {type:"text"},
+      password: {type:"password"}
+    }
+  });
+  RED.nodes.registerType('watson-retrieve-rank-ranker-settings', rankerSettingsNode, {
+    credentials: {
+      username: {type:"text"},
+      password: {type:"password"}
+    }
+  });
+  RED.nodes.registerType('watson-retrieve-rank-search-and-rank', searchAndRankNode, {
+    credentials: {
+      username: {type:"text"},
+      password: {type:"password"}
+    }
+  });
+  
   function setupRankRetrieveNode(msg,config,node,callback) {
     //Check for payload
     if (!msg.payload) {
