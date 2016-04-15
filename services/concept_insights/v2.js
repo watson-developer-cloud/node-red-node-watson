@@ -399,7 +399,6 @@ module.exports = function (RED) {
     concept_insights.accounts.getAccountsInfo({},function(err,res) {
       node.status({});
       if (err) {
-        console.log(err);
         var message = err.error;
         return node.error(message, msg);
       } else {
