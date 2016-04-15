@@ -20,7 +20,7 @@ module.exports = function (RED) {
 
   var username, password;
   var service = cfenv.getAppEnv().getServiceCreds(/concept insights/i);
-  console.log(cfenv).getAppEnv().getServices();
+ 
   if (service) {
     username = service.username;
     password = service.password;
@@ -259,7 +259,8 @@ module.exports = function (RED) {
           var corpus_name = this.corpus.cname;
           var access = this.corpus.access;
 
-          if (this.corpus.publiccorpus) {
+          //Private corpus takes precedence, but change to public if there is one.
+          if (this.corpus.publiccorpus && !this.corpus.cname) {
             corpus_name = this.corpus.publiccorpus;
             account_id = 'public';
           }
@@ -394,13 +395,14 @@ module.exports = function (RED) {
       version: 'v2'
     });
 
+    node.status({fill:"blue",shape:"ring",text:"Getting account information"});
     concept_insights.accounts.getAccountsInfo({},function(err,res) {
-      node.status({fill:"blue",shape:"ring",text:"Getting account information"});
+      node.status({});
       if (err) {
+        console.log(err);
         var message = err.error;
         return node.error(message, msg);
       } else {
-        node.status({});
         var account_id = res.accounts[0].account_id;
         if (callback) callback(concept_insights,account_id);
       }
