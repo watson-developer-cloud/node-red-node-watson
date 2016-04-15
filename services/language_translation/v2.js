@@ -100,7 +100,6 @@ module.exports = function (RED) {
     };
 
     this.doTrain = function (msg, basemodel, filetype) {
-      console.log(basemodel);
       language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -169,7 +168,6 @@ module.exports = function (RED) {
     }
 
     this.doGetStatus = function(msg, trainid) {
-      console.log('getstatus');
       language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -186,7 +184,6 @@ module.exports = function (RED) {
         function(err, model) {
           node.status({});
           if (err) { 
-            console.log('failed');
             node.status({
               fill: 'red',
               shape: 'ring',
@@ -194,7 +191,6 @@ module.exports = function (RED) {
             });
             node.error(err, msg);
           } else {
-            console.log('did not fail');
             msg.payload = model.status;
             node.send(msg);
             node.status({});
@@ -204,7 +200,6 @@ module.exports = function (RED) {
     }
 
     this.doDelete = function(msg, trainid) {
-      console.log('do delete');
       language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -217,11 +212,10 @@ module.exports = function (RED) {
         text: 'deleting'
       });
 
-      language_translation.deleteModel({ model_id:'{model_id}'},
+      language_translation.deleteModel({ model_id: trainid},
         function(err) {
           node.status({});
           if (err) { 
-            console.log('failed');
             node.status({
               fill: 'red',
               shape: 'ring',
@@ -229,7 +223,6 @@ module.exports = function (RED) {
             });
             node.error(err, msg);
           } else {
-            console.log('did not fail');
             msg.payload = "model deleted";
             node.send(msg);
             node.status({});
@@ -316,7 +309,6 @@ module.exports = function (RED) {
       } else {
         model_id = srclang + '-' + destlang + '-' + domain;
       }
-      console.log('switch', action);
       switch (action) {
       case 'translate':
         this.doTranslate(msg, model_id);

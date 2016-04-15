@@ -76,12 +76,33 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-translate">
-    <p>The Language Translation service enables you to translate text from one language to another.</p>
+    <p>The Language Translation service enables you to translate text from one language to another and to add your own translation models.</p>
+    <p></p>
+    <p><b>Translation Mode</b>.</p>
     <p>The text to translate should be passed in on <code>msg.payload</code>.</p>
     <p>The translated text will be returned on <code>msg.payload</code>.</p>
     <p>Source and destination language parameters can be configured through the editor panel or set dynamically using
     the language codes in the following properties, <code>msg.srclang</code> and <code>msg.destlang</code>. Please see
     the documentation linked below for the currently supported source and destination language codes.</p>
+    <p></p>
+    <p><b>Training Mode</b>.</p>
+    <p>This mode enables you to add your own customized model to the Watson translation service. </p>
+    <p>In the Dropbox node, you must specify one ore more of the following file options to customize the training:</p>
+    <p>forced_glossary - A UTF-8 encoded TMX file that contains pairs of matching terms in the source and target language that are seen as absolute by the system. This file completely overwrites the original domain data.</p>
+    <p>parallel_corpus - A UTF-8 encoded TMX file that contains matching phrases in the source and target language that serve as examples for Watson. Parallel corpora differ from glossaries because they do not overwrite the original domain data.</p>
+    <p>monolingual_corpus - A UTF-8 encoded plain text file that contains a body of text in the target language that is related to what you are translating. A monolingual corpus helps improve literal translations to be more fluent and human.</p>
+    <p>The Language Translation Node will return the ID of the created customized model.</p>
+    <p></p>
+    <p><b>Get Status Mode</b>.</p>
+    <p>This mode allows you to get the status of a model sent to training by providing its ID.</p>
+    <p>Values can be the followings:</p>
+    <p>training - Training is still in progress.</p>
+    <p>queued@<#> - Training has not yet started and the model is in the queue. The # indicates the number of your model in the queue.</p>
+    <p>error - Training did not complete because of an error.</p>
+    <p>available - Training is completed, and the service is now available to use with your custom translation model.</p>
+    <p><b>Delete Mode</b>.</p>
+    <p></p>
+    <p>This mode allows you to delete a model by providing its ID</p>
     <p>For more information about the Language Translation service, read the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/language-translation.html">documentation</a>.</p>
 </script>
 
