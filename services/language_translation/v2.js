@@ -159,7 +159,6 @@ module.exports = function (RED) {
                   text: 'model sent to training'
                 });
                 msg.payload = 'Model ' + model.name + ' successfully sent for training with id: ' + model.model_id;
-                msg.id = model_id;
                 node.send(msg);
                 node.status({});
               }
@@ -223,6 +222,10 @@ module.exports = function (RED) {
               text: 'could not delete'
             });
             node.error(err, msg);
+          } else {
+            msg.payload = "model deleted";
+            node.send(msg);
+            node.status({});
           }
         }
       );      
