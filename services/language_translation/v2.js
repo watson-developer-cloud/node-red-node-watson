@@ -99,7 +99,8 @@ module.exports = function (RED) {
       });
     };
 
-    this.doTrain = function (msg, model_id, filetype) {
+    this.doTrain = function (msg, basemodel, filetype) {
+      console.log(basemodel);
       language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -122,21 +123,21 @@ module.exports = function (RED) {
           case 'forcedglossary':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: model_id,
+              base_model_id: basemodel,
               forced_glossary: fs.createReadStream(info.path)
             };
             break;
           case 'parallelcorpus':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: model_id,
+              base_model_id: basemodel,
               parallel_corpus: fs.createReadStream(info.path)
             };
             break;
           case 'monolingualcorpus':
             params = {
               name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: model_id,
+              base_model_id: basemodel,
               monolingual_corpus: fs.createReadStream(info.path)
             };
             break;
@@ -168,6 +169,7 @@ module.exports = function (RED) {
     }
 
     this.doGetStatus = function(msg, trainid) {
+      console.log('getstatus');
       language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -184,6 +186,7 @@ module.exports = function (RED) {
         function(err, model) {
           node.status({});
           if (err) { 
+            console.log('failed');
             node.status({
               fill: 'red',
               shape: 'ring',
@@ -191,6 +194,7 @@ module.exports = function (RED) {
             });
             node.error(err, msg);
           } else {
+            console.log('did not fail');
             msg.payload = model.status;
             node.send(msg);
             node.status({});
@@ -200,6 +204,7 @@ module.exports = function (RED) {
     }
 
     this.doDelete = function(msg, trainid) {
+      console.log('do delete');
       language_translation = watson.language_translation({
         username: username,
         password: password,
@@ -216,6 +221,7 @@ module.exports = function (RED) {
         function(err) {
           node.status({});
           if (err) { 
+            console.log('failed');
             node.status({
               fill: 'red',
               shape: 'ring',
@@ -223,6 +229,7 @@ module.exports = function (RED) {
             });
             node.error(err, msg);
           } else {
+            console.log('did not fail');
             msg.payload = "model deleted";
             node.send(msg);
             node.status({});
@@ -309,13 +316,13 @@ module.exports = function (RED) {
       } else {
         model_id = srclang + '-' + destlang + '-' + domain;
       }
-
+      console.log('switch', action);
       switch (action) {
       case 'translate':
         this.doTranslate(msg, model_id);
         break;
       case 'train':
-        this.doTrain(msg, model_id, filetype);
+        this.doTrain(msg, basemodel, filetype);
         break;
       case 'getstatus':
         this.doGetStatus(msg, trainid);
