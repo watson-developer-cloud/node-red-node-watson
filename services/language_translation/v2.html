@@ -362,6 +362,7 @@ var base_model_selected = $('#node-input-basemodel').val();
 
   function oneditprepare() {
     console.log('when calling oneditprepare:');
+    console.log('before node this');
     console.log('values from var');
     console.log(' models ', models);
     console.log(' domain_type ', domain_type);
@@ -384,7 +385,29 @@ var base_model_selected = $('#node-input-basemodel').val();
     console.log($('#node-input-basemodel').val())
     console.log('end when calling oneditprepare');
     var node = this;
-
+    console.log('after node this');
+    console.log('when calling oneditprepare:');
+    console.log('values from var');
+    console.log(' models ', models);
+    console.log(' domain_type ', domain_type);
+    console.log(' languages ', languages);
+    console.log(' domain_selected ', domain_selected);
+    console.log(' srclang_selected ', srclang_selected);
+    console.log(' destlang_selected ', destlang_selected);
+    console.log(' action ', action);
+    console.log(' base_model_selected ', base_model_selected);
+    console.log('values from actual');
+    console.log(" domain_selected ");
+    console.log($('#node-input-domain').val());
+    console.log(" srclang_selected ");
+    console.log($('#node-input-srclang').val());
+    console.log(" destlang_selected ");
+    console.log($('#node-input-destlang').val());
+    console.log(" action ");
+    console.log($('#node-input-action').val());
+    console.log(" base_model_selected ");
+    console.log($('#node-input-basemodel').val())
+    console.log('end when calling oneditprepare');
     $.getJSON('watson-translate/vcap/')
       .done(function (sids) {
         $('.credentials').toggle(!sids);
