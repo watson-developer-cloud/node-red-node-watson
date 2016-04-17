@@ -340,28 +340,23 @@ var base_model_selected = $('#node-input-basemodel').val();
     $.getJSON('watson-translate/vcap/')
       .done(function (sids) {
         $('.credentials').toggle(!sids);
-        logon = true;
+        if ((first_launch || !models) && logon) {
+          $('#credentials-not-found').hide();
+          getModels();
+          first_launch = false;
+        } else if (models) {
+          $('#credentials-not-found').hide();
+          handlersUI();
+          selectAction();
+        } else {
+          $('#credentials-not-found').show();
+        }
       })
       .fail(function () {
         $('.credentials').show();
       }).always(function () {
         $('#credentials-check').hide();
       })
-
-    console.log(first_launch);
-    console.log(models);
-    console.log(logon);
-    if ((first_launch || !models) && logon) {
-      $('#credentials-not-found').hide();
-      getModels();
-      first_launch = false;
-    } else if (models) {
-      $('#credentials-not-found').hide();
-      handlersUI();
-      selectAction();
-    } else {
-      $('#credentials-not-found').show();
-    }
   }
 
   RED.nodes.registerType('watson-translate', {
