@@ -22,7 +22,7 @@
     </div>
     <div id="credentials-not-found" class="form-row">
         <div class="form-tips">
-            <i class="fa fa-question-circle"></i><b> Wrong credentials. </b> Could not retrieve models.
+            <i class="fa fa-question-circle"></i><b> Could not retrieve models. </b> <span id="try-again">Click here to ry again.</span>
         </div>
     </div>
     <div class="form-row">
@@ -123,6 +123,11 @@ var action = $('#node-input-action').val();
 var base_model_selected = $('#node-input-basemodel').val();
 
 (function () {
+
+  $('span#try-again').on('click', function() {
+    oneditprepare();
+  })
+  
   // sorting functions
   function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
