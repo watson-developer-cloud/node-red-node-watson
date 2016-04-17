@@ -21,20 +21,18 @@ module.exports = function (RED) {
 
   temp.track();
 
-  var username, password, language_translation;
+  var username, password, sUsername, sPassword, language_translation;
 
   var service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
 
   if (service) {
-    username = service.username;
-    password = service.password;
+    sUsername = service.username;
+    sPassword = service.password;
   }
 
   RED.httpAdmin.get('/watson-translate/vcap', function (req, res) {
-    res.json(service ? {
-      bound_service: true
-    } : null);
-  });
+    res.json(service ? {bound_service: true} : null);
+  });  
 
   RED.httpAdmin.get('/watson-translate/models', function (req, res) {
     language_translation = watson.language_translation({
@@ -72,13 +70,103 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.doTranslate = function (msg, model_id) {
+  username = sUsername || this.credentials.username;
+  password = sPassword || this.credentials.password;
+    this.on('input', function (msg) {
+      var message = '';
+
+      if (!msg.payload) {
+        message = 'Missing property: msg.payload';
+        node.error(message, msg)
+        return;
+      }
+
+      var srclang = msg.srclang || config.srclang;
+
+      if (!srclang) {
+        node.warn('Missing source language, message not translated');
+        node.send(msg);
+        return;
+      }
+
+      var destlang = msg.destlang || config.destlang;
+
+      if (!destlang) {
+        node.warn('Missing target language, message not translated');
+        node.send(msg);
+        return;
+      }
+
+      var domain = msg.domain || config.domain;
+
+      if (!domain) {
+        node.warn('Missing translation domain, message not translated');
+        node.send(msg);
+        return;
+      }
+
+      var action = msg.action || config.action;
+
+      if (!action) {
+        node.warn('Missing action, please select one');
+        node.send(msg);
+        return;
+      }
+
+      var filetype = msg.filetype || config.filetype;
+
+      if (!filetype) {
+        node.warn('Missing file type, please select one');
+        node.send(msg);
+        return;
+      }
+
+      var trainid = msg.trainid || config.trainid;
+      var basemodel = msg.basemodel || config.basemodel;
+
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password;
+
+      if (!username || !password) {
+        this.status({
+          fill: 'red',
+          shape: 'ring',
+          text: 'missing credentials'
+        });
+        message = 'Missing Language Translation service credentials';
+        node.error(message, msg)
+        return;
+      }
+
       language_translation = watson.language_translation({
         username: username,
         password: password,
         version: 'v2'
       });
 
+      var model_id = "";
+      if(domain === "news") {
+        model_id = srclang + '-' + destlang;
+      } else {
+        model_id = srclang + '-' + destlang + '-' + domain;
+      }
+      switch (action) {
+      case 'translate':
+        this.doTranslate(msg, model_id);
+        break;
+      case 'train':
+        this.doTrain(msg, basemodel, filetype);
+        break;
+      case 'getstatus':
+        this.doGetStatus(msg, trainid);
+        break;
+      case 'delete':
+        this.doDelete(msg, trainid);
+        break;
+      }
+    });
+
+    this.doTranslate = function (msg, model_id) {
       node.status({
         fill: 'blue',
         shape: 'dot',
@@ -100,12 +188,6 @@ module.exports = function (RED) {
     };
 
     this.doTrain = function (msg, basemodel, filetype) {
-      language_translation = watson.language_translation({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
-
       node.status({
         fill: 'blue',
         shape: 'dot',
@@ -168,12 +250,6 @@ module.exports = function (RED) {
     }
 
     this.doGetStatus = function(msg, trainid) {
-      language_translation = watson.language_translation({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
-
       node.status({
         fill: 'blue',
         shape: 'dot',
@@ -200,12 +276,6 @@ module.exports = function (RED) {
     }
 
     this.doDelete = function(msg, trainid) {
-      language_translation = watson.language_translation({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
-
       node.status({
         fill: 'blue',
         shape: 'dot',
@@ -230,100 +300,6 @@ module.exports = function (RED) {
         }
       );      
     }
-
-    this.on('input', function (msg) {
-      var message = '';
-
-      if (!msg.payload) {
-        message = 'Missing property: msg.payload';
-        node.error(message, msg)
-        return;
-      }
-
-      var srclang = msg.srclang || config.srclang;
-
-      if (!srclang) {
-        node.warn('Missing source language, message not translated');
-        node.send(msg);
-        return;
-      }
-
-      var destlang = msg.destlang || config.destlang;
-
-      if (!destlang) {
-        node.warn('Missing target language, message not translated');
-        node.send(msg);
-        return;
-      }
-
-      var domain = msg.domain || config.domain;
-
-      if (!domain) {
-        node.warn('Missing translation domain, message not translated');
-        node.send(msg);
-        return;
-      }
-
-      var action = msg.action || config.action;
-
-      if (!action) {
-        node.warn('Missing action, please select one');
-        node.send(msg);
-        return;
-      }
-
-      var filetype = msg.filetype || config.filetype;
-
-      if (!filetype) {
-        node.warn('Missing file type, please select one');
-        node.send(msg);
-        return;
-      }
-
-      var trainid = msg.trainid || config.trainid;
-      var basemodel = msg.basemodel || config.basemodel;
-
-      username = username || this.credentials.username;
-      password = password || this.credentials.password;
-
-      if (!username || !password) {
-        this.status({
-          fill: 'red',
-          shape: 'ring',
-          text: 'missing credentials'
-        });
-        message = 'Missing Language Translation service credentials';
-        node.error(message, msg)
-        return;
-      }
-
-      language_translation = watson.language_translation({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
-
-      var model_id = "";
-      if(domain === "news") {
-        model_id = srclang + '-' + destlang;
-      } else {
-        model_id = srclang + '-' + destlang + '-' + domain;
-      }
-      switch (action) {
-      case 'translate':
-        this.doTranslate(msg, model_id);
-        break;
-      case 'train':
-        this.doTrain(msg, basemodel, filetype);
-        break;
-      case 'getstatus':
-        this.doGetStatus(msg, trainid);
-        break;
-      case 'delete':
-        this.doDelete(msg, trainid);
-        break;
-      }
-    });
   }
 
   RED.nodes.registerType('watson-translate', SMTNode, {

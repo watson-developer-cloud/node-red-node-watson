@@ -108,6 +108,7 @@
 
 <script type="text/javascript">
 var first_launch = true;
+var logon = false;
 var models;
 var domain_type;
 var languages;
@@ -124,7 +125,6 @@ var base_model_selected = $('#node-input-basemodel').val();
   }
 
   function handlersUI() {
-    console.log('handlersUI');
     $('#node-input-action').change(function (val) {
       action = $('#node-input-action').val();
       selectAction();
@@ -153,7 +153,6 @@ var base_model_selected = $('#node-input-basemodel').val();
   }
 
   function selectAction() {
-    console.log('selectAction');
     action = $('#node-input-action').val();
     switch (action) {
       case 'train':
@@ -178,7 +177,6 @@ var base_model_selected = $('#node-input-basemodel').val();
   }
 
   function basemodelsAvailable() {
-    console.log('basemodelsAvailable');
     $('select#node-input-basemodel').empty();
     var base_models_available = models.filter(function (model) {
       return model.customizable === true;
@@ -212,7 +210,6 @@ var base_model_selected = $('#node-input-basemodel').val();
   }
 
   function domainsAvailable() {
-    console.log('domainsAvailable');
     $('select#node-input-domain').empty();
     domains = models.map(function (a) {
       return a.domain;
@@ -244,7 +241,6 @@ var base_model_selected = $('#node-input-basemodel').val();
   }
 
   function selectDomain() {
-    console.log('selectDomain');
     $('#node-input-srclang').empty();
     $('#node-input-destlang').empty();
     domain_selected = $('#node-input-domain').val();
@@ -303,7 +299,6 @@ var base_model_selected = $('#node-input-basemodel').val();
   }
 
   function destlangAvailable() {
-    console.log('destlangAvailable');
     var pair_lang = domain_type.map(function (a) {
       return a.model_id;
     });
@@ -316,41 +311,16 @@ var base_model_selected = $('#node-input-basemodel').val();
     available_destlang.forEach(function (val) {
       $('#node-input-destlang option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
     });
-
     checkPairLang();
   }
 
   function checkPairLang() {
-    console.log('checkPairLang');
     if($('select#node-input-destlang option:selected').is(':disabled')) {
       $('select#node-input-destlang').val('en');
     }
-    console.log('when calling checkPairLang:');
-    console.log('values from var');
-    console.log(' models ', models);
-    console.log(' domain_type ', domain_type);
-    console.log(' languages ', languages);
-    console.log(' domain_selected ', domain_selected);
-    console.log(' srclang_selected ', srclang_selected);
-    console.log(' destlang_selected ', destlang_selected);
-    console.log(' action ', action);
-    console.log(' base_model_selected ', base_model_selected);
-    console.log('values from actual');
-    console.log(" domain_selected ");
-    console.log($('#node-input-domain').val());
-    console.log(" srclang_selected ");
-    console.log($('#node-input-srclang').val());
-    console.log(" destlang_selected ");
-    console.log($('#node-input-destlang').val());
-    console.log(" action ");
-    console.log($('#node-input-action').val());
-    console.log(" base_model_selected ");
-    console.log($('#node-input-basemodel').val())
-    console.log('end when calling checkPairLang');
   }
 
   function getModels() {
-    console.log('getModels');
     $.getJSON('watson-translate/models/').done(function (data) {
       models = data.models;
       handlersUI();
@@ -361,56 +331,11 @@ var base_model_selected = $('#node-input-basemodel').val();
   }
 
   function oneditprepare() {
-    console.log('when calling oneditprepare:');
-    console.log('before node this');
-    console.log('values from var');
-    console.log(' models ', models);
-    console.log(' domain_type ', domain_type);
-    console.log(' languages ', languages);
-    console.log(' domain_selected ', domain_selected);
-    console.log(' srclang_selected ', srclang_selected);
-    console.log(' destlang_selected ', destlang_selected);
-    console.log(' action ', action);
-    console.log(' base_model_selected ', base_model_selected);
-    console.log('values from actual');
-    console.log(" domain_selected ");
-    console.log($('#node-input-domain').val());
-    console.log(" srclang_selected ");
-    console.log($('#node-input-srclang').val());
-    console.log(" destlang_selected ");
-    console.log($('#node-input-destlang').val());
-    console.log(" action ");
-    console.log($('#node-input-action').val());
-    console.log(" base_model_selected ");
-    console.log($('#node-input-basemodel').val())
-    console.log('end when calling oneditprepare');
     var node = this;
-    console.log('after node this');
-    console.log('when calling oneditprepare:');
-    console.log('values from var');
-    console.log(' models ', models);
-    console.log(' domain_type ', domain_type);
-    console.log(' languages ', languages);
-    console.log(' domain_selected ', domain_selected);
-    console.log(' srclang_selected ', srclang_selected);
-    console.log(' destlang_selected ', destlang_selected);
-    console.log(' action ', action);
-    console.log(' base_model_selected ', base_model_selected);
-    console.log('values from actual');
-    console.log(" domain_selected ");
-    console.log($('#node-input-domain').val());
-    console.log(" srclang_selected ");
-    console.log($('#node-input-srclang').val());
-    console.log(" destlang_selected ");
-    console.log($('#node-input-destlang').val());
-    console.log(" action ");
-    console.log($('#node-input-action').val());
-    console.log(" base_model_selected ");
-    console.log($('#node-input-basemodel').val())
-    console.log('end when calling oneditprepare');
     $.getJSON('watson-translate/vcap/')
       .done(function (sids) {
         $('.credentials').toggle(!sids);
+        logon = true;
       })
       .fail(function () {
         $('.credentials').show();
@@ -418,7 +343,7 @@ var base_model_selected = $('#node-input-basemodel').val();
         $('#credentials-check').hide();
       })
 
-    if (first_launch || !models) {
+    if ((first_launch || !models) && logon) {
       getModels();
       first_launch = false;
     } else {
