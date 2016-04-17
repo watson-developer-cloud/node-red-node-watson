@@ -110,7 +110,7 @@ module.exports = function (RED) {
 
         var params = {};
         
-        if(config.continuous === 'true')
+        /*if(config.continuous === 'true')
         {
           params = {
             audio: audio,
@@ -127,7 +127,15 @@ module.exports = function (RED) {
             continuous: false
           };
 
-        }
+        }*/
+
+        params = {
+          audio: audio,
+          content_type: 'audio/' + format,
+          model: model,
+          continuous: true,
+          keywords: ['arlemi','developerWorks']
+        };
 
 
         node.status({fill:'blue', shape:'dot', text:'requesting'});
