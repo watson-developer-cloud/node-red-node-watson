@@ -127,7 +127,7 @@ var base_model_selected = $('#node-input-basemodel').val();
   $('span#try-again').on('click', function() {
     oneditprepare();
   })
-  
+
   // sorting functions
   function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
@@ -336,13 +336,14 @@ var base_model_selected = $('#node-input-basemodel').val();
       selectAction();
     }).fail(function (err) {
       console.log(err);
-    }).always(function (osef) {});
+    }).always(function () {});
   }
 
   function oneditprepare() {
     var node = this;
     $.getJSON('watson-translate/vcap/')
       .done(function (sids) {
+        console.log(sids);
         $('.credentials').toggle(!sids);
         if (first_launch || !models) {
           $('#credentials-not-found').hide();

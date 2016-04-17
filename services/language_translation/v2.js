@@ -21,18 +21,20 @@ module.exports = function (RED) {
 
   temp.track();
 
-  var username, password, sUsername, sPassword, language_translation;
+  var username, password, language_translation;
 
   var service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
 
   if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
+    username = service.username;
+    password = service.password;
   }
 
   RED.httpAdmin.get('/watson-translate/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
-  });  
+    res.json(service ? {
+      bound_service: true
+    } : null);
+  });
 
   RED.httpAdmin.get('/watson-translate/models', function (req, res) {
     language_translation = watson.language_translation({
@@ -67,11 +69,6 @@ module.exports = function (RED) {
   });
 
   function SMTNode(config) {
-    RED.nodes.createNode(this, config);
-    var node = this;
-
-  username = sUsername || this.credentials.username;
-  password = sPassword || this.credentials.password;
     this.on('input', function (msg) {
       var message = '';
 
@@ -124,8 +121,8 @@ module.exports = function (RED) {
       var trainid = msg.trainid || config.trainid;
       var basemodel = msg.basemodel || config.basemodel;
 
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password;
+      username = username || this.credentials.username;
+      password = password || this.credentials.password;
 
       if (!username || !password) {
         this.status({
@@ -165,6 +162,9 @@ module.exports = function (RED) {
         break;
       }
     });
+
+    RED.nodes.createNode(this, config);
+    var node = this;
 
     this.doTranslate = function (msg, model_id) {
       node.status({
