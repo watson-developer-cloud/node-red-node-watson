@@ -348,6 +348,9 @@ var base_model_selected = $('#node-input-basemodel').val();
         $('#credentials-check').hide();
       })
 
+    console.log(first_launch);
+    console.log(models);
+    console.log(logon);
     if ((first_launch || !models) && logon) {
       $('#credentials-not-found').hide();
       getModels();
