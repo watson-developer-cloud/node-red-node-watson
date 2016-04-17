@@ -22,7 +22,7 @@
     </div>
     <div id="credentials-not-found" class="form-row">
         <div class="form-tips">
-            <i class="fa fa-question-circle"></i><b> Could not retrieve models. </b> <span id="try-again">Click here to ry again.</span>
+            <i class="fa fa-question-circle"></i><b> Could not bind to service. </b> Try other credentials?
         </div>
     </div>
     <div class="form-row">
@@ -123,10 +123,6 @@ var action = $('#node-input-action').val();
 var base_model_selected = $('#node-input-basemodel').val();
 
 (function () {
-
-  $('span#try-again').on('click', function() {
-    oneditprepare();
-  })
 
   // sorting functions
   function onlyUnique(value, index, self) {
@@ -330,20 +326,24 @@ var base_model_selected = $('#node-input-basemodel').val();
   }
 
   function getModels() {
-    $.getJSON('watson-translate/models/').done(function (data) {
+    var username = $('input#node-input-username').val();
+    var password = $('input#node-input-password').val();
+    $.getJSON('watson-translate/models/', {un: username,pwd: password}).done(function (data) {
       models = data.models;
-      handlersUI();
       selectAction();
     }).fail(function (err) {
       console.log(err);
+      $('#credentials-not-found').show();
     }).always(function () {});
   }
 
   function oneditprepare() {
+    console.log("zfsqdfqsg");
+    console.log(models);
     var node = this;
+    handlersUI();
     $.getJSON('watson-translate/vcap/')
       .done(function (sids) {
-        console.log(sids);
         $('.credentials').toggle(!sids);
         if (first_launch || !models) {
           $('#credentials-not-found').hide();
@@ -351,7 +351,6 @@ var base_model_selected = $('#node-input-basemodel').val();
           first_launch = false;
         } else if (models) {
           $('#credentials-not-found').hide();
-          handlersUI();
           selectAction();
         } else {
           $('#credentials-not-found').show();

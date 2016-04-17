@@ -37,11 +37,19 @@ module.exports = function (RED) {
   });
 
   RED.httpAdmin.get('/watson-translate/models', function (req, res) {
-    language_translation = watson.language_translation({
-      username: username,
-      password: password,
-      version: 'v2'
-    });
+    if(!username && !password) {
+      language_translation = watson.language_translation({
+        username: req.query.un,
+        password: req.query.pwd,
+        version: 'v2'
+      });     
+    } else {
+      language_translation = watson.language_translation({
+        username: username,
+        password: password,
+        version: 'v2'
+      });    
+    }
     language_translation.getModels({}, function (err, models) {
       if (err) {
         res.json(err);
@@ -69,6 +77,9 @@ module.exports = function (RED) {
   });
 
   function SMTNode(config) {
+    RED.nodes.createNode(this, config);
+    var node = this;
+
     this.on('input', function (msg) {
       var message = '';
 
@@ -162,9 +173,6 @@ module.exports = function (RED) {
         break;
       }
     });
-
-    RED.nodes.createNode(this, config);
-    var node = this;
 
     this.doTranslate = function (msg, model_id) {
       node.status({
