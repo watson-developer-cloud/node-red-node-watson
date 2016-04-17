@@ -37,11 +37,19 @@ module.exports = function (RED) {
   });
 
   RED.httpAdmin.get('/watson-translate/models', function (req, res) {
-    language_translation = watson.language_translation({
-      username: username,
-      password: password,
-      version: 'v2'
-    });
+    if(!username && !password) {
+      language_translation = watson.language_translation({
+        username: req.query.un,
+        password: req.query.pwd,
+        version: 'v2'
+      });     
+    } else {
+      language_translation = watson.language_translation({
+        username: username,
+        password: password,
+        version: 'v2'
+      });    
+    }
     language_translation.getModels({}, function (err, models) {
       if (err) {
         res.json(err);
@@ -71,165 +79,6 @@ module.exports = function (RED) {
   function SMTNode(config) {
     RED.nodes.createNode(this, config);
     var node = this;
-
-    this.doTranslate = function (msg, model_id) {
-      language_translation = watson.language_translation({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
-
-      node.status({
-        fill: 'blue',
-        shape: 'dot',
-        text: 'requesting'
-      });
-      language_translation.translate({
-        text: msg.payload,
-        model_id: model_id
-      },
-      function (err, response) {
-        node.status({})
-        if (err) {
-          node.error(err, msg);
-        } else {
-          msg.payload = response.translations[0].translation;
-        }
-        node.send(msg);
-      });
-    };
-
-    this.doTrain = function (msg, basemodel, filetype) {
-      language_translation = watson.language_translation({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
-
-      node.status({
-        fill: 'blue',
-        shape: 'dot',
-        text: 'requesting training'
-      });
-
-      temp.open({
-        suffix: '.xml'
-      }, function (err, info) {
-        if (!err) {
-          fs.write(info.fd, msg.payload);
-          var params = {};
-          switch (filetype) {
-          case 'forcedglossary':
-            params = {
-              name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: basemodel,
-              forced_glossary: fs.createReadStream(info.path)
-            };
-            break;
-          case 'parallelcorpus':
-            params = {
-              name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: basemodel,
-              parallel_corpus: fs.createReadStream(info.path)
-            };
-            break;
-          case 'monolingualcorpus':
-            params = {
-              name: msg.filename.replace(/[^0-9a-z]/gi, ''),
-              base_model_id: basemodel,
-              monolingual_corpus: fs.createReadStream(info.path)
-            };
-            break;
-          }
-          // Watson SDK call
-          language_translation.createModel(params,
-            function (err, model) {
-              node.status({});
-              if (err) {
-                node.status({
-                  fill: 'red',
-                  shape: 'ring',
-                  text: 'call to translation service failed'
-                });
-                node.error(err, msg);
-              } else {
-                node.status({
-                  fill: 'green',
-                  shape: 'dot',
-                  text: 'model sent to training'
-                });
-                msg.payload = 'Model ' + model.name + ' successfully sent for training with id: ' + model.model_id;
-                node.send(msg);
-                node.status({});
-              }
-            });
-        }
-      });
-    }
-
-    this.doGetStatus = function(msg, trainid) {
-      language_translation = watson.language_translation({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
-
-      node.status({
-        fill: 'blue',
-        shape: 'dot',
-        text: 'requesting status'
-      });
-
-      language_translation.getModel({ model_id: trainid},
-        function(err, model) {
-          node.status({});
-          if (err) { 
-            node.status({
-              fill: 'red',
-              shape: 'ring',
-              text: 'call to translation service failed'
-            });
-            node.error(err, msg);
-          } else {
-            msg.payload = model.status;
-            node.send(msg);
-            node.status({});
-          }
-        }
-      );
-    }
-
-    this.doDelete = function(msg, trainid) {
-      language_translation = watson.language_translation({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
-
-      node.status({
-        fill: 'blue',
-        shape: 'dot',
-        text: 'deleting'
-      });
-
-      language_translation.deleteModel({ model_id: trainid},
-        function(err) {
-          node.status({});
-          if (err) { 
-            node.status({
-              fill: 'red',
-              shape: 'ring',
-              text: 'could not delete'
-            });
-            node.error(err, msg);
-          } else {
-            msg.payload = "model deleted";
-            node.send(msg);
-            node.status({});
-          }
-        }
-      );      
-    }
 
     this.on('input', function (msg) {
       var message = '';
@@ -324,6 +173,141 @@ module.exports = function (RED) {
         break;
       }
     });
+
+    this.doTranslate = function (msg, model_id) {
+      node.status({
+        fill: 'blue',
+        shape: 'dot',
+        text: 'requesting'
+      });
+      language_translation.translate({
+        text: msg.payload,
+        model_id: model_id
+      },
+      function (err, response) {
+        node.status({})
+        if (err) {
+          node.error(err, msg);
+        } else {
+          msg.payload = response.translations[0].translation;
+        }
+        node.send(msg);
+      });
+    };
+
+    this.doTrain = function (msg, basemodel, filetype) {
+      node.status({
+        fill: 'blue',
+        shape: 'dot',
+        text: 'requesting training'
+      });
+
+      temp.open({
+        suffix: '.xml'
+      }, function (err, info) {
+        if (!err) {
+          fs.write(info.fd, msg.payload);
+          var params = {};
+          switch (filetype) {
+          case 'forcedglossary':
+            params = {
+              name: msg.filename.replace(/[^0-9a-z]/gi, ''),
+              base_model_id: basemodel,
+              forced_glossary: fs.createReadStream(info.path)
+            };
+            break;
+          case 'parallelcorpus':
+            params = {
+              name: msg.filename.replace(/[^0-9a-z]/gi, ''),
+              base_model_id: basemodel,
+              parallel_corpus: fs.createReadStream(info.path)
+            };
+            break;
+          case 'monolingualcorpus':
+            params = {
+              name: msg.filename.replace(/[^0-9a-z]/gi, ''),
+              base_model_id: basemodel,
+              monolingual_corpus: fs.createReadStream(info.path)
+            };
+            break;
+          }
+          // Watson SDK call
+          language_translation.createModel(params,
+            function (err, model) {
+              node.status({});
+              if (err) {
+                node.status({
+                  fill: 'red',
+                  shape: 'ring',
+                  text: 'call to translation service failed'
+                });
+                node.error(err, msg);
+              } else {
+                node.status({
+                  fill: 'green',
+                  shape: 'dot',
+                  text: 'model sent to training'
+                });
+                msg.payload = 'Model ' + model.name + ' successfully sent for training with id: ' + model.model_id;
+                node.send(msg);
+                node.status({});
+              }
+            });
+        }
+      });
+    }
+
+    this.doGetStatus = function(msg, trainid) {
+      node.status({
+        fill: 'blue',
+        shape: 'dot',
+        text: 'requesting status'
+      });
+
+      language_translation.getModel({ model_id: trainid},
+        function(err, model) {
+          node.status({});
+          if (err) { 
+            node.status({
+              fill: 'red',
+              shape: 'ring',
+              text: 'call to translation service failed'
+            });
+            node.error(err, msg);
+          } else {
+            msg.payload = model.status;
+            node.send(msg);
+            node.status({});
+          }
+        }
+      );
+    }
+
+    this.doDelete = function(msg, trainid) {
+      node.status({
+        fill: 'blue',
+        shape: 'dot',
+        text: 'deleting'
+      });
+
+      language_translation.deleteModel({ model_id: trainid},
+        function(err) {
+          node.status({});
+          if (err) { 
+            node.status({
+              fill: 'red',
+              shape: 'ring',
+              text: 'could not delete'
+            });
+            node.error(err, msg);
+          } else {
+            msg.payload = "model deleted";
+            node.send(msg);
+            node.status({});
+          }
+        }
+      );      
+    }
   }
 
   RED.nodes.registerType('watson-translate', SMTNode, {

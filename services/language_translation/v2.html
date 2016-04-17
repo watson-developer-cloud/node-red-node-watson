@@ -20,6 +20,11 @@
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
         </div>
     </div>
+    <div id="credentials-not-found" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Could not bind to service. </b> Try other credentials?
+        </div>
+    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -118,6 +123,7 @@ var action = $('#node-input-action').val();
 var base_model_selected = $('#node-input-basemodel').val();
 
 (function () {
+
   // sorting functions
   function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
@@ -310,7 +316,6 @@ var base_model_selected = $('#node-input-basemodel').val();
     available_destlang.forEach(function (val) {
       $('#node-input-destlang option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
     });
-
     checkPairLang();
   }
 
@@ -321,35 +326,41 @@ var base_model_selected = $('#node-input-basemodel').val();
   }
 
   function getModels() {
-    $.getJSON('watson-translate/models/').done(function (data) {
+    var username = $('input#node-input-username').val();
+    var password = $('input#node-input-password').val();
+    $.getJSON('watson-translate/models/', {un: username,pwd: password}).done(function (data) {
       models = data.models;
-      handlersUI();
       selectAction();
     }).fail(function (err) {
       console.log(err);
-    }).always(function (osef) {});
+      $('#credentials-not-found').show();
+    }).always(function () {});
   }
 
   function oneditprepare() {
+    console.log("zfsqdfqsg");
+    console.log(models);
     var node = this;
-
+    handlersUI();
     $.getJSON('watson-translate/vcap/')
       .done(function (sids) {
         $('.credentials').toggle(!sids);
+        if (first_launch || !models) {
+          $('#credentials-not-found').hide();
+          getModels();
+          first_launch = false;
+        } else if (models) {
+          $('#credentials-not-found').hide();
+          selectAction();
+        } else {
+          $('#credentials-not-found').show();
+        }
       })
       .fail(function () {
         $('.credentials').show();
       }).always(function () {
         $('#credentials-check').hide();
       })
-
-    if (first_launch || !models) {
-      getModels();
-      first_launch = false;
-    } else {
-      handlersUI();
-      selectAction();
-    }
   }
 
   RED.nodes.registerType('watson-translate', {
