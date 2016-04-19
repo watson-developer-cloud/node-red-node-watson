@@ -72,7 +72,9 @@ module.exports = function(RED) {
 				var wstream = fs.createWriteStream(file);
 				wstream.on('finish', function () {
 					fs.readFile(file, function (err, buf) {
-						if (err) console.error(err);
+						if (err) {
+							throw (err);
+						}
 						cb(fileType(buf).ext);
 					});
 				});
@@ -86,17 +88,16 @@ module.exports = function(RED) {
 			
 				stream_payload(info.path, msg.payload, function (format) {
 					
-					// convert a document
+					node.status({fill:"blue", shape:"dot", text:"converting"});
 					document_conversion.convert({
-						// (JSON) answer_units, normalized_html, or normalized_text
 						file: fs.createReadStream(info.path),
 						conversion_target: msg.target || node.target,
-						// Add custom configuration properties or omit for defaults
 						word: msg.word,
 						pdf: msg.pdf,
 						normalized_html: msg.normalized_html
 						
 					}, function (err, response) {
+						node.status({});
 						if (err) {
 							node.error(err);
 						} else {
