@@ -257,7 +257,6 @@ module.exports = function(RED) {
 		};
 
 		this.on('input', function (msg) {
-			console.log("Visual command: "+node.command);
 			switch(this.command) {
 				case "list":
 					this.doList(msg);
@@ -298,7 +297,9 @@ module.exports = function(RED) {
 
 		var stream_buffer = function (file, contents, cb) {
 			fs.writeFile(file, contents, function (err) {
-				if (err) throw err;
+				if (err) {
+					throw err;
+				}
 				cb(fileType(contents).ext);
 			});
 		};
@@ -307,7 +308,9 @@ module.exports = function(RED) {
 			var wstream = fs.createWriteStream(file);
 			wstream.on('finish', function () {
 				fs.readFile(file, function (err, buf) {
-					if (err) console.error(err);
+					if (err) {
+						throw err;
+					}
 					cb(fileType(buf).ext);
 				});
 			});
@@ -318,12 +321,16 @@ module.exports = function(RED) {
 		var stream_negative = (typeof msg.negative === 'string') ? stream_url : stream_buffer;
 
 		temp.open({suffix: '.zip'}, function (err, info) {
-			if (err) throw err;
+			if (err) {
+				throw err;
+			}
 			
 			stream_positive(info.path, msg.positive, function (format) {
 
 				temp.open({suffix: '.zip'}, function (err2, info2) {
-					if (err2) throw err2;
+					if (err2) {
+						throw err2;
+					}
 
 					stream_negative(info2.path, msg.negative, function (format) {
 							
@@ -333,8 +340,10 @@ module.exports = function(RED) {
 							negative_examples: fs.createReadStream(info2.path)
 						};
 							
+						node.status({fill:"blue", shape:"dot", text:"training"});
 						visual_recognition.createClassifier(params, 
 							function(err, response) {
+								node.status({});
 								if (err) {
 									node.error(err);
 								} else {
