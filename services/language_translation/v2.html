@@ -349,7 +349,7 @@ var base_model_selected = $('#node-input-basemodel').val();
       si non charger défauts
   */
     var node = this;
-    handlersUI();
+    //handlersUI();
     $.getJSON('watson-translate/vcap/').done(function (sids) {
         $('.credentials').toggle(!sids);
         if (first_launch || !models) {
