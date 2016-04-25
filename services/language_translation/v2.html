@@ -216,6 +216,7 @@ var base_model_selected = $('#node-input-basemodel').val();
   }
 
   function domainsAvailable() {
+    console.log(models);
     $('select#node-input-domain').empty();
     domains = models.map(function (a) {
       return a.domain;
@@ -333,6 +334,7 @@ var base_model_selected = $('#node-input-basemodel').val();
       models = data.models;
       selectAction();
     }).fail(function (err) {
+      console.log('did it fail');
       models = models_temp;
       $('#credentials-not-found').show();
     }).always(function () {});
@@ -362,6 +364,7 @@ var base_model_selected = $('#node-input-basemodel').val();
           selectAction();
         } 
       }).fail(function () {
+        console.log('did it fail');
         $('.credentials').show();
         models = models_temp;
       }).always(function () {
