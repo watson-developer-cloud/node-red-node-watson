@@ -354,6 +354,7 @@ var base_model_selected = $('#node-input-basemodel').val();
     var node = this;
     //handlersUI();
     $.getJSON('watson-translate/vcap/').done(function (sids) {
+      console.log('sids', sids);
         $('.credentials').toggle(!sids);
         if (first_launch || !models) {
           $('#credentials-not-found').hide();
