@@ -30,26 +30,16 @@ module.exports = function (RED) {
     password = service.password;
   }
 
-  RED.httpAdmin.get('/watson-translate/vcap', function (req, res) {
-    res.json(service ? {
-      bound_service: true
-    } : null);
-  });
+  RED.httpAdmin.get('/service-dialog/vcap', function (req, res) {
+    res.json(service ? {bound_service: true} : null);
+  });  
 
   RED.httpAdmin.get('/watson-translate/models', function (req, res) {
-    if(!username && !password) {
-      language_translation = watson.language_translation({
-        username: req.query.un,
-        password: req.query.pwd,
-        version: 'v2'
-      });     
-    } else {
-      language_translation = watson.language_translation({
-        username: username,
-        password: password,
-        version: 'v2'
-      });    
-    }
+    language_translation = watson.language_translation({
+      username: username,
+      password: password,
+      version: 'v2'
+    }); 
     language_translation.getModels({}, function (err, models) {
       if (err) {
         res.json(err);
@@ -152,8 +142,8 @@ module.exports = function (RED) {
         version: 'v2'
       });
 
-      var model_id = "";
-      if(domain === "news") {
+      var model_id = '';
+      if(domain === 'news') {
         model_id = srclang + '-' + destlang;
       } else {
         model_id = srclang + '-' + destlang + '-' + domain;
