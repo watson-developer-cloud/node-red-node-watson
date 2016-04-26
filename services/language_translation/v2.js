@@ -115,12 +115,6 @@ module.exports = function (RED) {
 
       var filetype = msg.filetype || config.filetype;
 
-      if (!filetype) {
-        node.warn('Missing file type, please select one');
-        node.send(msg);
-        return;
-      }
-
       var trainid = msg.trainid || config.trainid;
       var basemodel = msg.basemodel || config.basemodel;
 
