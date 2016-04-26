@@ -336,7 +336,7 @@ var base_model_selected = $('#node-input-basemodel').val();
             var node = this;
             $.getJSON('watson-translate/vcap/')
               .done(function (sids) {
-                console.log('sids', sids);
+                $('.credentials').toggle(!sids);
                 if(!sids) {
                   defaultUI(true);
                 } else {
@@ -350,7 +350,6 @@ var base_model_selected = $('#node-input-basemodel').val();
                     selectAction();
                   }                
                 }
-                $('.credentials').toggle(!sids);
               })
               .fail(function () {
                 $('.credentials').show();
