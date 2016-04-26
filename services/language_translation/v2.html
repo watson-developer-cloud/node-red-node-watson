@@ -326,7 +326,7 @@ var base_model_selected = $('#node-input-basemodel').val();
       action = "translate";
     } else {
       $('select#node-input-action, select#node-input-basemodel, #node-input-filetype, input#node-input-trainid').parent().show();
-      var action = $('#node-input-action').val();
+      action = $('#node-input-action').val();
     }
     
   }
@@ -348,6 +348,8 @@ var base_model_selected = $('#node-input-basemodel').val();
                     first_launch = false;
                   } else if (models) {
                     selectAction();
+                    handlersUI();
+                    selectAction();
                   }                
                 }
               })
@@ -358,7 +360,6 @@ var base_model_selected = $('#node-input-basemodel').val();
               })
             var initial_update = true;
             $('#node-input-srclang').change(function () {
-              console.log(node)
               var source_lang = $('#node-input-srclang').val()
               if (source_lang === 'en') {
                 $('#node-input-destlang option[value=en]').attr('disabled','disabled')
