@@ -30,9 +30,11 @@ module.exports = function (RED) {
     password = service.password;
   }
 
-  RED.httpAdmin.get('/service-dialog/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
-  });  
+  RED.httpAdmin.get('/watson-translate/vcap', function (req, res) {
+    res.json(service ? {
+      bound_service: true
+    } : null);
+  });
 
   RED.httpAdmin.get('/watson-translate/models', function (req, res) {
     language_translation = watson.language_translation({
