@@ -52,33 +52,13 @@ module.exports = function (RED) {
     });
   });
 
-  RED.httpAdmin.get('/watson-translate/languages', function (req, res) {
-    language_translation = watson.language_translation({
-      username: username,
-      password: password,
-      version: 'v2'
-    });
-    language_translation.getIdentifiableLanguages(null,
-      function (err, languages) {
-        if (err) {
-          res.json(err);
-        } else {
-          res.json(languages);
-        }
-      });
-  });
-
   function SMTNode(config) {
-    console.log('config');
-    console.log(config);
-    console.log('node');
-    console.log(this);
     RED.nodes.createNode(this, config);
     var node = this;
 
     this.on('input', function (msg) {
       var message = '';
-      console.log(msg);
+
       if (!msg.payload) {
         message = 'Missing property: msg.payload';
         node.error(message, msg)
