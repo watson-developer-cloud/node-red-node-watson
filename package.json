@@ -9,6 +9,7 @@
     "file-type": "^2.7.0",
     "request": "~2.53.0",
     "temp": "^0.8.3",
+    "qs": "6.x",
     "watson-developer-cloud": "^1.2.4"
   },
   "repository": {
@@ -34,12 +35,12 @@
       "watson-language-translate-v1": "services/language_translation/v2.js",
       "watson-personality-insights-v1": "services/personality_insights/v1.js",
       "watson-relationship-extraction-v1": "services/relationship_extraction/v1.js",
+      "watson-retrieve-and-rank-v1": "services/retrieve_and_rank/v1.js",
       "watson-speech-to-text-v1": "services/speech_to_text/v1.js",
       "watson-text-to-speech-v1": "services/text_to_speech/v1.js",
       "watson-tradeoff-analytics-v1": "services/tradeoff_analytics/v1.js",
       "watson-tone-analyzer-v3-beta": "services/tone_analyzer/v3-beta.js",
-      "watson-visual-recognition-v1": "services/visual_recognition/v1.js",
-      "watson-retrieve-and-rank-v1": "services/retrieve_and_rank/v1.js"
+      "watson-visual-recognition-v1": "services/visual_recognition/v1.js"
     }
   }
 }
