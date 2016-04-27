@@ -323,7 +323,7 @@ var base_model_selected = $('#node-input-basemodel').val();
   function defaultUI(flag) {
     if(flag) {
       $('select#node-input-action, select#node-input-basemodel, #node-input-filetype, input#node-input-trainid').parent().hide();
-      $('#node-input-action').val('Translate');
+      action = "translate";
     } else {
       $('select#node-input-action, select#node-input-basemodel, #node-input-filetype, input#node-input-trainid').parent().show();
       action = $('#node-input-action').val();
@@ -336,7 +336,7 @@ var base_model_selected = $('#node-input-basemodel').val();
             var node = this;
             $.getJSON('watson-translate/vcap/')
               .done(function (sids) {
-                $('.credentials').toggle(!sids);
+                $('#credentials-check').hide();
                 if(!sids) {
                   defaultUI(true);
                 } else {
