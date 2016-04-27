@@ -69,16 +69,12 @@ module.exports = function (RED) {
   });
 
   function SMTNode(config) {
-    console.log('config');
-    console.log(config);
-    console.log('node');
-    console.log(this);
     RED.nodes.createNode(this, config);
     var node = this;
 
     this.on('input', function (msg) {
       var message = '';
-      
+
       if (!msg.payload) {
         message = 'Missing property: msg.payload';
         node.error(message, msg)

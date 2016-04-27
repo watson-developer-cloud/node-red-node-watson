@@ -15,88 +15,76 @@
 -->
 
 <script type="text/x-red" data-template-name="watson-translate">
-    <div id="credentials-check" class="form-row">
-        <div class="form-tips">
-            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
-        </div>
-    </div>
-    <div id="models-default-value" class="form-row">
-        <div class="form-tips">
-            <i class="fa fa-question-circle"></i> Using default values for models
-        </div>
-    </div>
-    <div id="models-user-value" class="form-row">
-        <div class="form-tips">
-            <i class="fa fa-question-circle"></i> Using user values for models
-        </div>
-    </div>
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
-    </div>
-    <div class="form-row">
-        <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
-        <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
-            <option value="translate" selected="selected">Translate</option>
-            <option value="train">Train</option>
-            <option value="getstatus">Get status</option>
-            <option value="delete">Delete</option>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-domain"><i class="fa fa-book"></i>Domain</label>
-        <select type="text" id="node-input-domain" style="display: inline-block; vertical-align:middle; width: 70%;">
-            <option value="news" selected>News</option>
-            <option value="conversational">Conversational</option>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-basemodel"><i class="fa fa-book"></i> Base model</label>
-        <select type="text" id="node-input-basemodel" style="display: inline-block; vertical-align:middle; width: 70%;">
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-srclang"><i class="fa fa-comments-o"></i>Source</label>
-        <select type="text" id="node-input-srclang" style="display: inline-block; vertical-align:middle; width: 70%;">
-            <option value="en">English</option>
-            <option value="fr">French</option>
-            <option value="es">Spanish</option>
-            <option value="it">Italian</option>
-            <option value="pt">Portugese</option>
-            <option value="ar">Arabic</option>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-destlang"><i class="fa fa-comments-o"></i>Target</label>
-        <select type="text" id="node-input-destlang" style="display: inline-block; vertical-align:middle; width: 70%;">
-            <option value="en">English</option>
-            <option value="fr">French</option>
-            <option value="es">Spanish</option>
-            <option value="it">Italian</option>
-            <option value="pt">Portugese</option>
-            <option value="ar">Arabic</option>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-filetype"><i class="fa fa-book"></i> File type</label>
-        <select type="text" id="node-input-filetype" style="display: inline-block; vertical-align:middle; width: 70%;">
-            <option value="forcedglossary" selected="selected">Forced glossary</option>
-            <option value="parallelcorpus">Parallel corpus</option>
-            <option value="monolingualcorpus">Monolingual corpus</option>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-trainid"><i class="fa fa-tag"></i> ID</label>
-        <input type="text" id="node-input-trainid" placeholder="ID">
-    </div>
+  <div id="credentials-check" class="form-row">
+      <div class="form-tips">
+          <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+      </div>
+  </div>
+  <div class="form-row">
+      <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+      <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+  <div class="form-row credentials" style="display: none;">
+      <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+      <input type="text" id="node-input-username" placeholder="Username">
+  </div>
+  <div class="form-row credentials" style="display: none;">
+      <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+      <input type="password" id="node-input-password" placeholder="Password">
+  </div>
+  <div class="form-row">
+      <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
+      <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
+              <option value="translate" selected="selected">Translate</option>
+              <option value="train">Train</option>
+              <option value="getstatus">Get status</option>
+              <option value="delete">Delete</option>
+          </select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-domain"><i class="fa fa-book"></i>Domain</label>
+      <select type="text" id="node-input-domain" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="news" selected="selected">News</option><option value="conversational">Conversational</option><option value="patent">Patent</option></select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-basemodel"><i class="fa fa-book"></i> Base model</label>
+      <select type="text" id="node-input-basemodel" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="ar-en" selected="selected">ar-en</option><option value="arz-en">arz-en</option><option value="en-ar">en-ar</option><option value="en-arz">en-arz</option><option value="en-es">en-es</option><option value="en-fr">en-fr</option><option value="en-it">en-it</option><option value="en-pt">en-pt</option><option value="es-en">es-en</option><option value="es-fr">es-fr</option><option value="fr-en">fr-en</option><option value="fr-es">fr-es</option><option value="it-en">it-en</option><option value="pt-en">pt-en</option></select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-srclang-news"><i class="fa fa-comments-o"></i>Source</label>
+      <select type="text" id="node-input-srclang-news" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="ar">ar</option><option value="arz">arz</option><option value="en">en</option><option value="es">es</option><option value="fr">fr</option><option value="it">it</option><option value="pt">pt</option></select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-destlang-news"><i class="fa fa-comments-o"></i>Target</label>
+      <select type="text" id="node-input-destlang-news" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="en">en</option><option value="ar">ar</option><option value="arz">arz</option><option value="es">es</option><option value="fr">fr</option><option value="it">it</option><option value="pt">pt</option></select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-srclang-conversational"><i class="fa fa-comments-o"></i>Source</label>
+      <select type="text" id="node-input-srclang-conversational" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="ar">ar</option><option value="en">en</option><option value="es">es</option><option value="fr">fr</option><option value="pt">pt</option></select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-destlang-conversational"><i class="fa fa-comments-o"></i>Target</label>
+      <select type="text" id="node-input-destlang-conversational" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="en">en</option><option value="ar">ar</option><option value="es">es</option><option value="fr">fr</option><option value="pt">pt</option></select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-srclang-patent"><i class="fa fa-comments-o"></i>Source</label>
+      <select type="text" id="node-input-srclang-patent" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="es">es</option><option value="ko">ko</option><option value="pt">pt</option><option value="zh">zh</option></select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-destlang-patent"><i class="fa fa-comments-o"></i>Target</label>
+      <select type="text" id="node-input-destlang-patent" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="en">en</option></select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-filetype"><i class="fa fa-book"></i> File type</label>
+      <select type="text" id="node-input-filetype" style="display: inline-block; vertical-align:middle; width: 70%;">
+              <option value="forcedglossary" selected="selected">Forced glossary</option>
+              <option value="parallelcorpus">Parallel corpus</option>
+              <option value="monolingualcorpus">Monolingual corpus</option>
+          </select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-trainid"><i class="fa fa-tag"></i> ID</label>
+      <input type="text" id="node-input-trainid" placeholder="ID">
+  </div>
 </script>
 
 <script type="text/x-red" data-help-name="watson-translate">
@@ -138,7 +126,6 @@ var base_model_selected = $('#node-input-basemodel').val();
 
     $('#node-input-basemodel').change(function (val) {
       base_model_selected = $('#node-input-basemodel').val();
-      basemodelsAvailable();
     })
 
     // check availability 
@@ -149,157 +136,52 @@ var base_model_selected = $('#node-input-basemodel').val();
 
     $('#node-input-destlang').change(function () {
       destlang_selected = $('#node-input-destlang').val();
-      destlangAvailable();
     });
   }
 
   function selectAction() {
     action = $('#node-input-action').val();
     switch (action) {
-      case 'train':
-        $('select#node-input-srclang, select#node-input-destlang, #node-input-trainid, select#node-input-domain').parent().hide();
-        $('select#node-input-filetype, select#node-input-basemodel').parent().show();
-        basemodelsAvailable();
-        break;
       case 'translate':
-        $('select#node-input-srclang, select#node-input-destlang, select#node-input-domain').parent().show();
+        $('select#node-input-domain').parent().show();
         $('select#node-input-filetype, #node-input-trainid, select#node-input-basemodel').parent().hide();
+        selectDomain();
+        break;
+      case 'train':
+        $('select#node-input-srclang-conversational, select#node-input-destlang-conversational, select#node-input-srclang-news, select#node-input-destlang-news, select#node-input-srclang-patent, select#node-input-destlang-patent, #node-input-trainid, select#node-input-domain').parent().hide();
+        $('select#node-input-filetype, select#node-input-basemodel').parent().show();
         break;
       case 'getstatus':
-        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype, select#node-input-domain, select#node-input-basemodel').parent().hide();
+        $('select#node-input-srclang-conversational, select#node-input-destlang-conversational, select#node-input-srclang-news, select#node-input-destlang-news, select#node-input-srclang-patent, select#node-input-destlang-patent, select#node-input-filetype, select#node-input-domain, select#node-input-basemodel').parent().hide();
         $('#node-input-trainid').parent().show();        
         break;
       case 'delete':
-        $('select#node-input-srclang, select#node-input-destlang, select#node-input-filetype,  select#node-input-domain, select#node-input-basemodel').parent().hide();
+        $('select#node-input-srclang-conversational, select#node-input-destlang-conversational, select#node-input-srclang-news, select#node-input-destlang-news, select#node-input-srclang-patent, select#node-input-destlang-patent, select#node-input-filetype,  select#node-input-domain, select#node-input-basemodel').parent().hide();
         $('#node-input-trainid').parent().show(); 
         break;
     }
-    domainsAvailable();
-  }
-
-  function basemodelsAvailable() {
-    $('select#node-input-basemodel').empty();
-    var base_models_available = models.filter(function (model) {
-      return model.customizable === true;
-    });
-
-    base_models_available_ids = base_models_available.map(function (a) {
-      return a.model_id;
-    });
-    
-    if(!base_model_selected) {
-      var base_model_first_iteration = true;
-
-      base_models_available_ids.forEach(function (base_model) {
-        if (base_model_first_iteration) {
-          $('select#node-input-basemodel').append('<option value="' + base_model + '" selected="selected">' + base_model + '</option>');
-        } else {
-          $('select#node-input-basemodel').append('<option value="' + base_model + '">' + base_model + '</option>');
-        }
-        base_model_first_iteration = false;
-      });
-    } else {
-      base_models_available_ids.forEach(function (base_model) {
-        if (base_model_selected === base_model) {
-          $('select#node-input-basemodel').append('<option value="' + base_model + '" selected="selected">' + base_model + '</option>');
-        } else {
-          $('select#node-input-basemodel').append('<option value="' + base_model + '">' + base_model + '</option>');
-        }
-      });      
-    }
-
-  }
-
-  function domainsAvailable() {
-    $('select#node-input-domain').empty();
-    domains = models.map(function (a) {
-      return a.domain;
-    });
-
-    var unique_domains = domains.filter(onlyUnique);
-
-    if(!domain_selected) {
-      var domain_first_iteration = true;
-
-      unique_domains.forEach(function (domain) {
-        if (domain_first_iteration) {
-          $('select#node-input-domain').append('<option value="' + domain + '" selected="selected">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
-        } else {
-          $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
-        }
-        domain_first_iteration = false;
-      });
-    } else {
-      unique_domains.forEach(function (domain) {
-        if (domain_selected === domain) {
-          $('select#node-input-domain').append('<option value="' + domain + '" selected="selected">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
-        } else {
-          $('select#node-input-domain').append('<option value="' + domain + '">' + domain.charAt(0).toUpperCase() + domain.slice(1) + '</option>');
-        }
-      });      
-    }
-    selectDomain();
   }
 
   function selectDomain() {
-    $('#node-input-srclang').empty();
-    $('#node-input-destlang').empty();
     domain_selected = $('#node-input-domain').val();
-    domain_type = models.filter(function (model) {
-      return model.domain === domain_selected && model.status === 'available';
-    });
-    input_lang = domain_type.map(function (a) {
-      return a.source;
-    });
-    output_lang = domain_type.map(function (a) {
-      return a.target;
-    });
-    input_lang_unique = input_lang.filter(onlyUnique);
-    output_lang_unique = output_lang.filter(onlyUnique);
-
-    if(!srclang_selected)
-    {
-      var langsrc_first_iteration = true;
-      var langdest_first_iteration = true;
-
-      input_lang_unique.forEach(function (lang) {
-        if (langsrc_first_iteration) {
-          $('select#node-input-srclang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
-        } else {
-          $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
-        }
-        langsrc_first_iteration = false;
-      });
-      output_lang_unique.forEach(function (lang) {
-        if (langdest_first_iteration) {
-          $('select#node-input-destlang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
-        } else {
-          $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
-        }
-        langdest_first_iteration = false;
-      });
-      
-      
-    } else {
-      input_lang_unique.forEach(function (lang) {
-        if (srclang_selected === lang) {
-          $('select#node-input-srclang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
-        } else {
-          $('select#node-input-srclang').append('<option value="' + lang + '">' + lang + '</option>');
-        }
-      });
-      output_lang_unique.forEach(function (lang) {
-        if (destlang_selected === lang) {
-          $('select#node-input-destlang').append('<option value="' + lang + '" selected="selected">' + lang + '</option>');
-        } else {
-          $('select#node-input-destlang').append('<option value="' + lang + '">' + lang + '</option>');
-        }
-      });
+    if(domain_selected === "news") {
+      $('select#node-input-srclang-news, select#node-input-destlang-news').parent().show();
+      $('select#node-input-srclang-conversational, select#node-input-destlang-conversational, select#node-input-srclang-patent, select#node-input-destlang-patent').parent().hide();
+    } else if(domain_selected === "conversational") {
+      $('select#node-input-srclang-conversational, select#node-input-destlang-conversational').parent().show();
+      $('select#node-input-srclang-news, select#node-input-destlang-news, select#node-input-srclang-patent, select#node-input-destlang-patent').parent().hide();
+    } else if(domain_selected === "patent") {
+      $('select#node-input-srclang-patent, select#node-input-destlang-patent').parent().show();
+      $('select#node-input-srclang-conversational, select#node-input-destlang-conversational, select#node-input-srclang-news, select#node-input-destlang-news').parent().hide();
     }
     destlangAvailable();
   }
 
   function destlangAvailable() {
+    domain_type = models.filter(function (model) {
+      return model.domain === domain_selected && model.status === 'available';
+    });
+
     var pair_lang = domain_type.map(function (a) {
       return a.model_id;
     });
@@ -321,46 +203,21 @@ var base_model_selected = $('#node-input-basemodel').val();
     }
   }
 
-  function getModels() {
-    $.getJSON('watson-translate/models/').done(function (data) {
-      models = data.models;
-    }).fail(function (err) {
-      console.log(err);
-    }).always(function () {});
-  }
-
-    (function() {
-        function oneditprepare() {
-            var node = this;
-            $.getJSON('watson-translate/vcap/')
-              .done(function (sids) {
-                $('.credentials').toggle(!sids);
-                if(!sids) {
-                  $('#models-user-value').hide();
-                  $('#models-default-value').show();
-                  handlersUI();
-                  selectAction();                  
-                } else {
-                  $('#models-user-value').show();
-                  $('#models-default-value').hide();
-                  if (first_launch) {
-                    getModels();
-                    handlersUI();
-                    selectAction();
-                    first_launch = false;
-                  } else if (models) {
-                    handlersUI();
-                    selectAction();
-                  }                
-                }
-              })
-              .fail(function () {
-                $('.credentials').show();
-              }).always(function () {
-                $('#credentials-check').hide();
-              })
-        }
-
+  (function() {
+    function oneditprepare() {
+        var node = this;
+        $.getJSON('watson-translate/vcap/')
+          .done(function (sids) {
+            $('.credentials').toggle(!sids);
+            handlersUI();
+            selectAction();                  
+          })
+          .fail(function () {
+            $('.credentials').show();
+          }).always(function () {
+            $('#credentials-check').hide();
+          })
+    }
 
   RED.nodes.registerType('watson-translate', {
     category: 'IBM Watson',
