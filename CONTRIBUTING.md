@@ -89,6 +89,15 @@ npm start
 
 Then you can work on your project locally, update or create nodes, and all you have to do is to stop and start your local Node-RED.
 
+## Co-requisites
+
+If you need to install co-requisites nodes such as the nodes for dropbox support
+```
+cd ~/dev
+npm install node-red-node-dropbox
+```
+
+
 ## Modify or Create new Watson nodes
 
 If your want to modify an existing Watson nodes, just search the node in the following file under the node-red /  nodes section :
