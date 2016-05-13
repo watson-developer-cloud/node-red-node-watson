@@ -74,49 +74,19 @@ module.exports = function (RED) {
 
     this.on('input', function (msg) {
       var message = '';
-
       if (!msg.payload) {
         message = 'Missing property: msg.payload';
         node.error(message, msg)
         return;
       }
 
-      var srclang = msg.srclang || config.srclang;
-
-      if (!srclang) {
-        node.warn('Missing source language, message not translated');
-        node.send(msg);
-        return;
-      }
-
-      var destlang = msg.destlang || config.destlang;
-
-      if (!destlang) {
-        node.warn('Missing target language, message not translated');
-        node.send(msg);
-        return;
-      }
-
-      var domain = msg.domain || config.domain;
-
-      if (!domain) {
-        node.warn('Missing translation domain, message not translated');
-        node.send(msg);
-        return;
-      }
-
-      var action = msg.action || config.action;
+      var action = config.action;
 
       if (!action) {
         node.warn('Missing action, please select one');
         node.send(msg);
         return;
       }
-
-      var filetype = msg.filetype || config.filetype;
-
-      var trainid = msg.trainid || config.trainid;
-      var basemodel = msg.basemodel || config.basemodel;
 
       username = username || this.credentials.username;
       password = password || this.credentials.password;
@@ -138,29 +108,96 @@ module.exports = function (RED) {
         version: 'v2'
       });
 
+      switch (action) {
+        case 'translate':
+          this.doTranslate(msg);
+          break;
+        case 'train':
+          this.doTrain(msg);
+          break;
+        case 'getstatus':
+          this.doGetStatus(msg, trainid);
+          break;
+        case 'delete':
+          this.doDelete(msg, trainid);
+          break;
+      }
+    });
+
+    this.doTranslate = function (msg) {
+      var domain = msg.domain || config.domain;
+
+      if (!domain) {
+        node.warn('Missing translation domain, message not translated');
+        node.send(msg);
+        return;
+      }
+
+      var srclang  = ''; 
+      var destlang = '';
+
+      switch (domain) {
+        case 'news':
+          srclang = config.srclangnews;
+
+          if (!srclang) {
+            node.warn('Missing source language, message not translated');
+            node.send(msg);
+            return;
+          }
+
+          destlang = config.destlangnews;
+
+          if (!destlang) {
+            node.warn('Missing target language, message not translated');
+            node.send(msg);
+            return;
+          }
+          break;
+        case 'conversational':
+          srclang = config.srclangconversational;
+
+          if (!srclang) {
+            node.warn('Missing source language, message not translated');
+            node.send(msg);
+            return;
+          }
+
+          destlang = config.destlangconversational;
+
+          if (!destlang) {
+            node.warn('Missing target language, message not translated');
+            node.send(msg);
+            return;
+          }
+          break;
+        case 'patent':
+          srclang = config.srclangpatent;
+
+          if (!srclang) {
+            node.warn('Missing source language, message not translated');
+            node.send(msg);
+            return;
+          }
+
+          destlang = config.destlangpatent;
+
+          if (!destlang) {
+            node.warn('Missing target language, message not translated');
+            node.send(msg);
+            return;
+          }
+          break;
+      }
+
       var model_id = '';
+
       if(domain === 'news') {
         model_id = srclang + '-' + destlang;
       } else {
         model_id = srclang + '-' + destlang + '-' + domain;
       }
-      switch (action) {
-      case 'translate':
-        this.doTranslate(msg, model_id);
-        break;
-      case 'train':
-        this.doTrain(msg, basemodel, filetype);
-        break;
-      case 'getstatus':
-        this.doGetStatus(msg, trainid);
-        break;
-      case 'delete':
-        this.doDelete(msg, trainid);
-        break;
-      }
-    });
 
-    this.doTranslate = function (msg, model_id) {
       node.status({
         fill: 'blue',
         shape: 'dot',
@@ -181,7 +218,23 @@ module.exports = function (RED) {
       });
     };
 
-    this.doTrain = function (msg, basemodel, filetype) {
+    this.doTrain = function (msg) {
+      var filetype = config.filetype;
+
+      if (!filetype) {
+        node.warn('Missing file type, please select one');
+        node.send(msg);
+        return;
+      }
+
+      var basemodel = config.basemodel;
+
+      if (!basemodel) {
+        node.warn('Missing base model, please select one');
+        node.send(msg);
+        return;
+      }
+
       node.status({
         fill: 'blue',
         shape: 'dot',
@@ -244,6 +297,14 @@ module.exports = function (RED) {
     }
 
     this.doGetStatus = function(msg, trainid) {
+      var trainid = config.trainid;
+
+      if (!trainid) {
+        node.warn('Missing ID, please enter one');
+        node.send(msg);
+        return;
+      }
+
       node.status({
         fill: 'blue',
         shape: 'dot',
@@ -270,6 +331,14 @@ module.exports = function (RED) {
     }
 
     this.doDelete = function(msg, trainid) {
+      var trainid = config.trainid;
+
+      if (!trainid) {
+        node.warn('Missing ID, please enter one');
+        node.send(msg);
+        return;
+      }
+
       node.status({
         fill: 'blue',
         shape: 'dot',

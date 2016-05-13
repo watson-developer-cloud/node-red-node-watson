@@ -15,75 +15,251 @@
 -->
 
 <script type="text/x-red" data-template-name="watson-translate">
-  <div id="credentials-check" class="form-row">
-      <div class="form-tips">
-          <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
-      </div>
+  <div class="form-row" id="credentials-check">
+    <div class="form-tips">
+      <i class="fa fa-question-circle"></i> <b>Please wait:</b> Checking for bound
+      service credentials...
+    </div>
   </div>
   <div class="form-row">
-      <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-      <input type="text" id="node-input-name" placeholder="Name">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label> <input id=
+    "node-input-name" placeholder="Name" type="text">
   </div>
   <div class="form-row credentials" style="display: none;">
-      <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-      <input type="text" id="node-input-username" placeholder="Username">
+    <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+    <input id="node-input-username" placeholder="Username" type="text">
   </div>
   <div class="form-row credentials" style="display: none;">
-      <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-      <input type="password" id="node-input-password" placeholder="Password">
+    <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+    <input id="node-input-password" placeholder="Password" type="password">
   </div>
   <div class="form-row">
-      <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
-      <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
-              <option value="translate">Translate</option>
-              <option value="train">Train</option>
-              <option value="getstatus">Get status</option>
-              <option value="delete">Delete</option>
-          </select>
+    <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
+    <select id="node-input-action" style=
+    "display: inline-block; vertical-align:middle; width: 70%;">
+      <option value="translate">
+        Translate
+      </option>
+      <option value="train">
+        Train
+      </option>
+      <option value="getstatus">
+        Get status
+      </option>
+      <option value="delete">
+        Delete
+      </option>
+    </select>
   </div>
   <div class="form-row">
-      <label for="node-input-domain"><i class="fa fa-book"></i> Domain</label>
-      <select type="text" id="node-input-domain" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="news">News</option><option value="conversational">Conversational</option><option value="patent">Patent</option></select>
+    <label for="node-input-domain"><i class="fa fa-book"></i> Domain</label>
+    <select id="node-input-domain" style=
+    "display: inline-block; vertical-align:middle; width: 70%;">
+      <option value="news">
+        News
+      </option>
+      <option value="conversational">
+        Conversational
+      </option>
+      <option value="patent">
+        Patent
+      </option>
+    </select>
   </div>
   <div class="form-row">
-      <label for="node-input-basemodel"><i class="fa fa-book"></i> Base model</label>
-      <select type="text" id="node-input-basemodel" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="ar-en">ar-en</option><option value="arz-en">arz-en</option><option value="en-ar">en-ar</option><option value="en-arz">en-arz</option><option value="en-es">en-es</option><option value="en-fr">en-fr</option><option value="en-it">en-it</option><option value="en-pt">en-pt</option><option value="es-en">es-en</option><option value="es-fr">es-fr</option><option value="fr-en">fr-en</option><option value="fr-es">fr-es</option><option value="it-en">it-en</option><option value="pt-en">pt-en</option></select>
+    <label for="node-input-basemodel"><i class="fa fa-book"></i> Base
+    model</label> <select id="node-input-basemodel" style=
+    "display: inline-block; vertical-align:middle; width: 70%;">
+      <option value="ar-en">
+        ar-en
+      </option>
+      <option value="arz-en">
+        arz-en
+      </option>
+      <option value="en-ar">
+        en-ar
+      </option>
+      <option value="en-arz">
+        en-arz
+      </option>
+      <option value="en-es">
+        en-es
+      </option>
+      <option value="en-fr">
+        en-fr
+      </option>
+      <option value="en-it">
+        en-it
+      </option>
+      <option value="en-pt">
+        en-pt
+      </option>
+      <option value="es-en">
+        es-en
+      </option>
+      <option value="es-fr">
+        es-fr
+      </option>
+      <option value="fr-en">
+        fr-en
+      </option>
+      <option value="fr-es">
+        fr-es
+      </option>
+      <option value="it-en">
+        it-en
+      </option>
+      <option value="pt-en">
+        pt-en
+      </option>
+    </select>
   </div>
   <div class="form-row">
-      <label for="node-input-srclang-news"><i class="fa fa-comments-o"></i> Source</label>
-      <select type="text" id="node-input-srclang-news" class="node-input-srclang" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="ar">ar</option><option value="arz">arz</option><option value="en">en</option><option value="es">es</option><option value="fr">fr</option><option value="it">it</option><option value="pt">pt</option></select>
+    <label for="node-input-srclangnews"><i class="fa fa-comments-o"></i>
+    Source</label> <select class="node-input-srclang" id="node-input-srclangnews"
+    style="display: inline-block; vertical-align:middle; width: 70%;">
+      <option value="ar">
+        ar
+      </option>
+      <option value="arz">
+        arz
+      </option>
+      <option value="en">
+        en
+      </option>
+      <option value="es">
+        es
+      </option>
+      <option value="fr">
+        fr
+      </option>
+      <option value="it">
+        it
+      </option>
+      <option value="pt">
+        pt
+      </option>
+    </select>
   </div>
   <div class="form-row">
-      <label for="node-input-destlang-news"><i class="fa fa-comments-o"></i> Target</label>
-      <select type="text" id="node-input-destlang-news" class="node-input-destlang" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="en">en</option><option value="ar">ar</option><option value="arz">arz</option><option value="es">es</option><option value="fr">fr</option><option value="it">it</option><option value="pt">pt</option></select>
+    <label for="node-input-destlangnews"><i class="fa fa-comments-o"></i>
+    Target</label> <select class="node-input-destlang" id=
+    "node-input-destlangnews" style=
+    "display: inline-block; vertical-align:middle; width: 70%;">
+      <option value="en">
+        en
+      </option>
+      <option value="ar">
+        ar
+      </option>
+      <option value="arz">
+        arz
+      </option>
+      <option value="es">
+        es
+      </option>
+      <option value="fr">
+        fr
+      </option>
+      <option value="it">
+        it
+      </option>
+      <option value="pt">
+        pt
+      </option>
+    </select>
   </div>
   <div class="form-row">
-      <label for="node-input-srclang-conversational"><i class="fa fa-comments-o"></i> Source</label>
-      <select type="text" id="node-input-srclang-conversational" class="node-input-srclang" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="ar">ar</option><option value="en">en</option><option value="es">es</option><option value="fr">fr</option><option value="pt">pt</option></select>
+    <label for="node-input-srclangconversational"><i class="fa fa-comments-o"></i>
+    Source</label> <select class="node-input-srclang" id=
+    "node-input-srclangconversational" style=
+    "display: inline-block; vertical-align:middle; width: 70%;">
+      <option value="ar">
+        ar
+      </option>
+      <option value="en">
+        en
+      </option>
+      <option value="es">
+        es
+      </option>
+      <option value="fr">
+        fr
+      </option>
+      <option value="pt">
+        pt
+      </option>
+    </select>
   </div>
   <div class="form-row">
-      <label for="node-input-destlang-conversational"><i class="fa fa-comments-o"></i> Target</label>
-      <select type="text" id="node-input-destlang-conversational" class="node-input-destlang" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="en">en</option><option value="ar">ar</option><option value="es">es</option><option value="fr">fr</option><option value="pt">pt</option></select>
+    <label for="node-input-destlangconversational"><i class=
+    "fa fa-comments-o"></i> Target</label> <select class="node-input-destlang" id=
+    "node-input-destlangconversational" style=
+    "display: inline-block; vertical-align:middle; width: 70%;">
+      <option value="en">
+        en
+      </option>
+      <option value="ar">
+        ar
+      </option>
+      <option value="es">
+        es
+      </option>
+      <option value="fr">
+        fr
+      </option>
+      <option value="pt">
+        pt
+      </option>
+    </select>
   </div>
   <div class="form-row">
-      <label for="node-input-srclang-patent"><i class="fa fa-comments-o"></i> Source</label>
-      <select type="text" id="node-input-srclang-patent" class="node-input-srclang" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="es">es</option><option value="ko">ko</option><option value="pt">pt</option><option value="zh">zh</option></select>
+    <label for="node-input-srclangpatent"><i class="fa fa-comments-o"></i>
+    Source</label> <select class="node-input-srclang" id=
+    "node-input-srclangpatent" style=
+    "display: inline-block; vertical-align:middle; width: 70%;">
+      <option value="es">
+        es
+      </option>
+      <option value="ko">
+        ko
+      </option>
+      <option value="pt">
+        pt
+      </option>
+      <option value="zh">
+        zh
+      </option>
+    </select>
   </div>
   <div class="form-row">
-      <label for="node-input-destlang-patent"><i class="fa fa-comments-o"></i> Target</label>
-      <select type="text" id="node-input-destlang-patent" class="node-input-destlang" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="en">en</option></select>
+    <label for="node-input-destlangpatent"><i class="fa fa-comments-o"></i>
+    Target</label> <select class="node-input-destlang" id=
+    "node-input-destlangpatent" style=
+    "display: inline-block; vertical-align:middle; width: 70%;">
+      <option value="en">
+        en
+      </option>
+    </select>
   </div>
   <div class="form-row">
-      <label for="node-input-filetype"><i class="fa fa-book"></i> File type</label>
-      <select type="text" id="node-input-filetype" style="display: inline-block; vertical-align:middle; width: 70%;">
-              <option value="forcedglossary">Forced glossary</option>
-              <option value="parallelcorpus">Parallel corpus</option>
-              <option value="monolingualcorpus">Monolingual corpus</option>
-          </select>
+    <label for="node-input-filetype"><i class="fa fa-book"></i> File type</label>
+    <select id="node-input-filetype" style=
+    "display: inline-block; vertical-align:middle; width: 70%;">
+      <option value="forcedglossary">
+        Forced glossary
+      </option>
+      <option value="parallelcorpus">
+        Parallel corpus
+      </option>
+      <option value="monolingualcorpus">
+        Monolingual corpus
+      </option>
+    </select>
   </div>
   <div class="form-row">
-      <label for="node-input-trainid"><i class="fa fa-tag"></i> ID</label>
-      <input type="text" id="node-input-trainid" placeholder="ID">
+    <label for="node-input-trainid"><i class="fa fa-tag"></i> ID</label>
+    <input id="node-input-trainid" placeholder="ID" type="text">
   </div>
 </script>
 
@@ -130,11 +306,11 @@ var base_model_selected = $('#node-input-basemodel').val();
     })
 
     // check availability 
-    $('#node-input-srclang-news, #node-input-srclang-conversational, #node-input-srclang-patent').change(function () {
+    $('#node-input-srclangnews, #node-input-srclangconversational, #node-input-srclangpatent').change(function () {
       destlangAvailable();
     });
 
-    $('#node-input-destlang-news, #node-input-destlang-conversational, #node-input-destlang-patent').change(function () {
+    $('#node-input-destlangnews, #node-input-destlangconversational, #node-input-destlangpatent').change(function () {
       destlang_selected = $('.node-input-destlang:visible').val();
     });
   }
@@ -144,19 +320,19 @@ var base_model_selected = $('#node-input-basemodel').val();
     switch (action) {
       case 'translate':
         $('select#node-input-domain').parent().show();
-        $('select#node-input-filetype, #node-input-trainid, select#node-input-basemodel').parent().hide();
+        $('select#node-input-fil·etype, #node-input-trainid, select#node-input-basemodel, select#node-input-filetype').parent().hide();
         selectDomain();
         break;
       case 'train':
-        $('select#node-input-srclang-conversational, select#node-input-destlang-conversational, select#node-input-srclang-news, select#node-input-destlang-news, select#node-input-srclang-patent, select#node-input-destlang-patent, #node-input-trainid, select#node-input-domain').parent().hide();
+        $('select#node-input-srclangconversational, select#node-input-destlangconversational, select#node-input-srclangnews, select#node-input-destlangnews, select#node-input-srclangpatent, select#node-input-destlangpatent, #node-input-trainid, select#node-input-domain').parent().hide();
         $('select#node-input-filetype, select#node-input-basemodel').parent().show();
         break;
       case 'getstatus':
-        $('select#node-input-srclang-conversational, select#node-input-destlang-conversational, select#node-input-srclang-news, select#node-input-destlang-news, select#node-input-srclang-patent, select#node-input-destlang-patent, select#node-input-filetype, select#node-input-domain, select#node-input-basemodel').parent().hide();
+        $('select#node-input-srclangconversational, select#node-input-destlangconversational, select#node-input-srclangnews, select#node-input-destlangnews, select#node-input-srclangpatent, select#node-input-destlangpatent, select#node-input-filetype, select#node-input-domain, select#node-input-basemodel').parent().hide();
         $('#node-input-trainid').parent().show();        
         break;
       case 'delete':
-        $('select#node-input-srclang-conversational, select#node-input-destlang-conversational, select#node-input-srclang-news, select#node-input-destlang-news, select#node-input-srclang-patent, select#node-input-destlang-patent, select#node-input-filetype,  select#node-input-domain, select#node-input-basemodel').parent().hide();
+        $('select#node-input-srclangconversational, select#node-input-destlangconversational, select#node-input-srclangnews, select#node-input-destlangnews, select#node-input-srclangpatent, select#node-input-destlangpatent, select#node-input-filetype,  select#node-input-domain, select#node-input-basemodel').parent().hide();
         $('#node-input-trainid').parent().show(); 
         break;
     }
@@ -165,14 +341,14 @@ var base_model_selected = $('#node-input-basemodel').val();
   function selectDomain() {
     domain_selected = $('#node-input-domain').val();
     if(domain_selected === "news") {
-      $('select#node-input-srclang-news, select#node-input-destlang-news').parent().show();
-      $('select#node-input-srclang-conversational, select#node-input-destlang-conversational, select#node-input-srclang-patent, select#node-input-destlang-patent').parent().hide();
+      $('select#node-input-srclangnews, select#node-input-destlangnews').parent().show();
+      $('select#node-input-srclangconversational, select#node-input-destlangconversational, select#node-input-srclangpatent, select#node-input-destlangpatent').parent().hide();
     } else if(domain_selected === "conversational") {
-      $('select#node-input-srclang-conversational, select#node-input-destlang-conversational').parent().show();
-      $('select#node-input-srclang-news, select#node-input-destlang-news, select#node-input-srclang-patent, select#node-input-destlang-patent').parent().hide();
+      $('select#node-input-srclangconversational, select#node-input-destlangconversational').parent().show();
+      $('select#node-input-srclangnews, select#node-input-destlangnews, select#node-input-srclangpatent, select#node-input-destlangpatent').parent().hide();
     } else if(domain_selected === "patent") {
-      $('select#node-input-srclang-patent, select#node-input-destlang-patent').parent().show();
-      $('select#node-input-srclang-conversational, select#node-input-destlang-conversational, select#node-input-srclang-news, select#node-input-destlang-news').parent().hide();
+      $('select#node-input-srclangpatent, select#node-input-destlangpatent').parent().show();
+      $('select#node-input-srclangconversational, select#node-input-destlangconversational, select#node-input-srclangnews, select#node-input-destlangnews').parent().hide();
     }
     destlangAvailable();
   }
@@ -192,12 +368,43 @@ var base_model_selected = $('#node-input-basemodel').val();
       return model_id.match('^' + srclang_selected);
     });
 
+
+
+
+    if(domain_selected === "news") {
+      $('.node-input-destlangnews option').removeAttr('selected');       
+      $('.node-input-destlangnews option').attr('disabled', 'disabled');
+      available_destlang.forEach(function (val) {
+        $('.node-input-destlangnews option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
+      });
+      $('.node-input-destlangnews option[disabled!=disabled]:first').attr('selected', 'selected');
+    } else if(domain_selected === "conversational") {
+      $('.node-input-destlangconversational option').removeAttr('selected');       
+      $('.node-input-destlangconversational option').attr('disabled', 'disabled');
+      available_destlang.forEach(function (val) {
+        $('.node-input-destlangconversational option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
+      });
+      $('.node-input-destlangconversational option[disabled!=disabled]:first').attr('selected', 'selected');
+    } else if(domain_selected === "patent") {
+      $('.node-input-destlangpatent option').removeAttr('selected');       
+      $('.node-input-destlangpatent option').attr('disabled', 'disabled');
+      available_destlang.forEach(function (val) {
+        $('.node-input-destlangpatent option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
+      });
+      $('.node-input-destlangpatent option[disabled!=disabled]:first').attr('selected', 'selected');
+    }
+
+
+
+
+
+
     $('.node-input-destlang:visible option').removeAttr('selected');       
     $('.node-input-destlang:visible option').attr('disabled', 'disabled');
     available_destlang.forEach(function (val) {
       $('.node-input-destlang:visible option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
     });
-    $('.node-input-destlang:visible option[disabled!=disabled]:first').attr('selected', 'selected')
+    $('.node-input-destlang:visible option[disabled!=disabled]:first').attr('selected', 'selected');
   }
 
   (function() {
@@ -222,17 +429,29 @@ var base_model_selected = $('#node-input-basemodel').val();
       name: {
         value: ''
       },
-      srclang: {
+      srclangnews: {
+        value: 'ar'
+      },
+      destlangnews: {
         value: 'en'
       },
-      destlang: {
-        value: 'fr'
+      srclangconversational: {
+        value: 'ar'
+      },
+      destlangconversational: {
+        value: 'en'
+      },
+      srclangpatent: {
+        value: 'ko'
+      },
+      destlangpatent: {
+        value: 'en'
       },
       domain: {
         value: 'news'
       },
       basemodel: {
-        value: ''
+        value: 'ar-en'
       },
       action: {
         value: 'translate'
