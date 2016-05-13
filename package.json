@@ -10,6 +10,7 @@
     "request": "~2.53.0",
     "temp": "^0.8.3",
     "qs": "6.x",
+	  "image-type": "^2.0.2",
     "watson-developer-cloud": "^1.2.4"
   },
   "repository": {
