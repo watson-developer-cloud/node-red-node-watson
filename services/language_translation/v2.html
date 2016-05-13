@@ -145,7 +145,7 @@ var base_model_selected = $('#node-input-basemodel').val();
       case 'translate':
         $('select#node-input-domain').parent().show();
         $('select#node-input-filetype, #node-input-trainid, select#node-input-basemodel').parent().hide();
-        selectDomain();
+        //selectDomain();
         break;
       case 'train':
         $('select#node-input-srclang-conversational, select#node-input-destlang-conversational, select#node-input-srclang-news, select#node-input-destlang-news, select#node-input-srclang-patent, select#node-input-destlang-patent, #node-input-trainid, select#node-input-domain').parent().hide();
@@ -216,7 +216,7 @@ var base_model_selected = $('#node-input-basemodel').val();
         $.getJSON('watson-translate/vcap/')
           .done(function (sids) {
             $('.credentials').toggle(!sids);
-            handlersUI();
+            //handlersUI();
             selectAction();                  
           })
           .fail(function () {
