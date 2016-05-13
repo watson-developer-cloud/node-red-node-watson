@@ -30,6 +30,7 @@
             <option value="imageFaces">Faces</option>
             <option value="imageLink">URLs</option>
             <option value="imageKeywords">Content Tags</option>
+            <option value="imageText">Text</option>            
         </select>
     </div>
     <div class="form-row">
@@ -42,14 +43,17 @@
     <p>Using the Image Analysis node, you can use the Alchemy APIs to analyse images for face detection, content tags and links.</p>
     <p>The following features are available for analysis:</p>
     <ul>
-        <li><b>Faces</b>, discover human faces within the images.</li>
-        <li><b>URLs</b>, discover URLs within the images.</li>
+        <li><b>Faces</b>, discover human faces within the image.</li>
+        <li><b>URLs</b>, extract images from a URL webpage.</li>
         <li><b>Content Tags</b>, extract content tags from the image.</li>
+        <li><b>Text</b>, extract text from the image.</li>        
     </ul>
     <p>For full details on the feature details and response values, please see the <a href="http://www.alchemyapi.com/api">Alchemy API documentation</a></p>
     <p>The content to be analysed should be passed in on <code>msg.payload</code>.</p>
     <p>Valid <code>msg.payload</code> types: URL or Buffer containing raw image bytes.</p>
-    <p>If you need to send custom parameters along with each feature, set those parameters as children of the <code>msg.alchemy_options</code> object.</p>
+    <p>If you need to send custom parameters along with each feature, set those parameters as children of the <code>msg.alchemy_options</code> object.
+       eg. <code>msg.alchemy_options = {knowledgeGraph: 1}</code>
+    </p>
     <br>
     <p>Results from the Alchemy API service will made available at <code>msg.result</code>.</p>
 </script>
