@@ -35,7 +35,7 @@
   <div class="form-row">
       <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
       <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
-              <option value="translate" selected="selected">Translate</option>
+              <option value="translate">Translate</option>
               <option value="train">Train</option>
               <option value="getstatus">Get status</option>
               <option value="delete">Delete</option>
@@ -43,11 +43,11 @@
   </div>
   <div class="form-row">
       <label for="node-input-domain"><i class="fa fa-book"></i> Domain</label>
-      <select type="text" id="node-input-domain" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="news" selected="selected">News</option><option value="conversational">Conversational</option><option value="patent">Patent</option></select>
+      <select type="text" id="node-input-domain" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="news">News</option><option value="conversational">Conversational</option><option value="patent">Patent</option></select>
   </div>
   <div class="form-row">
       <label for="node-input-basemodel"><i class="fa fa-book"></i> Base model</label>
-      <select type="text" id="node-input-basemodel" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="ar-en" selected="selected">ar-en</option><option value="arz-en">arz-en</option><option value="en-ar">en-ar</option><option value="en-arz">en-arz</option><option value="en-es">en-es</option><option value="en-fr">en-fr</option><option value="en-it">en-it</option><option value="en-pt">en-pt</option><option value="es-en">es-en</option><option value="es-fr">es-fr</option><option value="fr-en">fr-en</option><option value="fr-es">fr-es</option><option value="it-en">it-en</option><option value="pt-en">pt-en</option></select>
+      <select type="text" id="node-input-basemodel" style="display: inline-block; vertical-align:middle; width: 70%;"><option value="ar-en">ar-en</option><option value="arz-en">arz-en</option><option value="en-ar">en-ar</option><option value="en-arz">en-arz</option><option value="en-es">en-es</option><option value="en-fr">en-fr</option><option value="en-it">en-it</option><option value="en-pt">en-pt</option><option value="es-en">es-en</option><option value="es-fr">es-fr</option><option value="fr-en">fr-en</option><option value="fr-es">fr-es</option><option value="it-en">it-en</option><option value="pt-en">pt-en</option></select>
   </div>
   <div class="form-row">
       <label for="node-input-srclang-news"><i class="fa fa-comments-o"></i> Source</label>
@@ -76,7 +76,7 @@
   <div class="form-row">
       <label for="node-input-filetype"><i class="fa fa-book"></i> File type</label>
       <select type="text" id="node-input-filetype" style="display: inline-block; vertical-align:middle; width: 70%;">
-              <option value="forcedglossary" selected="selected">Forced glossary</option>
+              <option value="forcedglossary">Forced glossary</option>
               <option value="parallelcorpus">Parallel corpus</option>
               <option value="monolingualcorpus">Monolingual corpus</option>
           </select>
@@ -192,20 +192,12 @@ var base_model_selected = $('#node-input-basemodel').val();
       return model_id.match('^' + srclang_selected);
     });
 
-    $('.node-input-destlang:visible option').show(); 
     $('.node-input-destlang:visible option').removeAttr('selected');       
     $('.node-input-destlang:visible option').attr('disabled', 'disabled');
     available_destlang.forEach(function (val) {
       $('.node-input-destlang:visible option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
     });
-    checkPairLang();
-  }
-
-  function checkPairLang() {
-    $('.node-input-destlang:visible option[disabled=disabled]').hide();
-    $('.node-input-destlang:visible').val($('.node-input-destlang:visible option[disabled!=disabled]:first').text());
-    $('.node-input-destlang:visible option[disabled!=disabled]:first').attr('selected', 'selected');
-    $('.node-input-destlang:visible').val($('.node-input-destlang:visible option[disabled!=disabled]:first').text());
+    $('.node-input-destlang:visible option[disabled!=disabled]:first').attr('selected', 'selected')
   }
 
   (function() {
