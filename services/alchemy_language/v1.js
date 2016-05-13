@@ -46,7 +46,8 @@ module.exports = function (RED) {
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
 
-  var services = cfenv.getAppEnv().services;
+  // Taking this line out as codacy was complaining about it. 
+  // var services = cfenv.getAppEnv().services;
   var service;
 
   var apikey, s_apikey;
@@ -103,13 +104,18 @@ module.exports = function (RED) {
         return;
       }
 
-       // The watson node-SDK expects the features as a single string. 
-      var extract = "" ; //doc-sentiment";
-      enabled_features.forEach(function(entry){extract += (',' + entry)})     
+      // The watson node-SDK expects the features as a single string. 
+      var extract = "" ; 
+      extract = enabled_features.join(",");   
 
       //console.log("Will be looking for ", extract)
 
-      var params = { text: msg.payload, extract: extract  };
+      var params = { text: msg.payload, extract: extract };
+
+      // Splice in the additional options from msg.alchemy_options
+      // eg. The user may have entered msg.alchemy_options = {maxRetrieve: 2};     
+
+      for (var key in msg.alchemy_options) { params[key] = msg.alchemy_options[key]; }
 
       alchemy_language.combined(params, function (err, response) {
         if (err || response.status === 'ERROR') {
@@ -118,16 +124,16 @@ module.exports = function (RED) {
           node.error(err, msg);
         }
         else {
-           msg.features = {};
-           //msg.features['all'] = response;
+          msg.features = {};
+          //msg.features['all'] = response;
            
-           Object.keys(FEATURES).forEach(function (feature) { 
-             var answer_feature = FEATURES[feature];
+          Object.keys(FEATURES).forEach(function (feature) { 
+            var answer_feature = FEATURES[feature];
        
-             msg.features[feature] = response[answer_feature] || {};  
-           });    
+            msg.features[feature] = response[answer_feature] || {};  
+          });    
            
-           node.send(msg);
+          node.send(msg);
         }
       });
 
