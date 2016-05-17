@@ -350,7 +350,10 @@ var base_model_selected = $('#node-input-basemodel').val();
       $('select#node-input-srclangpatent, select#node-input-destlangpatent').parent().show();
       $('select#node-input-srclangconversational, select#node-input-destlangconversational, select#node-input-srclangnews, select#node-input-destlangnews').parent().hide();
     }
-    destlangAvailable();
+    if(first_launch) {
+      destlangAvailable();
+      first_launch = false;
+    }
   }
 
   function destlangAvailable() {
