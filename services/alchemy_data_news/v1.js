@@ -108,7 +108,8 @@ module.exports = function(RED) {
 				if (err) {
 					node.error(err);
 				} else {
-					node.send({'payload': news});
+					msg.payload = news;
+					node.send(msg);
 				}
 			});
 		});
