@@ -100,17 +100,19 @@ module.exports = function (RED) {
       //context.set('watson-translate-node', {'one': 'aaa', 'two' : 'bbb'});
     });
 
-
-    // The node has received an input as part of a flow, need to determine what the request
-    // is for, and based on that if the required fields have been provided. 
+                                                                               
+    // The node has received an input as part of a flow, need to determine 
+    // what the request is for, and based on that if the required fields 
+    //have been provided. 
     this.on('input', function (msg) {
       
-      // These are var functions that have been initialised here, so that they are available for the 
-      // instance of this node to use. Tried to make these protoypes, but couldn't get them to be 
+      // These are var functions that have been initialised here, so that 
+      // they are available for the instance of this node to use. 
+      // Tried to make these protoypes, but couldn't get them to be 
       // invokedd. So instead have opted to go for vars. 
 
-      // If a translation is requested, then the model id will have been built by the calling 
-      // function based on source, target and domain.
+      // If a translation is requested, then the model id will have been 
+      // built by the calling function based on source, target and domain.
       var doTranslate = function(msg, model_id){
         node.status({
           fill: 'blue',
@@ -131,12 +133,13 @@ module.exports = function (RED) {
               msg.payload = response.translations[0].translation;
             }
             node.send(msg);
-        });
+          }
+        );
       }; 
 
       // If training is requested then the glossary will be a file input. We are using temp
       // to sync up the fetch of the file input stream, before invoking the train service. 
-      var doTrain = function(msg, model_id){
+      var doTrain = function(msg, model_id, filetype){
         node.status({
           fill: 'blue',
           shape: 'dot',
@@ -151,7 +154,7 @@ module.exports = function (RED) {
             var params = {};
             // only letters and numbers allowed in the submitted file name
             params.name = msg.filename.replace(/[^0-9a-z]/gi, '');
-            params.base_model_id = basemodel;
+            params.base_model_id = model_id;
             switch (filetype) {
               case 'forcedglossary':
                 params.forced_glossary = fs.createReadStream(info.path);
@@ -236,7 +239,7 @@ module.exports = function (RED) {
           {
             model_id: trainid,
           },
-          function (err, model) {
+          function (err) {
             if (err) {
               node.status({
                 fill: 'red',
@@ -318,7 +321,7 @@ module.exports = function (RED) {
           }
           var model_id = '';
           model_id = srclang + '-' + destlang;
-          if (domain != "news") {
+          if (domain !== 'news') {
             model_id += ('-' + domain);
           }
           doTranslate(msg, model_id);
