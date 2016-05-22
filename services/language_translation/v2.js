@@ -104,6 +104,8 @@ module.exports = function (RED) {
     // have been provided. 
     this.on('input', function (msg) {
 
+      var message = '';
+
       // The dynamic nature of this node has caused problems with the password field. it is 
       // hidden but not a credential. If it is treated as a credential, it gets lost when there
       // is a request to refresh the model list. 
@@ -292,8 +294,6 @@ module.exports = function (RED) {
 
       // Now that the do functions have been defined, can now determine what action this node
       // is configured for. 
-
-      var message = '';
 
       if (!msg.payload) {
         message = 'Missing property: msg.payload';
