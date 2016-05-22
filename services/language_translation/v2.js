@@ -30,7 +30,8 @@ module.exports = function (RED) {
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
 
-  var services = cfenv.getAppEnv().services;
+  // Not ever used, and codeacy complains about it.
+  // var services = cfenv.getAppEnv().services;
 
   var username, password, sUsername, sPassword;;
   var service = cfenv.getAppEnv().getServiceCreds(/language translation/i)
@@ -90,7 +91,7 @@ module.exports = function (RED) {
   function SMTNode (config) {
     RED.nodes.createNode(this, config);
     var node = this;
-    var ctx = this.context().flow;
+    // var ctx = this.context().flow;
  
     // this does nothing, but am keeping it with a commented out signature, as 
     // it might come in handy in the future.
@@ -315,7 +316,7 @@ module.exports = function (RED) {
             node.send(msg);
             return;
           }
-          var model_id = "";
+          var model_id = '';
           model_id = srclang + '-' + destlang;
           if (domain != "news") {
             model_id += ('-' + domain);
@@ -349,11 +350,11 @@ module.exports = function (RED) {
           doGetStatus(msg, trainid);       
           break;
         case 'delete':
-          var trainid = msg.trainid || config.trainid; 
-          doDelete(msg, trainid);  
+          var d_trainid = msg.trainid || config.trainid; 
+          doDelete(msg, d_trainid);  
           break;
         default:
-          var message = "Unexpected Mode";
+          message = 'Unexpected Mode';
           node.status({
             fill: 'blue',
             shape: 'dot',
@@ -367,8 +368,8 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-translate', SMTNode, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
+      username: {type:'text'},
+      password: {type:'password'}
     }
   });
 };
