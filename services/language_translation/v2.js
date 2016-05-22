@@ -104,6 +104,31 @@ module.exports = function (RED) {
     // have been provided. 
     this.on('input', function (msg) {
 
+      var message = '';
+
+      // The dynamic nature of this node has caused problems with the password field. it is 
+      // hidden but not a credential. If it is treated as a credential, it gets lost when there
+      // is a request to refresh the model list. 
+      //
+      // Credentials are needed for each of the modes.
+
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password || config.password;
+
+      if (!username || !password) {
+        message = 'Missing Language Translation service credentials';
+        node.error(message, msg);
+        return;
+      }
+
+      var action = msg.action || config.action;
+
+      if (!action) {
+        node.warn('Missing action, please select one');
+        node.send(msg);
+        return;
+      }
+      
       // This declaration put here, as codeacy wants it before it is used 
       // in the do functions below.
       var language_translation = watson.language_translation({
@@ -270,34 +295,9 @@ module.exports = function (RED) {
       // Now that the do functions have been defined, can now determine what action this node
       // is configured for. 
 
-      var message = '';
-
       if (!msg.payload) {
         message = 'Missing property: msg.payload';
         node.error(message, msg);
-        return;
-      }
-
-      // The dynamic nature of this node has caused problems with the password field. it is 
-      // hidden but not a credential. If it is treated as a credential, it gets lost when there
-      // is a request to refresh the model list. 
-      //
-      // Credentials are needed for each of the modes.
-
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
-
-      if (!username || !password) {
-        message = 'Missing Language Translation service credentials';
-        node.error(message, msg);
-        return;
-      }
-
-      var action = msg.action || config.action;
-
-      if (!action) {
-        node.warn('Missing action, please select one');
-        node.send(msg);
         return;
       }
 
