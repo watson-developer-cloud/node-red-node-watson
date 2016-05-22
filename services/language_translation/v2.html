@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013,2015 IBM Corp.
+  Copyright 2013,2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,283 +15,479 @@
 -->
 
 <script type="text/x-red" data-template-name="watson-translate">
-  <div class="form-row" id="credentials-check">
-    <div class="form-tips">
-      <i class="fa fa-question-circle"></i> <b>Please wait:</b> Checking for bound
-      service credentials...
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
     </div>
-  </div>
-  <div class="form-row">
-    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label> <input id=
-    "node-input-name" placeholder="Name" type="text">
-  </div>
-  <div class="form-row credentials" style="display: none;">
-    <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-    <input id="node-input-username" placeholder="Username" type="text">
-  </div>
-  <div class="form-row credentials" style="display: none;">
-    <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-    <input id="node-input-password" placeholder="Password" type="password">
-  </div>
-  <div class="form-row">
-    <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
-    <select id="node-input-action" style=
-    "display: inline-block; vertical-align:middle; width: 70%;">
-      <option value="translate">
-        Translate
-      </option>
-      <option value="train">
-        Train
-      </option>
-      <option value="getstatus">
-        Get status
-      </option>
-      <option value="delete">
-        Delete
-      </option>
-    </select>
-  </div>
-  <div class="form-row">
-    <label for="node-input-domain"><i class="fa fa-book"></i> Domain</label>
-    <select id="node-input-domain" style=
-    "display: inline-block; vertical-align:middle; width: 70%;">
-      <option value="news">
-        News
-      </option>
-      <option value="conversational">
-        Conversational
-      </option>
-      <option value="patent">
-        Patent
-      </option>
-    </select>
-  </div>
-  <div class="form-row">
-    <label for="node-input-basemodel"><i class="fa fa-book"></i> Base
-    model</label> <select id="node-input-basemodel" style=
-    "display: inline-block; vertical-align:middle; width: 70%;">
-      <option value="ar-en">
-        ar-en
-      </option>
-      <option value="arz-en">
-        arz-en
-      </option>
-      <option value="en-ar">
-        en-ar
-      </option>
-      <option value="en-arz">
-        en-arz
-      </option>
-      <option value="en-es">
-        en-es
-      </option>
-      <option value="en-fr">
-        en-fr
-      </option>
-      <option value="en-it">
-        en-it
-      </option>
-      <option value="en-pt">
-        en-pt
-      </option>
-      <option value="es-en">
-        es-en
-      </option>
-      <option value="es-fr">
-        es-fr
-      </option>
-      <option value="fr-en">
-        fr-en
-      </option>
-      <option value="fr-es">
-        fr-es
-      </option>
-      <option value="it-en">
-        it-en
-      </option>
-      <option value="pt-en">
-        pt-en
-      </option>
-    </select>
-  </div>
-  <div class="form-row">
-    <label for="node-input-srclangnews"><i class="fa fa-comments-o"></i>
-    Source</label> <select class="node-input-srclang" id="node-input-srclangnews"
-    style="display: inline-block; vertical-align:middle; width: 70%;">
-      <option value="ar">
-        ar
-      </option>
-      <option value="arz">
-        arz
-      </option>
-      <option value="en">
-        en
-      </option>
-      <option value="es">
-        es
-      </option>
-      <option value="fr">
-        fr
-      </option>
-      <option value="it">
-        it
-      </option>
-      <option value="pt">
-        pt
-      </option>
-    </select>
-  </div>
-  <div class="form-row">
-    <label for="node-input-destlangnews"><i class="fa fa-comments-o"></i>
-    Target</label> <select class="node-input-destlang" id=
-    "node-input-destlangnews" style=
-    "display: inline-block; vertical-align:middle; width: 70%;">
-      <option value="en">
-        en
-      </option>
-      <option value="ar">
-        ar
-      </option>
-      <option value="arz">
-        arz
-      </option>
-      <option value="es">
-        es
-      </option>
-      <option value="fr">
-        fr
-      </option>
-      <option value="it">
-        it
-      </option>
-      <option value="pt">
-        pt
-      </option>
-    </select>
-  </div>
-  <div class="form-row">
-    <label for="node-input-srclangconversational"><i class="fa fa-comments-o"></i>
-    Source</label> <select class="node-input-srclang" id=
-    "node-input-srclangconversational" style=
-    "display: inline-block; vertical-align:middle; width: 70%;">
-      <option value="ar">
-        ar
-      </option>
-      <option value="en">
-        en
-      </option>
-      <option value="es">
-        es
-      </option>
-      <option value="fr">
-        fr
-      </option>
-      <option value="pt">
-        pt
-      </option>
-    </select>
-  </div>
-  <div class="form-row">
-    <label for="node-input-destlangconversational"><i class=
-    "fa fa-comments-o"></i> Target</label> <select class="node-input-destlang" id=
-    "node-input-destlangconversational" style=
-    "display: inline-block; vertical-align:middle; width: 70%;">
-      <option value="en">
-        en
-      </option>
-      <option value="ar">
-        ar
-      </option>
-      <option value="es">
-        es
-      </option>
-      <option value="fr">
-        fr
-      </option>
-      <option value="pt">
-        pt
-      </option>
-    </select>
-  </div>
-  <div class="form-row">
-    <label for="node-input-srclangpatent"><i class="fa fa-comments-o"></i>
-    Source</label> <select class="node-input-srclang" id=
-    "node-input-srclangpatent" style=
-    "display: inline-block; vertical-align:middle; width: 70%;">
-      <option value="es">
-        es
-      </option>
-      <option value="ko">
-        ko
-      </option>
-      <option value="pt">
-        pt
-      </option>
-      <option value="zh">
-        zh
-      </option>
-    </select>
-  </div>
-  <div class="form-row">
-    <label for="node-input-destlangpatent"><i class="fa fa-comments-o"></i>
-    Target</label> <select class="node-input-destlang" id=
-    "node-input-destlangpatent" style=
-    "display: inline-block; vertical-align:middle; width: 70%;">
-      <option value="en">
-        en
-      </option>
-    </select>
-  </div>
-  <div class="form-row">
-    <label for="node-input-filetype"><i class="fa fa-book"></i> File type</label>
-    <select id="node-input-filetype" style=
-    "display: inline-block; vertical-align:middle; width: 70%;">
-      <option value="forcedglossary">
-        Forced glossary
-      </option>
-      <option value="parallelcorpus">
-        Parallel corpus
-      </option>
-      <option value="monolingualcorpus">
-        Monolingual corpus
-      </option>
-    </select>
-  </div>
-  <div class="form-row">
-    <label for="node-input-trainid"><i class="fa fa-tag"></i> ID</label>
-    <input id="node-input-trainid" placeholder="ID" type="text">
-  </div>
+    <div id="credentials-not-found" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Could not bind to service. </b> This node can not be further configured without a valid service. Try entering valid credentials?
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name"/>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username"/>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
+        <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
+            <option value="translate">Translate</option>
+            <option value="custom">Customised Translate</option>
+            <option value="train">Train</option>
+            <option value="getstatus">Get status</option>
+            <option value="delete">Delete</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-domain"><i class="fa fa-book"></i> Domains</label>
+        <select type="text" id="node-input-domain" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+
+    <div>
+        <input type="hidden" id="node-input-domainhidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-custom"><i class="fa fa-book"></i> Customised Model</label>
+        <select type="text" id="node-input-custom" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+
+    <div>
+        <input type="hidden" id="node-input-customhidden"/>
+    </div>    
+
+    <div class="form-row">
+        <label for="node-input-srclang"><i class="fa fa-comments-o"></i> Source</label>
+        <select type="text" id="node-input-srclang" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-srclanghidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-destlang"><i class="fa fa-comments-o"></i> Target</label>
+        <select type="text" id="node-input-destlang" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-destlanghidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-basemodel"><i class="fa fa-book"></i> Base model</label>
+        <select type="text" id="node-input-basemodel" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-basemodelhidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-filetype"><i class="fa fa-book"></i> File type</label>
+        <select type="text" id="node-input-filetype" style="display: inline-block; vertical-align:middle; width: 70%;">
+            <option value="forcedglossary" selected="selected">Forced glossary</option>
+            <option value="parallelcorpus">Parallel corpus</option>
+            <option value="monolingualcorpus">Monolingual corpus</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-trainid"><i class="fa fa-tag"></i> Model ID</label>
+        <input type="text" id="node-input-trainid" placeholder="Model ID">
+    </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-translate">
-    <p>The Language Translation service enables you to translate text from one language to another.</p>
+    <p>The Language Translation service enables you to translate text from one language to another and to add your own translation models.</p>
+    <p></p>
+    <p><b>Translation Mode</b>.</p>
     <p>The text to translate should be passed in on <code>msg.payload</code>.</p>
     <p>The translated text will be returned on <code>msg.payload</code>.</p>
+    <p>The full response from the service will be returned on <code>msg.translation</code></p>
     <p>Source and destination language parameters can be configured through the editor panel or set dynamically using
     the language codes in the following properties, <code>msg.srclang</code> and <code>msg.destlang</code>. Please see
     the documentation linked below for the currently supported source and destination language codes.</p>
+    <p></p>
+    <p><b>Customised Translation Mode</b>.</p>
+    <p>In this mode you can select a translation model that you have customised through 
+    the training options.</p>
+    <p>The text to translate should be passed in on <code>msg.payload</code>.</p>
+    <p>The translated text will be returned on <code>msg.payload</code>.</p>
+    <p>The full response from the service will be returned on <code>msg.translation</code></p>
+    <p></p>    
+    <p><b>Training Mode</b>.</p>
+    <p>This mode enables you to add your own customized model to the Watson translation service. </p>
+    <p>In the Dropbox node, you must specify one ore more of the following file options to customize the training:</p>
+    <p>forced_glossary - A UTF-8 encoded TMX file that contains pairs of matching terms in the source and target language that are seen as absolute by the system. This file completely overwrites the original domain data.</p>
+    <p>parallel_corpus - A UTF-8 encoded TMX file that contains matching phrases in the source and target language that serve as examples for Watson. Parallel corpora differ from glossaries because they do not overwrite the original domain data.</p>
+    <p>monolingual_corpus - A UTF-8 encoded plain text file that contains a body of text in the target language that is related to what you are translating. A monolingual corpus helps improve literal translations to be more fluent and human.</p>
+    <p>The Language Translation Node will return the ID of the created customized model.</p>
+    <p></p>
+    <p><b>Get Status Mode</b>.</p>
+    <p>This mode allows you to get the status of a model sent to training by providing its ID.</p>
+    <p>Values can be the followings:</p>
+    <p>training - Training is still in progress.</p>
+    <p>queued@<#> - Training has not yet started and the model is in the queue. The # indicates the number of your model in the queue.</p>
+    <p>error - Training did not complete because of an error. if you want to see the reason behind the error
+    this will be returned in <code>msg.translation</code></p>
+    <p>available - Training is completed, and the service is now available to use with your custom translation model.</p>
+    <p><b>Delete Mode</b>.</p>
+    <p></p>
+    <p>This mode allows you to delete a model by providing its ID</p>
     <p>For more information about the Language Translation service, read the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/language-translation.html">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
-var first_launch = true;
-var models = [{"model_id":"74f97d5c-c3a3-4962-a41c-fa6297d9fad0","source":"ar","target":"en","base_model_id":"ar-en","domain":"news","customizable":false,"default_model":false,"owner":"e3c6be3f-255a-43a5-8f23-fb533783ea19","status":"error","name":"glossarytmx","train_log":null},{"model_id":"3108dfd9-00e0-4266-8195-1f7f9a880683","source":"ar","target":"en","base_model_id":"ar-en","domain":"news","customizable":false,"default_model":false,"owner":"e3c6be3f-255a-43a5-8f23-fb533783ea19","status":"error","name":"glossarytmx","train_log":null},{"model_id":"9b5f2f86-ab1e-44fd-bfca-eed4c5d3a113","source":"es","target":"en","base_model_id":"es-en","domain":"news","customizable":false,"default_model":false,"owner":"e3c6be3f-255a-43a5-8f23-fb533783ea19","status":"error","name":"glossarytmx","train_log":null},{"model_id":"6bfa9bab-7579-435e-aab3-299c73415ce7","source":"en","target":"es","base_model_id":"en-es","domain":"news","customizable":false,"default_model":false,"owner":"e3c6be3f-255a-43a5-8f23-fb533783ea19","status":"error","name":"glossarytmx","train_log":null},{"model_id":"d40da789-a3eb-4591-9215-9da4f25db2a4","source":"en","target":"es","base_model_id":"en-es","domain":"news","customizable":false,"default_model":false,"owner":"e3c6be3f-255a-43a5-8f23-fb533783ea19","status":"error","name":"glossarytmx","train_log":null},{"model_id":"a55c0b14-460b-4ae4-a2b7-fa15ccf41ba7","source":"en","target":"es","base_model_id":"en-es","domain":"news","customizable":false,"default_model":false,"owner":"e3c6be3f-255a-43a5-8f23-fb533783ea19","status":"error","name":"glossarytmx","train_log":null},{"model_id":"020f06e0-170d-44e7-8484-6c78c81101a8","source":"en","target":"es","base_model_id":"en-es","domain":"news","customizable":false,"default_model":false,"owner":"e3c6be3f-255a-43a5-8f23-fb533783ea19","status":"error","name":"glossarytmx","train_log":null},{"model_id":"858457b5-5b5a-4588-b818-2e9cac7270ac","source":"ar","target":"en","base_model_id":"ar-en","domain":"news","customizable":false,"default_model":false,"owner":"e3c6be3f-255a-43a5-8f23-fb533783ea19","status":"error","name":"glossarytmx","train_log":null},{"model_id":"4f9db32f-fee7-4183-9de8-e76a75fb4d5b","source":"ar","target":"en","base_model_id":"ar-en","domain":"news","customizable":false,"default_model":false,"owner":"e3c6be3f-255a-43a5-8f23-fb533783ea19","status":"error","name":"glossarytmx","train_log":null},{"model_id":"ar-en","source":"ar","target":"en","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"ar-en-conversational","source":"ar","target":"en","base_model_id":"","domain":"conversational","customizable":false,"default_model":false,"owner":"","status":"available","name":"","train_log":null},{"model_id":"arz-en","source":"arz","target":"en","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"en-ar","source":"en","target":"ar","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"en-ar-conversational","source":"en","target":"ar","base_model_id":"","domain":"conversational","customizable":false,"default_model":false,"owner":"","status":"available","name":"","train_log":null},{"model_id":"en-arz","source":"en","target":"arz","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"en-es","source":"en","target":"es","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"en-es-conversational","source":"en","target":"es","base_model_id":"","domain":"conversational","customizable":false,"default_model":false,"owner":"","status":"available","name":"","train_log":null},{"model_id":"en-fr","source":"en","target":"fr","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"en-fr-conversational","source":"en","target":"fr","base_model_id":"","domain":"conversational","customizable":false,"default_model":false,"owner":"","status":"available","name":"","train_log":null},{"model_id":"en-it","source":"en","target":"it","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"en-pt","source":"en","target":"pt","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"en-pt-conversational","source":"en","target":"pt","base_model_id":"","domain":"conversational","customizable":false,"default_model":false,"owner":"","status":"available","name":"","train_log":null},{"model_id":"es-en","source":"es","target":"en","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"es-en-conversational","source":"es","target":"en","base_model_id":"","domain":"conversational","customizable":false,"default_model":false,"owner":"","status":"available","name":"","train_log":null},{"model_id":"es-en-patent","source":"es","target":"en","base_model_id":"","domain":"patent","customizable":false,"default_model":false,"owner":"","status":"available","name":"","train_log":null},{"model_id":"es-fr","source":"es","target":"fr","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"fr-en","source":"fr","target":"en","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"fr-en-conversational","source":"fr","target":"en","base_model_id":"","domain":"conversational","customizable":false,"default_model":false,"owner":"","status":"available","name":"","train_log":null},{"model_id":"fr-es","source":"fr","target":"es","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"it-en","source":"it","target":"en","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"ko-en-patent","source":"ko","target":"en","base_model_id":"","domain":"patent","customizable":false,"default_model":false,"owner":"","status":"available","name":"","train_log":null},{"model_id":"pt-en","source":"pt","target":"en","base_model_id":"","domain":"news","customizable":true,"default_model":true,"owner":"","status":"available","name":"","train_log":null},{"model_id":"pt-en-conversational","source":"pt","target":"en","base_model_id":"","domain":"conversational","customizable":false,"default_model":false,"owner":"","status":"available","name":"","train_log":null},{"model_id":"pt-en-patent","source":"pt","target":"en","base_model_id":"","domain":"patent","customizable":false,"default_model":false,"owner":"","status":"available","name":"","train_log":null},{"model_id":"zh-en-patent","source":"zh","target":"en","base_model_id":"","domain":"patent","customizable":false,"default_model":false,"owner":"","status":"available","name":"","train_log":null}];
+  var models = null;
+  var domains = null;
+  var basemodels = null;
+  var custommodels = null;
+  var domain_type;
+  var first_launch = true;
+  var have_credentials = false;
+  var using_local_credentials = false;
 
-var domain_type;
-var languages;
-var domain_selected = $('#node-input-domain').val();
-var srclang_selected;
-var destlang_selected;
-var action = $('#node-input-action').val();
-var base_model_selected = $('#node-input-basemodel').val();
+  var action = $('#node-input-action').val();
+  var domain_selected = $('#node-input-domainhidden').val();
+  var custom_selected = $('#node-input-customhidden').val();
+  var srclang_selected = $('#node-input-srclanghidden').val();
+  var destlang_selected = $('#node-input-destlanghidden').val();
+  var base_model_selected = $('#node-input-basemodelhidden').val();
+
+  var LANGUAGES = { 'ar' : 'Arabic', 
+                    'arz': 'Spoken Arabic', 
+                    'en': 'English' , 
+                    'es': 'Spanish', 
+                    'fr': 'French', 
+                    'it': 'Italian', 
+                    'pt': 'Portuguese',
+                    'ko': 'Korean',
+                    'zh': 'Chinese'
+                  };
+
+  // convert an id in the form it-ko into Italian - Korean for display 
+  function idToText(id) {
+    var txt = "";
+    var langs = id.split('-');
+    var first = true;
+    
+    langs.forEach(function(language){
+      txt += (LANGUAGES[language] ? LANGUAGES[language] : lang); 
+      if (first) {
+        txt += ' - ';
+        first = false;
+      }
+    }) 
+    return txt;
+  }
+
+  // Function to be used at the start, as don't want to expose any fields, unless the model is 
+  // available. The model it self can only be fetched if the credentials are available. 
+  function hideEverything() {
+    if (!models) {
+      $('#credentials-not-found').show();
+      $('#node-input-action').parent().hide();  
+      $('select#node-input-srclang, select#node-input-destlang').parent().hide();  
+      $('select#node-input-domain').parent().hide();
+      $('select#node-input-custom').parent().hide();
+      $('select#node-input-basemodel').parent().hide();
+      $('select#node-input-filetype').parent().hide();
+      $('input#node-input-trainid').parent().hide();
+    } 
+  }
+
+  // If we have models, then certain fields can be shown.
+  // this is invoked in the process tha obtains the models, which may be 
+  // after the dialog is shown. 
+  // ie. all the fields are initially hidden, but once the credentials are valid and
+  // the model has been retrieved then this function is invoked to update what fields 
+  // are shown without the user having to close the dialog. 
+  // Problem is that the onchange is only invoked when the user tabs to another field. 
+  function visibilityCheck() {
+    if (models) {
+      $('#node-input-action').parent().show();  
+      selectAction();         
+    } 
+  }
 
   // sorting functions
   function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
   }
 
+
+  // Retrieve the available models from the server, if data is returned, then 
+  // can enable the dynamic selection fields. 
+  function getModels() {
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+
+    $.getJSON('watson-translate/models/', {un: u, pwd: p}).done(function (data) {
+      if (data.models) {
+        models = data.models;
+        have_credentials = true;  
+        visibilityCheck();      
+      }
+    }).fail(function (err) {
+      console.log(err);
+    }).always(function () {});
+  }
+
+  // Simple check that is only invoked if the service is not bound into bluemix. In this case the
+  // user has to provide credentials. Once there are credentials, then the models are retrieved. 
+  function checkCredentials() {
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+
+    if (u && u.length && p) {      
+      if (!models) {
+        getModels();
+        if (models) {$('#node-input-action').parent().show(); }
+      } 
+    } else if (!models) {
+      $('#node-input-action').parent().hide();  
+    }
+  }
+
+  // function that is called when the domain or the source language is changed. In this case the 
+  // destination language selection field is dynamically repopulated, and reselected if the 
+  // previously selection is still in the new list.
+  function destlangAvailable() {
+    if (!domain_type) { return; }
+
+    var pair_lang = domain_type.map(function (a) {
+      return a.model_id;
+    });
+
+    // need to do an exact source language match to allow for variations
+    // like ar and arz. if the input is ar, then don't want it to match with arz
+    var available_destlang = pair_lang.filter(function (model_id) {
+      return model_id.match('^' + srclang_selected + '-');
+    });
+
+    available_destlang.forEach(function (val) {
+      var lang = val.split('-')[1];
+
+      var selectedText = '';
+      if (destlang_selected === lang) {
+        selectedText = 'selected="selected"';
+      }
+      $('select#node-input-destlang')
+        .append('<option value='
+                      + '"' + lang + '"'
+                      + selectedText
+                      + '>'
+                      + (LANGUAGES[lang] ? LANGUAGES[lang] : lang)
+                      + '</option>');               
+    });
+    destlang_selected = $('#node-input-destlang').val();
+  }
+
+  // Populates the domains selection field. 
+  // If domains have already been retrieved then no need to refetch them. 
+  function domainsAvailable() {
+    if (!domains) {
+      domains = models.map(function (a) {
+        return a.domain;
+      });     
+    }
+    if (domains) {
+      $('select#node-input-domain').empty();
+      var unique_domains = domains.filter(onlyUnique);
+
+      unique_domains.forEach(function(domain) {
+        var selectedText = '';
+        if (domain_selected === domain) {
+          selectedText = 'selected="selected"';
+        }
+        $('select#node-input-domain')
+          .append('<option value='
+                        + '"' + domain + '"'
+                        + selectedText
+                        + '>'
+                        + domain.charAt(0).toUpperCase() 
+                        + domain.slice(1) 
+                        + '</option>');               
+      });
+
+    selectDomain();
+    }  
+  }
+
+  // Populates the base model field. These are the models that are available to be customised. 
+  function basemodelsAvailable() {
+    if (!basemodels && models) {
+      basemodels = models.filter(function (model) {
+        return model.customizable === true;
+      });
+    }   
+    if (basemodels) {
+      $('select#node-input-basemodel').empty();
+      basemodels.forEach(function(base_model){
+        var selectedText = '';
+        if (base_model_selected === base_model.model_id) {
+            selectedText = 'selected="selected"';
+        }  
+        $('select#node-input-basemodel')
+            .append('<option value='
+                          + '"' + base_model.model_id + '"'
+                          + selectedText
+                          + '>'
+                          + idToText(base_model.model_id)
+                          + '</option>');
+      });                   
+    }  
+  }
+
+  // Populates the customised models field. These are the models that have been
+  // customised. This control needs to be refreshed. Currently the only that that 
+  // will happen is by a page refresh. Need to have a trigger everytime the create 
+  // new model is triggerd, but that is a little complicated and needs to be done on
+  // a clear mind.
+  function customsAvailable() {
+    if (!custommodels && models) {
+      custommodels = models.filter(function (m) {
+        return (m.base_model_id && ('' != m.base_model_id));
+      });
+    }
+    if (custommodels) {
+      $('select#node-input-custom').empty();
+    
+      custommodels.forEach(function(m){
+        var selectedText = '';
+        if (custom_selected === m.model_id) {
+            selectedText = 'selected="selected"';
+        }  
+        $('select#node-input-custom')
+            .append('<option value='
+                        + '"' + m.model_id + '"'
+                        + selectedText
+                        + '>'
+                        + m.model_id 
+                        + ' (' + m.domain + ' ' + m.base_model_id + ' ' + m.name + ')'
+                        + '</option>');
+
+      });                   
+    }
+  }
+
+
+  // UI Handler for the Mode / switch. 
+  // Princliple function is to show / hide the appropriate fields.  
+  function selectAction() {
+    action = $('#node-input-action').val();
+    if (models) {
+      $('#credentials-not-found').hide();
+      switch (action) {
+        case 'translate':
+          $('select#node-input-srclang, select#node-input-destlang').parent().show();
+          $('select#node-input-domain').parent().show();
+          $('select#node-input-custom').parent().hide();
+          $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
+          $('input#node-input-trainid').parent('').hide();
+          break;
+        case 'custom':
+          $('select#node-input-custom').parent().show();
+          $('select#node-input-srclang, select#node-input-destlang').parent().hide();
+          $('select#node-input-domain').parent().hide();
+          $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
+          $('input#node-input-trainid').parent('').hide();
+          break;          
+        case 'train':
+          $('select#node-input-custom').parent().hide();      
+          $('select#node-input-srclang, select#node-input-destlang').parent().hide();
+          $('select#node-input-domain').parent().hide();
+          $('select#node-input-basemodel, select#node-input-filetype').parent('').show();
+          $('input#node-input-trainid').parent('').hide();          
+          break;
+        case 'getstatus':
+        case 'delete':
+          $('select#node-input-custom').parent().hide();
+          $('input#node-input-trainid').parent('').show();  
+          $('select#node-input-srclang, select#node-input-destlang').parent().hide();
+          $('select#node-input-domain').parent().hide();
+          $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
+          break;
+      }
+      domainsAvailable();
+      basemodelsAvailable();
+      customsAvailable();
+    } else {
+      $('#credentials-not-found').show();
+    }
+  }
+
+  // UI Handler for the domain switch
+  // Repopulate the source and languages based on the available translations for the domain
+  function selectDomain(){
+    $('#node-input-srclang').empty();
+    $('#node-input-destlang').empty();
+    if (models && domains) {
+      domain_selected = $('#node-input-domain').val();
+      domain_type = models.filter(function (model) {
+        return model.domain === domain_selected && model.status === 'available';
+      });
+      var input_lang = domain_type.map(function (a) {
+        return a.source;
+      });
+      var output_lang = domain_type.map(function (a) {
+        return a.target;
+      });
+      input_lang_unique = input_lang.filter(onlyUnique);
+      output_lang_unique = output_lang.filter(onlyUnique);
+
+      input_lang_unique.forEach(function(lang){
+        var selectedText = '';
+        if (srclang_selected === lang) {
+          selectedText = 'selected="selected"';
+        }
+        $('select#node-input-srclang')
+          .append('<option value='
+                        + '"' + lang + '"'
+                        + selectedText
+                        + '>'
+                        + (LANGUAGES[lang] ? LANGUAGES[lang] : lang)
+                        + '</option>');               
+      });
+      // Having repopulated the input language selection, the old selected item
+      // may no longer be in the list, so refresh it.
+      srclang_selected = $('#node-input-srclang').val();
+      destlangAvailable();
+    }
+  }
+
+
+  // Register the handlers for the fields
   function handlersUI() {
-    $('#node-input-action').change(function (val) {
+    $('#node-input-username').change(function(val){
+      checkCredentials();
+      if (have_credentials) {
+        selectAction();}
+    }); 
+    $('#node-input-password').change(function(val){
+      checkCredentials();
+      if (have_credentials) {
+        selectAction();
+      }
+    }); 
+
+    $('#node-input-action').change(function(val){
       action = $('#node-input-action').val();
       selectAction();
     });
@@ -301,192 +497,136 @@ var base_model_selected = $('#node-input-basemodel').val();
       selectDomain();
     });
 
+    $('#node-input-custom').change(function () {
+      custom_selected = $('#node-input-custom').val();
+    });  
+
+    $('#node-input-srclang').change(function () {
+      srclang_selected = $('#node-input-srclang').val();
+      destlangAvailable();
+    });
+
+    $('#node-input-destlang').change(function () {
+      destlang_selected = $('#node-input-destlang').val();
+    });  
+
     $('#node-input-basemodel').change(function (val) {
       base_model_selected = $('#node-input-basemodel').val();
-    })
-
-    // check availability 
-    $('#node-input-srclangnews, #node-input-srclangconversational, #node-input-srclangpatent').change(function () {
-      destlangAvailable();
-    });
-
-    $('#node-input-destlangnews, #node-input-destlangconversational, #node-input-destlangpatent').change(function () {
-      destlang_selected = $('.node-input-destlang:visible').val();
-    });
+    });  
   }
 
-  function selectAction() {
-    action = $('#node-input-action').val();
-    switch (action) {
-      case 'translate':
-        $('select#node-input-domain').parent().show();
-        $('select#node-input-fil·etype, #node-input-trainid, select#node-input-basemodel, select#node-input-filetype').parent().hide();
-        selectDomain();
-        break;
-      case 'train':
-        $('select#node-input-srclangconversational, select#node-input-destlangconversational, select#node-input-srclangnews, select#node-input-destlangnews, select#node-input-srclangpatent, select#node-input-destlangpatent, #node-input-trainid, select#node-input-domain').parent().hide();
-        $('select#node-input-filetype, select#node-input-basemodel').parent().show();
-        break;
-      case 'getstatus':
-        $('select#node-input-srclangconversational, select#node-input-destlangconversational, select#node-input-srclangnews, select#node-input-destlangnews, select#node-input-srclangpatent, select#node-input-destlangpatent, select#node-input-filetype, select#node-input-domain, select#node-input-basemodel').parent().hide();
-        $('#node-input-trainid').parent().show();        
-        break;
-      case 'delete':
-        $('select#node-input-srclangconversational, select#node-input-destlangconversational, select#node-input-srclangnews, select#node-input-destlangnews, select#node-input-srclangpatent, select#node-input-destlangpatent, select#node-input-filetype,  select#node-input-domain, select#node-input-basemodel').parent().hide();
-        $('#node-input-trainid').parent().show(); 
-        break;
+  // The dynamic nature of the selection fields in this node has caused problems.
+  // Whenever there is a fetch for the models, on a page refresh or applicaiton 
+  // restart, the settings for the dynamic fields are lost. 
+  // So hidden (text) fields are being used to squirrel away the values, so that
+  // they can be restored.
+  function restoreFromHidden() {
+    domain_selected = $('#node-input-domainhidden').val();    
+    $('select#node-input-domain').val(domain_selected);
+    srclang_selected = $('#node-input-srclanghidden').val();    
+    $('select#node-input-srslang').val(srclang_selected);
+    destlang_selected = $('#node-input-destlanghidden').val();    
+    $('select#node-input-destlang').val(destlang_selected);
+
+    base_model_selected = $('#node-input-basemodelhidden').val();    
+    $('select#node-input-basemodel').val(base_model_selected);
+    custom_selected = $('#node-input-customhidden').val();    
+    $('select#node-input-custom').val(custom_selected);
+  }
+
+  // This is the on edit prepare function, which will be invoked everytime the dialog
+  // is shown. 
+  function oneditprepare() {
+    hideEverything();
+    restoreFromHidden();
+ 
+    handlersUI();
+    // Look for VCAP Json file, done is called if found or not, with service indicating 
+    // if the translation service is actually bound into this application.
+    if (!have_credentials) {
+      $.getJSON('watson-translate/vcap/')
+        .done(function (service) {
+          // for some reason the getJSON resets the vars so need to restoreFromHidden again 
+          // so again.
+          restoreFromHidden();
+          $('.credentials').toggle(!service);
+          if (!service) {
+            // no bound service, so check local settings to see if they are valid
+            using_local_credentials = true;
+            checkCredentials();
+          } else {
+            // credentials are only valid if we can get hold of the models using them
+            using_local_credentials = false;
+            if (!models) {getModels();}
+          }
+        }).fail(function () {
+          $('.credentials').show();        
+        }).always(function () {
+          $('#credentials-check').hide();        
+        });
+    }
+    // credentials can be set during the oneditprepare process, so check again.
+    if (have_credentials || using_local_credentials)
+    {
+      $('#credentials-check').hide(); 
+      if (have_credentials) { 
+        $('#credentials-not-found').hide();
+      }
+      if (using_local_credentials) {
+        $('.credentials').show();  
+      }
+      selectAction();      
     }
   }
 
-  function selectDomain() {
-    domain_selected = $('#node-input-domain').val();
-    if(domain_selected === "news") {
-      $('select#node-input-srclangnews, select#node-input-destlangnews').parent().show();
-      $('select#node-input-srclangconversational, select#node-input-destlangconversational, select#node-input-srclangpatent, select#node-input-destlangpatent').parent().hide();
-    } else if(domain_selected === "conversational") {
-      $('select#node-input-srclangconversational, select#node-input-destlangconversational').parent().show();
-      $('select#node-input-srclangnews, select#node-input-destlangnews, select#node-input-srclangpatent, select#node-input-destlangpatent').parent().hide();
-    } else if(domain_selected === "patent") {
-      $('select#node-input-srclangpatent, select#node-input-destlangpatent').parent().show();
-      $('select#node-input-srclangconversational, select#node-input-destlangconversational, select#node-input-srclangnews, select#node-input-destlangnews').parent().hide();
-    }
-    if(first_launch) {
-      destlangAvailable();
-      first_launch = false;
-    }
+  // Save the values in the dyanmic lists to the hidden fields.
+  function oneditsave(){
+    $('#node-input-domainhidden').val(domain_selected); 
+    $('#node-input-srclanghidden').val(srclang_selected);  
+    $('#node-input-destlanghidden').val(destlang_selected);  
+    $('#node-input-basemodelhidden').val(base_model_selected); 
+    $('#node-input-customhidden').val(custom_selected);        
   }
 
-  function destlangAvailable() {
-    srclang_selected = $('.node-input-srclang:visible').val();
-    destlang_selected = $('.node-input-destlang:visible').val();
-    domain_type = models.filter(function (model) {
-      return model.domain === domain_selected && model.status === 'available';
-    });
-
-    var pair_lang = domain_type.map(function (a) {
-      return a.model_id;
-    });
-
-    var available_destlang = pair_lang.filter(function (model_id) {
-      return model_id.match('^' + srclang_selected);
-    });
-
-
-
-
-    if(domain_selected === "news") {
-      $('.node-input-destlangnews option').removeAttr('selected');       
-      $('.node-input-destlangnews option').attr('disabled', 'disabled');
-      available_destlang.forEach(function (val) {
-        $('.node-input-destlangnews option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
-      });
-      $('.node-input-destlangnews option[disabled!=disabled]:first').attr('selected', 'selected');
-    } else if(domain_selected === "conversational") {
-      $('.node-input-destlangconversational option').removeAttr('selected');       
-      $('.node-input-destlangconversational option').attr('disabled', 'disabled');
-      available_destlang.forEach(function (val) {
-        $('.node-input-destlangconversational option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
-      });
-      $('.node-input-destlangconversational option[disabled!=disabled]:first').attr('selected', 'selected');
-    } else if(domain_selected === "patent") {
-      $('.node-input-destlangpatent option').removeAttr('selected');       
-      $('.node-input-destlangpatent option').attr('disabled', 'disabled');
-      available_destlang.forEach(function (val) {
-        $('.node-input-destlangpatent option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
-      });
-      $('.node-input-destlangpatent option[disabled!=disabled]:first').attr('selected', 'selected');
-    }
-
-
-
-
-
-
-    $('.node-input-destlang:visible option').removeAttr('selected');       
-    $('.node-input-destlang:visible option').attr('disabled', 'disabled');
-    available_destlang.forEach(function (val) {
-      $('.node-input-destlang:visible option[value=' + val.split('-')[1] + ']').removeAttr('disabled')
-    });
-    $('.node-input-destlang:visible option[disabled!=disabled]:first').attr('selected', 'selected');
-  }
-
+  // Define and run the function to register this node.
   (function() {
-    function oneditprepare() {
-        var node = this;
-        $.getJSON('watson-translate/vcap/')
-          .done(function (sids) {
-            $('.credentials').toggle(!sids);
-            handlersUI();
-            selectAction();                  
-          })
-          .fail(function () {
-            $('.credentials').show();
-          }).always(function () {
-            $('#credentials-check').hide();
-          })
-    }
-
-  RED.nodes.registerType('watson-translate', {
-    category: 'IBM Watson',
-    defaults: {
-      name: {
-        value: ''
-      },
-      srclangnews: {
-        value: 'ar'
-      },
-      destlangnews: {
-        value: 'en'
-      },
-      srclangconversational: {
-        value: 'ar'
-      },
-      destlangconversational: {
-        value: 'en'
-      },
-      srclangpatent: {
-        value: 'ko'
-      },
-      destlangpatent: {
-        value: 'en'
-      },
-      domain: {
-        value: 'news'
-      },
-      basemodel: {
-        value: 'ar-en'
-      },
-      action: {
-        value: 'translate'
-      },
-      filetype: {
-        value: 'forcedglossary'
-      },
-      trainid: {
-        value: ''
-      }
-    },
-    credentials: {
-      username: {
-        type: 'text'
-      },
-      password: {
-        type: 'password'
-      }
-    },
-    color: 'rgb(140, 198, 63)',
-    inputs: 1,
-    outputs: 1,
-    icon: 'translation.png',
-    paletteLabel: 'language translation',
-    label: function () {
-      return this.name || 'language translation';
-    },
-    labelStyle: function () {
-      return this.name ? 'node_label_italic' : '';
-    },
-    oneditprepare: oneditprepare
-  });
-})();
+        RED.nodes.registerType('watson-translate', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ''},
+                action: {value: 'translate'},
+                basemodel: {value: ''},
+                domain: {value: 'news'},
+                srclang: {value: 'en'},
+                destlang: {value: 'fr'},
+                password: {value: ''},
+                custom: {value: ''},
+                domainhidden: {value: ''},
+                srclanghidden: {value: ''},
+                destlanghidden: {value: ''},
+                basemodelhidden: {value: ''},
+                customhidden: {value: ''},                
+                filetype: {value: 'forcedglossary'},
+                trainid: {value: ''}
+            },
+            credentials: {
+              username: {type: 'text'} //,
+              // password: {type: 'text'}
+            },
+            color: "rgb(140, 198, 63)",
+            inputs: 1,
+            outputs: 1,
+            icon: "languageid.png",
+            paletteLabel: "language translation",
+            label: function() {
+                return this.name || "language translation";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: oneditprepare,
+            oneditsave: oneditsave
+        });
+  })();
 
 </script>
