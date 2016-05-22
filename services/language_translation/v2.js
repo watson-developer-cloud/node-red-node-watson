@@ -357,10 +357,12 @@ module.exports = function (RED) {
           node.warn('Base Model needs must be set for train mode');
           node.send(msg);            
         }
+        
         var filetype = msg.filetype || config.filetype;
+        
         if (!filetype) {
-           node.warn('Filetype needs must be set for train mode');
-           node.send(msg);                        
+          node.warn('Filetype needs must be set for train mode');
+          node.send(msg);                        
         }
         doTrain(msg, basemodel, filetype);
         break;
@@ -385,7 +387,7 @@ module.exports = function (RED) {
           text: message
         });
         node.error(message, msg);
-       }
+      }
     });
   }
 
