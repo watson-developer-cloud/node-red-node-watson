@@ -33,7 +33,8 @@ module.exports = function (RED) {
   // Not ever used, and codeacy complains about it.
   // var services = cfenv.getAppEnv().services;
 
-  var username, password, sUsername, sPassword;;
+  var username, password, sUsername, sPassword;
+
   var service = cfenv.getAppEnv().getServiceCreds(/language translation/i)
 
   if (service) {
@@ -52,22 +53,24 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-translate/models', function (req, res) {
+    var lt = null; 
+
     if(!username && !password) {
-      language_translation = watson.language_translation({
+      lt = watson.language_translation({
         username: req.query.un,
         password: req.query.pwd,
         version: 'v2'
       });     
     } else {
-      language_translation = watson.language_translation({
+      lt = watson.language_translation({
         username: username,
         password: password,
         version: 'v2'
       });    
     }
-    language_translation.getModels({}, function (err, models) {
+    lt.getModels({}, function (err, models) {
       if (err) {
-        console.log('Error:', err);
+        //console.log('Error:', err);
         res.json(err);
       }
       else {
@@ -91,20 +94,25 @@ module.exports = function (RED) {
   function SMTNode (config) {
     RED.nodes.createNode(this, config);
     var node = this;
-    // var ctx = this.context().flow;
  
     // this does nothing, but am keeping it with a commented out signature, as 
     // it might come in handy in the future.
     this.on('close', function() {
-      //var context = this.context().flow;
-      //context.set('watson-translate-node', {'one': 'aaa', 'two' : 'bbb'});
     });
 
                                                                                
     // The node has received an input as part of a flow, need to determine 
     // what the request is for, and based on that if the required fields 
-    //have been provided. 
+    // have been provided. 
     this.on('input', function (msg) {
+
+      // This declaration put here, as codeacy wants it before it is used 
+      // in the do functions below.
+      var language_translation = watson.language_translation({
+        username: username,
+        password: password,
+        version: 'v2'
+      });
       
       // These are var functions that have been initialised here, so that 
       // they are available for the instance of this node to use. 
@@ -119,22 +127,26 @@ module.exports = function (RED) {
           shape: 'dot',
           text: 'requesting'
         });
+
+        // Please be careful when reading the below. The first parameter is 
+        // a structure, and the tabbing enforced by codeacy imho obfuscates
+        // the code, rather than making it clearer. I would have liked an
+        // extra couple of spaces.
         language_translation.translate({
-            text: msg.payload,
-            model_id: model_id
-          },
-          function (err, response) {
-            node.status({})
-            if (err) {
-              node.error(err, msg);
-            } else {
-              msg.translation = {};
-              msg.translation['response'] = response;
-              msg.payload = response.translations[0].translation;
-            }
-            node.send(msg);
+          text: msg.payload,
+          model_id: model_id
+        },
+        function (err, response) {
+          node.status({})
+          if (err) {
+            node.error(err, msg);
+          } else {
+            msg.translation = {};
+            msg.translation['response'] = response;
+            msg.payload = response.translations[0].translation;
           }
-        );
+          node.send(msg);
+        });
       }; 
 
       // If training is requested then the glossary will be a file input. We are using temp
@@ -159,10 +171,10 @@ module.exports = function (RED) {
               case 'forcedglossary':
                 params.forced_glossary = fs.createReadStream(info.path);
                 break;
-              case 'parallelcorpus':
+            case 'parallelcorpus':
                 params.parallel_corpus = fs.createReadStream(info.path);
                 break;
-              case 'monolingualcorpus':
+            case 'monolingualcorpus':
                 params.monolingual_corpus = fs.createReadStream(info.path);
                 break;
             }
@@ -283,12 +295,6 @@ module.exports = function (RED) {
         return;
       }
 
-      var language_translation = watson.language_translation({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
-
       var action = msg.action || config.action;
       if (!action) {
         node.warn('Missing action, please select one');
@@ -302,6 +308,7 @@ module.exports = function (RED) {
       switch (action) {
         case 'translate':
           var domain = msg.domain || config.domain;
+          
           if (!domain) {
             node.warn('Missing translation domain, message not translated');
             node.send(msg);
