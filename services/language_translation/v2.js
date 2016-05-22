@@ -70,11 +70,9 @@ module.exports = function (RED) {
     }
     lt.getModels({}, function (err, models) {
       if (err) {
-        //console.log('Error:', err);
         res.json(err);
       }
       else {
-        // console.log('Models are: ', models);
         res.json(models);
       }
     });
@@ -168,15 +166,15 @@ module.exports = function (RED) {
             params.name = msg.filename.replace(/[^0-9a-z]/gi, '');
             params.base_model_id = model_id;
             switch (filetype) {
-              case 'forcedglossary':
-                params.forced_glossary = fs.createReadStream(info.path);
-                break;
+            case 'forcedglossary':
+              params.forced_glossary = fs.createReadStream(info.path);
+              break;
             case 'parallelcorpus':
-                params.parallel_corpus = fs.createReadStream(info.path);
-                break;
+              params.parallel_corpus = fs.createReadStream(info.path);
+              break;
             case 'monolingualcorpus':
-                params.monolingual_corpus = fs.createReadStream(info.path);
-                break;
+              params.monolingual_corpus = fs.createReadStream(info.path);
+              break;
             }
 
             language_translation.createModel(params, 
@@ -296,6 +294,7 @@ module.exports = function (RED) {
       }
 
       var action = msg.action || config.action;
+
       if (!action) {
         node.warn('Missing action, please select one');
         node.send(msg);
@@ -306,71 +305,86 @@ module.exports = function (RED) {
       // are specific to the requested action.
       // The required fields are checked, before the relevant function is invoked.
       switch (action) {
-        case 'translate':
-          var domain = msg.domain || config.domain;
-          
-          if (!domain) {
-            node.warn('Missing translation domain, message not translated');
-            node.send(msg);
-            return;
-          }
-          var srclang = msg.srclang || config.srclang;
-          if (!srclang) {
-            node.warn('Missing source language, message not translated');
-            node.send(msg);
-            return;
-          }
-          var destlang = msg.destlang || config.destlang;
-          if (!destlang) {
-            node.warn('Missing target language, message not translated');
-            node.send(msg);
-            return;
-          }
-          var model_id = '';
-          model_id = srclang + '-' + destlang;
-          if (domain !== 'news') {
-            model_id += ('-' + domain);
-          }
-          doTranslate(msg, model_id);
-          break;
-        case 'custom':
-          var custom = msg.custom || config.custom;
-          if (!custom) {
-            node.warn('Missing customised model, message not translated');
-            node.send(msg);
-            return;            
-          } 
-          doTranslate(msg, custom);
-          break; 
-        case 'train':
-          var basemodel = msg.basemodel || config.basemodel;
-          if (!basemodel) {
-            node.warn('Base Model needs must be set for train mode');
-            node.send(msg);            
-          }
-          var filetype = msg.filetype || config.filetype;
-          if (!filetype) {
-            node.warn('Filetype needs must be set for train mode');
-            node.send(msg);                        
-          }
-          doTrain(msg, basemodel, filetype);
-          break;
-        case 'getstatus':
-          var trainid = msg.trainid || config.trainid; 
-          doGetStatus(msg, trainid);       
-          break;
-        case 'delete':
-          var d_trainid = msg.trainid || config.trainid; 
-          doDelete(msg, d_trainid);  
-          break;
-        default:
-          message = 'Unexpected Mode';
-          node.status({
-            fill: 'blue',
-            shape: 'dot',
-            text: message
-          });
-          node.error(message, msg);
+      case 'translate':
+        var domain = msg.domain || config.domain;
+
+        if (!domain) {
+          node.warn('Missing translation domain, message not translated');
+          node.send(msg);
+          return;
+        }
+        
+        var srclang = msg.srclang || config.srclang;
+        
+        if (!srclang) {
+          node.warn('Missing source language, message not translated');
+          node.send(msg);
+          return;
+        }
+        
+        var destlang = msg.destlang || config.destlang;
+        
+        if (!destlang) {
+          node.warn('Missing target language, message not translated');
+          node.send(msg);
+          return;
+        }
+        
+        var model_id = '';
+        
+        model_id = srclang + '-' + destlang;
+        if (domain !== 'news') {
+          model_id += ('-' + domain);
+        }
+        doTranslate(msg, model_id);
+        break;
+      
+      case 'custom':
+        var custom = msg.custom || config.custom;
+      
+        if (!custom) {
+          node.warn('Missing customised model, message not translated');
+          node.send(msg);
+          return;            
+        } 
+        doTranslate(msg, custom);
+        break; 
+      
+      case 'train':
+        var basemodel = msg.basemodel || config.basemodel;
+      
+        if (!basemodel) {
+          node.warn('Base Model needs must be set for train mode');
+          node.send(msg);            
+        }
+        var filetype = msg.filetype || config.filetype;
+        if (!filetype) {
+           node.warn('Filetype needs must be set for train mode');
+           node.send(msg);                        
+        }
+        doTrain(msg, basemodel, filetype);
+        break;
+      
+      case 'getstatus':
+        var trainid = msg.trainid || config.trainid; 
+      
+        doGetStatus(msg, trainid);       
+        break;
+      
+      case 'delete':
+        var d_trainid = msg.trainid || config.trainid; 
+      
+        doDelete(msg, d_trainid);  
+        break;
+      
+      default:
+        message = 'Unexpected Mode';
+        node.status({
+          fill: 'blue',
+          shape: 'dot',
+          text: message
+        });
+        node.error(message, msg);
        }
     });
   }
