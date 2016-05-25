@@ -15,6 +15,7 @@
  **/
 
 module.exports = function (RED) {
+  var request = require('request');
   var cfenv = require('cfenv');
   var temp = require('temp');
   var url = require('url');
@@ -83,13 +84,30 @@ module.exports = function (RED) {
 
   // Function that is syncing up the asynchronous nature of the stream
   // so that the full file can be sent to the API. 
-  function stream_buffer(file, contents, cb) {
+  var stream_buffer = function(file, contents, cb) {
     fs.writeFile(file, contents, function (err) {
       if (err) throw err;
       cb(fileType(contents).ext);
     });
   };
 
+
+  // Function that is syncing up the asynchronous nature of the stream
+  // so that the full file can be sent to the API. 
+  var stream_url = function(file, url, cb) {
+    var wstream = fs.createWriteStream(file);
+
+    wstream.on('finish', function () {
+      fs.readFile(file, function (err, buf) {
+        if (err) {
+          throw err;
+        }
+        cb(fileType(buf).ext)
+      });
+    });
+
+    request(url).pipe(wstream);
+  };
 
   // This is the Speech to Text Node
 
@@ -116,11 +134,14 @@ module.exports = function (RED) {
           if (r) {
             if (r.length && r[0].alternatives.length) {
               var index = r[0].alternatives.length - 1;
-              msg.transcription = r[0].alternatives[index].transcript;
               msg.fullresult = r;
             } 
+            msg.transcription = '';
             r.forEach(function(a){
               // console.log(a.alternatives);
+              a.alternatives.forEach(function(t){
+                msg.transcription += t.transcript;
+              })
             });   
           }
           node.send(msg); 
@@ -220,7 +241,7 @@ module.exports = function (RED) {
 
       // This check is repeated just before the call to the service, but 
       // its also performed here as a double check. 
-      if (!msg.payload instanceof Buffer) {
+      if (!(msg.payload instanceof Buffer)) {
         if (typeof msg.payload === 'string' && !urlCheck(msg.payload)) {
           var message = 'Invalid URL.';
 
@@ -259,11 +280,22 @@ module.exports = function (RED) {
 
             performAction(audio, format, actionComplete, temp.cleanup);        
           });
-
         });
       } else if (urlCheck(msg.payload)) {
-        //params['url'] = msg.payload;
-        //performAction(params, feature, actionComplete);
+        temp.open({suffix: '.audio'}, function(err, info){
+          if (err) {
+            this.status({fill:'red', shape:'ring', text:'unable to open url audio stream'});          
+            var message ='Node has been unable to open the url audio stream'; 
+            node.error(message, msg);
+            return;        
+          }  
+
+          stream_url(info.path, msg.payload, function (format) {
+            var audio = fs.createReadStream(info.path);
+
+            performAction(audio, format, actionComplete, temp.cleanup);        
+          });
+        });
       } else {
         this.status({fill:'red', shape:'ring', text:'payload is invalid'});          
         var message ='Payload must be either an audio buffer or a string representing a url'; 
@@ -271,8 +303,7 @@ module.exports = function (RED) {
         return;        
       }
 
-      //msg.transcription = 'Work is in progres ... 004';
-      //node.send(msg);
+
     });  
   }
 
