@@ -126,8 +126,7 @@ module.exports = function (RED) {
         if (err || data.status === 'ERROR') {
           node.status({fill:'red', shape:'ring', text:'call to speech to text service failed'}); 
           node.error(err, msg);
-        }
-        else {
+        } else {
           var r = data.results; 
 
           msg.transcription = '';
@@ -196,6 +195,8 @@ module.exports = function (RED) {
       // Now perform checks on the input and parameters, to make sure that all
       // is in place before the service is invoked.
 
+      var message = '';
+
       // Credentials are needed for the service. They will either be bound or
       // specified by the user in the dialog. 
       username = sUsername || this.credentials.username;
@@ -234,7 +235,7 @@ module.exports = function (RED) {
       // The input comes in on msg.payload, and can either be an audio file or a string 
       // representing a URL.  
       if (!msg.payload instanceof Buffer || !typeof msg.payload === 'string') {
-        var message = 'Invalid property: msg.payload, can only be a URL or a Buffer.';
+        message = 'Invalid property: msg.payload, can only be a URL or a Buffer.';
 
         node.error(message, msg)
         return;
@@ -244,13 +245,14 @@ module.exports = function (RED) {
       // its also performed here as a double check. 
       if (!(msg.payload instanceof Buffer)) {
         if (typeof msg.payload === 'string' && !urlCheck(msg.payload)) {
-          var message = 'Invalid URL.';
+          message = 'Invalid URL.';
 
           node.error(message, msg)
           return;
         }
       } else {
         var f = fileType(msg.payload).ext;
+
         switch (f) {
         case 'wav':
         case 'flac':
@@ -271,7 +273,7 @@ module.exports = function (RED) {
         temp.open({suffix: '.' + fileType(msg.payload).ext}, function (err, info) {
           if (err) {
             this.status({fill:'red', shape:'ring', text:'unable to open audio stream'});          
-            var message ='Node has been unable to open the audio stream'; 
+            message = 'Node has been unable to open the audio stream'; 
 
             node.error(message, msg);
             return;        
@@ -288,7 +290,7 @@ module.exports = function (RED) {
           if (err) {
             this.status({fill:'red', shape:'ring', 
               text:'unable to open url audio stream'});          
-            var message ='Node has been unable to open the url audio stream'; 
+            message = 'Node has been unable to open the url audio stream'; 
 
             node.error(message, msg);
             return;        
@@ -302,7 +304,7 @@ module.exports = function (RED) {
         });
       } else {
         this.status({fill:'red', shape:'ring', text:'payload is invalid'});          
-        var message = 'Payload must be either an audio buffer or a string representing a url'; 
+        message = 'Payload must be either an audio buffer or a string representing a url'; 
         node.error(message, msg);
         return;        
       }
