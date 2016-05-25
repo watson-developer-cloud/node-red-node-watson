@@ -59,18 +59,17 @@ module.exports = function (RED) {
 
    // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-speech-to-text/models', function (req, res) {
-    stt = watson.speech_to_text({
-            username: username ? username : req.query.un,   
-            password: password ? password : req.query.pwd, 
-            version: 'v1',
-            url: 'https://stream.watsonplatform.net/speech-to-text/api'
-          });
+    var stt = watson.speech_to_text({
+      username: username ? username : req.query.un,   
+      password: password ? password : req.query.pwd, 
+      version: 'v1',
+      url: 'https://stream.watsonplatform.net/speech-to-text/api'
+    });
 
     stt.getModels({}, function(err, models){
       if (err) {
         res.json(err);
-      }
-      else {
+      } else {
         res.json(models);
       }
     });          
@@ -79,8 +78,9 @@ module.exports = function (RED) {
   // Utility function to perform a URL validation check
   function urlCheck(str) {
     var parsed = url.parse(str)
+
     return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
-  };
+  }
 
   // Function that is syncing up the asynchronous nature of the stream
   // so that the full file can be sent to the API. 
@@ -128,12 +128,11 @@ module.exports = function (RED) {
           node.error(err, msg);
         }
         else {
-          msg.transcription = '';
+          var r = data.results; 
 
-          var r = data.results;           
+          msg.transcription = '';
           if (r) {
             if (r.length && r[0].alternatives.length) {
-              var index = r[0].alternatives.length - 1;
               msg.fullresult = r;
             } 
             msg.transcription = '';
@@ -186,7 +185,9 @@ module.exports = function (RED) {
           }
         });
 
-        if (cbcleanup) cbcleanup();
+        if (cbcleanup) {
+          cbcleanup();
+        }
       }
 
 
@@ -256,7 +257,8 @@ module.exports = function (RED) {
         case 'ogg':
           break;
         default:
-          var message_err_format = 'Audio format (' + f + ') not supported, must be encoded as WAV, FLAC or OGG.';
+          var message_err_format 
+              = 'Audio format (' + f + ') not supported, must be encoded as WAV, FLAC or OGG.';
 
           node.error(message_err_format, msg)
           return;  
@@ -265,12 +267,12 @@ module.exports = function (RED) {
 
       // We are now ready to process the input data 
       // If its a buffer then need to read it all before invoking the service 
-      var params = {};
       if (msg.payload instanceof Buffer) {
         temp.open({suffix: '.' + fileType(msg.payload).ext}, function (err, info) {
           if (err) {
             this.status({fill:'red', shape:'ring', text:'unable to open audio stream'});          
             var message ='Node has been unable to open the audio stream'; 
+
             node.error(message, msg);
             return;        
           }  
@@ -284,8 +286,10 @@ module.exports = function (RED) {
       } else if (urlCheck(msg.payload)) {
         temp.open({suffix: '.audio'}, function(err, info){
           if (err) {
-            this.status({fill:'red', shape:'ring', text:'unable to open url audio stream'});          
+            this.status({fill:'red', shape:'ring', 
+              text:'unable to open url audio stream'});          
             var message ='Node has been unable to open the url audio stream'; 
+
             node.error(message, msg);
             return;        
           }  
@@ -298,7 +302,7 @@ module.exports = function (RED) {
         });
       } else {
         this.status({fill:'red', shape:'ring', text:'payload is invalid'});          
-        var message ='Payload must be either an audio buffer or a string representing a url'; 
+        var message = 'Payload must be either an audio buffer or a string representing a url'; 
         node.error(message, msg);
         return;        
       }
