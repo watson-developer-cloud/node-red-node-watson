@@ -33,8 +33,6 @@ module.exports = function(RED) {
 		}
 	}
 
-	util.log("*** CONVERT: "+JSON.stringify(converts));
-
 	// GNF: This method provides service credentials when prompted from the node editor
 	RED.httpAdmin.get('/convert/vcap', function(req,res) {
 		res.send(JSON.stringify(converts));
