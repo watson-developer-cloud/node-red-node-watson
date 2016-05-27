@@ -13,6 +13,36 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
+<!-- Service Credentials Configuration Node -->
+<script type="text/x-red" data-template-name="watson-retrieve-rank-credentials">
+    <div class="form-row">
+        <label for="node-config-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-config-input-username" placeholder="Username">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-config-input-password" placeholder="Password">
+    </div>
+</script>
+
+<script type="text/javascript">
+(function() {
+    console.log("hello");
+    RED.nodes.registerType('watson-retrieve-rank-credentials',{
+        category: 'config',
+        defaults: { 
+            username:{value: ""},
+            password:{value: ""}
+        },
+        label: function() {
+            return 'Retrieve and Rank Credentials';
+        }
+    });
+})();
+</script>
+
+
 <!-- Create Cluster Node -->
 <script type="text/x-red" data-template-name="watson-retrieve-rank-create-cluster">
     <div id="credentials-check" class="form-row">
@@ -24,13 +54,9 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
+    <div class="form-row">
+        <label for="node-input-bluemix"><i class="fa fa-user"></i> Service Credentials</label>
+        <input type="text" id="node-input-servicecreds">
     </div>
     <div class="form-row clustername">
         <label for="node-input-clustername"><i class="fa fa-tag"></i> Cluster Name</label>
@@ -64,12 +90,9 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ""},
+                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials'},
                 clustername: {value: ""},
                 clustersize: {value: "free"}
-            },
-            credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
             },
             color: "rgb(85, 150, 230)",
             inputs: 1,
@@ -106,13 +129,9 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
+    <div class="form-row">
+        <label for="node-input-bluemix"><i class="fa fa-user"></i> Service Credentials</label>
+        <input type="text" id="node-input-servicecreds">
     </div>
     <div class="form-row">
         <label for="node-input-mode"><i class="fa fa-question"></i> Mode</label>
@@ -147,6 +166,7 @@
             defaults: {
                 name: {value: ""},
                 mode: {value: "list"},
+                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials'},
                 clusterid: {value: ""}
             },
             credentials: {
@@ -196,13 +216,9 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
+    <div class="form-row">
+        <label for="node-input-bluemix"><i class="fa fa-user"></i> Service Credentials</label>
+        <input type="text" id="node-input-servicecreds">
     </div>
     <div class="form-row mode clusterid">
         <label for="node-input-clusterid"><i class="fa fa-tag"></i> Cluster ID</label>
@@ -228,12 +244,9 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ""},
+                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials'},
                 clusterid: {value: "", required: true},
                 configname: {value: "", required: true}
-            },
-            credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
             },
             color: "rgb(85, 150, 230)",
             inputs: 1,
@@ -270,13 +283,9 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
+    <div class="form-row">
+        <label for="node-input-bluemix"><i class="fa fa-user"></i> Service Credentials</label>
+        <input type="text" id="node-input-servicecreds">
     </div>
     <div class="form-row clusterid">
         <label for="node-input-clusterid"><i class="fa fa-tag"></i> Cluster ID</label>
@@ -314,14 +323,11 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ""},
+                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials'},
                 clusterid: {value: "", required: true},
                 mode: {value: "list"},
                 configname: {value: ""}
                 
-            },
-            credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
             },
             color: "rgb(85, 150, 230)",
             inputs: 1,
@@ -366,13 +372,9 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
+    <div class="form-row">
+        <label for="node-input-bluemix"><i class="fa fa-user"></i> Service Credentials</label>
+        <input type="text" id="node-input-servicecreds">
     </div>
     <div class="form-row clusterid">
         <label for="node-input-clusterid"><i class="fa fa-tag"></i> Cluster ID</label>
@@ -418,16 +420,13 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ""},
+                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials'},
                 clusterid: {value: "", required: true},
                 collectionname: {value: "", required: true},
                 mode: {value: "create"},
                 configname: {value: ""}
                 
-            },
-            credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
-            },
+            },          
             color: "rgb(85, 150, 230)",
             inputs: 1,
             outputs: 1,
@@ -471,13 +470,9 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
+    <div class="form-row">
+        <label for="node-input-bluemix"><i class="fa fa-user"></i> Service Credentials</label>
+        <input type="text" id="node-input-servicecreds">
     </div>
     <div class="form-row rankername">
         <label for="node-input-rankername"><i class="fa fa-tag"></i> Ranker Name</label>
@@ -501,11 +496,8 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ""},
+                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials'},
                 rankername: {value: ""}
-            },
-            credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
             },
             color: "rgb(85, 150, 230)",
             inputs: 1,
@@ -542,13 +534,9 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
+    <div class="form-row">
+        <label for="node-input-bluemix"><i class="fa fa-user"></i> Service Credentials</label>
+        <input type="text" id="node-input-servicecreds">
     </div>
     <div class="form-row">
         <label for="node-input-mode"><i class="fa fa-question"></i> Mode</label>
@@ -584,12 +572,9 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ""},
+                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials'},
                 mode: {value: "list"},
                 rankerid: {value: ""}
-            },
-            credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
             },
             color: "rgb(85, 150, 230)",
             inputs: 1,
@@ -634,13 +619,9 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
+    <div class="form-row">
+        <label for="node-input-bluemix"><i class="fa fa-user"></i> Service Credentials</label>
+        <input type="text" id="node-input-servicecreds">
     </div>
     <div class="form-row mode clusterid">
         <label for="node-input-clusterid"><i class="fa fa-tag"></i> Cluster ID</label>
@@ -683,14 +664,11 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ""},
+                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials'},
                 clusterid: {value: "", required: true},
                 collectionname: {value: "", required: true},
                 searchmode: {value: "search-and-rank"},
                 rankerid: {value: ""}
-            },
-            credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
             },
             color: "rgb(85, 150, 230)",
             inputs: 1,

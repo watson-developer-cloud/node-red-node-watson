@@ -36,6 +36,11 @@ module.exports = function (RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
+  function serviceCredentialsConfigurationNode(config) {
+    RED.nodes.createNode(this,config);
+    this.username = config.username;
+    this.password = config.password;
+  }
  
   function createRankerNode(config) {
     RED.nodes.createNode(this, config);
@@ -419,12 +424,9 @@ module.exports = function (RED) {
     });
   }
 
-  RED.nodes.registerType('watson-retrieve-rank-create-cluster', createClusterNode, {
-    credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
-    }
-  });
+  RED.nodes.registerType("watson-retrieve-rank-credentials", serviceCredentialsConfigurationNode);
+  RED.nodes.registerType('watson-retrieve-rank-create-cluster', createClusterNode);
+
   RED.nodes.registerType('watson-retrieve-rank-cluster-settings', clusterSettingsNode, {
     credentials: {
       username: {type:"text"},
@@ -477,8 +479,10 @@ module.exports = function (RED) {
     }
 
     //Check credentials
-    username = username || node.credentials.username;
-    password = password || node.credentials.password;
+    this.credentials = RED.nodes.getNode(config.servicecreds);
+    console.log(config);
+    username = username || this.credentials.username;
+    password = password || this.credentials.password;
 
     if (!username || !password) {
       message = 'Missing Concept Insights service credentials';
