@@ -53,6 +53,7 @@ module.exports = function (RED) {
     // this flag we can reduce that do two exits. One if there is an
     // error detected and the second for normal processing
     var errorDetected = false;
+    var isBuffer = false;
 
     // Invoked whenb the node has received an input as part of a flow.
     this.on('input', function (msg) {
@@ -70,9 +71,24 @@ module.exports = function (RED) {
       if (!msg.payload) {
         message = 'Missing property: msg.payload';
         errorDetected = true;
+      } else {
+        var hasJSONmethod = (typeof msg.payload.toJSON === 'function') ;
+
+        if (hasJSONmethod === true) {
+          if (msg.payload.toJSON().type === 'Buffer') {
+            isBuffer = true;
+          }      
+        }      
+      }
+
+      // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
+      if (typeof msg.payload !== 'string' &&  isBuffer !== true) {
+        errorDetected = true;
+        message = 'The payload must be either a string or a Buffer';
       }
 
       if (errorDetected) {
+        node.status({fill:'red', shape:'dot', text:message}); 
         node.error(message, msg);
         return;
       }
@@ -81,8 +97,14 @@ module.exports = function (RED) {
       var sentences = msg.sentences || config.sentences;
       var contentType = msg.contentType || config.contentType
 
-      // Taking out the username and password, as because of EcmaScript 6 any value: key pair with the 
-      // same name eg username and username are implied and don't need to be specified. 
+      //var taSettings = {
+      //  'username' : username, 
+      //  'password' : password,
+      //  'tones' : tones,
+      //  'sentences' : sentences,
+      //  'contentType' : contentType
+      //};
+
       var tone_analyzer = watson.tone_analyzer({
         username: username,
         password: password,
@@ -90,43 +112,29 @@ module.exports = function (RED) {
         version_date: '2016-05-19'
       });
 
-      var hasJSONmethod = (typeof msg.payload.toJSON === 'function') ;
-      var isBuffer = false;
 
-      if (hasJSONmethod === true) {
-        if (msg.payload.toJSON().type === 'Buffer') {
-          isBuffer = true;
-        }      
+      var options = {
+        text: msg.payload,
+        sentences: sentences,
+        isHTML: contentType
+      };
+
+      if (tones !== 'all') {
+        options.tones =   tones;
       }
 
-      // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-      if (typeof msg.payload === 'string' ||  isBuffer === true) {
-        var options = {
-          text: msg.payload,
-          sentences: sentences,
-          isHTML: contentType
-        };
-
-        if (tones !== 'all') {
-          options.tones =   tones;
+      node.status({fill:'blue', shape:'dot', text:'requesting'});
+      tone_analyzer.tone(options, function (err, response) {
+        node.status({})
+        if (err) {
+          node.error(err, msg);
+        } else {
+          msg.response = response;
         }
 
-        node.status({fill:'blue', shape:'dot', text:'requesting'});
-        tone_analyzer.tone(options, function (err, response) {
-          node.status({})
-          if (err) {
-            node.error(err, msg);
-          } else {
-            msg.response = response;
-          }
+        node.send(msg);
+      });
 
-          node.send(msg);
-        });
-      } else {
-        message = 'The payload must be either a string or a Buffer';
-        node.status({fill:'red', shape:'dot', text:message}); 
-        node.error(message, msg);         
-      }
     });
   }
 
