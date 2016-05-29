@@ -34,14 +34,8 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg, config, node) {
-      callToneAnalyzer(msg);
-    });
-
-  }
-
-  var callToneAnalyzer = function(msg, config, node) {
-    var message = '';
+    this.on('input', function (msg) {
+      var message = '';
 
       if (!msg.payload) {
         message = 'Missing property: msg.payload';
@@ -108,6 +102,7 @@ module.exports = function (RED) {
         node.status({fill:'red', shape:'dot', text:message}); 
         node.error(message, msg);         
       }
+    });
   }
   RED.nodes.registerType('watson-tone-analyzer-v3', Node, {
     credentials: {
