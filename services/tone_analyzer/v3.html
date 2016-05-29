@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="watson-tone-analyzer">
+<script type="text/x-red" data-template-name="watson-tone-analyzer-v3">
     <div id="credentials-check" class="form-row">
         <div class="form-tips">
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
@@ -37,8 +37,8 @@
         <select type="text" id="node-input-tones" style="display: inline-block; width: 70%;" >
             <option value="all">All</option>
             <option value="emotion">Emotion</option>
+            <option value="language">Language</option>
             <option value="social">Social</option>
-            <option value="writing">Writing</option>
         </select>
     </div>
     <div class="form-row">
@@ -48,26 +48,33 @@
             <option value="false">False</option>
         </select>
     </div>
+    <div class="form-row">
+        <label for="node-input-contentType"><i class="fa fa-comments-o"></i> Content type</label>
+        <select type="text" id="node-input-contentType" style="display: inline-block; width: 70%;" >
+            <option value="false">Text</option>
+            <option value="true">HTML</option>
+        </select>
+    </div>
  
 </script>
 
-<script type="text/x-red" data-help-name="watson-tone-analyzer">
+<script type="text/x-red" data-help-name="watson-tone-analyzer-v3">
     <p>The Tone Analyzer service uses linguistic analysis to detect emotional tones, social propensities, and writing styles in written communication.</p>
     <p>The text to analyze should be passed in on <b>msg.payload</b>.</p>
     <p>The service response will be returned on <b>msg.response</b>.</p>
     <p>Usng the node editor dialog users can filter the results by tone (emotion, writing or social) and whether to include sentence-level analysis.</p>
     <p>For more information about the Tone Analyzer service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/tone-analyzer.html">documentation</a>.</p>
-    <p><b>NB:</b> This is the old beta version and it is only being retained for backward compatibility for anyone that has old credentials. It will no longer work with new credentials.</p>
 </script>
 
 <script type="text/javascript">
     (function() {
-        RED.nodes.registerType('watson-tone-analyzer', {
+        RED.nodes.registerType('watson-tone-analyzer-v3', {
             category: 'IBM Watson',
             defaults: {
                 name: {value: ""},
                 tones: {value: "all"},
-                sentences: {value: "true"}
+                sentences: {value: "true"},
+                contentType: {value: "false"}
             },
             credentials: {
               username: {type:"text"},
@@ -77,9 +84,9 @@
             inputs: 1,
             outputs: 1,
             icon: "tone_analyzer.png",
-            paletteLabel: "tone analyzer",
+            paletteLabel: "tone analyzer v3",
             label: function() {
-                return this.name || "tone analyzer";
+                return this.name || "tone analyzer v3";
             },
             labelStyle: function() {
                 return this.name ? "node_label_italic" : "";
