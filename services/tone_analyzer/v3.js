@@ -56,10 +56,6 @@ module.exports = function (RED) {
       var sentences = msg.sentences || config.sentences;
       var contentType = msg.contentType || config.contentType
 
-      callToneAnalyzer(username, password, msg, tones, sentences, contentType);
-    });
-
-    var callToneAnalyzer = function(username, password, msg, tones, sentences, contentType) {
       var watson = require('watson-developer-cloud');
 
       var tone_analyzer = watson.tone_analyzer({
@@ -106,9 +102,8 @@ module.exports = function (RED) {
         node.status({fill:'red', shape:'dot', text:message}); 
         node.error(message, msg);         
       }
-    }
+    });
   }
-
   RED.nodes.registerType('watson-tone-analyzer-v3', Node, {
     credentials: {
       username: {type:'text'},
