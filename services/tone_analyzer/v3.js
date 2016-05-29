@@ -87,8 +87,6 @@ module.exports = function (RED) {
           options.tones =   tones;
         }
 
-        console.log(options);
-
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         tone_analyzer.tone(options, function (err, response) {
           node.status({})
