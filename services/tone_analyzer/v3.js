@@ -15,39 +15,55 @@
  **/
 
 module.exports = function (RED) {
+  var watson = require('watson-developer-cloud');  
   var cfenv = require('cfenv');
 
-  var username, password;
+  // Require the Cloud Foundry Module to pull credentials from bound service 
+  // If they are found then they are stored in sUsername and sPassword, as the 
+  // service credentials. This separation from sUsername and username to allow 
+  // the end user to modify the node credentials when the service is not bound.
+  // Otherwise, once set username would never get reset, resulting in a frustrated
+  // user who, when he errenously enters bad credentials, can't figure out why
+  // the edited ones are not being taken.
+
+  // Not ever used, and codeacy complains about it.
+
+  var username, password, sUsername, sPassword;
 
   var service = cfenv.getAppEnv().getServiceCreds(/tone analyzer/i)
 
   if (service) {
-    username = service.username;
-    password = service.password;
+    sUsername = service.username;
+    sPassword = service.password;
   }
 
+  // Node RED Admin - fetch and set vcap services
   RED.httpAdmin.get('/watson-tone-analyzer/vcap', function (req, res) {
     res.json(service ? {bound_service: true} : null);
   });
 
+
+  // This is the Tone Analyzer Node. 
   function Node (config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
+    // Invoked whenb the node has received an input as part of a flow.
     this.on('input', function (msg) {
       var message = '';
 
-      if (!msg.payload) {
-        message = 'Missing property: msg.payload';
+      // Credentials are needed for each of the modes.
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password;      
+
+      if (!username || !password) {
+        message = 'Missing Tone Analyzer service credentials';
         node.error(message, msg);
         return;
       }
 
-      username = username || this.credentials.username;
-      password = password || this.credentials.password;
-
-      if (!username || !password) {
-        message = 'Missing Tone Analyzer service credentials';
+      if (!msg.payload) {
+        message = 'Missing property: msg.payload';
         node.error(message, msg);
         return;
       }
@@ -56,7 +72,6 @@ module.exports = function (RED) {
       var sentences = msg.sentences || config.sentences;
       var contentType = msg.contentType || config.contentType
 
-      var watson = require('watson-developer-cloud');
 
       var tone_analyzer = watson.tone_analyzer({
         username: username,
@@ -104,6 +119,8 @@ module.exports = function (RED) {
       }
     });
   }
+  
+
   RED.nodes.registerType('watson-tone-analyzer-v3', Node, {
     credentials: {
       username: {type:'text'},
