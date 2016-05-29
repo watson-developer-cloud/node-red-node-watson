@@ -43,10 +43,8 @@ module.exports = function (RED) {
   });
 
 
-  // This is the Tone Analyzer Node. 
-  function Node (config) {
-    RED.nodes.createNode(this, config);
-    var node = this;
+  var processOnInput = function(msg, config, node) {
+      var message = '';
 
     // added in this flag as codacy was complaing about the 
     // cyclomatic complexity. Essentially the number of exit points. With
@@ -55,13 +53,9 @@ module.exports = function (RED) {
     var errorDetected = false;
     var isBuffer = false;
 
-    // Invoked whenb the node has received an input as part of a flow.
-    this.on('input', function (msg) {
-      var message = '';
-
       // Credentials are needed for each of the modes.
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password;      
+      username = sUsername || node.credentials.username;
+      password = sPassword || node.credentials.password;      
 
       if (!username || !password) {
         message = 'Missing Tone Analyzer service credentials';
@@ -134,7 +128,17 @@ module.exports = function (RED) {
 
         node.send(msg);
       });
+  };
 
+
+  // This is the Tone Analyzer Node. 
+  function Node (config) {
+    RED.nodes.createNode(this, config);
+    var node = this;
+
+    // Invoked whenb the node has received an input as part of a flow.
+    this.on('input', function (msg) {
+      processOnInput(msg, config, node);
     });
   }
 
