@@ -48,6 +48,12 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
+    // added in this flag as codacy was complaing about the 
+    // cyclomatic complexity. Essentially the number of exit points. With
+    // this flag we can reduce that do two exits. One if there is an
+    // error detected and the second for normal processing
+    var errorDetected = false;
+
     // Invoked whenb the node has received an input as part of a flow.
     this.on('input', function (msg) {
       var message = '';
@@ -58,12 +64,15 @@ module.exports = function (RED) {
 
       if (!username || !password) {
         message = 'Missing Tone Analyzer service credentials';
-        node.error(message, msg);
-        return;
+        errorDetected = true;
       }
 
       if (!msg.payload) {
         message = 'Missing property: msg.payload';
+        errorDetected = true;
+      }
+
+      if (errorDetected) {
         node.error(message, msg);
         return;
       }
@@ -72,7 +81,8 @@ module.exports = function (RED) {
       var sentences = msg.sentences || config.sentences;
       var contentType = msg.contentType || config.contentType
 
-
+      // Taking out the username and password, as because of EcmaScript 6 any value: key pair with the 
+      // same name eg username and username are implied and don't need to be specified. 
       var tone_analyzer = watson.tone_analyzer({
         username: username,
         password: password,
@@ -119,7 +129,7 @@ module.exports = function (RED) {
       }
     });
   }
-  
+
 
   RED.nodes.registerType('watson-tone-analyzer-v3', Node, {
     credentials: {
