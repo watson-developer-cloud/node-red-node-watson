@@ -38,7 +38,7 @@ module.exports = function (RED) {
       var message = '';
 
       if (!msg.payload) {
-        var message = 'Missing property: msg.payload';
+        message = 'Missing property: msg.payload';
         node.error(message, msg);
         return;
       }
@@ -70,13 +70,12 @@ module.exports = function (RED) {
 
       if (hasJSONmethod === true) {
         if (msg.payload.toJSON().type === 'Buffer') {
-          isBuffer=true;
+          isBuffer = true;
         }      
       }
 
       // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-      if (typeof msg.payload === 'string' ||  isBuffer === true )
-      {
+      if (typeof msg.payload === 'string' ||  isBuffer === true ) {
         var options = {
           text: msg.payload,
           sentences: sentences,
