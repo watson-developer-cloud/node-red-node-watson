@@ -56,6 +56,10 @@ module.exports = function (RED) {
       var sentences = msg.sentences || config.sentences;
       var contentType = msg.contentType || config.contentType
 
+      callToneAnalyzer(username, password, msg, tones, sentences, contentType);
+    });
+
+    var callToneAnalyzer = function(username, password, msg, tones, sentences, contentType) {
       var watson = require('watson-developer-cloud');
 
       var tone_analyzer = watson.tone_analyzer({
@@ -75,7 +79,7 @@ module.exports = function (RED) {
       }
 
       // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-      if (typeof msg.payload === 'string' ||  isBuffer === true ) {
+      if (typeof msg.payload === 'string' ||  isBuffer === true) {
         var options = {
           text: msg.payload,
           sentences: sentences,
@@ -97,14 +101,14 @@ module.exports = function (RED) {
 
           node.send(msg);
         });
-      }
-      else {
+      } else {
         message = 'The payload must be either a string or a Buffer';
         node.status({fill:'red', shape:'dot', text:message}); 
         node.error(message, msg);         
       }
-    });
+    }
   }
+
   RED.nodes.registerType('watson-tone-analyzer-v3', Node, {
     credentials: {
       username: {type:'text'},
