@@ -16,9 +16,6 @@
 
 module.exports = function (RED) {
   var cfenv = require('cfenv');
-  
-  var services = cfenv.getAppEnv().services,
-    service;
 
   var username, password;
 
@@ -38,6 +35,8 @@ module.exports = function (RED) {
     var node = this;
 
     this.on('input', function (msg) {
+      var message = '';
+
       if (!msg.payload) {
         var message = 'Missing property: msg.payload';
         node.error(message, msg);
@@ -48,7 +47,7 @@ module.exports = function (RED) {
       password = password || this.credentials.password;
 
       if (!username || !password) {
-        var message = 'Missing Tone Analyzer service credentials';
+        message = 'Missing Tone Analyzer service credentials';
         node.error(message, msg);
         return;
       }
@@ -68,18 +67,19 @@ module.exports = function (RED) {
 
       var hasJSONmethod = (typeof msg.payload.toJSON === 'function') ;
       var isBuffer = false;
-      if (hasJSONmethod==true)
-      {
-        if (msg.payload.toJSON().type == 'Buffer')
-            isBuffer=true;
+
+      if (hasJSONmethod === true) {
+        if (msg.payload.toJSON().type === 'Buffer') {
+          isBuffer=true;
+        }      
       }
 
       // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-      if (typeof msg.payload == 'string' ||  isBuffer == true )
+      if (typeof msg.payload === 'string' ||  isBuffer === true )
       {
         var options = {
           text: msg.payload,
-          sentences: config.sentences,
+          sentences: sentences,
           isHTML: contentType
         };
 
@@ -100,7 +100,7 @@ module.exports = function (RED) {
         });
       }
       else {
-        var message = 'The payload must be either a string or a Buffer';
+        message = 'The payload must be either a string or a Buffer';
         node.status({fill:'red', shape:'dot', text:message}); 
         node.error(message, msg);         
       }
