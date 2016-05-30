@@ -42,51 +42,58 @@ module.exports = function (RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
+  // Function that checks the payload and determines
+  // whether it is JSON or a Buffer
+  var checkPayload = function(payload) {
+    var message = null;
+
+    var hasJSONmethod = (typeof payload.toJSON === 'function') ;
+      if (hasJSONmethod === true) {
+        if (payload.toJSON().type === 'Buffer') {
+          isBuffer = true;
+        }      
+      }      
+      // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
+      if (typeof payload !== 'string' &&  isBuffer !== true) {
+        message = 'The payload must be either a string or a Buffer';
+      }
+
+    return message;
+  }
+
 
   // Function that checks the configuration to make sure that credentials,
   // payload and options have been proviced in the correct format.
   var checkConfiguration = function(msg, config, node, cb) {
+    var message = null;      
+    var isBuffer = false;
+    var taSettings = {};
+
+    // Credentials are needed for each of the modes.
+    username = sUsername || node.credentials.username;
+    password = sPassword || node.credentials.password;      
+
+    if (!username || !password) {
+      message = 'Missing Tone Analyzer service credentials';
+    }
+
+    if (!message && !msg.payload) {
+      message = 'Missing property: msg.payload';
+    } 
+
+    if (!message) {
+      message = checkPayload(msg.payload);
+    }
+
+    if (!message) {
+      taSettings.username = username;
+      taSettings.password = password;
+      taSettings.tones = msg.tones || config.tones;
+      taSettings.sentences = msg.sentences || config.sentences;
+      taSettings.contentType = msg.contentType || config.contentType
+    }
+
     if (cb) {
-      var message = null;      
-      var isBuffer = false;
-
-      // Credentials are needed for each of the modes.
-      username = sUsername || node.credentials.username;
-      password = sPassword || node.credentials.password;      
-
-      if (!username || !password) {
-        message = 'Missing Tone Analyzer service credentials';
-      }
-
-      if (!message && !msg.payload) {
-        message = 'Missing property: msg.payload';
-      } 
-
-      if (!message) {
-        var hasJSONmethod = (typeof msg.payload.toJSON === 'function') ;
-
-        if (hasJSONmethod === true) {
-          if (msg.payload.toJSON().type === 'Buffer') {
-            isBuffer = true;
-          }      
-        }      
-
-        // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-        if (typeof msg.payload !== 'string' &&  isBuffer !== true) {
-          message = 'The payload must be either a string or a Buffer';
-        }
-      }
-
-      var taSettings = {};
-
-      if (!message) {
-        taSettings.username = username;
-        taSettings.password = password;
-        taSettings.tones = msg.tones || config.tones;
-        taSettings.sentences = msg.sentences || config.sentences;
-        taSettings.contentType = msg.contentType || config.contentType
-      }
-
       cb(message, taSettings);
     }
   };
