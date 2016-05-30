@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 - The transcription returned for the Speech to Text node now returns full (untruncated) transcription. The
 alternatives are returned in msg.fullresult. The dialog now loads available models dynamically. This will
 allow new speech models to be identified without requiring a further code change. 
+- The Retrieve and Rank node nows stores credentials in a configuration node, allowing the credentials to be 
+shared acrosss a flow with multiple Retrieve and Rank nodes.
+- New Tone Analyzer V3 node to support the V3 GA API. 
 
 ### New in version 0.4.1
 - AlchemyAPI Image Analysis and Language nodes migrated from old Alchemy SDK to current 
