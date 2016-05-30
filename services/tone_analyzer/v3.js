@@ -66,7 +66,7 @@ module.exports = function (RED) {
 
   // Function that checks the configuration to make sure that credentials,
   // payload and options have been proviced in the correct format.
-  var checkConfiguration = function(msg, config, node, cb) {
+  var checkConfiguration = function(msg, node, cb) {
     var message = null;      
     var taSettings = {};
 
@@ -89,9 +89,9 @@ module.exports = function (RED) {
     if (!message) {
       taSettings.username = username;
       taSettings.password = password;
-      taSettings.tones = msg.tones || config.tones;
-      taSettings.sentences = msg.sentences || config.sentences;
-      taSettings.contentType = msg.contentType || config.contentType
+      //taSettings.tones = msg.tones || config.tones;
+      //taSettings.sentences = msg.sentences || config.sentences;
+      //taSettings.contentType = msg.contentType || config.contentType
     }
 
     if (cb) {
@@ -103,7 +103,7 @@ module.exports = function (RED) {
   // function when the node recieves input inside a flow. 
   // Configuration is first checked before the service is invoked.
   var processOnInput = function(msg, config, node) {
-    checkConfiguration (msg, config, node, function(err, settings){
+    checkConfiguration (msg, node, function(err, settings){
       if (err) {
         node.status({fill:'red', shape:'dot', text:err}); 
         node.error(err, msg);
@@ -116,14 +116,18 @@ module.exports = function (RED) {
           'version_date': '2016-05-19'
         });
 
+        var tones = msg.tones || config.tones;
+        var sentences = msg.sentences || config.sentences;
+        var contentType = msg.contentType || config.contentType
+
         var options = {
           'text': msg.payload,
-          'sentences': settings.sentences,
-          'isHTML': settings.contentType
+          'sentences': sentences,   // settings.sentences,
+          'isHTML': contentType     // settings.contentType
         };
 
-        if (settings.tones !== 'all') {
-          options.tones =   settings.tones;
+        if (tones !== 'all') {
+          options.tones = tones;
         }
     
         node.status({fill:'blue', shape:'dot', text:'requesting'});
