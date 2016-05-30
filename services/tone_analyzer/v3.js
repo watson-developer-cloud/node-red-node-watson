@@ -89,15 +89,32 @@ module.exports = function (RED) {
     if (!message) {
       taSettings.username = username;
       taSettings.password = password;
-      //taSettings.tones = msg.tones || config.tones;
-      //taSettings.sentences = msg.sentences || config.sentences;
-      //taSettings.contentType = msg.contentType || config.contentType
     }
 
     if (cb) {
       cb(message, taSettings);
     }
   };
+
+  // function to parse through the options in preparation
+  // for the sevice call.
+  var parseOptions = function (msg, config) {
+    var tones = msg.tones || config.tones;
+    var sentences = msg.sentences || config.sentences;
+    var contentType = msg.contentType || config.contentType
+
+    var options = {
+      'text': msg.payload,
+      'sentences': sentences,   
+      'isHTML': contentType     
+    };
+
+    if (tones !== 'all') {
+      options.tones = tones;
+    }
+
+    return options;
+  }
 
 
   // function when the node recieves input inside a flow. 
@@ -116,19 +133,7 @@ module.exports = function (RED) {
           'version_date': '2016-05-19'
         });
 
-        var tones = msg.tones || config.tones;
-        var sentences = msg.sentences || config.sentences;
-        var contentType = msg.contentType || config.contentType
-
-        var options = {
-          'text': msg.payload,
-          'sentences': sentences,   // settings.sentences,
-          'isHTML': contentType     // settings.contentType
-        };
-
-        if (tones !== 'all') {
-          options.tones = tones;
-        }
+        var options = parseOptions(msg, config);
     
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         tone_analyzer.tone(options, function (err, response) {
