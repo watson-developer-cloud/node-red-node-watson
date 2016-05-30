@@ -43,15 +43,12 @@ module.exports = function (RED) {
   });
 
 
-  var processOnInput = function(msg, config, node) {
-      var message = '';
-
-    // added in this flag as codacy was complaing about the 
-    // cyclomatic complexity. Essentially the number of exit points. With
-    // this flag we can reduce that do two exits. One if there is an
-    // error detected and the second for normal processing
-    var errorDetected = false;
-    var isBuffer = false;
+  // Function that checks the configuration to make sure that credentials,
+  // payload and options have been proviced in the correct format.
+  var checkConfiguration = function(msg, config, node, cb) {
+    if (cb) {
+      var message = '';      
+      var isBuffer = false;
 
       // Credentials are needed for each of the modes.
       username = sUsername || node.credentials.username;
@@ -59,12 +56,14 @@ module.exports = function (RED) {
 
       if (!username || !password) {
         message = 'Missing Tone Analyzer service credentials';
-        errorDetected = true;
+        cb(message, null);
+        return;
       }
 
       if (!msg.payload) {
         message = 'Missing property: msg.payload';
-        errorDetected = true;
+        cb(message, null);
+        return;
       } else {
         var hasJSONmethod = (typeof msg.payload.toJSON === 'function') ;
 
@@ -77,13 +76,8 @@ module.exports = function (RED) {
 
       // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
       if (typeof msg.payload !== 'string' &&  isBuffer !== true) {
-        errorDetected = true;
         message = 'The payload must be either a string or a Buffer';
-      }
-
-      if (errorDetected) {
-        node.status({fill:'red', shape:'dot', text:message}); 
-        node.error(message, msg);
+        cb(message, null);
         return;
       }
 
@@ -91,43 +85,60 @@ module.exports = function (RED) {
       var sentences = msg.sentences || config.sentences;
       var contentType = msg.contentType || config.contentType
 
-      //var taSettings = {
-      //  'username' : username, 
-      //  'password' : password,
-      //  'tones' : tones,
-      //  'sentences' : sentences,
-      //  'contentType' : contentType
-      //};
-
-      var tone_analyzer = watson.tone_analyzer({
-        username: username,
-        password: password,
-        version: 'v3',
-        version_date: '2016-05-19'
-      });
-
-
-      var options = {
-        text: msg.payload,
-        sentences: sentences,
-        isHTML: contentType
+      var taSettings = {
+        'username' : username, 
+        'password' : password,
+        'tones' : tones,
+        'sentences' : sentences,
+        'contentType' : contentType
       };
 
-      if (tones !== 'all') {
-        options.tones =   tones;
+      cb(null, taSettings);
+    }
+  };
+
+
+  // function when the node recieves input inside a flow. 
+  // Configuration is first checked before the service is invoked.
+  var processOnInput = function(msg, config, node) {
+    checkConfiguration (msg, config, node, function(err, settings){
+      if (err) {
+        node.status({fill:'red', shape:'dot', text:err}); 
+        node.error(err, msg);
+        return;
       }
+      else {
+        var tone_analyzer = watson.tone_analyzer({
+          'username': settings.username,
+          'password': settings.password,
+          'version': 'v3',
+          'version_date': '2016-05-19'
+        });
 
-      node.status({fill:'blue', shape:'dot', text:'requesting'});
-      tone_analyzer.tone(options, function (err, response) {
-        node.status({})
-        if (err) {
-          node.error(err, msg);
-        } else {
-          msg.response = response;
+        var options = {
+          'text': msg.payload,
+          'sentences': settings.sentences,
+          'isHTML': settings.contentType
+        };
+
+        if (settings.tones !== 'all') {
+          options.tones =   settings.tones;
         }
+    
+        node.status({fill:'blue', shape:'dot', text:'requesting'});
+        tone_analyzer.tone(options, function (err, response) {
+          node.status({})
+          if (err) {
+            node.error(err, msg);
+          } else {
+            msg.response = response;
+          }
+          node.send(msg);
+        });
 
-        node.send(msg);
-      });
+      }
+    });
+
   };
 
 
