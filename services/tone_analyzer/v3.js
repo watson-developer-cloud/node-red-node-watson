@@ -46,17 +46,19 @@ module.exports = function (RED) {
   // whether it is JSON or a Buffer
   var checkPayload = function(payload) {
     var message = null;
+    var isBuffer = false;
 
     var hasJSONmethod = (typeof payload.toJSON === 'function') ;
-      if (hasJSONmethod === true) {
-        if (payload.toJSON().type === 'Buffer') {
-          isBuffer = true;
-        }      
+
+    if (hasJSONmethod === true) {
+      if (payload.toJSON().type === 'Buffer') {
+        isBuffer = true;
       }      
-      // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-      if (typeof payload !== 'string' &&  isBuffer !== true) {
-        message = 'The payload must be either a string or a Buffer';
-      }
+    }      
+    // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
+    if (typeof payload !== 'string' &&  isBuffer !== true) {
+      message = 'The payload must be either a string or a Buffer';
+    }
 
     return message;
   }
@@ -66,7 +68,6 @@ module.exports = function (RED) {
   // payload and options have been proviced in the correct format.
   var checkConfiguration = function(msg, config, node, cb) {
     var message = null;      
-    var isBuffer = false;
     var taSettings = {};
 
     // Credentials are needed for each of the modes.
