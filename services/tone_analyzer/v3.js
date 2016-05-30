@@ -71,13 +71,8 @@ module.exports = function (RED) {
     var taSettings = {};
 
     // Credentials are needed for each of the modes.
-    // Deliberate break to check what codacy says about complexity
-    //username = sUsername || node.credentials.username;
-    //password = sPassword || node.credentials.password;      
-
-    username = node.credentials.username;
-    password = node.credentials.password;      
-
+    username = sUsername || node.credentials.username;
+    password = sPassword || node.credentials.password;      
 
     if (!username || !password) {
       message = 'Missing Tone Analyzer service credentials';
