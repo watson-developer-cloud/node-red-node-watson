@@ -56,9 +56,13 @@ module.exports = function (RED) {
 
       if (!username || !password) {
         message = 'Missing Tone Analyzer service credentials';
-      } else if (!msg.payload) {
+      }
+
+      if (!message && !msg.payload) {
         message = 'Missing property: msg.payload';
-      } else {
+      } 
+
+      if (!message) {
         var hasJSONmethod = (typeof msg.payload.toJSON === 'function') ;
 
         if (hasJSONmethod === true) {
@@ -66,30 +70,24 @@ module.exports = function (RED) {
             isBuffer = true;
           }      
         }      
+
         // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
         if (typeof msg.payload !== 'string' &&  isBuffer !== true) {
           message = 'The payload must be either a string or a Buffer';
         }
       }
 
-      if (message) {
-        cb(message, null);
-        return;        
+      var taSettings = {};
+
+      if (!message) {
+        taSettings.username = username;
+        taSettings.password = password;
+        taSettings.tones = msg.tones || config.tones;
+        taSettings.sentences = msg.sentences || config.sentences;
+        taSettings.contentType = msg.contentType || config.contentType
       }
 
-      var tones = msg.tones || config.tones;
-      var sentences = msg.sentences || config.sentences;
-      var contentType = msg.contentType || config.contentType
-
-      var taSettings = {
-        'username' : username, 
-        'password' : password,
-        'tones' : tones,
-        'sentences' : sentences,
-        'contentType' : contentType
-      };
-
-      cb(null, taSettings);
+      cb(message, taSettings);
     }
   };
 
