@@ -47,7 +47,7 @@ module.exports = function (RED) {
   // payload and options have been proviced in the correct format.
   var checkConfiguration = function(msg, config, node, cb) {
     if (cb) {
-      var message = '';      
+      var message = null;      
       var isBuffer = false;
 
       // Credentials are needed for each of the modes.
@@ -56,14 +56,8 @@ module.exports = function (RED) {
 
       if (!username || !password) {
         message = 'Missing Tone Analyzer service credentials';
-        cb(message, null);
-        return;
-      }
-
-      if (!msg.payload) {
+      } else if (!msg.payload) {
         message = 'Missing property: msg.payload';
-        cb(message, null);
-        return;
       } else {
         var hasJSONmethod = (typeof msg.payload.toJSON === 'function') ;
 
@@ -72,13 +66,15 @@ module.exports = function (RED) {
             isBuffer = true;
           }      
         }      
+        // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
+        if (typeof msg.payload !== 'string' &&  isBuffer !== true) {
+          message = 'The payload must be either a string or a Buffer';
+        }
       }
 
-      // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-      if (typeof msg.payload !== 'string' &&  isBuffer !== true) {
-        message = 'The payload must be either a string or a Buffer';
+      if (message) {
         cb(message, null);
-        return;
+        return;        
       }
 
       var tones = msg.tones || config.tones;
@@ -106,8 +102,7 @@ module.exports = function (RED) {
         node.status({fill:'red', shape:'dot', text:err}); 
         node.error(err, msg);
         return;
-      }
-      else {
+      } else {
         var tone_analyzer = watson.tone_analyzer({
           'username': settings.username,
           'password': settings.password,
