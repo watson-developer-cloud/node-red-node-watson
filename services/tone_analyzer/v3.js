@@ -91,9 +91,7 @@ module.exports = function (RED) {
 
     if (!taSettings) {
       message = 'Missing Tone Analyzer service credentials';
-    }
-
-    if (!message && !msg.payload) {
+    } else if (!msg.payload) {
       message = 'Missing property: msg.payload';
     } 
 
