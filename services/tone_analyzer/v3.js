@@ -61,6 +61,23 @@ module.exports = function (RED) {
     }
 
     return message;
+  };
+
+  // Check that the credentials have been provided
+  // Credentials are needed for each the service.
+  var checkCreds = function(credentials) {
+    var taSettings = null;
+
+    username = sUsername || credentials.username;
+    password = sPassword || credentials.password;      
+
+    if (username && password) {
+      taSettings = {};
+      taSettings.username = username;
+      taSettings.password = password;
+    }
+
+    return taSettings;
   }
 
 
@@ -68,13 +85,11 @@ module.exports = function (RED) {
   // payload and options have been proviced in the correct format.
   var checkConfiguration = function(msg, node, cb) {
     var message = null;      
-    var taSettings = {};
+    var taSettings = null;
 
-    // Credentials are needed for each of the modes.
-    username = sUsername || node.credentials.username;
-    password = sPassword || node.credentials.password;      
+    taSettings = checkCreds(node.credentials);
 
-    if (!username || !password) {
+    if (!taSettings) {
       message = 'Missing Tone Analyzer service credentials';
     }
 
@@ -84,11 +99,6 @@ module.exports = function (RED) {
 
     if (!message) {
       message = checkPayload(msg.payload);
-    }
-
-    if (!message) {
-      taSettings.username = username;
-      taSettings.password = password;
     }
 
     if (cb) {
