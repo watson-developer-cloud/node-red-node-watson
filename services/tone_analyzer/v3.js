@@ -107,7 +107,7 @@ module.exports = function (RED) {
   var parseOptions = function (msg, config) {
     var tones = msg.tones || config.tones;
     var sentences = msg.sentences || config.sentences;
-    var contentType = msg.contentType || config.contentType
+    var contentType = msg.contentType || config.contentType;
 
     var options = {
       'text': msg.payload,
