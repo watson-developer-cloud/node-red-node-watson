@@ -158,7 +158,7 @@ module.exports = function (RED) {
         //Cluster name can be passed into msg.payload, but the cluster name
         //specified in the config takes priority
         var clustername;
-        (config.clustername != '') ? clustername = config.clustername : clustername = msg.payload;
+        (config.clustername !== '') ? clustername = config.clustername : clustername = msg.payload;
         var params = {
           cluster_name: clustername,
           cluster_size: config.clustersize !== 'free' ? config.clustersize : null,
