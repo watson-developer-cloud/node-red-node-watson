@@ -17,6 +17,7 @@
 module.exports = function (RED) {
   var watson = require('watson-developer-cloud');  
   var cfenv = require('cfenv');
+  var toneutils = require('../../utilities/tone-utils');
 
   // Require the Cloud Foundry Module to pull credentials from bound service 
   // If they are found then they are stored in sUsername and sPassword, as the 
@@ -37,31 +38,13 @@ module.exports = function (RED) {
     sPassword = service.password;
   }
 
+  //toneutils.ping();
+
   // Node RED Admin - fetch and set vcap services
   RED.httpAdmin.get('/watson-tone-analyzer/vcap', function (req, res) {
     res.json(service ? {bound_service: true} : null);
   });
 
-  // Function that checks the payload and determines
-  // whether it is JSON or a Buffer
-  var checkPayload = function(payload) {
-    var message = null;
-    var isBuffer = false;
-
-    var hasJSONmethod = (typeof payload.toJSON === 'function') ;
-
-    if (hasJSONmethod === true) {
-      if (payload.toJSON().type === 'Buffer') {
-        isBuffer = true;
-      }      
-    }      
-    // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-    if (typeof payload !== 'string' &&  isBuffer !== true) {
-      message = 'The payload must be either a string or a Buffer';
-    }
-
-    return message;
-  };
 
   // Check that the credentials have been provided
   // Credentials are needed for each the service.
@@ -92,7 +75,7 @@ module.exports = function (RED) {
     if (!taSettings) {
       message = 'Missing Tone Analyzer service credentials';
     } else if (msg.payload) {
-      message = checkPayload(msg.payload);
+      message = toneutils.checkPayload(msg.payload);
     } else  {
       message = 'Missing property: msg.payload';
     }
