@@ -51,6 +51,19 @@ ToneUtils.prototype = {
     var tones = msg.tones || config.tones;
 
     return (tones === 'all' ? '' : tones);  	
+  },
+
+  // function to parse through the options in preparation
+  // for the sevice call.
+  parseOptions: function(msg, config) {
+    var options = {
+      'text': msg.payload,
+      'sentences': msg.sentences || config.sentences,   
+      'isHTML': msg.contentType || config.contentType    
+    };
+
+    options.tones = toneutils.parseToneOption(msg, config);
+    return options;
   }
 
 

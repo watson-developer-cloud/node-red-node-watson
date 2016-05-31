@@ -85,20 +85,6 @@ module.exports = function (RED) {
   };
 
 
-  // function to parse through the options in preparation
-  // for the sevice call.
-  var parseOptions = function (msg, config) {
-    var options = {
-      'text': msg.payload,
-      'sentences': msg.sentences || config.sentences,   
-      'isHTML': msg.contentType || config.contentType    
-    };
-
-    options.tones = toneutils.parseToneOption(msg, config);
-    return options;
-  }
-
-
   // function when the node recieves input inside a flow. 
   // Configuration is first checked before the service is invoked.
   var processOnInput = function(msg, config, node) {
@@ -115,7 +101,7 @@ module.exports = function (RED) {
           'version_date': '2016-05-19'
         });
 
-        var options = parseOptions(msg, config);
+        var options = toneutils.parseOptions(msg, config);
     
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         tone_analyzer.tone(options, function (err, response) {
