@@ -112,12 +112,13 @@ module.exports = function (RED) {
     var options = {
       'text': msg.payload,
       'sentences': msg.sentences || config.sentences,   
-      'isHTML': msg.contentType || config.contentType     
+      'isHTML': msg.contentType || config.contentType,   
+      'tones' : (tones === 'all' ? '' : tones)
     };
 
-    if (tones !== 'all') {
-      options.tones = tones;
-    }
+    //if (tones !== 'all') {
+    // options.tones = tones;
+    //}
 
     return options;
   }
