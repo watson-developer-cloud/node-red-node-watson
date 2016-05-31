@@ -114,7 +114,6 @@ module.exports = function (RED) {
   // function to parse through the options in preparation
   // for the sevice call.
   var parseOptions = function (msg, config) {
-
     var options = {
       'text': msg.payload,
       'sentences': msg.sentences || config.sentences,   
@@ -122,7 +121,6 @@ module.exports = function (RED) {
     };
 
     options.tones = parseToneOption(msg, config);
-
     return options;
   }
 
