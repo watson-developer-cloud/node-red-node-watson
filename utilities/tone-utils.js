@@ -62,7 +62,7 @@ ToneUtils.prototype = {
       'isHTML': msg.contentType || config.contentType    
     };
 
-    options.tones = toneutils.parseToneOption(msg, config);
+    options.tones = this.parseToneOption(msg, config);
     return options;
   }
 
