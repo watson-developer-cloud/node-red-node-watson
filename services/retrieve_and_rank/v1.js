@@ -155,8 +155,12 @@ module.exports = function (RED) {
     this.on('input', function(msg) {
       setupRankRetrieveNode(msg, config, this, function (retrieve_and_rank) {
 
+        //Cluster name can be passed into msg.payload, but the cluster name
+        //specified in the config takes priority
+        var clustername;
+        (config.clustername != "") ? clustername = config.clustername : clustername = msg.payload;
         var params = {
-          cluster_name: config.clustername,
+          cluster_name: clustername,
           cluster_size: config.clustersize !== 'free' ? config.clustersize : null,
         }
 
@@ -480,7 +484,6 @@ module.exports = function (RED) {
 
     //Check credentials
     this.credentials = RED.nodes.getNode(config.servicecreds);
-    console.log(config);
     username = username || this.credentials.username;
     password = password || this.credentials.password;
 
