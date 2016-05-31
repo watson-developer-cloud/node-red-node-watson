@@ -106,13 +106,13 @@ module.exports = function (RED) {
   // for the sevice call.
   var parseOptions = function (msg, config) {
     var tones = msg.tones || config.tones;
-    var sentences = msg.sentences || config.sentences;
-    var contentType = msg.contentType || config.contentType;
+    // var sentences = msg.sentences || config.sentences;
+    // var contentType = msg.contentType || config.contentType;
 
     var options = {
       'text': msg.payload,
-      'sentences': sentences,   
-      'isHTML': contentType     
+      'sentences': msg.sentences || config.sentences,   
+      'isHTML': msg.contentType || config.contentType     
     };
 
     if (tones !== 'all') {
