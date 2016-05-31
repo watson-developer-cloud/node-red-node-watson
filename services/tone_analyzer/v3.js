@@ -82,7 +82,7 @@ module.exports = function (RED) {
 
 
   // Function that checks the configuration to make sure that credentials,
-  // payload and options have been proviced in the correct format.
+  // payload and options have been provided in the correct format.
   var checkConfiguration = function(msg, node, cb) {
     var message = null;      
     var taSettings = null;
@@ -93,11 +93,10 @@ module.exports = function (RED) {
       message = 'Missing Tone Analyzer service credentials';
     } else if (!msg.payload) {
       message = 'Missing property: msg.payload';
-    } 
-
-    if (!message) {
-      message = checkPayload(msg.payload);
-    }
+      if (!message) {
+        message = checkPayload(msg.payload);
+      }
+    }     
 
     if (cb) {
       cb(message, taSettings);
@@ -117,8 +116,14 @@ module.exports = function (RED) {
       'isHTML': contentType     
     };
 
-    if (tones !== 'all') {
-      options.tones = tones;
+    // if (tones !== 'all') {
+    //  options.tones = tones;
+    // }
+
+    switch (tones) {
+      case 'all':
+        options.tones = tones
+        break;
     }
 
     return options;
