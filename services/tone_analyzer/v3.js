@@ -38,7 +38,6 @@ module.exports = function (RED) {
     sPassword = service.password;
   }
 
-  //toneutils.ping();
 
   // Node RED Admin - fetch and set vcap services
   RED.httpAdmin.get('/watson-tone-analyzer/vcap', function (req, res) {
@@ -85,14 +84,6 @@ module.exports = function (RED) {
     }
   };
 
-  // Function to parse and determine tone setting
-  // 'all' is the setting which needs be be blanked
-  // if not the service will throw an error
-  var parseToneOption = function (msg, config) {
-    var tones = msg.tones || config.tones;
-
-    return (tones === 'all' ? '' : tones);
-  }
 
   // function to parse through the options in preparation
   // for the sevice call.
@@ -103,7 +94,7 @@ module.exports = function (RED) {
       'isHTML': msg.contentType || config.contentType    
     };
 
-    options.tones = parseToneOption(msg, config);
+    options.tones = toneutils.parseToneOption(msg, config);
     return options;
   }
 

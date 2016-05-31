@@ -42,6 +42,15 @@ ToneUtils.prototype = {
     }
 
     return message;
+  },
+
+  // Function to parse and determine tone setting
+  // 'all' is the setting which needs be be blanked
+  // if not the service will throw an error
+  parseToneOption: function(msg, config) {
+    var tones = msg.tones || config.tones;
+
+    return (tones === 'all' ? '' : tones);  	
   }
 
 
