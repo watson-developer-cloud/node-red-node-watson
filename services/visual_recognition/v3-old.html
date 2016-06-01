@@ -1,0 +1,393 @@
+<!--
+  Copyright 2015 IBM Corp. 
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="visual-recognition-v3">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-user"></i> API Key</label>
+        <input type="text" id="node-input-apikey" placeholder="API Key">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="visual-recognition-v3">
+    <p>Visual Recognition (v3) uses deep learning algorithms to analyze images for scenes, objects, faces, text, and other subjects that can give you insights into your visual content.</p>
+    <p>Supported <code>msg.payload</code> types:</b>.</p>
+    <ul>
+        <li><b>String</b> URL to image</li>
+        <li><b>Buffer</b> Raw Image Bytes</li>
+    </ul>
+    <p>The identified images labels will be returned on <code>msg.labels</code>.</p>
+    <p>For more information about the Visual Recognition service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('visual-recognition-v3', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+            },
+            credentials: {
+              apikey: {type:"text"}
+              //username: {type:"text"},
+              //password: {type:"password"}
+            },
+            color: "rgb(72, 232, 211)",
+            inputs: 1,
+            outputs: 1,
+            icon: "VR-v3-25x25.png",
+            paletteLabel: "visual recognition v3",
+            label: function() {
+                return this.name || "visual recognition v3";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $.getJSON('watson-visual-recognition/vcap/')
+                  .done(function (service) {
+                    $('.credentials').toggle(!service);
+                  })
+                  .fail(function () {
+                    $('.credentials').show();
+                  }).always(function () {
+                    $('#credentials-check').hide();
+                  })
+            }
+        });
+    })();
+</script>
+
+<script type="text/javascript">
+
+	function classifiersList(node) {
+		
+		console.log("-> classifiersList");
+		
+		var last = $('#node-input-classifier').children().last();
+		var opts = [];
+		$.getJSON('watson-visual-recognition/list/'+node.service,function(data) {
+			var classifiers = data.classifiers;
+			for (var i=0; i < classifiers.length; i++) {
+				console.log("-> classifiersList.data "+classifiers[i].name);
+				var selected = node.classifier === classifiers[i].name;
+				opts.push(
+					'<option value="' + classifiers[i].classifier_id + '"' + (selected ? " selected":"") + '>' +
+						classifiers[i].name +
+					'</option>'
+				);
+			}
+
+			console.log("-> node.classifier: "+node.classifier);
+			if (opts.length === 0) {
+				$('#node-input-classifier').find("option").filter(function() {
+					return $(this).val() === node.classifier;
+				}).attr('selected', true);
+			} else {
+				last.before(opts.join(""));
+			}
+		});
+	}
+
+	RED.nodes.registerType('visual-util-v3',{
+		category: 'IBM_Watson',
+		color: 'rgb(72, 232, 211)',
+		defaults: {
+			name: {value:""},
+			command: {value:"",required:true},
+			classifier: {value:"",required:false},
+			apikey: {value:"",required:true},
+			//username: {value:"",required:true},
+			//password: {value:"",required:true},
+			service: {value:"",required:true}
+		},		
+		inputs:1,
+		outputs:1,
+		icon: "VR-v3-25x25.png",
+		label: function() {
+			return this.name||"visual utils v3";
+		},
+		
+		visuals: [],
+		
+		oneditprepare: function() {
+			var node = this;
+			console.log("this: "+JSON.stringify(this));
+			
+			classifiersList(node);
+	
+			$.getJSON('watson-visual-recognition/vcap/',function(data) {
+				
+				node.visuals = data;
+				var last = $('#node-input-service').children().last();
+				var opts = [];
+	
+				for (var i=0; i < data.length; i++) {
+					var selected = node.service === data[i].name;
+					opts.push(
+						'<option value="' + data[i].name + '"' + (selected ? " selected":"") + '>' +
+							data[i].name +
+						'</option>'
+					);
+				}
+	
+				if (opts.length === 0) {
+					node.service = "_ext_";
+					$('#node-input-service').find("option").filter(function() {
+						return $(this).val() == node.service;
+					}).attr('selected', true);
+				} else {
+					last.before(opts.join(""));
+				}
+	
+				if (node.service === '_ext_') {
+					$("#external_visual_service :input").attr('disabled',false);
+				} else {
+					for (var i2=0;i2<node.visuals.length;i2++) {
+						var ws = node.visuals[i2];
+						if (ws.name === node.service) {
+							$("#node-input-apikey").val(ws.api_key);
+							//$("#node-input-username").val(ws.username);
+							//$("#node-input-password").val(ws.password);
+							console.log("** Visual: "+JSON.stringify(node.visuals[i2]));
+						}
+					}
+					$("#external_visual_service :input").attr('disabled',true);
+				}
+				
+				if (node.command === 'list') {
+					$("#node-input-classifier :input").attr('disabled',true);
+				} else {
+					$("#node-input-classifier :input").attr('disabled',false);
+				}
+
+			});
+
+			$("#node-input-command").on("change",function() {
+				if (this.value === 'list') {
+					$("#node-input-classifier :input").attr('disabled',true);
+				} else {
+					$("#node-input-classifier :input").attr('disabled',false);
+				}
+			});
+
+			$("#node-input-service").on("change",function() {
+				$("#node--input-service").val(this.value);
+				if (this.value === '_ext_') {
+					$("#external_visual_details :input").attr('disabled',false);
+				} else {
+					if(node.visuals) {
+						$("#external_visual_details :input").attr('disabled',true);
+						for (var i=0;i<node.visuals.length;i++) {
+							var ws = node.visuals[i];
+							if (ws.name === this.value) {
+								$("#node-input-apikey").val(ws.api_key);
+								//$("#node-input-username").val(ws.username);
+								//$("#node-input-password").val(ws.password);
+							}
+						}
+					}
+
+				}
+			});
+
+			$("#node-input-command").on("change",function() {
+				if (this.value === 'list') {
+					$("#node-input-classifier :input").attr('disabled',true);
+				} else {
+					$("#node-input-classifier :input").attr('disabled',false);
+				}
+			});
+		}
+
+	});
+
+	RED.nodes.registerType('visual-training-v3',{
+		category: 'IBM_Watson',
+		color: 'rgb(72, 232, 211)',
+		defaults: {
+			name: {value:""},
+			classifier: {value:"",required:true},
+			apikey: {value:"",required:true},
+			//username: {value:"",required:true},
+			//password: {value:"",required:true},
+			service: {value:"",required:true}
+		},		
+		inputs:1,
+		outputs:1,
+		icon: "VR-v3-25x25.png",
+		label: function() {
+			return this.name||"visual training v3";
+		},
+		
+		visuals: [],
+
+		oneditprepare: function() {
+			var node = this;
+			console.log("this: "+JSON.stringify(this));
+	
+			$.getJSON('watson-visual-recognition/vcap/',function(data) {
+				
+				node.visuals = data;
+				console.log("Visuals: "+JSON.stringify(data));
+				
+				var last = $('#node-input-service').children().last();
+				var opts = [];
+	
+				console.log("node.service: "+node.service);
+				for (var i=0; i < data.length; i++) {
+					console.log("data.name: "+data[i].name);
+					
+					var selected = node.service === data[i].name;
+					console.log("selected: "+selected);
+					opts.push(
+						'<option value="' + data[i].name + '"' + (selected ? " selected":"") + '>' +
+							data[i].name +
+						'</option>'
+					);
+				}
+	
+				if (opts.length === 0) {
+					node.service = "_ext_";
+					$('#node-input-service').find("option").filter(function() {
+						return $(this).val() == node.service;
+					}).attr('selected', true);
+				} else {
+					last.before(opts.join(""));
+				}
+	
+				if (node.service === '_ext_') {
+				} else {
+					for (var i2=0;i2<node.visuals.length;i2++) {
+						var ws = node.visuals[i2];
+						if (ws.name === node.service) {
+							$("#node-input-apikey").val(ws.api_key);
+							//$("#node-input-username").val(ws.username);
+							//$("#node-input-password").val(ws.password);
+							util.log("** Visual: "+JSON.stringify(node.visuals[i2]));
+						}
+					}
+					$("#external_visual_details :input").attr('disabled',true);
+				}
+			});
+
+			$("#node-input-service").on("change",function() {
+				$("#node--input-service").val(this.value);
+				if (this.value === '_ext_') {
+					$("#external_visual_details :input").attr('disabled',false);
+				} else {
+					if(node.visuals) {
+						$("#external_visual_details :input").attr('disabled',true);
+						for (var i=0;i<node.visuals.length;i++) {
+							var ws = node.visuals[i];
+							if (ws.name === this.value) {
+								$("#node-input-apikey").val(ws.api_key);
+								//$("#node-input-username").val(ws.username);
+								//$("#node-input-password").val(ws.password);
+							}
+						}
+					}
+
+				}
+			});
+		}
+	});
+
+</script>
+
+<script type="text/x-red" data-template-name="visual-util-v3">
+	<div class="form-row">
+		<label for="node-input-name"><i class="icon-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="Name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-command"><i class="icon-tag"></i> Command</label>
+		<select id="node-input-command">
+			<option value="list">List Classifiers</option>
+			<option value="details">Classifier Details</option>
+			<option value="delete">Delete Classifier</option>
+		</select>
+	</div>
+	<div class="form-row">
+		<label for="node-input-classifier"><i class="icon-tag"></i> Classifier</label>
+		<select id="node-input-classifier">
+			<option value="" disabled></option>
+		</select>
+		<!--input type="text" id="node-input-classifier" placeholder="Name"-->
+	</div>
+	<div class="form-row">
+		<label for="node-input-service"><i class="fa fa-globe"></i> Service</label>
+		<select id="node-input-service">
+			<option value="" disabled></option>
+			<option value="_ext_"> External service</option>
+		</select>
+	</div>
+	<div id="external_visual_details">
+		<div class="form-row">
+			<label for="node-input-apikey"><i class="fa fa-user"></i> API Key</label>
+			<input type="text" id="node-input-apikey">
+		</div>
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="visual-util-v3">
+	<p>A node for managing the classifiers in the Visual Recognition service (v3) in Watson</p>
+	<p>More information about this service can be found in the 
+	<a href='https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/visual-recognition/'>Image (CHECK -UPDATE LINK) Recognition API V3 documentation</a></p>.
+</script>
+
+<script type="text/x-red" data-template-name="visual-training-v3">
+	<div class="form-row">
+		<label for="node-input-name"><i class="icon-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="Name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-classifier"><i class="icon-tag"></i> Classifier</label>
+		<input type="text" id="node-input-classifier" placeholder="Name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-service"><i class="fa fa-globe"></i> Service</label>
+		<select id="node-input-service">
+			<option value="" disabled></option>
+			<option value="_ext_"> External service</option>
+		</select>
+	</div>
+	<div id="external_visual_details">
+		<div class="form-row">
+			<label for="node-input-apikey"><i class="fa fa-user"></i> API Key</label>
+			<input type="text" id="node-input-apikey">
+		</div>
+	</div>
+</script>
+
+<script type="text/x-red" data-help-name="visual-training-v3">
+	<p>A node for training the Visual Recognition service (v3) in Watson</p>
+	<p>This service requires that two sets of images are provided for the training. These sets of files should be 
+	zipped and provided to the node either as binary streams or as a list of URL. The positive and negative set of images 
+	should be pointed by <b>msg.positive</b> and <b>msg.negative</b>.</p>
+	<p>More information about this service can be found in the 
+	<a href='https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/visual-recognition/'>Image Recognition API documentation</a></p>.
+</script>
+
+
