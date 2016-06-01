@@ -86,18 +86,16 @@ module.exports = function (RED) {
   // it should be called here or after alchemy returns and passed
   // control back to cbdone.
 
-  function performAction(params, feature, cbdone, cbcleanup) {
+  function performAction(params, feature, cbdone) {
 
-    console.log("params: ", params);
-    console.log("feature: ", feature);
+    //console.log("params: ", params);
+    //console.log("feature: ", feature);
 
         var visual_recognition = watson.visual_recognition({
           api_key: apikey,
           version: 'v3',
-          version_date: '2016-05-20'
+          version_date: '2016-05-19'
         });
-
-    //var alchemy_vision = watson.alchemy_vision( { api_key: apikey } );
 
     if (feature == 'classifyImage')
     {
@@ -117,9 +115,6 @@ module.exports = function (RED) {
       visual_recognition.deleteClassifier(params, cbdone);
     }
 
-
-
-    if (cbcleanup) cbcleanup();
   }
 
 
@@ -131,6 +126,7 @@ module.exports = function (RED) {
     this.on('input', function (msg) {
 
       node.status({});
+      temp.cleanup(); // so there is at most 1 temp file at a time (did not found a better solution...)
 
       if (!msg.payload) {
         this.status({fill:'red', shape:'ring', text:'missing payload'}); 
@@ -162,24 +158,32 @@ module.exports = function (RED) {
 
       var params = {};
 
-      //for (var key in msg.alchemy_options) { params[key] = msg.alchemy_options[key]; }
-
       // This is the callback after the call to the watson service.    
       // Set up as a var within this scope, so it has access to node, msg etc. 
       // in preparation for the Watson service action       
-      var actionComplete = function(err, keywords) {
-        if (err || keywords.status === 'ERROR') {
+      var actionComplete = function(res, body, other) {
+
+        //if (err || keywords.status === 'ERROR') {
+        if (body.images[0].error) {
+          err = body.images[0].error.description;
+          err_id = body.images[0].error.error_id
+
           node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
-          console.log('Error:', msg, err);
-          node.error(err, msg);
+          msg.result = {};
+          msg.result['error_id']= err_id;
+          msg.result['error']= err;
+          console.log('Error:', err);
+          msg.payload='see msg.result.error';
+          node.send(msg); 
         }
         else {
-          msg.result = keywords[FEATURE_RESPONSES[feature]] || [];
-          msg.fullresult = {};
-          msg.fullresult['all'] = keywords;
+          //msg.result = keywords[FEATURE_RESPONSES[feature]] || [];
+          msg.result = {};
+          msg.result['all'] = body;
+          msg.payload='see msg.result'; // to remove any Buffer that could remains
           node.send(msg); 
           node.status({});
-        }        
+        }
       }        
       
       // If the input is an image, need to stream the input in, giving time for the
@@ -197,8 +201,10 @@ module.exports = function (RED) {
           stream_buffer(info.path, msg.payload, function () {
             console.log('debug2: temp file size: ' + fs.statSync(info.path).size);
             params['images_file'] = fs.createReadStream(info.path);
-            //console.log('debug3');
-            performAction(params, feature, actionComplete, temp.cleanup);        
+
+            //console.log('info object : ', info);
+            // TODO : debug why aectivating temp.cleanup is making failing of every POST classify, detectFaces, etc ..
+            performAction(params, feature, actionComplete);
           });
 
         });
