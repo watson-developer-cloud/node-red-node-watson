@@ -285,7 +285,7 @@ module.exports = function (RED) {
                       console.log('list_params[prop] : ', list_params[prop]);
                       console.log('before cb()');
                       //cb(null,"file " + prop + " ready"); // IIIII
-                      callback();
+                      if (typeof callback=="function") callback();
                     });
                   }); // temp.open
               }); // asyncTasks.push
