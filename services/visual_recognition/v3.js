@@ -268,18 +268,24 @@ module.exports = function (RED) {
               // before pushing the function into the task array wrap the push in an IIFE function, passing in the 'prop' parameter
               (function(prop, list_params, msg) {
 
-               asyncTasks.push(function (cb) {
+               asyncTasks.push(function (callback) {
                   var buffer = msg.params[prop];
                   temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
                     if (err) {
                       this.status({fill:'red', shape:'ring', text:'unable to open image stream'});          
                       var message ='Node has been unable to open the image stream'; 
                       node.error(message, msg);
-                      cb('error in open image');
+                      callback('error in open image');
                     }  
                     stream_buffer(info.path, msg.params[prop], function () {
+                      console.log('prop : ', prop);
+                      console.log('msg.params[prop] : ', msg.params[prop]);
+                      console.log('info.path : ', info.path);
                       list_params[prop]=fs.createReadStream(info.path);
-                      cb(null,"file " + prop + " ready");
+                      console.log('list_params[prop] : ', list_params[prop]);
+                      console.log('before cb()');
+                      //cb(null,"file " + prop + " ready"); // IIIII
+                      callback();
                     });
                   }); // temp.open
               }); // asyncTasks.push
@@ -294,12 +300,18 @@ module.exports = function (RED) {
 
           async.parallel(asyncTasks, function(error, results){
             // when all temp local copies are ready, copy of all parameters and request to watson api
+            console.log(error, results);
             if (error)
             {
               console.log("Parallel ended with error " + error);
               return;
             }
+            console.log('in parallel end');
+            console.log(params);
+            console.log(list_params);
             params = Object.assign (params, list_params);
+            console.log(params);
+            console.log(list_params);
             performAction(params, feature, actionComplete2);
           });
       }
