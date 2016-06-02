@@ -265,7 +265,7 @@ module.exports = function (RED) {
             if (prop.indexOf('_examples')>=0)
             {
               // before pushing the function into the task array wrap the push in an IIFE function, passing in the 'prop' parameter
-              (function(prop) {
+              (function(prop, list_params) {
 
                asyncTasks.push(function (cb) {
                   var buffer = msg.params[prop];
