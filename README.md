@@ -3,7 +3,7 @@ Node-RED Watson Nodes for IBM Bluemix
 
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/e157cf8407f2442396789dc78075340a)](https://www.codacy.com/app/rezgui-y/node-red-node-watson)
 
-### New in next version
+### New in version 0.4.2
 - The transcription returned for the Speech to Text node now returns full (untruncated) transcription. The
 alternatives are returned in msg.fullresult. The dialog now loads available models dynamically. This will
 allow new speech models to be identified without requiring a further code change. 
