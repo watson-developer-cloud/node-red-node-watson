@@ -34,6 +34,7 @@ module.exports = function (RED) {
   var temp = require('temp');
   var fileType = require('file-type');
   var fs = require('fs');
+  var async = require('async');
 
   // temp is being used for file streaming to allow the file to arrive so it can be processed. 
   temp.track();
@@ -88,9 +89,6 @@ module.exports = function (RED) {
 
   function performAction(params, feature, cbdone) {
 
-    //console.log("params: ", params);
-    //console.log("feature: ", feature);
-
         var visual_recognition = watson.visual_recognition({
           api_key: apikey,
           version: 'v3',
@@ -117,15 +115,19 @@ module.exports = function (RED) {
 
   }
 
-
   // This is the Watson Visual Recognition V3 Node
   function WatsonVisualRecognitionV3Node (config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg) {
+    this.on('input', function (msg) 
+    {
+
+      // Check which single feature has been requested.
+      var feature = config["image-feature"];
 
       node.status({});
+      
       temp.cleanup(); // so there is at most 1 temp file at a time (did not found a better solution...)
 
       if (!msg.payload) {
@@ -135,12 +137,13 @@ module.exports = function (RED) {
         return;
       }
 
-    if (typeof msg.payload == "boolean" || typeof msg.payload == "number") {
-        this.status({fill:'red', shape:'ring', text:'bad format payload'}); 
-        var message = 'Bad format : msg.payload must be a URL string or a Node.js Buffer';
-        node.error(message, msg);
-        return;
-      }
+    if (feature != 'retrieveClassifiersList' && feature != 'retrieveClassifierDetails' && feature != 'deleteClassifier')
+      if (typeof msg.payload == "boolean" || typeof msg.payload == "number") {
+          this.status({fill:'red', shape:'ring', text:'bad format payload'}); 
+          var message = 'Bad format : msg.payload must be a URL string or a Node.js Buffer';
+          node.error(message, msg);
+          return;
+        }
 
       // If it is present the newly provided user entered key takes precedence over the existing one. 
       apikey = s_apikey || this.credentials.apikey;
@@ -153,28 +156,60 @@ module.exports = function (RED) {
         return;
       }
 
-      // Check which single feature has been requested.
-      var feature = config["image-feature"];
-
       var params = {};
 
       // This is the callback after the call to the watson service.    
       // Set up as a var within this scope, so it has access to node, msg etc. 
       // in preparation for the Watson service action       
-      var actionComplete = function(res, body, other) {
+      var actionComplete = function(err, body, other) {
 
-        //if (err || keywords.status === 'ERROR') {
-        if (body.images[0].error) {
-          err = body.images[0].error.description;
+        if (err != null && body==null)
+        {
+          node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
+          msg.result = {};
+          msg.result['error_code']= err.code;
+          if (!err.error)
+            msg.result['error']= err.error;
+          console.log('Error:', err.code);
+          node.error('Error code : ' +  err.code);
+          return;
+        }
+        else if (body.images[0].error)
+        {
+          err_desc = body.images[0].error.description;
           err_id = body.images[0].error.error_id
-
           node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
           msg.result = {};
           msg.result['error_id']= err_id;
-          msg.result['error']= err;
-          console.log('Error:', err);
+          msg.result['error']= err_desc;
+          console.log('Error:', err_desc);
           msg.payload='see msg.result.error';
           node.send(msg); 
+        }
+        else {
+          msg.result = {};
+          msg.result['all'] = body;
+          msg.payload='see msg.result'; // to remove any Buffer that could remains
+          node.send(msg); 
+          node.status({});
+        }
+      } // actionComplete    
+
+      var actionComplete2 = function(err, body, other) {
+
+        console.log('err', err);
+        console.log('body', body);
+
+        if (err != null && body==null)
+        {
+          node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
+          msg.result = {};
+          msg.result['error_code']= err.code;
+          if (!err.error)
+            msg.result['error']= err.error;
+          console.log('Error:', err.code);
+          node.error('Error code : ' +  err.code);
+          return;
         }
         else {
           //msg.result = keywords[FEATURE_RESPONSES[feature]] || [];
@@ -184,7 +219,28 @@ module.exports = function (RED) {
           node.send(msg); 
           node.status({});
         }
-      }        
+      } // actionComplete2
+
+      var actionCompleteDeleteClassifier = function(err, body, other) {
+
+        if (err != null && body==null)
+        {
+          node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
+          msg.result = {};
+          msg.result['error_code']= err.code;
+          if (!err.error)
+            msg.result['error']= err.error;
+          console.log('Error:', err.code);
+          node.error('Error code : ' +  err.code);
+          return;
+        }
+        else {
+          msg.result = 'Deleted classifier_id';
+          msg.payload='see msg.result';
+          node.send(msg); 
+          node.status({});
+        }
+      } // actionCompleteDeleteClassifier
       
       // If the input is an image, need to stream the input in, giving time for the
       // data to arrive, before invoking the service. 
@@ -197,34 +253,67 @@ module.exports = function (RED) {
             node.error(message, msg);
             return;        
           }  
-          //console.log('debug1');
           stream_buffer(info.path, msg.payload, function () {
-            console.log('debug2: temp file size: ' + fs.statSync(info.path).size);
-            params['images_file'] = fs.createReadStream(info.path);
-
-            //console.log('info object : ', info);
-            // TODO : debug why aectivating temp.cleanup is making failing of every POST classify, detectFaces, etc ..
-            performAction(params, feature, actionComplete);
-          });
-
-        });
-      } else if (feature=='createClassifier') {
-        // copy all msg.params properties in params
-          //for (var k in msg.params)
-          //  params[k]=msg.params[k];
-          params = Object.assign (params, msg.params);
-          console.log("HERE assign" , params);
+          params['images_file'] = fs.createReadStream(info.path);
           performAction(params, feature, actionComplete);
+          });
+        }); // temp
+      } else if (feature=='createClassifier') {   
+          var list_params = {};
+          var asyncTasks = [];
+          for (var k in msg.params)
+          {
+            prop = k;
+            if (prop.indexOf('_examples')>=0)
+            {
+              // before pushing the function into the task array wrap the push in an IIFE function, passing in the 'prop' parameter
+              (function(prop) {
+
+               asyncTasks.push(function (cb) {
+                  var buffer = msg.params[prop];
+                  temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
+                    if (err) {
+                      this.status({fill:'red', shape:'ring', text:'unable to open image stream'});          
+                      var message ='Node has been unable to open the image stream'; 
+                      node.error(message, msg);
+                      cb('error in open image');
+                    }  
+                    stream_buffer(info.path, msg.params[prop], function () {
+                      list_params[prop]=fs.createReadStream(info.path);
+                      cb(null,"file " + prop + " ready");
+                    });
+                  }); // temp.open
+              }); // asyncTasks.push
+
+              })(prop);
+
+            } else if (prop=='name') {
+              list_params[k]=msg.params[k];
+            }
+          } // for
+          
+
+          async.parallel(asyncTasks, function(error, results){
+            // when all temp local copies are ready, copy of all parameters and request to watson api
+            if (error)
+            {
+              console.log("Parallel ended with error " + error);
+              return;
+            }
+            params = Object.assign (params, list_params);
+            performAction(params, feature, actionComplete2);
+          });
       }
         else if (feature=='retrieveClassifiersList') { 
-          performAction(params, feature, actionComplete);
+          performAction(params, feature, actionComplete2);
       }
         else if (feature =='retrieveClassifierDetails') {
-          performAction(params, feature, actionComplete);
+          params['classifier_id']=msg.params['classifier_id'];
+          performAction(params, feature, actionComplete2);
       }
         else if (feature=='deleteClassifier') {
-
-        performAction(params, feature, actionComplete);
+        params['classifier_id']=msg.params['classifier_id'];
+        performAction(params, feature, actionCompleteDeleteClassifier);
 
       } else if (urlCheck(msg.payload)) {
         params['url'] = msg.payload;
