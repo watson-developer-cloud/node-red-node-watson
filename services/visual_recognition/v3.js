@@ -286,7 +286,7 @@ module.exports = function (RED) {
               })(prop);
 
             } else if (prop=='name') {
-              list_params[k]=msg.params[k];
+              list_params[prop]=msg.params[prop];
             }
           } // for
           
