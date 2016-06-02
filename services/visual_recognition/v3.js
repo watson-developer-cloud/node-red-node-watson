@@ -77,7 +77,6 @@ module.exports = function (RED) {
   function stream_buffer(file, contents, cb) {
     fs.writeFile(file, contents, function (err) {
       if (err) throw err;
-      console.log('debug4');
       cb();
     });
   };
@@ -89,7 +88,7 @@ module.exports = function (RED) {
 
   function performAction(params, feature, cbdone) {
 
-        var visual_recognition = watson.visual_recognition({
+        var visualRecognition = watson.visual_recognition({
           api_key: apikey,
           version: 'v3',
           version_date: '2016-05-19'
@@ -97,20 +96,19 @@ module.exports = function (RED) {
 
     if (feature == 'classifyImage')
     {
-      visual_recognition.classify(params, cbdone);
-    } else if (feature == 'detectFaces') {
-      visual_recognition.detectFaces(params, cbdone);
-    } else if (feature == 'recognizeText') {
-      visual_recognition.recognizeText(params, cbdone);
-    } else if (feature == 'createClassifier') {
-      console.log("calling  createClassifier ")
-      visual_recognition.createClassifier(params, cbdone);
-    } else if (feature == 'retrieveClassifiersList') {
-      visual_recognition.listClassifiers(params, cbdone);
-    } else if (feature == 'retrieveClassifierDetails') {
-      visual_recognition.getClassifier(params, cbdone);
-    } else if (feature == 'deleteClassifier') {
-      visual_recognition.deleteClassifier(params, cbdone);
+      visualRecognition.classify(params, cbdone);
+    } else if (feature === 'detectFaces') {
+      visualRecognition.detectFaces(params, cbdone);
+    } else if (feature === 'recognizeText') {
+      visualRecognition.recognizeText(params, cbdone);
+    } else if (feature === 'createClassifier') {
+      visualRecognition.createClassifier(params, cbdone);
+    } else if (feature === 'retrieveClassifiersList') {
+      visualRecognition.listClassifiers(params, cbdone);
+    } else if (feature === 'retrieveClassifierDetails') {
+      visualRecognition.getClassifier(params, cbdone);
+    } else if (feature === 'deleteClassifier') {
+      visualRecognition.deleteClassifier(params, cbdone);
     }
 
   }
