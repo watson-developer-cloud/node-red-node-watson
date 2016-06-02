@@ -259,13 +259,14 @@ module.exports = function (RED) {
       } else if (feature=='createClassifier') {   
           var list_params = {};
           var asyncTasks = [];
+          var prop = null;
           for (var k in msg.params)
           {
             prop = k;
             if (prop.indexOf('_examples')>=0)
             {
               // before pushing the function into the task array wrap the push in an IIFE function, passing in the 'prop' parameter
-              (function(prop, list_params) {
+              (function(prop, list_params, msg) {
 
                asyncTasks.push(function (cb) {
                   var buffer = msg.params[prop];
@@ -283,7 +284,7 @@ module.exports = function (RED) {
                   }); // temp.open
               }); // asyncTasks.push
 
-              })(prop);
+              })(prop, list_params, msg);
 
             } else if (prop=='name') {
               list_params[prop]=msg.params[prop];
