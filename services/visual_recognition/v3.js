@@ -275,17 +275,17 @@ module.exports = function (RED) {
                       this.status({fill:'red', shape:'ring', text:'unable to open image stream'});          
                       var message ='Node has been unable to open the image stream'; 
                       node.error(message, msg);
-                      callback('error in open image');
+                      if (typeof callback=="function") callback('open error on '+prop);
                     }  
                     stream_buffer(info.path, msg.params[prop], function () {
                       console.log('prop : ', prop);
-                      console.log('msg.params[prop] : ', msg.params[prop]);
+                      //console.log('msg.params[prop] : ', msg.params[prop]);
                       console.log('info.path : ', info.path);
                       list_params[prop]=fs.createReadStream(info.path);
-                      console.log('list_params[prop] : ', list_params[prop]);
+                      //console.log('list_params[prop] : ', list_params[prop]);
                       console.log('before cb()');
                       //cb(null,"file " + prop + " ready"); // IIIII
-                      if (typeof callback=="function") callback();
+                      if (typeof callback=="function") callback(null, prop);
                     });
                   }); // temp.open
               }); // asyncTasks.push
@@ -307,11 +307,11 @@ module.exports = function (RED) {
               return;
             }
             console.log('in parallel end');
-            console.log(params);
-            console.log(list_params);
+            //console.log(params);
+            //console.log(list_params);
             params = Object.assign (params, list_params);
-            console.log(params);
-            console.log(list_params);
+            //console.log(params);
+            //console.log(list_params);
             performAction(params, feature, actionComplete2);
           });
       }
