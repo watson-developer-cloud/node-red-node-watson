@@ -309,7 +309,9 @@ module.exports = function (RED) {
             console.log('in parallel end');
             //console.log(params);
             //console.log(list_params);
-            params = Object.assign (params, list_params);
+            //params = Object.assign (params, list_params);
+            for (p in list_params)
+              params[p]=list_params[p];
             //console.log(params);
             //console.log(list_params);
             performAction(params, feature, actionComplete2);
