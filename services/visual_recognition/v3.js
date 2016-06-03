@@ -117,7 +117,7 @@ module.exports = function (RED) {
   function WatsonVisualRecognitionV3Node (config) {
     RED.nodes.createNode(this, config);
     var node = this;
-
+    var message;
     this.on('input', function (msg) 
     {
       // Check which single feature has been requested.
@@ -127,14 +127,14 @@ module.exports = function (RED) {
 
       if (!msg.payload) {
         this.status({fill:'red', shape:'ring', text:'missing payload'}); 
-        var message = 'Missing property: msg.payload';
+        message = 'Missing property: msg.payload';
         node.error(message, msg);
         return;
       }
       if (feature != 'retrieveClassifiersList' && feature != 'retrieveClassifierDetails' && feature != 'deleteClassifier')
       if (typeof msg.payload == "boolean" || typeof msg.payload == "number") {
           this.status({fill:'red', shape:'ring', text:'bad format payload'}); 
-          var message = 'Bad format : msg.payload must be a URL string or a Node.js Buffer';
+          message = 'Bad format : msg.payload must be a URL string or a Node.js Buffer';
           node.error(message, msg);
           return;
         }
@@ -145,7 +145,7 @@ module.exports = function (RED) {
 
       if (!apikey) {
         this.status({fill:'red', shape:'ring', text:'missing credentials'});          
-        var message ='Missing Watson Visual Recognition API service credentials'; 
+        message ='Missing Watson Visual Recognition API service credentials'; 
         node.error(message, msg);
         return;
       }
@@ -170,8 +170,8 @@ module.exports = function (RED) {
         }
         else if (body.images[0].error)
         {
-          err_desc = body.images[0].error.description;
-          err_id = body.images[0].error.error_id
+          var err_desc = body.images[0].error.description;
+          var err_id = body.images[0].error.error_id
           node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
           msg.result = {};
           msg.result['error_id']= err_id;
@@ -239,7 +239,7 @@ module.exports = function (RED) {
         temp.open({suffix: '.' + fileType(msg.payload).ext}, function (err, info) {
           if (err) {
             this.status({fill:'red', shape:'ring', text:'unable to open image stream'});          
-            var message ='Node has been unable to open the image stream'; 
+            message ='Node has been unable to open the image stream'; 
             node.error(message, msg);
             return;        
           }  
