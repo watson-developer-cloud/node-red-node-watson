@@ -298,7 +298,7 @@ module.exports = function (RED) {
           } // for
           
 
-          async.parallel(asyncTasks, function(error, results){
+          async.series(asyncTasks, function(error, results){
             // when all temp local copies are ready, copy of all parameters and request to watson api
             console.log(error, results);
             if (error)
