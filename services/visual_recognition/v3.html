@@ -67,16 +67,43 @@
 	<p>Using the Visual Recognition v3 node, you can use the Watson Visual Recognition service V3 to identify scenes, objects, faces, and text in images you upload to the service. You can create and train a custom classifier to identify subjects that suit your needs.</p>
     <p>The following features are available :</p>
     <ul>
-        <li><b>Classify an image</b> Upload images or URLs to identify built-in classifiers by default. To identify custom classifiers, include the classifier_ids or owners parameters. Images must be in .jpeg, or .png format.</li>
-        <li><b>Detect Faces</b> : analyze faces in images and get data about them, such as estimated age and gender. Images must be in .jpeg, or .png format.</li>
+        <li><b>Classify an image</b> Upload images or URLs to identify built-in classifiers by default. To identify custom classifiers, include the classifier_ids or owners parameters. Images must be in .jpeg, .jpg or .png format.</li>
+        <li><b>Detect Faces</b> : analyze faces in images and get data about them, such as estimated age and gender. Images must be in .jpeg, .jpg or .png format.</li>
         <li><b>Recognize Text</b> : recognizes text in images. This is a beta function of the Visual Recognition service that supports only English language text identification</li>        
     </ul>
-    <p>For full details on the feature details and response values, please see the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/">Watson Visual Recognition (v3) API documentation</a></p>
-    <p>The content to be analysed should be passed in on <code>msg.payload</code>.</p>
-    <p>Valid <code>msg.payload</code> types: URL or Buffer containing raw image bytes.</p>
 
-    <br>
-    <p>Results from the Watson Visual Recognition service will made available at <code>msg.result</code>.</p>
+    <p>Results from the Watson Visual Recognition service APIs below will made available at <code>msg.result</code></p>
+    <p>Important : Maximum image size is 2 MB</p>
+    <br/>
+
+    <p><b>Classify an image</b></p>
+    <p>This feature should be provided in input : </p>
+    <ul>
+    <li><code>msg.payload</code> : the URL or the Node.js Buffer of an image. Redirects are followed, so you can use shortened URLs. (Required)</li>
+    <li><code>msg.params["classifier_ids"]</code> : A comma-separated list of the classifier IDs used to classify the images. "Default" is the classifier_id of the built-in classifier. (string) (Optional)</li>
+    <li><code>msg.params["owners"]</code> : A comma-separated list with the value(s) "IBM" and/or "me" to specify which classifiers to run. (string) (Optional)</li>
+    <li><code>msg.params["threshold"]</code> : A floating value (in string format) that specifies the minimum score a class must have to be displayed in the response (Optional)</li>
+    </ul>
+    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#classify_an_image">API documentation</a>.</p>
+
+    <p><b>Detect Faces</b></p>
+    <p>This feature should be provided in input : </p>
+    <ul>
+    <li><code>msg.payload</code> : the URL or the Node.js Buffer of an image. Redirects are followed, so you can use shortened URLs. (Required)</li>
+    </ul>
+    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#detect_faces">API documentation</a>.</p>
+
+    <p><b>Text Recognition</b></p>
+    <p>This feature should be provided in input : </p>
+    <ul>
+    <li><code>msg.payload</code> : the URL or the Node.js Buffer of an image. Redirects are followed, so you can use shortened URLs. (Required)</li>
+    </ul>
+    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#recognize_text">API documentation</a>.</p>
+
+
+    <p>For full details on the feature details and response values, please see the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/">Watson Visual Recognition (v3) API documentation</a></p>
+    
+    <p>Check the sample Flow for this node on  <a href="https://github.com/watson-developer-cloud/node-red-bluemix-starter">Watson Node-RED Starter</a></p>
 </script>
 
 
@@ -84,11 +111,40 @@
 	<p> This node enables you to use the training features of the Watson Visual Recognition service V3 that aims to identify scenes, objects, faces, and text in images you upload to the service. Using this node you can create and train a custom classifier to identify subjects that suit your needs.</p>
     <p>The following features are available :</p>
     <ul>
-        <li><b>Create a classifier</b> details TODO</li>
-        <li><b>Retrieve a list of custom classifier</b> details TODO</li>
-        <li><b>Retrieve classifier details</b> details TODO</li>
-        <li><b>Delete a classifier</b> details TODO</li>
+        <li><b>Create a classifier</b> </li>
+        <li><b>Retrieve a list of custom classifier</b></li>
+        <li><b>Retrieve classifier details</b></li>
+        <li><b>Delete a classifier</b></li>
     </ul>
+
+    <p><b>Create a Classifier</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+    <li><code>msg.params["name"]</code> : a string name that will be used as prefix for the returned classifier_id (Required)</li>
+    <li><code>msg.params["{classname}_positive_examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images. (Required)</li>
+    <li><code>msg.params["negative_examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images.(Optional)</li>
+    </ul>
+    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#create_a_classifier">API documentation</a>.</p>
+
+    <p><b>Retrieve classifiers list</b></p>
+    <p>this feature does not need input params.</p>
+
+    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#retrieve_a_list_of_classifiers">API documentation</a>.</p>
+    
+    <p><b>Retrieve a classifier details</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+    <li><code>msg.params["classifier_id"]</code> : the classifier_id (string) (Required)</li>
+    </ul>
+    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#retrieve_classifier_details">API documentation</a>.</p>
+    
+    <p><b>Delete a classifier </b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+    <li><code>msg.params["classifier_id"]</code> : the classifier_id (string) (Required)</li>
+    </ul>
+    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#delete_a_classifier">API documentation</a>.</p>
+
     <p>For full details on the feature details and response values, please see the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/">Watson Visual Recognition (v3) API documentation</a></p>
     
     <p>The content to be analysed should be passed in on <code>msg.payload</code>.</p>
@@ -96,6 +152,9 @@
 
     <br>
     <p>Results from the Watson Visual Recognition service will made available at <code>msg.result</code>.</p>
+
+    <p>Check the sample Flow for this node on  <a href="https://github.com/watson-developer-cloud/node-red-bluemix-starter">Watson Node-RED Starter</a></p>
+    
 </script>
 
 

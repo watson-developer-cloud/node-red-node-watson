@@ -120,12 +120,9 @@ module.exports = function (RED) {
 
     this.on('input', function (msg) 
     {
-
       // Check which single feature has been requested.
       var feature = config["image-feature"];
-
       node.status({});
-      
       temp.cleanup(); // so there is at most 1 temp file at a time (did not found a better solution...)
 
       if (!msg.payload) {
@@ -134,8 +131,7 @@ module.exports = function (RED) {
         node.error(message, msg);
         return;
       }
-
-    if (feature != 'retrieveClassifiersList' && feature != 'retrieveClassifierDetails' && feature != 'deleteClassifier')
+      if (feature != 'retrieveClassifiersList' && feature != 'retrieveClassifierDetails' && feature != 'deleteClassifier')
       if (typeof msg.payload == "boolean" || typeof msg.payload == "number") {
           this.status({fill:'red', shape:'ring', text:'bad format payload'}); 
           var message = 'Bad format : msg.payload must be a URL string or a Node.js Buffer';
@@ -195,9 +191,6 @@ module.exports = function (RED) {
 
       var actionComplete2 = function(err, body, other) {
 
-        console.log('err', err);
-        console.log('body', body);
-
         if (err != null && body==null)
         {
           node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
@@ -210,7 +203,6 @@ module.exports = function (RED) {
           return;
         }
         else {
-          //msg.result = keywords[FEATURE_RESPONSES[feature]] || [];
           msg.result = {};
           msg.result['all'] = body;
           msg.payload='see msg.result'; // to remove any Buffer that could remains
@@ -253,6 +245,12 @@ module.exports = function (RED) {
           }  
           stream_buffer(info.path, msg.payload, function () {
           params['images_file'] = fs.createReadStream(info.path);
+          if ( msg.params != null && msg.params.classifier_ids != null)
+            params['classifier_ids']=msg.params['classifier_ids'];
+          if ( msg.params != null && msg.params.owners != null)
+            params['owners']=msg.params['owners'];
+          if ( msg.params != null && msg.params.threshold != null)
+            params['threshold']=msg.params['threshold'];
           performAction(params, feature, actionComplete);
           });
         }); // temp
@@ -275,17 +273,11 @@ module.exports = function (RED) {
                       this.status({fill:'red', shape:'ring', text:'unable to open image stream'});          
                       var message ='Node has been unable to open the image stream'; 
                       node.error(message, msg);
-                      if (typeof callback=="function") callback('open error on '+prop);
+                      callback('open error on '+prop);
                     }  
                     stream_buffer(info.path, msg.params[prop], function () {
-                      console.log('prop : ', prop);
-                      //console.log('msg.params[prop] : ', msg.params[prop]);
-                      console.log('info.path : ', info.path);
                       list_params[prop]=fs.createReadStream(info.path);
-                      //console.log('list_params[prop] : ', list_params[prop]);
-                      console.log('before cb()');
-                      //cb(null,"file " + prop + " ready"); // IIIII
-                      if (typeof callback=="function") callback(null, prop);
+                      callback(null, prop);
                     });
                   }); // temp.open
               }); // asyncTasks.push
@@ -298,7 +290,7 @@ module.exports = function (RED) {
           } // for
           
 
-          async.series(asyncTasks, function(error, results){
+          async.parallel(asyncTasks, function(error, results){
             // when all temp local copies are ready, copy of all parameters and request to watson api
             console.log(error, results);
             if (error)
@@ -306,14 +298,8 @@ module.exports = function (RED) {
               console.log("Parallel ended with error " + error);
               return;
             }
-            console.log('in parallel end');
-            //console.log(params);
-            //console.log(list_params);
-            //params = Object.assign (params, list_params);
             for (p in list_params)
               params[p]=list_params[p];
-            //console.log(params);
-            //console.log(list_params);
             performAction(params, feature, actionComplete2);
           });
       }
@@ -330,6 +316,12 @@ module.exports = function (RED) {
 
       } else if (urlCheck(msg.payload)) {
         params['url'] = msg.payload;
+        if ( msg.params != null && msg.params.classifier_ids != null)
+            params['classifier_ids']=msg.params['classifier_ids'];
+        if ( msg.params != null && msg.params.owners != null)
+            params['owners']=msg.params['owners'];
+        if ( msg.params != null && msg.params.threshold != null)
+            params['threshold']=msg.params['threshold'];
         performAction(params, feature, actionComplete);
       } else {
         this.status({fill:'red', shape:'ring', text:'payload is invalid'});          
