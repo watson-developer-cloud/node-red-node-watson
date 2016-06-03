@@ -36,7 +36,12 @@ module.exports = function (RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
- 
+  function serviceCredentialsConfigurationNode(config) {
+    RED.nodes.createNode(this,config);
+    this.username = config.username;
+    this.password = config.password;
+  }
+
   function createRankerNode(config) {
     RED.nodes.createNode(this, config);
     var node = this;
@@ -51,20 +56,20 @@ module.exports = function (RED) {
         var params = {
           training_data: msg.payload
         };
-      
+
         if (config.rankername) {
-          params.training_metadata = "{\"name\": \""+config.rankername+"\"}";
+          params.training_metadata = '{\"name\": \"'+config.rankername+'\"}';
         }
-        node.status({fill:"blue",shape:"ring",text:"Uploading training data"});
+        node.status({fill:'blue',shape:'ring',text:'Uploading training data'});
         retrieve_and_rank.createRanker(params, function(err, res) {
             handleWatsonCallback(null,node,msg,err,res,function() {
-              node.status({fill:"blue",shape:"ring",text:"Training data uploaded. Ranker is training"});
+              node.status({fill:'blue',shape:'ring',text:'Training data uploaded. Ranker is training'});
               //Now check the status of the ranker
               var ranker_id = res.ranker_id;
               checkRankerStatus(retrieve_and_rank,msg,node,ranker_id);
             });;
         });
-      });      
+      });
     });
   }
 
@@ -92,7 +97,7 @@ module.exports = function (RED) {
               var message = 'No ranker id specified';
               node.error(message, msg)
               return;
-            }           
+            }
             break;
           case 'delete':
             if (params.ranker_id) {
@@ -106,7 +111,7 @@ module.exports = function (RED) {
             }
             break;
         }
-      });      
+      });
     });
   }
 
@@ -116,7 +121,7 @@ module.exports = function (RED) {
 
     this.on('input', function(msg) {
       setupRankRetrieveNode(msg,config,this,function(retrieve_and_rank) {
-        
+
         var params = {
           cluster_id: config.clusterid,
           collection_name: config.collectionname
@@ -139,7 +144,7 @@ module.exports = function (RED) {
           handleWatsonCallback(null,node,msg,err,searchResponse);
         });
 
-      });      
+      });
     });
   }
 
@@ -150,8 +155,12 @@ module.exports = function (RED) {
     this.on('input', function(msg) {
       setupRankRetrieveNode(msg, config, this, function (retrieve_and_rank) {
 
+        //Cluster name can be passed into msg.payload, but the cluster name
+        //specified in the config takes priority
+        var clustername;
+        (config.clustername !== '') ? clustername = config.clustername : clustername = msg.payload;
         var params = {
-          cluster_name: config.clustername,
+          cluster_name: clustername,
           cluster_size: config.clustersize !== 'free' ? config.clustersize : null,
         }
 
@@ -161,7 +170,7 @@ module.exports = function (RED) {
 
           if (err) {
             node.status({});
-            var message = "";
+            var message = '';
             (err.error) ? message = err.error : message = err.message;
             return node.error(message, msg);
           }
@@ -203,7 +212,7 @@ module.exports = function (RED) {
               var message = 'No cluster id specified';
               node.error(message, msg)
               return;
-            }           
+            }
             break;
           case 'delete':
             if (params.cluster_id) {
@@ -217,7 +226,7 @@ module.exports = function (RED) {
             }
             break;
         }
-      });      
+      });
     });
   }
 
@@ -264,7 +273,7 @@ module.exports = function (RED) {
             uploadConfig(file, temp.cleanup);
           });
         });
-      });      
+      });
     });
   }
 
@@ -292,7 +301,7 @@ module.exports = function (RED) {
               //Note. temporary workaround until bug is fixed in Node SDK
               //Stream zip file from watson api to temp directory,
               //read from temp directory and pass on in msg.payload as buffer
-              var url = "https://gateway.watsonplatform.net/retrieve-and-rank/api/v1/solr_clusters/"+params.cluster_id+"/config/"+params.config_name;
+              var url = 'https://gateway.watsonplatform.net/retrieve-and-rank/api/v1/solr_clusters/'+params.cluster_id+'/config/'+params.config_name;
               var sendToPayload = function(zipFile, cb) {
                 msg.payload = zipFile;
                 node.send(msg);
@@ -316,12 +325,12 @@ module.exports = function (RED) {
                 stream_url(info.path, url, function (content) {
                   sendToPayload(content, temp.cleanup);
                 });
-              });    
+              });
             } else {
               var message = 'Missing cluster id or config name';
               node.error(message, msg)
               return;
-            }           
+            }
             break;
           case 'delete':
             if (params.cluster_id && params.config_name) {
@@ -335,7 +344,7 @@ module.exports = function (RED) {
             }
             break;
         }
-      });      
+      });
     });
   }
 
@@ -415,59 +424,56 @@ module.exports = function (RED) {
             }
             break;
         }
-      });      
+      });
     });
   }
 
-  RED.nodes.registerType('watson-retrieve-rank-create-cluster', createClusterNode, {
-    credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
-    }
-  });
+  RED.nodes.registerType('watson-retrieve-rank-credentials', serviceCredentialsConfigurationNode);
+  RED.nodes.registerType('watson-retrieve-rank-create-cluster', createClusterNode);
+
   RED.nodes.registerType('watson-retrieve-rank-cluster-settings', clusterSettingsNode, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
+      username: {type:'text'},
+      password: {type:'password'}
     }
   });
   RED.nodes.registerType('watson-retrieve-rank-upload-solr-configuration', uploadSolrConfigurationNode, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
+      username: {type:'text'},
+      password: {type:'password'}
     }
   });
   RED.nodes.registerType('watson-retrieve-rank-solr-configuration-settings', solrConfigurationSettingsNode, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
+      username: {type:'text'},
+      password: {type:'password'}
     }
   });
   RED.nodes.registerType('watson-retrieve-rank-solr-collection', solrCollectionNode, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
+      username: {type:'text'},
+      password: {type:'password'}
     }
   });
   RED.nodes.registerType('watson-retrieve-rank-create-ranker', createRankerNode, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
+      username: {type:'text'},
+      password: {type:'password'}
     }
   });
   RED.nodes.registerType('watson-retrieve-rank-ranker-settings', rankerSettingsNode, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
+      username: {type:'text'},
+      password: {type:'password'}
     }
   });
   RED.nodes.registerType('watson-retrieve-rank-search-and-rank', searchAndRankNode, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
+      username: {type:'text'},
+      password: {type:'password'}
     }
   });
-  
+
   function setupRankRetrieveNode(msg,config,node,callback) {
     //Check for payload
     if (!msg.payload) {
@@ -477,8 +483,9 @@ module.exports = function (RED) {
     }
 
     //Check credentials
-    username = username || node.credentials.username;
-    password = password || node.credentials.password;
+    this.credentials = RED.nodes.getNode(config.servicecreds);
+    username = username || this.credentials.username;
+    password = password || this.credentials.password;
 
     if (!username || !password) {
       message = 'Missing Concept Insights service credentials';
@@ -497,7 +504,7 @@ module.exports = function (RED) {
 
   function handleWatsonCallback(mode,node,msg,err,res,cb) {
     if (err) {
-      var message = "";
+      var message = '';
       if (err.description) {
         message = err.description;
       } else if (err.message) {
@@ -508,7 +515,7 @@ module.exports = function (RED) {
       node.status({});
       return node.error(message, msg);
     } else {
-      (mode == 'delete' && Object.keys(res).length == 0) ? msg.payload = "Ranker deleted" : msg.payload = res;
+      (mode == 'delete' && Object.keys(res).length == 0) ? msg.payload = 'Ranker deleted' : msg.payload = res;
       if (mode != 'index') {
         node.send(msg);
       }
@@ -518,7 +525,7 @@ module.exports = function (RED) {
 
   function checkRankerStatus(retrieve_and_rank,msg,node,ranker_id) {
     var interval = 10000;
-    //Loop and check the status of the ranker 
+    //Loop and check the status of the ranker
     var statusInterval = setInterval(function(){
       var params = {
         ranker_id: ranker_id
@@ -527,13 +534,13 @@ module.exports = function (RED) {
           if (err) {
             node.status({});
             console.log(err);
-            var message = "Ranker training state error: "+err.error;
+            var message = 'Ranker training state error: '+err.error;
             clearInterval(statusInterval);
             return node.error(message, msg);
           } else {
             switch (res.status) {
               case 'Available':
-                node.status({fill:"green",shape:"ring",text:"Ranker available"});
+                node.status({fill:'green',shape:'ring',text:'Ranker available'});
                 return clearInterval(statusInterval);
                 break;
 
@@ -542,7 +549,7 @@ module.exports = function (RED) {
 
               default:
                 node.status({});
-                var message = "Ranker training status: "+res.status+", description: "+res.status_description;
+                var message = 'Ranker training status: '+res.status+', description: '+res.status_description;
                 clearInterval(statusInterval);
                 return node.error(message, msg);
             }
@@ -562,14 +569,14 @@ module.exports = function (RED) {
         retrieve_and_rank.pollCluster(params, function(err, res) {
             if (err) {
               node.status({});
-              var message = "Cluster creation state error: "+err.error;
+              var message = 'Cluster creation state error: '+err.error;
               clearInterval(statusInterval);
               return node.error(message, msg);
             } else {
 
               switch (res.solr_cluster_status) {
                 case 'READY':
-                  node.status({fill:"green",shape:"ring",text:"Cluster available"});
+                  node.status({fill:'green',shape:'ring',text:'Cluster available'});
                   return clearInterval(statusInterval);
                   break;
 
@@ -578,7 +585,7 @@ module.exports = function (RED) {
 
                 default:
                   node.status({});
-                  var message = "Cluster status: "+res.status+", description: "+res.status_description;
+                  var message = 'Cluster status: '+res.status+', description: '+res.status_description;
                   clearInterval(statusInterval);
                   return node.error(message, msg);
               }
