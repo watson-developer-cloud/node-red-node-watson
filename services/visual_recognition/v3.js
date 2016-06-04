@@ -15,7 +15,7 @@
  **/
 
 // Watson Visual Recognition functions supported by this node
-var FEATURE_RESPONSES = {
+/*var FEATURE_RESPONSES = {
   classifyImage: 'classifyImage',
   detectFaces: 'detectFaces',
   recognizeText: 'recognizeText',
@@ -23,7 +23,7 @@ var FEATURE_RESPONSES = {
   retrieveClassifiersList: 'retrieveClassifiersList',
   retrieveClassifierDetails: 'retrieveClassifierDetails',
   deleteClassifier: 'deleteClassifier'
-};
+};*/
 
 module.exports = function (RED) {
   var cfenv = require('cfenv');
@@ -93,24 +93,30 @@ module.exports = function (RED) {
           version: 'v3',
           version_date: '2016-05-19'
         });
-
-    if (feature == 'classifyImage')
+    switch(feature)
     {
-      visualRecognition.classify(params, cbdone);
-    } else if (feature === 'detectFaces') {
-      visualRecognition.detectFaces(params, cbdone);
-    } else if (feature === 'recognizeText') {
-      visualRecognition.recognizeText(params, cbdone);
-    } else if (feature === 'createClassifier') {
-      visualRecognition.createClassifier(params, cbdone);
-    } else if (feature === 'retrieveClassifiersList') {
-      visualRecognition.listClassifiers(params, cbdone);
-    } else if (feature === 'retrieveClassifierDetails') {
-      visualRecognition.getClassifier(params, cbdone);
-    } else if (feature === 'deleteClassifier') {
-      visualRecognition.deleteClassifier(params, cbdone);
+      case 'classifyImage' : 
+        visualRecognition.classify(params, cbdone);
+        break;
+      case 'detectFaces':
+        visualRecognition.detectFaces(params, cbdone);
+        break;
+      case 'recognizeText':
+        visualRecognition.recognizeText(params, cbdone);
+        break;
+      case 'createClassifier':
+        visualRecognition.createClassifier(params, cbdone);
+        break;
+      case 'retrieveClassifiersList':
+        visualRecognition.listClassifiers(params, cbdone);
+        break;
+      case 'retrieveClassifierDetails':
+        visualRecognition.getClassifier(params, cbdone);
+        break;
+      case 'deleteClassifier':
+        visualRecognition.deleteClassifier(params, cbdone);
+        break;
     }
-
   }
 
   // This is the Watson Visual Recognition V3 Node
@@ -121,9 +127,10 @@ module.exports = function (RED) {
     this.on('input', function (msg) 
     {
       // Check which single feature has been requested.
-      var feature = config["image-feature"];
+      var feature = config['image-feature'];
       node.status({});
-      temp.cleanup(); // so there is at most 1 temp file at a time (did not found a better solution...)
+      // so there is at most 1 temp file at a time (did not found a better solution...)
+      temp.cleanup(); 
 
       if (!msg.payload) {
         this.status({fill:'red', shape:'ring', text:'missing payload'}); 
@@ -131,15 +138,20 @@ module.exports = function (RED) {
         node.error(message, msg);
         return;
       }
-      if (feature != 'retrieveClassifiersList' && feature != 'retrieveClassifierDetails' && feature != 'deleteClassifier')
-      if (typeof msg.payload == "boolean" || typeof msg.payload == "number") {
+      if (feature !== 'retrieveClassifiersList' && feature !== 'retrieveClassifierDetails' 
+          && feature !== 'deleteClassifier')
+      {
+        if (typeof msg.payload === 'boolean' || typeof msg.payload === 'number') 
+        {
           this.status({fill:'red', shape:'ring', text:'bad format payload'}); 
           message = 'Bad format : msg.payload must be a URL string or a Node.js Buffer';
           node.error(message, msg);
           return;
         }
+      }
 
-      // If it is present the newly provided user entered key takes precedence over the existing one. 
+      // If it is present the newly provided user entered key 
+      // takes precedence over the existing one. 
       apikey = s_apikey || this.credentials.apikey;
       this.status({}); 
 
@@ -187,7 +199,7 @@ module.exports = function (RED) {
           node.send(msg); 
           node.status({});
         }
-      } // actionComplete    
+      }; // actionComplete    
 
       var actionComplete2 = function(err, body, other) {
 
@@ -209,7 +221,7 @@ module.exports = function (RED) {
           node.send(msg); 
           node.status({});
         }
-      } // actionComplete2
+      }; // actionComplete2
 
       var actionCompleteDeleteClassifier = function(err, body, other) {
 
@@ -230,7 +242,7 @@ module.exports = function (RED) {
           node.send(msg); 
           node.status({});
         }
-      } // actionCompleteDeleteClassifier
+      }; // actionCompleteDeleteClassifier
       
       // If the input is an image, need to stream the input in, giving time for the
       // data to arrive, before invoking the service. 
@@ -254,7 +266,7 @@ module.exports = function (RED) {
           performAction(params, feature, actionComplete);
           });
         }); // temp
-      } else if (feature=='createClassifier') {   
+      } else if (feature==='createClassifier') {   
           var list_params = {};
           var asyncTasks = [];
           var prop = null;
@@ -263,7 +275,8 @@ module.exports = function (RED) {
             prop = k;
             if (prop.indexOf('_examples')>=0)
             {
-              // before pushing the function into the task array wrap the push in an IIFE function, passing in the 'prop' parameter
+              // before pushing the function into the task array wrap the push 
+              // in an IIFE function, passing in the 'prop' parameter
               (function(prop, list_params, msg) {
 
                asyncTasks.push(function (callback) {
@@ -284,29 +297,30 @@ module.exports = function (RED) {
 
               })(prop, list_params, msg);
 
-            } else if (prop=='name') {
+            } else if (prop==='name') {
               list_params[prop]=msg.params[prop];
             }
           } // for
           
 
           async.parallel(asyncTasks, function(error, results){
-            // when all temp local copies are ready, copy of all parameters and request to watson api
+            // when all temp local copies are ready, 
+            // copy of all parameters and request to watson api
             console.log(error, results);
             if (error)
             {
-              console.log("Parallel ended with error " + error);
-              return;
+              console.log('Parallel ended with error ' + error);
+              throw error;
             }
             for (p in list_params)
               params[p]=list_params[p];
             performAction(params, feature, actionComplete2);
           });
       }
-        else if (feature=='retrieveClassifiersList') { 
+        else if (feature==='retrieveClassifiersList') { 
           performAction(params, feature, actionComplete2);
       }
-        else if (feature =='retrieveClassifierDetails') {
+        else if (feature ==='retrieveClassifierDetails') {
           params['classifier_id']=msg.params['classifier_id'];
           performAction(params, feature, actionComplete2);
       }
@@ -325,7 +339,7 @@ module.exports = function (RED) {
         performAction(params, feature, actionComplete);
       } else {
         this.status({fill:'red', shape:'ring', text:'payload is invalid'});          
-        var message ='Payload must be either an image buffer or a string representing a url'; 
+        message ='Payload must be either an image buffer or a string representing a url'; 
         node.error(message, msg);
         return;        
       }
@@ -335,13 +349,13 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('visual-recognition-v3', WatsonVisualRecognitionV3Node, {
     credentials: {
-      apikey: {type:"password"}
+      apikey: {type:'password'}
     }
   });
 
 RED.nodes.registerType('visual-recognition-util-v3', WatsonVisualRecognitionV3Node, {
     credentials: {
-      apikey: {type:"password"}
+      apikey: {type:'password'}
     }
   });
 
