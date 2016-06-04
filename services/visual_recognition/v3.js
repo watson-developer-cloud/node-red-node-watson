@@ -70,7 +70,7 @@ module.exports = function (RED) {
   };
 
   function urlCheck(str) {
-    var parsed = url.parse(str)
+    var parsed = url.parse(str);
     return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
   };
 
@@ -171,7 +171,8 @@ module.exports = function (RED) {
 
         if (err != null && body==null)
         {
-          node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
+          node.status({fill:'red', shape:'ring', 
+                       text:'call to watson visual recognition v3 service failed'}); 
           msg.result = {};
           msg.result['error_code']= err.code;
           if (!err.error)
@@ -183,7 +184,7 @@ module.exports = function (RED) {
         else if (body.images[0].error)
         {
           var err_desc = body.images[0].error.description;
-          var err_id = body.images[0].error.error_id
+          var err_id = body.images[0].error.error_id;
           node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
           msg.result = {};
           msg.result['error_id']= err_id;
@@ -283,7 +284,8 @@ module.exports = function (RED) {
                   var buffer = msg.params[prop];
                   temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
                     if (err) {
-                      this.status({fill:'red', shape:'ring', text:'unable to open image stream'});          
+                      this.status({fill:'red', shape:'ring', 
+                                   text:'unable to open image stream'});          
                       var message ='Node has been unable to open the image stream'; 
                       node.error(message, msg);
                       callback('open error on '+prop);
@@ -317,14 +319,14 @@ module.exports = function (RED) {
             performAction(params, feature, actionComplete2);
           });
       }
-        else if (feature==='retrieveClassifiersList') { 
+        else if (feature === 'retrieveClassifiersList') { 
           performAction(params, feature, actionComplete2);
       }
-        else if (feature ==='retrieveClassifierDetails') {
+        else if (feature === 'retrieveClassifierDetails') {
           params['classifier_id']=msg.params['classifier_id'];
           performAction(params, feature, actionComplete2);
       }
-        else if (feature=='deleteClassifier') {
+        else if (feature === 'deleteClassifier') {
         params['classifier_id']=msg.params['classifier_id'];
         performAction(params, feature, actionCompleteDeleteClassifier);
 
