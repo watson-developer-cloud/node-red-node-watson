@@ -182,7 +182,7 @@
                   };
 
   // convert an id in the form it-ko into Italian - Korean for display 
-  function idToText(id) {
+  function changeIdToText(id) {
     var txt = "";
     var langs = id.split('-');
     var first = true;
@@ -199,7 +199,7 @@
 
   // Function to be used at the start, as don't want to expose any fields, unless the model is 
   // available. The model it self can only be fetched if the credentials are available. 
-  function hideEverything() {
+  function hideAll() {
     if (!models) {
       $('#credentials-not-found').show();
       $('#node-input-action').parent().hide();  
@@ -219,22 +219,22 @@
   // the model has been retrieved then this function is invoked to update what fields 
   // are shown without the user having to close the dialog. 
   // Problem is that the onchange is only invoked when the user tabs to another field. 
-  function visibilityCheck() {
+  function checkVisibility() {
     if (models) {
       $('#node-input-action').parent().show();  
-      selectAction();         
+      checkActionSelected();         
     } 
   }
 
   // sorting functions
-  function onlyUnique(value, index, self) {
+  function checkUnique(value, index, self) {
     return self.indexOf(value) === index;
   }
 
 
   // Retrieve the available models from the server, if data is returned, then 
   // can enable the dynamic selection fields. 
-  function getModels() {
+  function checkModels() {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
@@ -242,7 +242,7 @@
       if (data.models) {
         models = data.models;
         have_credentials = true;  
-        visibilityCheck();      
+        checkVisibility();      
       }
     }).fail(function (err) {
       console.log(err);
@@ -251,13 +251,13 @@
 
   // Simple check that is only invoked if the service is not bound into bluemix. In this case the
   // user has to provide credentials. Once there are credentials, then the models are retrieved. 
-  function checkCredentials() {
+  function getCredentials() {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
     if (u && u.length && p) {      
       if (!models) {
-        getModels();
+        checkModels();
         if (models) {$('#node-input-action').parent().show(); }
       } 
     } else if (!models) {
@@ -268,7 +268,7 @@
   // function that is called when the domain or the source language is changed. In this case the 
   // destination language selection field is dynamically repopulated, and reselected if the 
   // previously selection is still in the new list.
-  function destlangAvailable() {
+  function langDestAvailable() {
     if (!domain_type) { return; }
 
     var pair_lang = domain_type.map(function (a) {
@@ -301,7 +301,7 @@
 
   // Populates the domains selection field. 
   // If domains have already been retrieved then no need to refetch them. 
-  function domainsAvailable() {
+  function checkDomains() {
     if (!domains) {
       domains = models.map(function (a) {
         return a.domain;
@@ -309,7 +309,7 @@
     }
     if (domains) {
       $('select#node-input-domain').empty();
-      var unique_domains = domains.filter(onlyUnique);
+      var unique_domains = domains.filter(checkUnique);
 
       unique_domains.forEach(function(domain) {
         var selectedText = '';
@@ -326,12 +326,12 @@
                         + '</option>');               
       });
 
-    selectDomain();
+    checkDomainSelected();
     }  
   }
 
   // Populates the base model field. These are the models that are available to be customised. 
-  function basemodelsAvailable() {
+  function checkBaseModels() {
     if (!basemodels && models) {
       basemodels = models.filter(function (model) {
         return model.customizable === true;
@@ -349,7 +349,7 @@
                           + '"' + base_model.model_id + '"'
                           + selectedText
                           + '>'
-                          + idToText(base_model.model_id)
+                          + changeIdToText(base_model.model_id)
                           + '</option>');
       });                   
     }  
@@ -360,7 +360,7 @@
   // will happen is by a page refresh. Need to have a trigger everytime the create 
   // new model is triggerd, but that is a little complicated and needs to be done on
   // a clear mind.
-  function customsAvailable() {
+  function checkCustomsAvailable() {
     if (!custommodels && models) {
       custommodels = models.filter(function (m) {
         return (m.base_model_id && ('' != m.base_model_id));
@@ -390,7 +390,7 @@
 
   // UI Handler for the Mode / switch. 
   // Princliple function is to show / hide the appropriate fields.  
-  function selectAction() {
+  function checkActionSelected() {
     action = $('#node-input-action').val();
     if (models) {
       $('#credentials-not-found').hide();
@@ -425,9 +425,9 @@
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
           break;
       }
-      domainsAvailable();
-      basemodelsAvailable();
-      customsAvailable();
+      checkDomains();
+      checkBaseModels();
+      checkCustomsAvailable();
     } else {
       $('#credentials-not-found').show();
     }
@@ -435,7 +435,7 @@
 
   // UI Handler for the domain switch
   // Repopulate the source and languages based on the available translations for the domain
-  function selectDomain(){
+  function checkDomainSelected(){
     $('#node-input-srclang').empty();
     $('#node-input-destlang').empty();
     if (models && domains) {
@@ -449,8 +449,8 @@
       var output_lang = domain_type.map(function (a) {
         return a.target;
       });
-      input_lang_unique = input_lang.filter(onlyUnique);
-      output_lang_unique = output_lang.filter(onlyUnique);
+      input_lang_unique = input_lang.filter(checkUnique);
+      output_lang_unique = output_lang.filter(checkUnique);
 
       input_lang_unique.forEach(function(lang){
         var selectedText = '';
@@ -468,33 +468,33 @@
       // Having repopulated the input language selection, the old selected item
       // may no longer be in the list, so refresh it.
       srclang_selected = $('#node-input-srclang').val();
-      destlangAvailable();
+      langDestAvailable();
     }
   }
 
 
   // Register the handlers for the fields
-  function handlersUI() {
+  function UIListeners() {
     $('#node-input-username').change(function(val){
-      checkCredentials();
+      getCredentials();
       if (have_credentials) {
-        selectAction();}
+        checkActionSelected();}
     }); 
     $('#node-input-password').change(function(val){
-      checkCredentials();
+      getCredentials();
       if (have_credentials) {
-        selectAction();
+        checkActionSelected();
       }
     }); 
 
     $('#node-input-action').change(function(val){
       action = $('#node-input-action').val();
-      selectAction();
+      checkActionSelected();
     });
 
     $('#node-input-domain').change(function (val) {
       domain_selected = $('#node-input-domain').val();
-      selectDomain();
+      checkDomainSelected();
     });
 
     $('#node-input-custom').change(function () {
@@ -503,7 +503,7 @@
 
     $('#node-input-srclang').change(function () {
       srclang_selected = $('#node-input-srclang').val();
-      destlangAvailable();
+      langDestAvailable();
     });
 
     $('#node-input-destlang').change(function () {
@@ -520,7 +520,7 @@
   // restart, the settings for the dynamic fields are lost. 
   // So hidden (text) fields are being used to squirrel away the values, so that
   // they can be restored.
-  function restoreFromHidden() {
+  function restoreHidden() {
     domain_selected = $('#node-input-domainhidden').val();    
     $('select#node-input-domain').val(domain_selected);
     srclang_selected = $('#node-input-srclanghidden').val();    
@@ -537,27 +537,27 @@
   // This is the on edit prepare function, which will be invoked everytime the dialog
   // is shown. 
   function oneditprepare() {
-    hideEverything();
-    restoreFromHidden();
+    hideAll();
+    restoreHidden();
  
-    handlersUI();
+    UIListeners();
     // Look for VCAP Json file, done is called if found or not, with service indicating 
     // if the translation service is actually bound into this application.
     if (!have_credentials) {
       $.getJSON('watson-translate/vcap/')
         .done(function (service) {
-          // for some reason the getJSON resets the vars so need to restoreFromHidden again 
+          // for some reason the getJSON resets the vars so need to restoreHidden again 
           // so again.
-          restoreFromHidden();
+          restoreHidden();
           $('.credentials').toggle(!service);
           if (!service) {
             // no bound service, so check local settings to see if they are valid
             using_local_credentials = true;
-            checkCredentials();
+            getCredentials();
           } else {
             // credentials are only valid if we can get hold of the models using them
             using_local_credentials = false;
-            if (!models) {getModels();}
+            if (!models) {checkModels();}
           }
         }).fail(function () {
           $('.credentials').show();        
@@ -575,7 +575,7 @@
       if (using_local_credentials) {
         $('.credentials').show();  
       }
-      selectAction();      
+      checkActionSelected();      
     }
   }
 
