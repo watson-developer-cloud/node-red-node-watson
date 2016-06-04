@@ -183,7 +183,6 @@
 
   // convert an id in the form it-ko into Italian - Korean for display 
   function changeIdToText(id) {
-    console.log('in changeIdToText');
     var txt = "";
     var langs = id.split('-');
     var first = true;
@@ -201,7 +200,6 @@
   // Function to be used at the start, as don't want to expose any fields, unless the model is 
   // available. The model it self can only be fetched if the credentials are available. 
   function hideAll() {
-    console.log('in hideAll');
     if (!models) {
       $('#credentials-not-found').show();
       $('#node-input-action').parent().hide();  
@@ -222,7 +220,6 @@
   // are shown without the user having to close the dialog. 
   // Problem is that the onchange is only invoked when the user tabs to another field. 
   function checkVisibility() {
-    console.log('in checkVisibility');
     if (models) {
       $('#node-input-action').parent().show();  
       checkActionSelected();         
@@ -238,7 +235,6 @@
   // Retrieve the available models from the server, if data is returned, then 
   // can enable the dynamic selection fields. 
   function checkModels() {
-    console.log('in checkModels');
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
@@ -256,7 +252,6 @@
   // Simple check that is only invoked if the service is not bound into bluemix. In this case the
   // user has to provide credentials. Once there are credentials, then the models are retrieved. 
   function getCredentials() {
-    console.log('in getCredentials');
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
@@ -274,7 +269,6 @@
   // destination language selection field is dynamically repopulated, and reselected if the 
   // previously selection is still in the new list.
   function langDestAvailable() {
-    console.log('in langDestAvailable');
     if (!domain_type) { return; }
 
     var pair_lang = domain_type.map(function (a) {
@@ -308,7 +302,6 @@
   // Populates the domains selection field. 
   // If domains have already been retrieved then no need to refetch them. 
   function checkDomains() {
-    console.log('in checkDomains');
     if (!domains) {
       domains = models.map(function (a) {
         return a.domain;
@@ -339,7 +332,6 @@
 
   // Populates the base model field. These are the models that are available to be customised. 
   function checkBaseModels() {
-    console.log('in checkBaseModels');
     if (!basemodels && models) {
       basemodels = models.filter(function (model) {
         return model.customizable === true;
@@ -369,7 +361,6 @@
   // new model is triggerd, but that is a little complicated and needs to be done on
   // a clear mind.
   function checkCustomsAvailable() {
-    console.log('in checkCustomsAvailable');
     if (!custommodels && models) {
       custommodels = models.filter(function (m) {
         return (m.base_model_id && ('' != m.base_model_id));
@@ -400,7 +391,6 @@
   // UI Handler for the Mode / switch. 
   // Princliple function is to show / hide the appropriate fields.  
   function checkActionSelected() {
-    console.log('in checkActionSelected');
     action = $('#node-input-action').val();
     if (models) {
       $('#credentials-not-found').hide();
@@ -446,7 +436,6 @@
   // UI Handler for the domain switch
   // Repopulate the source and languages based on the available translations for the domain
   function checkDomainSelected(){
-    console.log('in checkDomainSelected');
     $('#node-input-srclang').empty();
     $('#node-input-destlang').empty();
     if (models && domains) {
@@ -486,7 +475,6 @@
 
   // Register the handlers for the fields
   function UIListeners() {
-    console.log('in UIListeners');
     $('#node-input-username').change(function(val){
       getCredentials();
       if (have_credentials) {
@@ -533,7 +521,6 @@
   // So hidden (text) fields are being used to squirrel away the values, so that
   // they can be restored.
   function restoreHidden() {
-    console.log('in restoreHidden');
     domain_selected = $('#node-input-domainhidden').val();    
     $('select#node-input-domain').val(domain_selected);
     srclang_selected = $('#node-input-srclanghidden').val();    
@@ -550,8 +537,6 @@
   // This is the on edit prepare function, which will be invoked everytime the dialog
   // is shown. 
   function oneditprepare() {
-    console.log('in oneditprepare');
-
     hideAll();
     restoreHidden();
  
@@ -596,7 +581,6 @@
 
   // Save the values in the dyanmic lists to the hidden fields.
   function oneditsave(){
-    console.log('in oneditsave');
     $('#node-input-domainhidden').val(domain_selected); 
     $('#node-input-srclanghidden').val(srclang_selected);  
     $('#node-input-destlanghidden').val(destlang_selected);  
