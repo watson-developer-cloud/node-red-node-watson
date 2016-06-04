@@ -28,12 +28,11 @@
 
 <script type="text/javascript">
 (function() {
-    console.log("hello");
     RED.nodes.registerType('watson-retrieve-rank-credentials',{
         category: 'config',
-        defaults: { 
-            username:{value: ""},
-            password:{value: ""}
+        defaults: {
+            username:{value: ''},
+            password:{value: ''}
         },
         label: function() {
             return 'Retrieve and Rank Credentials';
@@ -79,7 +78,7 @@
 
 <script type="text/x-red" data-help-name="watson-retrieve-rank-create-cluster">
 <p>The IBM Watson™ Retrieve and Rank service combines two information retrieval components in a single service: the power of Apache Solr and a sophisticated machine learning capability. This combination provides users with more relevant results by automatically reranking them by using these machine learning algorithms.</p>
-    <p>The create cluster node provisions a Solr cluster. You can specify the <b>size</b> of the cluster in the node configuration panel. For a small free cluster for testing choose the “Free” option. For more information about cluster sizing, see <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/retrieve-rank/solr_ops.shtml#sizing">Sizing your Retrieve and Rank cluster</a>. A <b>cluster name</b> can also be specified in the node configuration panel.</p>
+    <p>The create cluster node provisions a Solr cluster. You can specify the <b>size</b> of the cluster in the node configuration panel. For a small free cluster for testing choose the “Free” option. For more information about cluster sizing, see <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/retrieve-rank/solr_ops.shtml#sizing">Sizing your Retrieve and Rank cluster</a>. A <b>cluster name</b> can be specified in the node configuration panel or passed in on <code>msg.payload</code>. The cluster name specified in the node configuration panel takes priority.</p>
     <p>The cluster will then be created. This takes a short while to complete. When the cluster is available, the status underneath the node will change to <b>“Cluster available”</b>.</p>
     <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
 </script>
@@ -89,21 +88,21 @@
         RED.nodes.registerType('watson-retrieve-rank-create-cluster', {
             category: 'IBM Watson',
             defaults: {
-                name: {value: ""},
-                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials', required: false},
-                clustername: {value: ""},
-                clustersize: {value: "free"}
+                name: {value: ''},
+                servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
+                clustername: {value: ''},
+                clustersize: {value: 'free'}
             },
-            color: "rgb(85, 150, 230)",
+            color: 'rgb(85, 150, 230)',
             inputs: 1,
             outputs: 1,
-            icon: "RetrieveRank.png",
-            paletteLabel: "retrieve and rank create cluster",
+            icon: 'RetrieveRank.png',
+            paletteLabel: 'retrieve and rank create cluster',
             label: function() {
-                return this.name || "retrieve and rank create cluster";
+                return this.name || 'retrieve and rank create cluster';
             },
             labelStyle: function() {
-                return this.name ? "node_label_italic" : "";
+                return this.name ? 'node_label_italic' : '';
             },
             oneditprepare: function() {
                 $.getJSON('watson-retrieve-and-rank/vcap/').done(function (service) {
@@ -164,25 +163,25 @@
         RED.nodes.registerType('watson-retrieve-rank-cluster-settings', {
             category: 'IBM Watson',
             defaults: {
-                name: {value: ""},
-                mode: {value: "list"},
-                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials', required: false},
-                clusterid: {value: ""}
+                name: {value: ''},
+                mode: {value: 'list'},
+                servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
+                clusterid: {value: ''}
             },
             credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
+              username: {type:'text'},
+              password: {type:'password'}
             },
-            color: "rgb(85, 150, 230)",
+            color: 'rgb(85, 150, 230)',
             inputs: 1,
             outputs: 1,
-            icon: "RetrieveRank.png",
-            paletteLabel: "retrieve and rank cluster settings",
+            icon: 'RetrieveRank.png',
+            paletteLabel: 'retrieve and rank cluster settings',
             label: function() {
-                return this.name || "retrieve and rank cluster settings";
+                return this.name || 'retrieve and rank cluster settings';
             },
             labelStyle: function() {
-                return this.name ? "node_label_italic" : "";
+                return this.name ? 'node_label_italic' : '';
             },
             oneditprepare: function() {
                 $('#node-input-mode').change(function () {
@@ -191,7 +190,7 @@
                         $('.form-row.mode.clusterid').hide();
                     } else {
                         $('.form-row.mode.clusterid').show();
-                    } 
+                    }
                 });
                 $.getJSON('watson-retrieve-and-rank/vcap/').done(function (service) {
                     $('.servicecreds').toggle(!service);
@@ -243,21 +242,21 @@
         RED.nodes.registerType('watson-retrieve-rank-upload-solr-configuration', {
             category: 'IBM Watson',
             defaults: {
-                name: {value: ""},
-                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials', required: false},
-                clusterid: {value: "", required: true},
-                configname: {value: "", required: true}
+                name: {value: ''},
+                servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
+                clusterid: {value: '', required: true},
+                configname: {value: '', required: true}
             },
-            color: "rgb(85, 150, 230)",
+            color: 'rgb(85, 150, 230)',
             inputs: 1,
             outputs: 1,
-            icon: "RetrieveRank.png",
-            paletteLabel: "retrieve and rank upload solr configuration",
+            icon: 'RetrieveRank.png',
+            paletteLabel: 'retrieve and rank upload solr configuration',
             label: function() {
-                return this.name || "retrieve and rank upload solr configuration";
+                return this.name || 'retrieve and rank upload solr configuration';
             },
             labelStyle: function() {
-                return this.name ? "node_label_italic" : "";
+                return this.name ? 'node_label_italic' : '';
             },
             oneditprepare: function() {
                 $.getJSON('watson-retrieve-and-rank/vcap/').done(function (service) {
@@ -322,23 +321,23 @@
         RED.nodes.registerType('watson-retrieve-rank-solr-configuration-settings', {
             category: 'IBM Watson',
             defaults: {
-                name: {value: ""},
-                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials', required: false},
-                clusterid: {value: "", required: true},
-                mode: {value: "list"},
-                configname: {value: ""}
-                
+                name: {value: ''},
+                servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
+                clusterid: {value: '', required: true},
+                mode: {value: 'list'},
+                configname: {value: ''}
+
             },
-            color: "rgb(85, 150, 230)",
+            color: 'rgb(85, 150, 230)',
             inputs: 1,
             outputs: 1,
-            icon: "RetrieveRank.png",
-            paletteLabel: "retrieve and rank solr configuration settings",
+            icon: 'RetrieveRank.png',
+            paletteLabel: 'retrieve and rank solr configuration settings',
             label: function() {
-                return this.name || "retrieve and rank solr configuration settings";
+                return this.name || 'retrieve and rank solr configuration settings';
             },
             labelStyle: function() {
-                return this.name ? "node_label_italic" : "";
+                return this.name ? 'node_label_italic' : '';
             },
             oneditprepare: function() {
                 $('#node-input-mode').change(function () {
@@ -347,7 +346,7 @@
                         $('.form-row.mode.configname').hide();
                     } else {
                         $('.form-row.mode.configname').show();
-                    } 
+                    }
                 });
                 $.getJSON('watson-retrieve-and-rank/vcap/').done(function (service) {
                     $('.servicecreds').toggle(!service);
@@ -398,7 +397,7 @@
         <label for="node-input-configname"><i class="fa fa-tag"></i> Configuration Name</label>
         <input type="text" id="node-input-configname" placeholder="Configuration Name">
     </div>
-    
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-retrieve-rank-solr-collection">
@@ -419,24 +418,24 @@
         RED.nodes.registerType('watson-retrieve-rank-solr-collection', {
             category: 'IBM Watson',
             defaults: {
-                name: {value: ""},
-                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials', required: false},
-                clusterid: {value: "", required: true},
-                collectionname: {value: "", required: true},
-                mode: {value: "create"},
-                configname: {value: ""}
-                
-            },          
-            color: "rgb(85, 150, 230)",
+                name: {value: ''},
+                servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
+                clusterid: {value: '', required: true},
+                collectionname: {value: '', required: true},
+                mode: {value: 'create'},
+                configname: {value: ''}
+
+            },
+            color: 'rgb(85, 150, 230)',
             inputs: 1,
             outputs: 1,
-            icon: "RetrieveRank.png",
-            paletteLabel: "retrieve and rank solr collection",
+            icon: 'RetrieveRank.png',
+            paletteLabel: 'retrieve and rank solr collection',
             label: function() {
-                return this.name || "retrieve and rank solr collection";
+                return this.name || 'retrieve and rank solr collection';
             },
             labelStyle: function() {
-                return this.name ? "node_label_italic" : "";
+                return this.name ? 'node_label_italic' : '';
             },
             oneditprepare: function() {
                 $('#node-input-mode').change(function () {
@@ -445,7 +444,7 @@
                         $('.form-row.mode.configname').show();
                     } else {
                         $('.form-row.mode.configname').hide();
-                    } 
+                    }
                 });
                 $.getJSON('watson-retrieve-and-rank/vcap/').done(function (service) {
                     $('.servicecreds').toggle(!service);
@@ -483,9 +482,9 @@
 <script type="text/x-red" data-help-name="watson-retrieve-rank-create-ranker">
     <p>The IBM Watson™ Retrieve and Rank service combines two information retrieval components in a single service: the power of Apache Solr and a sophisticated machine learning capability. This combination provides users with more relevant results by automatically reranking them by using these machine learning algorithms.</p>
     <p>The create ranker node allows a ranker to be trained from <code>.csv</code> training data. The training data should be passed in as a <b>Buffer</b> on <code>msg.payload</code>. </p>
-    
+
     <p>Once triggered, the ranker will then begin training. Once the ranker is available, the status underneath the node will change to <b>“Ranker Available”</b>.</p>
-    
+
     <p>The ranker id is returned on <code>msg.payload</code>.</p>
     <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
 </script>
@@ -495,20 +494,20 @@
         RED.nodes.registerType('watson-retrieve-rank-create-ranker', {
             category: 'IBM Watson',
             defaults: {
-                name: {value: ""},
-                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials', required: false},
-                rankername: {value: ""}
+                name: {value: ''},
+                servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
+                rankername: {value: ''}
             },
-            color: "rgb(85, 150, 230)",
+            color: 'rgb(85, 150, 230)',
             inputs: 1,
             outputs: 1,
-            icon: "RetrieveRank.png",
-            paletteLabel: "retrieve and rank create ranker",
+            icon: 'RetrieveRank.png',
+            paletteLabel: 'retrieve and rank create ranker',
             label: function() {
-                return this.name || "retrieve and rank create ranker";
+                return this.name || 'retrieve and rank create ranker';
             },
             labelStyle: function() {
-                return this.name ? "node_label_italic" : "";
+                return this.name ? 'node_label_italic' : '';
             },
             oneditprepare: function() {
                 $.getJSON('watson-retrieve-and-rank/vcap/').done(function (service) {
@@ -555,13 +554,13 @@
 <script type="text/x-red" data-help-name="watson-retrieve-rank-ranker-settings">
     <p>The IBM Watson™ Retrieve and Rank service combines two information retrieval components in a single service: the power of Apache Solr and a sophisticated machine learning capability. This combination provides users with more relevant results by automatically reranking them by using these machine learning algorithms.</p>
     <p>The ranker settings node provides information regarding the status of rankers within a service. The following queries are available:</p>
-    
+
     <ul>
         <li><b>List Rankers</b> Retrieves the list of rankers for the service instance.</li>
         <li><b>Ranker Information</b> Returns status and other information about a ranker. The <code>ranker_id</code> is specified in the node configuration panel.</li>
         <li><b>Delete Ranker</b> Deletes a ranker. The <code>ranker_id</code> is specified in the node configuration panel.</li>
     </ul>
-    
+
     <p>The result is returned on <code>msg.payload</code>.</p>
     <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
 </script>
@@ -571,21 +570,21 @@
         RED.nodes.registerType('watson-retrieve-rank-ranker-settings', {
             category: 'IBM Watson',
             defaults: {
-                name: {value: ""},
-                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials', required: false},
-                mode: {value: "list"},
-                rankerid: {value: ""}
+                name: {value: ''},
+                servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
+                mode: {value: 'list'},
+                rankerid: {value: ''}
             },
-            color: "rgb(85, 150, 230)",
+            color: 'rgb(85, 150, 230)',
             inputs: 1,
             outputs: 1,
-            icon: "RetrieveRank.png",
-            paletteLabel: "retrieve and rank ranker settings",
+            icon: 'RetrieveRank.png',
+            paletteLabel: 'retrieve and rank ranker settings',
             label: function() {
-                return this.name || "retrieve and rank ranker settings";
+                return this.name || 'retrieve and rank ranker settings';
             },
             labelStyle: function() {
-                return this.name ? "node_label_italic" : "";
+                return this.name ? 'node_label_italic' : '';
             },
             oneditprepare: function() {
                 $('#node-input-mode').change(function () {
@@ -594,7 +593,7 @@
                         $('.form-row.mode.rankerid').hide();
                     } else {
                         $('.form-row.mode.rankerid').show();
-                    } 
+                    }
                 });
                 $.getJSON('watson-retrieve-and-rank/vcap/').done(function (service) {
                     $('.servicecreds').toggle(!service);
@@ -647,7 +646,7 @@
 <script type="text/x-red" data-help-name="watson-retrieve-rank-search-and-rank">
     <p>The IBM Watson™ Retrieve and Rank service combines two information retrieval components in a single service: the power of Apache Solr and a sophisticated machine learning capability. This combination provides users with more relevant results by automatically reranking them by using these machine learning algorithms.</p>
     <p>The search and rank node returns reranked results for your query, where the query matches the <a href="https://cwiki.apache.org/confluence/display/solr/The+Standard+Query+Parser">Solr Standard Query Parser</a>. In the node configuration, you must specify:</p>
-    
+
     <ul>
         <li><b>Cluster ID</b></li>
         <li><b>Collection Name</b></li>
@@ -663,23 +662,23 @@
         RED.nodes.registerType('watson-retrieve-rank-search-and-rank', {
             category: 'IBM Watson',
             defaults: {
-                name: {value: ""},
-                servicecreds: {value: "", type: 'watson-retrieve-rank-credentials', required: false},
-                clusterid: {value: "", required: true},
-                collectionname: {value: "", required: true},
-                searchmode: {value: "search-and-rank"},
-                rankerid: {value: ""}
+                name: {value: ''},
+                servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
+                clusterid: {value: '', required: true},
+                collectionname: {value: '', required: true},
+                searchmode: {value: 'search-and-rank'},
+                rankerid: {value: ''}
             },
-            color: "rgb(85, 150, 230)",
+            color: 'rgb(85, 150, 230)',
             inputs: 1,
             outputs: 1,
-            icon: "RetrieveRank.png",
-            paletteLabel: "retrieve and rank search and rank",
+            icon: 'RetrieveRank.png',
+            paletteLabel: 'retrieve and rank search and rank',
             label: function() {
-                return this.name || "retrieve and rank search and rank";
+                return this.name || 'retrieve and rank search and rank';
             },
             labelStyle: function() {
-                return this.name ? "node_label_italic" : "";
+                return this.name ? 'node_label_italic' : '';
             },
             oneditprepare: function() {
                 $.getJSON('watson-retrieve-and-rank/vcap/').done(function (service) {

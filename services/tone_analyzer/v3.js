@@ -15,77 +15,94 @@
  **/
 
 module.exports = function (RED) {
+  var watson = require('watson-developer-cloud');  
   var cfenv = require('cfenv');
+  var toneutils = require('../../utilities/tone-utils');
 
-  var username, password;
+  // Require the Cloud Foundry Module to pull credentials from bound service 
+  // If they are found then they are stored in sUsername and sPassword, as the 
+  // service credentials. This separation from sUsername and username to allow 
+  // the end user to modify the node credentials when the service is not bound.
+  // Otherwise, once set username would never get reset, resulting in a frustrated
+  // user who, when he errenously enters bad credentials, can't figure out why
+  // the edited ones are not being taken.
+
+  // Not ever used, and codeacy complains about it.
+
+  var username, password, sUsername, sPassword;
 
   var service = cfenv.getAppEnv().getServiceCreds(/tone analyzer/i)
 
   if (service) {
-    username = service.username;
-    password = service.password;
+    sUsername = service.username;
+    sPassword = service.password;
   }
 
+
+  // Node RED Admin - fetch and set vcap services
   RED.httpAdmin.get('/watson-tone-analyzer/vcap', function (req, res) {
     res.json(service ? {bound_service: true} : null);
   });
 
-  function Node (config) {
-    RED.nodes.createNode(this, config);
-    var node = this;
 
-    this.on('input', function (msg) {
-      var message = '';
+  // Check that the credentials have been provided
+  // Credentials are needed for each the service.
+  var checkCreds = function(credentials) {
+    var taSettings = null;
 
-      if (!msg.payload) {
-        message = 'Missing property: msg.payload';
-        node.error(message, msg);
+    username = sUsername || credentials.username;
+    password = sPassword || credentials.password;      
+
+    if (username && password) {
+      taSettings = {};
+      taSettings.username = username;
+      taSettings.password = password;
+    }
+
+    return taSettings;
+  }
+
+
+  // Function that checks the configuration to make sure that credentials,
+  // payload and options have been provied in the correct format.
+  var checkConfiguration = function(msg, node, cb) {
+    var message = null;      
+    var taSettings = null;
+
+    taSettings = checkCreds(node.credentials);
+
+    if (!taSettings) {
+      message = 'Missing Tone Analyzer service credentials';
+    } else if (msg.payload) {
+      message = toneutils.checkPayload(msg.payload);
+    } else  {
+      message = 'Missing property: msg.payload';
+    }
+
+    if (cb) {
+      cb(message, taSettings);
+    }
+  };
+
+
+  // function when the node recieves input inside a flow. 
+  // Configuration is first checked before the service is invoked.
+  var processOnInput = function(msg, config, node) {
+    checkConfiguration (msg, node, function(err, settings){
+      if (err) {
+        node.status({fill:'red', shape:'dot', text:err}); 
+        node.error(err, msg);
         return;
-      }
+      } else {
+        var tone_analyzer = watson.tone_analyzer({
+          'username': settings.username,
+          'password': settings.password,
+          'version': 'v3',
+          'version_date': '2016-05-19'
+        });
 
-      username = username || this.credentials.username;
-      password = password || this.credentials.password;
-
-      if (!username || !password) {
-        message = 'Missing Tone Analyzer service credentials';
-        node.error(message, msg);
-        return;
-      }
-
-      var tones = msg.tones || config.tones;
-      var sentences = msg.sentences || config.sentences;
-      var contentType = msg.contentType || config.contentType
-
-      var watson = require('watson-developer-cloud');
-
-      var tone_analyzer = watson.tone_analyzer({
-        username: username,
-        password: password,
-        version: 'v3',
-        version_date: '2016-05-19'
-      });
-
-      var hasJSONmethod = (typeof msg.payload.toJSON === 'function') ;
-      var isBuffer = false;
-
-      if (hasJSONmethod === true) {
-        if (msg.payload.toJSON().type === 'Buffer') {
-          isBuffer = true;
-        }      
-      }
-
-      // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-      if (typeof msg.payload === 'string' ||  isBuffer === true) {
-        var options = {
-          text: msg.payload,
-          sentences: sentences,
-          isHTML: contentType
-        };
-
-        if (tones !== 'all') {
-          options.tones =   tones;
-        }
-
+        var options = toneutils.parseOptions(msg, config);
+    
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         tone_analyzer.tone(options, function (err, response) {
           node.status({})
@@ -94,16 +111,27 @@ module.exports = function (RED) {
           } else {
             msg.response = response;
           }
-
           node.send(msg);
         });
-      } else {
-        message = 'The payload must be either a string or a Buffer';
-        node.status({fill:'red', shape:'dot', text:message}); 
-        node.error(message, msg);         
+
       }
     });
+
+  };
+
+
+  // This is the Tone Analyzer Node. 
+  function Node (config) {
+    RED.nodes.createNode(this, config);
+    var node = this;
+
+    // Invoked whenb the node has received an input as part of a flow.
+    this.on('input', function (msg) {
+      processOnInput(msg, config, node);
+    });
   }
+
+
   RED.nodes.registerType('watson-tone-analyzer-v3', Node, {
     credentials: {
       username: {type:'text'},
