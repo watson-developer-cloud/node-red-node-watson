@@ -40,9 +40,9 @@ module.exports = function (RED) {
   temp.track();
 
   // Require the Cloud Foundry Module to pull credentials from bound service 
-  // If they are found then the api key is stored in the variable s_apikey. 
+  // If they are found then the api key is stored in the variable sAPIKey. 
   //
-  // This separation between s_apikey and apikey is to allow 
+  // This separation between sAPIKey and apikey is to allow 
   // the end user to modify the key credentials when the service is not bound.
   // Otherwise, once set apikey is never reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
@@ -51,12 +51,12 @@ module.exports = function (RED) {
   // Taking this line out as codacy was complaining about it. 
   // var services = cfenv.getAppEnv().services,
 
-  var apikey, s_apikey;
+  var apikey, sAPIKey;
 
   var service = cfenv.getAppEnv().getServiceCreds(/visual recognition/i);
 
   if (service) {
-    s_apikey = service.apikey;
+    sAPIKey = service.apikey;
   }
 
   RED.httpAdmin.get('/watson-visual-recognition/vcap', function (req, res) {
@@ -152,7 +152,7 @@ module.exports = function (RED) {
 
       // If it is present the newly provided user entered key 
       // takes precedence over the existing one. 
-      apikey = s_apikey || this.credentials.apikey;
+      apikey = sAPIKey || this.credentials.apikey;
       this.status({}); 
 
       if (!apikey) {
@@ -185,7 +185,8 @@ module.exports = function (RED) {
         {
           var err_desc = body.images[0].error.description;
           var err_id = body.images[0].error.error_id;
-          node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
+          node.status({fill:'red', shape:'ring', 
+                       text:'call to watson visual recognition v3 service failed'}); 
           msg.result = {};
           msg.result['error_id']= err_id;
           msg.result['error']= err_desc;
@@ -268,7 +269,7 @@ module.exports = function (RED) {
           });
         }); // temp
       } else if (feature==='createClassifier') {   
-          var list_params = {};
+          var listParams = {};
           var asyncTasks = [];
           var prop = null;
           for (var k in msg.params)
@@ -278,7 +279,7 @@ module.exports = function (RED) {
             {
               // before pushing the function into the task array wrap the push 
               // in an IIFE function, passing in the 'prop' parameter
-              (function(prop, list_params, msg) {
+              (function(prop, listParams, msg) {
 
                asyncTasks.push(function (callback) {
                   var buffer = msg.params[prop];
@@ -291,16 +292,16 @@ module.exports = function (RED) {
                       callback('open error on '+prop);
                     }  
                     stream_buffer(info.path, msg.params[prop], function () {
-                      list_params[prop]=fs.createReadStream(info.path);
+                      listParams[prop]=fs.createReadStream(info.path);
                       callback(null, prop);
                     });
                   }); // temp.open
               }); // asyncTasks.push
 
-              })(prop, list_params, msg);
+              })(prop, listParams, msg);
 
             } else if (prop==='name') {
-              list_params[prop]=msg.params[prop];
+              listParams[prop]=msg.params[prop];
             }
           } // for
           
@@ -314,8 +315,8 @@ module.exports = function (RED) {
               console.log('Parallel ended with error ' + error);
               throw error;
             }
-            for (p in list_params)
-              params[p]=list_params[p];
+            for (p in listParams)
+              params[p]=listParams[p];
             performAction(params, feature, actionComplete2);
           });
       }
