@@ -188,7 +188,7 @@
     var first = true;
     
     langs.forEach(function(language){
-      txt += (LANGUAGES[language] ? LANGUAGES[language] : lang); 
+      txt += (LANGUAGES[language] ? LANGUAGES[language] : language); 
       if (first) {
         txt += ' - ';
         first = false;
@@ -307,7 +307,7 @@
         return a.domain;
       });     
     }
-    if (domains) {
+    if (domains && domains.length) {
       $('select#node-input-domain').empty();
       var unique_domains = domains.filter(checkUnique);
 
