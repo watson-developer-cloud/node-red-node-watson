@@ -3,6 +3,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/e157cf8407f2442396789dc78075340a)](https://www.codacy.com/app/rezgui-y/node-red-node-watson)
 
+### New in version 0.4.4
+- Bugfixes to Speech to Text
+
 ### New in version 0.4.3
 - New Visual Recognition V3 node to support the V3 GA API. This incorporates the features that were previously
 available as part of AlchemyAPI Vision.
