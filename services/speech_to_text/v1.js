@@ -59,6 +59,8 @@ module.exports = function (RED) {
 
    // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-speech-to-text/models', function (req, res) {
+    console.log('Insde request to fetch models');
+    console.log('Checking bound credentials username / password', username, password);
     var stt = watson.speech_to_text({
       username: username ? username : req.query.un,   
       password: password ? password : req.query.pwd, 
@@ -68,8 +70,10 @@ module.exports = function (RED) {
 
     stt.getModels({}, function(err, models){
       if (err) {
+        console.log('Error fetching models ', err);
         res.json(err);
       } else {
+        console.log('Models returned');
         res.json(models);
       }
     });          
