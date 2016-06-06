@@ -99,10 +99,18 @@ module.exports = function (RED) {
 
     wstream.on('finish', function () {
       fs.readFile(file, function (err, buf) {
+        var fmt = null;
+        var error = null;
+
         if (err) {
-          throw err;
+          error = err;
         }
-        cb(fileType(buf).ext);
+        if (fileType(buf)) {
+          fmt = fileType(buf).ext;
+        } else {
+          error = 'Unrecognised file format';
+        }
+        cb(error, fmt);
       });
     });
 
@@ -272,7 +280,7 @@ module.exports = function (RED) {
       if (msg.payload instanceof Buffer) {
         temp.open({suffix: '.' + fileType(msg.payload).ext}, function (err, info) {
           if (err) {
-            this.status({fill:'red', shape:'ring', text:'unable to open audio stream'});          
+            node.status({fill:'red', shape:'ring', text:'unable to open audio stream'});          
             message = 'Node has been unable to open the audio stream'; 
 
             node.error(message, msg);
@@ -288,7 +296,7 @@ module.exports = function (RED) {
       } else if (urlCheck(msg.payload)) {
         temp.open({suffix: '.audio'}, function(err, info){
           if (err) {
-            this.status({fill:'red', shape:'ring', 
+            node.status({fill:'red', shape:'ring', 
               text:'unable to open url audio stream'});          
             message = 'Node has been unable to open the url audio stream'; 
 
@@ -296,14 +304,22 @@ module.exports = function (RED) {
             return;        
           }  
 
-          stream_url(info.path, msg.payload, function (format) {
+          stream_url(info.path, msg.payload, function (err, format) {
+            if (err) {
+              node.status({fill:'red', shape:'ring', 
+                text:'url stream not recognised as audio'});          
+                message = 'Node did not recognise the url audio stream as audio'; 
+
+              node.error(message, msg);
+              return;        
+            }  
             var audio = fs.createReadStream(info.path);
 
             performAction(audio, format, actionComplete, temp.cleanup);        
           });
         });
       } else {
-        this.status({fill:'red', shape:'ring', text:'payload is invalid'});          
+        node.status({fill:'red', shape:'ring', text:'payload is invalid'});          
         message = 'Payload must be either an audio buffer or a string representing a url'; 
         node.error(message, msg);
         return;        
