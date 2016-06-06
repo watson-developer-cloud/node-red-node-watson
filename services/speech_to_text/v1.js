@@ -23,7 +23,7 @@ module.exports = function (RED) {
   var fileType = require('file-type');
   var watson = require('watson-developer-cloud');
 
-  var service = cfenv.getAppEnv().getServiceCreds(/speech to text/i)
+  var service = cfenv.getAppEnv().getServiceCreds(/speech to text/i);
 
   // Require the Cloud Foundry Module to pull credentials from bound service 
   // If they are found then the username and password will be stored in 
@@ -77,7 +77,7 @@ module.exports = function (RED) {
 
   // Utility function to perform a URL validation check
   function urlCheck(str) {
-    var parsed = url.parse(str)
+    var parsed = url.parse(str);
 
     return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
   }
@@ -102,7 +102,7 @@ module.exports = function (RED) {
         if (err) {
           throw err;
         }
-        cb(fileType(buf).ext)
+        cb(fileType(buf).ext);
       });
     });
 
@@ -139,12 +139,12 @@ module.exports = function (RED) {
               // console.log(a.alternatives);
               a.alternatives.forEach(function(t){
                 msg.transcription += t.transcript;
-              })
+              });
             });   
           }
           node.send(msg); 
         }        
-      }  
+      };  
 
 
       // Utility function that performs the speech to text service call. 
@@ -177,7 +177,7 @@ module.exports = function (RED) {
 
         // Everything is now in place to invoke the service 
         speech_to_text.recognize(params, function (err, res) {
-          node.status({})
+          node.status({});
           cbdone(err,res);
           if (cbcleanup) {
             cbcleanup();
@@ -205,21 +205,21 @@ module.exports = function (RED) {
       if (!username || !password) {
         var message_err_credentials = 'Missing Speech To Text service credentials';
 
-        node.error(message_err_credentials, msg)
+        node.error(message_err_credentials, msg);
         return;
       }  
 
       if (!config.lang) {
         var message_err_lang = 'Missing audio language configuration, unable to process speech.';
 
-        node.error(message_err_lang, msg)
+        node.error(message_err_lang, msg);
         return;
       }
 
       if (!config.band) {
         var message_err_band = 'Missing audio quality configuration, unable to process speech.';
 
-        node.error(message_err_band, msg)
+        node.error(message_err_band, msg);
         return;
       }  
 
@@ -228,7 +228,7 @@ module.exports = function (RED) {
       if (!config.continuous) {
         var message_err_continuous = 'Missing continuous details, unable to process speech.';
 
-        node.error(message_err_continuous, msg)
+        node.error(message_err_continuous, msg);
         return;
       }  
 
@@ -237,7 +237,7 @@ module.exports = function (RED) {
       if (!msg.payload instanceof Buffer || !typeof msg.payload === 'string') {
         message = 'Invalid property: msg.payload, can only be a URL or a Buffer.';
 
-        node.error(message, msg)
+        node.error(message, msg);
         return;
       }
 
@@ -262,7 +262,7 @@ module.exports = function (RED) {
           var message_err_format 
               = 'Audio format (' + f + ') not supported, must be encoded as WAV, FLAC or OGG.';
 
-          node.error(message_err_format, msg)
+          node.error(message_err_format, msg);
           return;  
         }
       }  
