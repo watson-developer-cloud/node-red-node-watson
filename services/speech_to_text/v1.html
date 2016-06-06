@@ -89,12 +89,15 @@
 </script>
 
 <script type="text/javascript">
-  var models = null;
-  var languages = null;
-  var bands = null;
 
-  var language_selected = '';
-  var band_selected = '';
+  // Need to simulate a namespace, as some of the variables had started to leak across nodes
+  function STT () {
+    var models = null;
+  }  
+
+  // This is the namespace for stt. Currently only contains models, but more vars and functions may need to be 
+  // moved in if there is a clash with other nodes.
+  var stt = new STT();
 
   var LANGUAGES = { 'en-US' : 'US English', 
                     'pt-BR': 'Portuguese Braziilian', 
@@ -105,6 +108,12 @@
                     'ja-JP': 'Japanese'
                   };
 
+  var languages = null;
+  var bands = null;
+
+  var language_selected = '';
+  var band_selected = '';
+
 
   // sorting functions
   function onlyUnique(value, index, self) {
@@ -114,7 +123,7 @@
   // Function to be used at the start, as don't want to expose any fields, unless the models are 
   // available. The models can only be fetched if the credentials are available. 
   function hideEverything() {
-    if (!models) {
+    if (!stt.models) {
       $('#credentials-not-found').show();
       $('label#node-label-message').parent().hide();    
       $('input#node-input-continuous').parent().hide();   
@@ -126,7 +135,7 @@
   // Check if there is a model then can show the fields. 
   // available. The models can only be fetched if the credentials are available. 
   function visibilityCheck() {
-    if (models) {
+    if (stt.models) {
       $('label#node-label-message').parent().hide();            
       $('input#node-input-continuous').parent().show(); 
       $('select#node-input-lang').parent().show();  
@@ -141,13 +150,13 @@
 
 
   // Simple check that is only invoked if the service is not bound into bluemix. In this case the
-  // user has to provide credentials. Once there are credentials, then the models are retrieved. 
+  // user has to provide credentials. Once there are credentials, then the stt.models are retrieved. 
   function checkCredentials() {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
     if (u && u.length && p) {      
-      if (!models) {
+      if (!stt.models) {
         getModels();
       } 
     }  
@@ -155,8 +164,8 @@
 
   // Populate the quality select field
   function populateBands() {
-    if (!bands && models) {
-      bands = models.map(function(m) {
+    if (!bands && stt.models) {
+      bands = stt.models.map(function(m) {
         return m.name.split('_')[1];
       });
       var unique_bands = bands.filter(onlyUnique); 
@@ -211,17 +220,15 @@
   // Retrieve the available models from the server, if data is returned, then 
   // can enable the dynamic selection fields. 
   function getModels(haveCredentials) {
-    console.log('Fetching models');
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
-    $.getJSON('/watson-speech-to-text/models/', {un: u, pwd: p}).done(function (data) {
-      console.log('Models have been retrieved');
+    $.getJSON('watson-speech-to-text/models/', {un: u, pwd: p}).done(function (data) {
       if (data.error) {
         $('label#node-label-message').parent().show();
         $('label#node-label-message').text(data.error); 
       } else if (data.models) {
-        models = data.models;
+        stt.models = data.models;
         //have_credentials = true; 
         postModelCheck();       
       }
@@ -234,8 +241,8 @@
 
   // Called to complete the languages selection table
   function processLanguages() {
-    if (!languages && models) {
-      languages = models.map(function(m) {
+    if (!languages && stt.models) {
+      languages = stt.models.map(function(m) {
         return m.language;
       });
     }
@@ -262,7 +269,7 @@
 
   // Called to work through the models, completing the dyanmic selection fields.
   function processModels() {
-    if (models) {
+    if (stt.models) {
       processLanguages();
       populateBands();
     }
@@ -284,7 +291,6 @@
   // This is the on edit prepare function, which will be invoked everytime the dialog
   // is shown. 
   function oneditprepare() {
-    console.log('In oneditprepare');
     hideEverything();
     restoreFromHidden();
     handlersUI();
@@ -295,7 +301,7 @@
       .done(function (service) {
         restoreFromHidden();
         $('.credentials').toggle(!service);
-        if (!models) {getModels(service);}
+        if (!stt.models) {getModels(service);}
         else {postModelCheck();}
       })
       .fail(function () {
@@ -342,4 +348,5 @@
             oneditsave: oneditsave
         });
     })();
+
 </script>
