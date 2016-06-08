@@ -133,9 +133,7 @@ module.exports = function (RED) {
     var message;
     var visualRecognition;
     
-    this.on('input', function (msg) 
-    {
-      // Check which single feature has been requested.
+    this.on('input', function (msg) {
       var feature = config['image-feature'];
       node.status({});
       // so there is at most 1 temp file at a time (did not found a better solution...)
