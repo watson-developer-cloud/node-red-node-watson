@@ -194,7 +194,7 @@ module.exports = function (RED) {
             msg.result['error']= err.error;
           }
           //console.log('Error:', err.code);
-          node.error('Error code : ' +  err.code);
+          node.error('Error code : ' + err.code);
           return;
         }
         else if (body.images[0].error)
