@@ -4,6 +4,7 @@ Node-RED Watson Nodes for IBM Bluemix
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4f98536040924add9da4ca1deecb72b4)](https://www.codacy.com/app/BetaWorks-NodeRED-Watson/node-red-node-watson?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=watson-developer-cloud/node-red-node-watson&amp;utm_campaign=Badge_Grade)
 
 ### New in version 0.4.4
+- Visual Recognition v3 : added a Delete All Classifiers feature in the util node.
 - New palette category for deprecated Nodes, that are being retained for backward compatibity.
 - Bugfixes to Speech to Text.
 
