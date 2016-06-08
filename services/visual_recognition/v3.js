@@ -163,7 +163,8 @@ module.exports = function (RED) {
 
         if (err != null && body==null)
         {
-          node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
+          node.status({fill:'red', shape:'ring', 
+            text:'call to watson visual recognition v3 service failed'}); 
           msg.result = {};
           msg.result['error_code']= err.code;
           if (!err.error)
@@ -300,7 +301,6 @@ module.exports = function (RED) {
           async.parallel(asyncTasks, function(error, results){
             // when all temp local copies are ready, 
             // copy of all parameters and request to watson api
-<<<<<<< HEAD
             //console.log(error, results);
             if (error)
             {
@@ -319,11 +319,11 @@ module.exports = function (RED) {
           params['classifier_id']=msg.params['classifier_id'];
           performAction(visualRecognition, params, feature, actionComplete2);
       }
-        else if (feature=='deleteClassifier') {
+        else if (feature==='deleteClassifier') {
         params['classifier_id']=msg.params['classifier_id'];
         performAction(visualRecognition, params, feature, actionCompleteDeleteClassifier);
       } 
-        else if (feature=='deleteAllClassifiers') {
+        else if (feature==='deleteAllClassifiers') {
         performDeleteAllClassifiers(visualRecognition, node, msg);
       }
 
@@ -355,12 +355,13 @@ module.exports = function (RED) {
     visualRecognition.listClassifiers(params, function(err, body, other) {
       node.status({});
       if (err) {
-          node.status({fill:'red', shape:'ring', text:'Delete All : call to listClassifiers failed'});
+          node.status({fill:'red', shape:'ring', 
+            text:'Delete All : call to listClassifiers failed'});
           node.error(err, msg);   
         } else {
           // Array to hold async tasks
           var asyncTasks = [];
-          var nb_todelete = body.classifiers.length;
+          var nbTodelete = body.classifiers.length;
           var nbdeleted = 0;
           body.classifiers.forEach(function (aClassifier) {
               asyncTasks.push(function (cb) {
@@ -369,10 +370,12 @@ module.exports = function (RED) {
                 visualRecognition.deleteClassifier(parms, function(err, body, other) {
                 if (err) {
                     node.error(err, msg);
-                    console.log('Error with the removal of classifier_id '+parms.classifier_id +' : ' +  err);
-                    cb('error')
+                    console.log('Error with the removal of classifier_id '
+                      +parms.classifier_id +' : ' +  err);
+                    cb('error');
                   } else {
-                    console.log('Classifier ID '+ aClassifier.classifier_id + ' deleted successfully.');
+                    console.log('Classifier ID '+ aClassifier.classifier_id 
+                      + ' deleted successfully.');
                     nbdeleted++;
                   }
                   cb(null,parms.classifier_id);
@@ -380,14 +383,15 @@ module.exports = function (RED) {
               });
           });
         } // else
-        async.parallel(asyncTasks, function(error, deleted_list){
-          if (deleted_list.length==nb_todelete) {
+        async.parallel(asyncTasks, function(error, deletedList){
+          if (deletedList.length===nbTodelete) {
             msg.payload='see msg.result.error';
             msg.result = 'All custom classifiers have been deleted.';
           }
           else {
             msg.payload='see msg.result.error';
-            msg.result = 'Some Classifiers could have not been deleted; See node-RED log for errors.';
+            msg.result = 'Some Classifiers could have not been deleted;'
+            +'See log for errors.';
           }
           node.send(msg);
           node.status({});           
