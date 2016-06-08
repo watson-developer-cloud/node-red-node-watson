@@ -100,6 +100,7 @@ module.exports = function (RED) {
                 } else {
                   console.log('Classifier ID '+ aClassifier.classifier_id 
                     + ' deleted successfully.');
+                  console.log(body);
                   nbdeleted++;
                 }
                 cb(null,parms.classifier_id);
