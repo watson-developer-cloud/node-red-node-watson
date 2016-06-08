@@ -79,33 +79,33 @@ module.exports = function (RED) {
     visualRecognition.listClassifiers(params, function(err, body) {
       node.status({});
       if (err) {
-          node.status({fill:'red', shape:'ring', 
-            text:'Delete All : call to listClassifiers failed'});
-          node.error(err, msg);   
-        } else {
-          // Array to hold async tasks
-          var asyncTasks = [];
-          var nbTodelete = body.classifiers.length;
-          var nbdeleted = 0;
-          body.classifiers.forEach(function (aClassifier) {
-              asyncTasks.push(function (cb) {
-                var parms = {};
-                parms.classifier_id=aClassifier.classifier_id;
-                visualRecognition.deleteClassifier(parms, function(err, body) {
-                if (err) {
-                    node.error(err, msg);
-                    console.log('Error with the removal of classifier_id '
-                      +parms.classifier_id +' : ' +  err);
-                    cb('error');
-                  } else {
-                    console.log('Classifier ID '+ aClassifier.classifier_id 
-                      + ' deleted successfully.');
-                    nbdeleted++;
-                  }
-                  cb(null,parms.classifier_id);
-                });  
-              });
-          });
+        node.status({fill:'red', shape:'ring', 
+          text:'Delete All : call to listClassifiers failed'});
+        node.error(err, msg);   
+      } else {
+        // Array to hold async tasks
+        var asyncTasks = [];
+        var nbTodelete = body.classifiers.length;
+        var nbdeleted = 0;
+        body.classifiers.forEach(function (aClassifier) {
+            asyncTasks.push(function (cb) {
+              var parms = {};
+              parms.classifier_id=aClassifier.classifier_id;
+              visualRecognition.deleteClassifier(parms, function(err, body) {
+              if (err) {
+                  node.error(err, msg);
+                  console.log('Error with the removal of classifier_id '
+                    +parms.classifier_id +' : ' +  err);
+                  cb('error');
+                } else {
+                  console.log('Classifier ID '+ aClassifier.classifier_id 
+                    + ' deleted successfully.');
+                  nbdeleted++;
+                }
+                cb(null,parms.classifier_id);
+              });  
+            });
+        });
         } // else
         async.parallel(asyncTasks, function(error, deletedList){
           if (deletedList.length===nbTodelete) {
@@ -120,7 +120,7 @@ module.exports = function (RED) {
           node.send(msg);
           node.status({});           
         });
-      });
+    });
     }  // delete all func 
 
 
@@ -130,6 +130,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
     var message;
+    var visualRecognition;
     
     this.on('input', function (msg) 
     {
@@ -145,8 +146,8 @@ module.exports = function (RED) {
         node.error(message, msg);
         return;
       }
-      if (feature !== 'retrieveClassifiersList' && feature !== 'retrieveClassifierDetails' 
-          && feature !== 'deleteClassifier' && feature !== 'deleteAllClassifiers')
+      if (feature !== 'retrieveClassifiersList' && feature !== 'retrieveClassifierDetails' && 
+        feature !== 'deleteClassifier' && feature !== 'deleteAllClassifiers')
       {
         if (typeof msg.payload === 'boolean' || typeof msg.payload === 'number') 
         {
@@ -162,7 +163,7 @@ module.exports = function (RED) {
       apikey = sAPIKey || this.credentials.apikey;
       this.status({}); 
 
-      var visualRecognition = watson.visual_recognition({
+      visualRecognition = watson.visual_recognition({
         api_key: apikey,
         version: 'v3',
         version_date: '2016-05-19'
@@ -271,24 +272,24 @@ module.exports = function (RED) {
             return;        
           }  
           stream_buffer(info.path, msg.payload, function () {
-          params['images_file'] = fs.createReadStream(info.path);
-          if ( msg.params != null && msg.params.classifier_ids != null)
-            params['classifier_ids']=msg.params['classifier_ids'];
-          if ( msg.params != null && msg.params.owners != null)
-            params['owners']=msg.params['owners'];
-          if ( msg.params != null && msg.params.threshold != null)
-            params['threshold']=msg.params['threshold'];
-          switch(feature) {
-            case 'classifyImage' : 
-              visualRecognition.classify(params, actionComplete);
-              break;
-            case 'detectFaces':
-              visualRecognition.detectFaces(params, actionComplete);
-              break;
-            case 'recognizeText':
-              visualRecognition.recognizeText(params, actionComplete);
-              break;
-          }
+            params['images_file'] = fs.createReadStream(info.path);
+            if ( msg.params != null && msg.params.classifier_ids != null)
+              params['classifier_ids']=msg.params['classifier_ids'];
+            if ( msg.params != null && msg.params.owners != null)
+              params['owners']=msg.params['owners'];
+            if ( msg.params != null && msg.params.threshold != null)
+              params['threshold']=msg.params['threshold'];
+            switch(feature) {
+              case 'classifyImage' : 
+                visualRecognition.classify(params, actionComplete);
+                break;
+              case 'detectFaces':
+                visualRecognition.detectFaces(params, actionComplete);
+                break;
+              case 'recognizeText':
+                visualRecognition.recognizeText(params, actionComplete);
+                break;
+            }
           });
         }); // temp
       } else if (feature==='createClassifier') {   
