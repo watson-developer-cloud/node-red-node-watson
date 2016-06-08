@@ -70,39 +70,6 @@ module.exports = function (RED) {
     });
   };
 
-  // Utility function that performs the Watson Visual Recognition call. 
-  // the cleanup removes the temp storage, and I am not sure whether 
-  // it should be called here or after alchemy returns and passed
-  // control back to cbdone.
-
-  function performAction(visualRecognition, params, feature, cbdone) {
-
-    switch(feature)
-    {
-      case 'classifyImage' : 
-        visualRecognition.classify(params, cbdone);
-        break;
-      case 'detectFaces':
-        visualRecognition.detectFaces(params, cbdone);
-        break;
-      case 'recognizeText':
-        visualRecognition.recognizeText(params, cbdone);
-        break;
-      case 'createClassifier':
-        visualRecognition.createClassifier(params, cbdone);
-        break;
-      case 'retrieveClassifiersList':
-        visualRecognition.listClassifiers(params, cbdone);
-        break;
-      case 'retrieveClassifierDetails':
-        visualRecognition.getClassifier(params, cbdone);
-        break;
-      case 'deleteClassifier':
-        visualRecognition.deleteClassifier(params, cbdone);
-        break;
-    }
-  }
-
   // This is the Watson Visual Recognition V3 Node
   function WatsonVisualRecognitionV3Node (config) {
 
@@ -257,7 +224,19 @@ module.exports = function (RED) {
             params['owners']=msg.params['owners'];
           if ( msg.params != null && msg.params.threshold != null)
             params['threshold']=msg.params['threshold'];
-          performAction(visualRecognition, params, feature, actionComplete);
+          
+          switch(feature)
+          {
+            case 'classifyImage' : 
+              visualRecognition.classify(params, actionComplete);
+              break;
+            case 'detectFaces':
+              visualRecognition.detectFaces(params, actionComplete);
+              break;
+            case 'recognizeText':
+              visualRecognition.recognizeText(params, actionComplete);
+              break;
+          }
           });
         }); // temp
       } else if (feature==='createClassifier') {   
@@ -301,7 +280,6 @@ module.exports = function (RED) {
           async.parallel(asyncTasks, function(error, results){
             // when all temp local copies are ready, 
             // copy of all parameters and request to watson api
-            //console.log(error, results);
             if (error)
             {
               console.log('createClassifier ended with error ' + error);
@@ -309,24 +287,23 @@ module.exports = function (RED) {
             }
             for (p in listParams)
               params[p]=listParams[p];
-            performAction(visualRecognition, params, feature, actionComplete2);
+            visualRecognition.createClassifier(params,actionComplete2);
           });
       }
         else if (feature==='retrieveClassifiersList') { 
-          performAction(visualRecognition, params, feature, actionComplete2);
+          visualRecognition.listClassifiers(params,actionComplete2);
       }
         else if (feature ==='retrieveClassifierDetails') {
           params['classifier_id']=msg.params['classifier_id'];
-          performAction(visualRecognition, params, feature, actionComplete2);
+          visualRecognition.getClassifier(params,actionComplete2);
       }
         else if (feature==='deleteClassifier') {
         params['classifier_id']=msg.params['classifier_id'];
-        performAction(visualRecognition, params, feature, actionCompleteDeleteClassifier);
+        visualRecognition.getClassifier(params,actionCompleteDeleteClassifier);
       } 
         else if (feature==='deleteAllClassifiers') {
         performDeleteAllClassifiers(visualRecognition, node, msg);
       }
-
       else if (urlCheck(msg.payload)) {
         params['url'] = msg.payload;
         if ( msg.params != null && msg.params.classifier_ids != null)
@@ -335,7 +312,18 @@ module.exports = function (RED) {
             params['owners']=msg.params['owners'];
         if ( msg.params != null && msg.params.threshold != null)
             params['threshold']=msg.params['threshold'];
-        performAction(visualRecognition, params, feature, actionComplete);
+        switch(feature)
+        {
+          case 'classifyImage' : 
+            visualRecognition.classify(params, actionComplete);
+            break;
+          case 'detectFaces':
+            visualRecognition.detectFaces(params, actionComplete);
+            break;
+          case 'recognizeText':
+           visualRecognition.recognizeText(params, actionComplete);
+            break;
+        }
       } else {
         this.status({fill:'red', shape:'ring', text:'payload is invalid'});          
         message ='Payload must be either an image buffer or a string representing a url'; 
