@@ -65,7 +65,9 @@ module.exports = function (RED) {
 
   function stream_buffer(file, contents, cb) {
     fs.writeFile(file, contents, function (err) {
-      if (err) throw err;
+      if (err) {
+        throw err;
+      }
       cb();
     });
   };
@@ -188,22 +190,23 @@ module.exports = function (RED) {
             text:'call to watson visual recognition v3 service failed'}); 
           msg.result = {};
           msg.result['error_code']= err.code;
-          if (!err.error)
+          if (!err.error) {
             msg.result['error']= err.error;
-          console.log('Error:', err.code);
+          }
+          //console.log('Error:', err.code);
           node.error('Error code : ' +  err.code);
           return;
         }
         else if (body.images[0].error)
         {
-          var err_desc = body.images[0].error.description;
-          var err_id = body.images[0].error.error_id;
+          var errDesc = body.images[0].error.description;
+          var errId = body.images[0].error.error_id;
           node.status({fill:'red', shape:'ring', 
                        text:'call to watson visual recognition v3 service failed'}); 
           msg.result = {};
-          msg.result['error_id']= err_id;
-          msg.result['error']= err_desc;
-          console.log('Error:', err_desc);
+          msg.result['error_id']= errId;
+          msg.result['error']= errDesc;
+          console.log('Error:', errDesc);
           msg.payload='see msg.result.error';
           node.send(msg); 
         }
@@ -220,7 +223,8 @@ module.exports = function (RED) {
 
         if (err != null && body==null)
         {
-          node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
+          node.status({fill:'red', shape:'ring', 
+            text:'call to watson visual recognition v3 service failed'}); 
           msg.result = {};
           msg.result['error_code']= err.code;
           if (!err.error)
