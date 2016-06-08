@@ -35,7 +35,9 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-visual-recognition">
-    <p><b>NB:</b> This node uses the old beta API and it is only being retained for backward compatibility for anyone that has an olde AlchemyAPI key. It will no longer work with new AlchemyAPI keys.</p>
+    <p><b>NB:</b> This node uses the old beta API and it is only being retained for backward compatibility for 
+        anyone that has an Visual Recognition credentials. 
+        It will no longer work with new Visual Recognition keys.</p>
     <br/>
     <p>The Visual Recognition service analyses images to understand their contents.</p>
     <p>The image to be analysed should be passed in on <code>msg.payload</code>.</p>
@@ -51,7 +53,7 @@
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-visual-recognition', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ""},
             },
@@ -117,7 +119,7 @@
 	}
 
 	RED.nodes.registerType('watson-visual-util',{
-		category: 'IBM_Watson',
+		category: 'Watson Deprecated',
 		color: '#FFFF80',
 		defaults: {
 			name: {value:""},
@@ -227,7 +229,7 @@
 	});
 
 	RED.nodes.registerType('watson-visual-training',{
-		category: 'IBM_Watson',
+		category: 'Watson Deprecated',
 		color: '#FFFF80',
 		defaults: {
 			name: {value:""},
@@ -356,7 +358,9 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-visual-util">
-    <p><b>NB:</b> This node uses the old beta API and it is only being retained for backward compatibility for anyone that has an olde AlchemyAPI key. It will no longer work with new AlchemyAPI keys.</p>
+    <p><b>NB:</b> This node uses the old beta API and it is only being retained for backward compatibility for 
+        anyone that has an Visual Recognition credentials. 
+        It will no longer work with new Visual Recognition keys.</p>
     <br/>
     <p>A node for managing the classifiers in the Visual Recognition service in Watson</p>
 	<p>More information about this service can be found in the 
@@ -392,6 +396,10 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-visual-training">
+    <p><b>NB:</b> This node uses the old beta API and it is only being retained for backward compatibility for 
+        anyone that has an Visual Recognition credentials. 
+        It will no longer work with new Visual Recognition keys.</p>
+    <br/>
 	<p>A node for training the Visual Recognition service in Watson</p>
 	<p>This service requires that two sets of images are provided for the training. These sets of files should be 
 	zipped and provided to the node either as binary streams or as URL's. The positive and negative set of images 
