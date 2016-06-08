@@ -84,36 +84,36 @@ module.exports = function (RED) {
         node.error(err, msg);   
       } else {
         // Array to hold async tasks
-        var asyncTasks = [];
-        var nbTodelete = body.classifiers.length;
-        var nbdeleted = 0;
+        var asyncTasks, nbTodelete, nbdeleted;
+        asyncTasks = [];
+        nbTodelete = body.classifiers.length;
+        nbdeleted = 0;
         body.classifiers.forEach(function (aClassifier) {
-            asyncTasks.push(function (cb) {
-              var parms = {};
-              parms.classifier_id=aClassifier.classifier_id;
-              visualRecognition.deleteClassifier(parms, function(err, body) {
+          asyncTasks.push(function (cb) {
+            var parms = {};
+            parms.classifier_id=aClassifier.classifier_id;
+            visualRecognition.deleteClassifier(parms, function(err, body) {
               if (err) {
-                  node.error(err, msg);
-                  console.log('Error with the removal of classifier_id '
-                    +parms.classifier_id +' : ' +  err);
-                  cb('error');
-                } else {
-                  console.log('Classifier ID '+ aClassifier.classifier_id 
-                    + ' deleted successfully.');
-                  console.log(body);
-                  nbdeleted++;
-                }
-                cb(null,parms.classifier_id);
-              });  
-            });
+                node.error(err, msg);
+                console.log('Error with the removal of classifier_id '
+                  +parms.classifier_id +' : ' +  err);
+                cb('error');
+              } else {
+                console.log('Classifier ID '+ aClassifier.classifier_id 
+                  + ' deleted successfully.');
+                console.log(body);
+                nbdeleted++;
+              }
+              cb(null,parms.classifier_id);
+            });  
+          });
         });
         } // else
         async.parallel(asyncTasks, function(error, deletedList){
           if (deletedList.length===nbTodelete) {
             msg.payload='see msg.result.error';
             msg.result = 'All custom classifiers have been deleted.';
-          }
-          else {
+          } else {
             msg.payload='see msg.result.error';
             msg.result = 'Some Classifiers could have not been deleted;'
             +'See log for errors.';
@@ -274,22 +274,22 @@ module.exports = function (RED) {
           }  
           stream_buffer(info.path, msg.payload, function () {
             params['images_file'] = fs.createReadStream(info.path);
-            if ( msg.params != null && msg.params.classifier_ids != null)
+            if (msg.params != null && msg.params.classifier_ids != null)
               params['classifier_ids']=msg.params['classifier_ids'];
-            if ( msg.params != null && msg.params.owners != null)
+            if (msg.params != null && msg.params.owners != null)
               params['owners']=msg.params['owners'];
-            if ( msg.params != null && msg.params.threshold != null)
+            if (msg.params != null && msg.params.threshold != null)
               params['threshold']=msg.params['threshold'];
             switch(feature) {
-              case 'classifyImage' : 
-                visualRecognition.classify(params, actionComplete);
-                break;
-              case 'detectFaces':
-                visualRecognition.detectFaces(params, actionComplete);
-                break;
-              case 'recognizeText':
-                visualRecognition.recognizeText(params, actionComplete);
-                break;
+            case 'classifyImage':
+              visualRecognition.classify(params, actionComplete);
+              break;
+            case 'detectFaces':
+              visualRecognition.detectFaces(params, actionComplete);
+              break;
+            case 'recognizeText':
+              visualRecognition.recognizeText(params, actionComplete);
+              break;
             }
           });
         }); // temp
