@@ -70,6 +70,60 @@ module.exports = function (RED) {
     });
   };
 
+  // This function performs the operation to Delete ALL Dialogs
+  function performDeleteAllClassifiers(visualRecognition, node, msg) {
+
+    node.status({fill:'blue', shape:'dot', text:'requesting Delete All classifiers'});
+
+    var params = {};
+    visualRecognition.listClassifiers(params, function(err, body) {
+      node.status({});
+      if (err) {
+          node.status({fill:'red', shape:'ring', 
+            text:'Delete All : call to listClassifiers failed'});
+          node.error(err, msg);   
+        } else {
+          // Array to hold async tasks
+          var asyncTasks = [];
+          var nbTodelete = body.classifiers.length;
+          var nbdeleted = 0;
+          body.classifiers.forEach(function (aClassifier) {
+              asyncTasks.push(function (cb) {
+                var parms = {};
+                parms.classifier_id=aClassifier.classifier_id;
+                visualRecognition.deleteClassifier(parms, function(err, body) {
+                if (err) {
+                    node.error(err, msg);
+                    console.log('Error with the removal of classifier_id '
+                      +parms.classifier_id +' : ' +  err);
+                    cb('error');
+                  } else {
+                    console.log('Classifier ID '+ aClassifier.classifier_id 
+                      + ' deleted successfully.');
+                    nbdeleted++;
+                  }
+                  cb(null,parms.classifier_id);
+                });  
+              });
+          });
+        } // else
+        async.parallel(asyncTasks, function(error, deletedList){
+          if (deletedList.length===nbTodelete) {
+            msg.payload='see msg.result.error';
+            msg.result = 'All custom classifiers have been deleted.';
+          }
+          else {
+            msg.payload='see msg.result.error';
+            msg.result = 'Some Classifiers could have not been deleted;'
+            +'See log for errors.';
+          }
+          node.send(msg);
+          node.status({});           
+        });
+      });
+    }  // delete all func 
+
+
   // This is the Watson Visual Recognition V3 Node
   function WatsonVisualRecognitionV3Node (config) {
 
@@ -109,10 +163,10 @@ module.exports = function (RED) {
       this.status({}); 
 
       var visualRecognition = watson.visual_recognition({
-          api_key: apikey,
-          version: 'v3',
-          version_date: '2016-05-19'
-        });
+        api_key: apikey,
+        version: 'v3',
+        version_date: '2016-05-19'
+      });
   
       if (!apikey) {
         this.status({fill:'red', shape:'ring', text:'missing credentials'});          
@@ -224,9 +278,7 @@ module.exports = function (RED) {
             params['owners']=msg.params['owners'];
           if ( msg.params != null && msg.params.threshold != null)
             params['threshold']=msg.params['threshold'];
-          
-          switch(feature)
-          {
+          switch(feature) {
             case 'classifyImage' : 
               visualRecognition.classify(params, actionComplete);
               break;
@@ -312,8 +364,7 @@ module.exports = function (RED) {
             params['owners']=msg.params['owners'];
         if ( msg.params != null && msg.params.threshold != null)
             params['threshold']=msg.params['threshold'];
-        switch(feature)
-        {
+        switch(feature) {
           case 'classifyImage' : 
             visualRecognition.classify(params, actionComplete);
             break;
@@ -334,59 +385,7 @@ module.exports = function (RED) {
     });
   }
 
-  // This function performs the operation to Delete ALL Dialogs
-  function performDeleteAllClassifiers(visualRecognition, node, msg) {
-
-    node.status({fill:'blue', shape:'dot', text:'requesting Delete All classifiers'});
-
-    var params = {};
-    visualRecognition.listClassifiers(params, function(err, body, other) {
-      node.status({});
-      if (err) {
-          node.status({fill:'red', shape:'ring', 
-            text:'Delete All : call to listClassifiers failed'});
-          node.error(err, msg);   
-        } else {
-          // Array to hold async tasks
-          var asyncTasks = [];
-          var nbTodelete = body.classifiers.length;
-          var nbdeleted = 0;
-          body.classifiers.forEach(function (aClassifier) {
-              asyncTasks.push(function (cb) {
-                var parms = {};
-                parms.classifier_id=aClassifier.classifier_id;
-                visualRecognition.deleteClassifier(parms, function(err, body, other) {
-                if (err) {
-                    node.error(err, msg);
-                    console.log('Error with the removal of classifier_id '
-                      +parms.classifier_id +' : ' +  err);
-                    cb('error');
-                  } else {
-                    console.log('Classifier ID '+ aClassifier.classifier_id 
-                      + ' deleted successfully.');
-                    nbdeleted++;
-                  }
-                  cb(null,parms.classifier_id);
-                });  
-              });
-          });
-        } // else
-        async.parallel(asyncTasks, function(error, deletedList){
-          if (deletedList.length===nbTodelete) {
-            msg.payload='see msg.result.error';
-            msg.result = 'All custom classifiers have been deleted.';
-          }
-          else {
-            msg.payload='see msg.result.error';
-            msg.result = 'Some Classifiers could have not been deleted;'
-            +'See log for errors.';
-          }
-          node.send(msg);
-          node.status({});           
-        });
-      });
-    }  // delete all func 
-
+  
   RED.nodes.registerType('visual-recognition-v3', WatsonVisualRecognitionV3Node, {
     credentials: {
       apikey: {type:'password'}
