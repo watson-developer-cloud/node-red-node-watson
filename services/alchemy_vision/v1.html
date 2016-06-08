@@ -40,6 +40,9 @@
 </script>
 
 <script type="text/x-red" data-help-name="alchemy-image-analysis">
+    <p><b>NB:</b> The service behind this node has been merged with Visual Recognition. 
+    This node uses the old beta API and it is only being retained for backward compatibility for anyone that has an old AlchemyAPI key. It will no longer work with new AlchemyAPI keys.</p>
+    <br/>
     <p>Using the Image Analysis node, you can use the Alchemy APIs to analyse images for face detection, content tags and links.</p>
     <p>The following features are available for analysis:</p>
     <ul>
@@ -61,7 +64,7 @@
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('alchemy-image-analysis', {
-            category: 'IBM Watson',
+            category: "Watson Deprecated",
             defaults: {
               name: {value: ""},
               apikey: {value: ""},

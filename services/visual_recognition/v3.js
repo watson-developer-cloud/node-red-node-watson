@@ -40,12 +40,12 @@ module.exports = function (RED) {
   // Taking this line out as codacy was complaining about it. 
   // var services = cfenv.getAppEnv().services,
 
-  var apikey, s_apikey;
+  var apikey, sAPIKey;
 
   var service = cfenv.getAppEnv().getServiceCreds(/visual recognition/i);
 
   if (service) {
-    s_apikey = service.apikey;
+    sAPIKey = service.apikey;
   }
 
   RED.httpAdmin.get('/watson-visual-recognition/vcap', function (req, res) {
@@ -59,7 +59,7 @@ module.exports = function (RED) {
   };
 
   function urlCheck(str) {
-    var parsed = url.parse(str)
+    var parsed = url.parse(str);
     return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
   };
 
@@ -138,7 +138,7 @@ module.exports = function (RED) {
 
       // If it is present the newly provided user entered key 
       // takes precedence over the existing one. 
-      apikey = s_apikey || this.credentials.apikey;
+      apikey = sAPIKey || this.credentials.apikey;
       this.status({}); 
 
       var visualRecognition = watson.visual_recognition({
@@ -175,8 +175,9 @@ module.exports = function (RED) {
         else if (body.images[0].error)
         {
           var err_desc = body.images[0].error.description;
-          var err_id = body.images[0].error.error_id
-          node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
+          var err_id = body.images[0].error.error_id;
+          node.status({fill:'red', shape:'ring', 
+                       text:'call to watson visual recognition v3 service failed'}); 
           msg.result = {};
           msg.result['error_id']= err_id;
           msg.result['error']= err_desc;
@@ -259,7 +260,7 @@ module.exports = function (RED) {
           });
         }); // temp
       } else if (feature==='createClassifier') {   
-          var list_params = {};
+          var listParams = {};
           var asyncTasks = [];
           var prop = null;
           for (var k in msg.params)
@@ -269,28 +270,29 @@ module.exports = function (RED) {
             {
               // before pushing the function into the task array wrap the push 
               // in an IIFE function, passing in the 'prop' parameter
-              (function(prop, list_params, msg) {
+              (function(prop, listParams, msg) {
 
                asyncTasks.push(function (callback) {
                   var buffer = msg.params[prop];
                   temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
                     if (err) {
-                      this.status({fill:'red', shape:'ring', text:'unable to open image stream'});          
+                      this.status({fill:'red', shape:'ring', 
+                                   text:'unable to open image stream'});          
                       var message ='Node has been unable to open the image stream'; 
                       node.error(message, msg);
                       callback('open error on '+prop);
                     }  
                     stream_buffer(info.path, msg.params[prop], function () {
-                      list_params[prop]=fs.createReadStream(info.path);
+                      listParams[prop]=fs.createReadStream(info.path);
                       callback(null, prop);
                     });
                   }); // temp.open
               }); // asyncTasks.push
 
-              })(prop, list_params, msg);
+              })(prop, listParams, msg);
 
             } else if (prop==='name') {
-              list_params[prop]=msg.params[prop];
+              listParams[prop]=msg.params[prop];
             }
           } // for
           
@@ -298,14 +300,15 @@ module.exports = function (RED) {
           async.parallel(asyncTasks, function(error, results){
             // when all temp local copies are ready, 
             // copy of all parameters and request to watson api
+<<<<<<< HEAD
             //console.log(error, results);
             if (error)
             {
               console.log('createClassifier ended with error ' + error);
               throw error;
             }
-            for (p in list_params)
-              params[p]=list_params[p];
+            for (p in listParams)
+              params[p]=listParams[p];
             performAction(visualRecognition, params, feature, actionComplete2);
           });
       }
@@ -342,7 +345,6 @@ module.exports = function (RED) {
 
     });
   }
-
 
   // This function performs the operation to Delete ALL Dialogs
   function performDeleteAllClassifiers(visualRecognition, node, msg) {
