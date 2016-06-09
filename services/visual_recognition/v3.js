@@ -110,7 +110,8 @@ module.exports = function (RED) {
             });  
           });
         });
-        } // else
+
+        
         async.parallel(asyncTasks, function(error, deletedList){
           if (deletedList.length===nbTodelete) {
             msg.payload='see msg.result.error';
@@ -123,7 +124,10 @@ module.exports = function (RED) {
           node.send(msg);
           node.status({});           
         });
-    });
+        
+        } // else
+
+    }); // list classifiers
     }  // delete all func 
 
 
