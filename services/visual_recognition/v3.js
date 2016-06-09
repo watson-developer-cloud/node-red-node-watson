@@ -56,12 +56,12 @@ module.exports = function (RED) {
  
   function imageCheck(data) {
     return data instanceof Buffer && imageType(data) !== null;
-  };
+  }
 
   function urlCheck(str) {
     var parsed = url.parse(str);
     return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
-  };
+  }
 
   function stream_buffer(file, contents, cb) {
     fs.writeFile(file, contents, function (err) {
@@ -70,7 +70,7 @@ module.exports = function (RED) {
       }
       cb();
     });
-  };
+  }
 
   // This function performs the operation to Delete ALL Dialogs
   function performDeleteAllClassifiers(visualRecognition, node, msg) {
