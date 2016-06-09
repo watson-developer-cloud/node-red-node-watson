@@ -93,13 +93,18 @@
   // Need to simulate a namespace, as some of the variables had started to leak across nodes
   function STT () {
     var models = null;
+    var LANGUAGES = null; 
+    var languages = null;
+    var bands = null;
+    var language_selected = '';
+    var band_selected = '';
   }  
 
   // This is the namespace for stt. Currently only contains models, but more vars and functions may need to be 
   // moved in if there is a clash with other nodes.
   var stt = new STT();
 
-  var LANGUAGES = { 'en-US' : 'US English', 
+  stt.LANGUAGES = { 'en-US' : 'US English', 
                     'pt-BR': 'Portuguese Braziilian', 
                     'en-UK': 'UK English' , 
                     'zh-CN': 'Mandarin', 
@@ -107,13 +112,6 @@
                     'ar-AR': 'Arablic', 
                     'ja-JP': 'Japanese'
                   };
-
-  var languages = null;
-  var bands = null;
-
-  var language_selected = '';
-  var band_selected = '';
-
 
   // sorting functions
   function onlyUnique(value, index, self) {
@@ -164,20 +162,20 @@
 
   // Populate the quality select field
   function populateBands() {
-    if (!bands && stt.models) {
-      bands = stt.models.map(function(m) {
+    if (!stt.bands && stt.models) {
+      stt.bands = stt.models.map(function(m) {
         return m.name.split('_')[1];
       });
-      var unique_bands = bands.filter(onlyUnique); 
-      bands = unique_bands;
+      var unique_bands = stt.bands.filter(onlyUnique); 
+      stt.bands = unique_bands;
     }
 
-    if (bands) {
+    if (stt.bands) {
       $('select#node-input-band').empty();
 
-      bands.forEach(function(b) {
+      stt.bands.forEach(function(b) {
         var selectedText = '';
-        if (band_selected === b) {
+        if (stt.band_selected === b) {
           selectedText = 'selected="selected"';
         }
         $('select#node-input-band')
@@ -201,12 +199,12 @@
     }); 
 
     $('#node-input-lang').change(function (val) {
-      language_selected = $('#node-input-lang').val();
+      stt.language_selected = $('#node-input-lang').val();
       populateBands();
     }); 
 
     $('#node-input-band').change(function (val) {
-      band_selected = $('#node-input-band').val();
+      stt.band_selected = $('#node-input-band').val();
     });       
   }
 
@@ -241,18 +239,18 @@
 
   // Called to complete the languages selection table
   function processLanguages() {
-    if (!languages && stt.models) {
-      languages = stt.models.map(function(m) {
+    if (!stt.languages && stt.models) {
+      stt.languages = stt.models.map(function(m) {
         return m.language;
       });
     }
-    if (languages) {
+    if (stt.languages) {
       $('select#node-input-lang').empty();
-      var unique_langs = languages.filter(onlyUnique);   
+      var unique_langs = stt.languages.filter(onlyUnique);   
 
       unique_langs.forEach(function(l) {
         var selectedText = '';
-        if (language_selected === l) {
+        if (stt.language_selected === l) {
           selectedText = 'selected="selected"';
         }
         $('select#node-input-lang')
@@ -260,7 +258,7 @@
                         + '"' + l + '"'
                         + selectedText
                         + '>'
-                        + (LANGUAGES[l] ? LANGUAGES[l] : l)  
+                        + (stt.LANGUAGES[l] ? stt.LANGUAGES[l] : l)  
                         + '</option>');               
       });
 
@@ -281,11 +279,11 @@
   // So hidden (text) fields are being used to squirrel away the values, so that
   // they can be restored.
   function restoreFromHidden() {
-    language_selected = $('#node-input-langhidden').val();    
-    $('select#node-input-lang').val(language_selected);
+    stt.language_selected = $('#node-input-langhidden').val();    
+    $('select#node-input-lang').val(stt.language_selected);
 
-    band_selected = $('#node-input-bandhidden').val();    
-    $('select#node-input-band').val(band_selected);
+    stt.band_selected = $('#node-input-bandhidden').val();    
+    $('select#node-input-band').val(stt.band_selected);
   }  
 
   // This is the on edit prepare function, which will be invoked everytime the dialog
@@ -313,8 +311,8 @@
 
   // Save the values in the dyanmic lists to the hidden fields.
   function oneditsave(){
-    $('#node-input-langhidden').val(language_selected); 
-    $('#node-input-bandhidden').val(band_selected); 
+    $('#node-input-langhidden').val(stt.language_selected); 
+    $('#node-input-bandhidden').val(stt.band_selected); 
   }
 
     (function() {
