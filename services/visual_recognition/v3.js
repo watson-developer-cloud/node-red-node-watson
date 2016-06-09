@@ -250,7 +250,8 @@ module.exports = function (RED) {
 
         if (err != null && body==null)
         {
-          node.status({fill:'red', shape:'ring', text:'call to watson visual recognition v3 service failed'}); 
+          node.status({fill:'red', shape:'ring', 
+            text:'call to watson visual recognition v3 service failed'}); 
           msg.result = {};
           msg.result['error_code']= err.code;
           if (!err.error)
