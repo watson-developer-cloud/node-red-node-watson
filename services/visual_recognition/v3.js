@@ -99,7 +99,7 @@ module.exports = function (RED) {
                 node.error(err, msg);
                 console.log('Error with the removal of classifier_id '
                   +parms.classifier_id +' : ' +  err);
-                cb('error');
+                return cb('error');
               } else {
                 console.log('Classifier ID '+ aClassifier.classifier_id 
                   + ' deleted successfully.');
@@ -321,7 +321,7 @@ module.exports = function (RED) {
                                    text:'unable to open image stream'});          
                       var message ='Node has been unable to open the image stream'; 
                       node.error(message, msg);
-                      callback('open error on '+prop);
+                      return callback('open error on '+prop);
                     }  
                     stream_buffer(info.path, msg.params[prop], function () {
                       listParams[prop]=fs.createReadStream(info.path);
