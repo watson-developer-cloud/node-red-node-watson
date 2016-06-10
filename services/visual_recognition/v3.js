@@ -66,19 +66,17 @@ module.exports = function (RED) {
   }
 
   function verifyInputs(feature, node, msg) {
-    var message='', b=true;
     switch(feature) {
     case 'classifyImage':
     case 'detectFaces':
     case 'recognizeText':
       if (typeof msg.payload === 'boolean' || typeof msg.payload === 'number') {
         this.status({fill:'red', shape:'ring', text:'bad format payload'}); 
-        message = 'Bad format : msg.payload must be a URL string or a Node.js Buffer';
-        node.error(message, msg);
+        node.error('Bad format : msg.payload must be a URL string or a Node.js Buffer', msg);
         return false;
       }
     }
-    return b;
+    return true;
   }
 
   function verifyServiceCredentials(node, msg) {
@@ -143,15 +141,12 @@ module.exports = function (RED) {
 }
 
 function prepareParamsCommon(params, node, msg, cb) {
-  var message;
   if (imageCheck(msg.payload)) {
-    // process 1,2,3 in buffer mode
     temp.open({suffix: '.' + fileType(msg.payload).ext}, function (err, info) {
       if (err) {
         this.status({fill:'red', shape:'ring', text:'unable to open image stream'});          
-        message ='Node has been unable to open the image stream'; 
-        node.error(message, msg);
-        return;        
+        node.error('Node has been unable to open the image stream', msg);
+        return cb();
       }  
       stream_buffer(info.path, msg.payload, function () {
         params['images_file'] = fs.createReadStream(info.path);
@@ -163,7 +158,7 @@ function prepareParamsCommon(params, node, msg, cb) {
           params['threshold']=msg.params['threshold'];
         cb();
         });
-      }); // temp.open
+      }); 
   } else if (urlCheck(msg.payload)) {
     params['url'] = msg.payload;
     if (msg.params != null && msg.params.classifier_ids != null)
@@ -172,66 +167,55 @@ function prepareParamsCommon(params, node, msg, cb) {
       params['owners']=msg.params['owners'];
     if (msg.params != null && msg.params.threshold != null)
       params['threshold']=msg.params['threshold'];
-    return cb();
+    cb();
   } else {
-    console.log('else');
     node.status({fill:'red', shape:'ring', text:'payload is invalid'});          
-    message ='Payload must be either an image buffer or a string representing a url'; 
-    node.error(message, msg);
-    return;
+    node.error('Payload must be either an image buffer or a string representing a url', msg);
   }
 }
 
 
+function addTask (asyncTasks, msg, key, listParams, node) {
+   asyncTasks.push(function (callback) {
+      var buffer = msg.params[key];
+      temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
+        if (err) {
+          node.status({fill:'red', shape:'ring', 
+                       text:'unable to open image stream'});          
+          node.error('Node has been unable to open the image stream', msg);
+          return callback('open error on '+key);
+        }  
+        stream_buffer(info.path, msg.params[key], function () {
+          listParams[key]=fs.createReadStream(info.path);
+          callback(null, key);
+        });
+      });
+  });
+}
+
 function prepareParamsCreateClassifier (params, node, msg, cb) {
-  var listParams = {}, asyncTasks = [], prop = null;
-  for (var k in msg.params) {
-    prop = k;
-    if (prop.indexOf('_examples')>=0)
+  var listParams = {}, asyncTasks = [] ;
+  for (var key in msg.params) {
+    if (key.indexOf('_examples')>=0)
     {
-      // before pushing the function into the task array wrap the push 
-      // in an IIFE function, passing in the 'prop' parameter
-      (function(prop, listParams, msg) {
-
-       asyncTasks.push(function (callback) {
-          var buffer = msg.params[prop];
-          temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
-            if (err) {
-              this.status({fill:'red', shape:'ring', 
-                           text:'unable to open image stream'});          
-              var message ='Node has been unable to open the image stream'; 
-              node.error(message, msg);
-              return callback('open error on '+prop);
-            }  
-            stream_buffer(info.path, msg.params[prop], function () {
-              listParams[prop]=fs.createReadStream(info.path);
-              callback(null, prop);
-            });
-          }); // temp.open
-      }); // asyncTasks.push
-
-      })(prop, listParams, msg);
-
-    } else if (prop==='name') {
-      listParams[prop]=msg.params[prop];
+      addTask(asyncTasks, msg, key, listParams, node);
+    } else if (key==='name') {
+      listParams[key]=msg.params[key];
     }
   } // for
   async.parallel(asyncTasks, function(error, results){
-    // when all temp local copies are ready, 
-    // copy of all parameters and request to watson api
     if (error)
     {
       console.log('createClassifier ended with error ' + error);
       throw error;
     }
-    for (p in listParams)
+    for (var p in listParams)
       params[p]=listParams[p];
     cb();
   });
   }
 
   function performDeleteAllClassifiers(params, node, msg) {
-    //var params = {};
     node.service.listClassifiers(params, function(err, body) {
       node.status({});
       if (err) {
@@ -269,14 +253,14 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
             msg.result = 'All custom classifiers have been deleted.';
           } else {
             msg.payload='see msg.result.error';
-            msg.result = 'Some Classifiers could have not been deleted;'
-            +'See log for errors.';
+            msg.result = 'Some Classifiers could have not been deleted;'+
+            'See log for errors.';
           }
           node.send(msg);
           node.status({});           
         });
-        } // else
-    }); // list classifiers
+        }
+    }); 
   }  // delete all func 
 
   function executeService(feature, params, node, msg) {
@@ -337,7 +321,9 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
   function WatsonVisualRecognitionV3Node (config) {
     var node = this, b=false, feature = config['image-feature'];
     RED.nodes.createNode(this, config);
-    node.on('input', function (msg) {      
+
+    node.on('input', function (msg) {    
+      var params = {}  ;
       node.status({});
       // so there is at most 1 temp file at a time (did not found a better solution...)
       temp.cleanup(); 
