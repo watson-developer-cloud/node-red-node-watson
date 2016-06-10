@@ -288,7 +288,10 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
     }); // list classifiers
   }  // delete all func 
 
-  function executeService(feature, params, node, msg) {
+  function executeService(inputs, node, msg) {
+    var params = inputs.params;
+    var feature = inputs.feature;
+
     node.status({fill:'blue', shape:'dot', text:'Calling '+ feature + ' ...'});
     switch(feature) {
       case 'classifyImage':
@@ -353,7 +356,8 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
     var feature = config['image-feature'];
     RED.nodes.createNode(this, config);
     node.on('input', function (msg) {
-      var params = {};
+      var inputs= {};
+      
       node.status({});
       // so there is at most 1 temp file at a time (did not found a better solution...)
       temp.cleanup(); 
@@ -364,7 +368,9 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
       if (!b) {return;}
       b=verifyServiceCredentials(node, msg);
       if (!b) {return;}
-      executeService(feature,params,node,msg);
+      inputs.params = {};
+      inputs.feature = feature; 
+      executeService(inputs,node,msg);
   });
 }
   
