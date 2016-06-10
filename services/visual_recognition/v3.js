@@ -115,14 +115,11 @@ module.exports = function (RED) {
       return;
     } else if (err == null && body != null && body.images != null && 
       body.images[0].error) {
-      var errDesc = body.images[0].error.description;
-      var errId = body.images[0].error.error_id;
       node.status({fill:'red', shape:'ring', 
                    text:'call to watson visual recognition v3 service failed'}); 
       msg.result = {};
-      msg.result['error_id']= errId;
-      msg.result['error']= errDesc;
-      //console.log('Error:', errDesc);
+      msg.result['error_id']= body.images[0].error.error_id;
+      msg.result['error']= body.images[0].error.description;
       msg.payload='see msg.result.error';
       node.send(msg); 
     } else {
@@ -181,23 +178,23 @@ module.exports = function (RED) {
   function addTask (asyncTasks, msg, key, listParams, node) {
     asyncTasks.push(function (callback) {
       var buffer = msg.params[key];
-        temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
-          if (err) {
-            node.status({fill:'red', shape:'ring', 
-                         text:'unable to open image stream'});          
-            node.error('Node has been unable to open the image stream', msg);
-            return callback('open error on '+key);
-          }  
-          stream_buffer(info.path, msg.params[key], function () {
-            listParams[key]=fs.createReadStream(info.path);
-            callback(null, key);
-          });
+      temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
+        if (err) {
+          node.status({fill:'red', shape:'ring', 
+                       text:'unable to open image stream'});          
+          node.error('Node has been unable to open the image stream', msg);
+          return callback('open error on '+key);
+        }  
+        stream_buffer(info.path, msg.params[key], function () {
+          listParams[key]=fs.createReadStream(info.path);
+          callback(null, key);
         });
+      });
     });
   }
 
   function prepareParamsCreateClassifier (params, node, msg, cb) {
-    var listParams = {}, asyncTasks = [] ;
+    var listParams = {}, asyncTasks = [] , key=null;
     for (var key in msg.params) {
       if (key.indexOf('_examples')>=0) {
         addTask(asyncTasks, msg, key, listParams, node);
@@ -207,11 +204,12 @@ module.exports = function (RED) {
     } // for
     async.parallel(asyncTasks, function(error, results){
       if (error) {
-        console.log('createClassifier ended with error ' + error);
+        //console.log('createClassifier ended with error ' + error);
         throw error;
       }
-      for (p in listParams)
+      for (var p in listParams) {
         params[p]=listParams[p];
+      }
       cb();
     });
   }
@@ -225,10 +223,8 @@ module.exports = function (RED) {
         node.error(err, msg);   
       } else {
         // Array to hold async tasks
-        var asyncTasks, nbTodelete, nbdeleted;
-        asyncTasks = [];
+        var asyncTasks=[], nbTodelete=0, nbdeleted=0;
         nbTodelete = body.classifiers.length;
-        nbdeleted = 0;
         body.classifiers.forEach(function (aClassifier) {
           asyncTasks.push(function (cb) {
             var parms = {};
@@ -239,11 +235,10 @@ module.exports = function (RED) {
                 console.log('Error with the removal of classifier_id ' +
                   parms.classifier_id +' : ' + err);
                 return cb('error');
-              } else {
-                console.log('Classifier ID '+ aClassifier.classifier_id + 
-                  ' deleted successfully.');
-                nbdeleted++;
               }
+              console.log('Classifier ID '+ aClassifier.classifier_id + 
+                ' deleted successfully.');
+              nbdeleted++;
               cb(null,parms.classifier_id);
             });  
           });
@@ -260,7 +255,7 @@ module.exports = function (RED) {
           node.send(msg);
           node.status({});           
         });
-        }
+      }
     }); 
   }  // delete all func 
 
@@ -324,17 +319,23 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
 
     node.on('input', function (msg) {    
-      var params = {}  ;
+      var params = {};
       node.status({});
       // so there is at most 1 temp file at a time (did not found a better solution...)
       temp.cleanup(); 
 
       b=verifyPayload(node, msg);
-      if (!b) {return;}
+      if (!b) {
+        return;
+      }
       b=verifyInputs(node, msg);
-      if (!b) {return;}
+      if (!b) {
+        return;
+      }
       b=verifyServiceCredentials(node, msg);
-      if (!b) {return;}
+      if (!b) {
+        return;
+      }
       executeService(feature,params,node,msg);
     });
   }
@@ -345,7 +346,7 @@ module.exports = function (RED) {
     }
   });
 
-RED.nodes.registerType('visual-recognition-util-v3', WatsonVisualRecognitionV3Node, {
+  RED.nodes.registerType('visual-recognition-util-v3', WatsonVisualRecognitionV3Node, {
     credentials: {
       apikey: {type:'password'}
     }
