@@ -288,7 +288,7 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
     }); // list classifiers
   }  // delete all func 
 
-  function executeService(inputs, node, msg) {
+  function executeService(inputs, node) {
     var params = inputs.params;
     var feature = inputs.feature;
     var msg = inputs.msg;
@@ -371,8 +371,8 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
       if (!b) {return;}
       inputs.params = {};
       inputs.feature = feature;
-      inputs.msg=msg;
-      executeService(inputs,node,msg);
+      inputs.msg = msg;
+      executeService(inputs,node);
   });
 }
   
