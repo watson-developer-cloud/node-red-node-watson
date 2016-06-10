@@ -16,14 +16,14 @@
 
 module.exports = function (RED) {
   var cfenv = require('cfenv'),
-      watson = require('watson-developer-cloud'),
-      imageType = require('image-type'),
-      url = require('url'),
-      temp = require('temp'),
-      fileType = require('file-type'),
-      fs = require('fs'),
-      async = require('async'),
-      apikey, sAPIKey, service;
+    watson = require('watson-developer-cloud'),
+    imageType = require('image-type'),
+    url = require('url'),
+    temp = require('temp'),
+    fileType = require('file-type'),
+    fs = require('fs'),
+    async = require('async'),
+    apikey = null, sAPIKey=null, service=null;
 
   // temp is being used for file streaming to allow the file to arrive so it can be processed. 
   temp.track();
@@ -66,7 +66,7 @@ module.exports = function (RED) {
   }
 
   function verifyInputs(feature, node, msg) {
-    var message, b=true;
+    var message='', b=true;
     switch(feature) {
     case 'classifyImage':
     case 'detectFaces':
@@ -140,7 +140,7 @@ module.exports = function (RED) {
       node.send(msg); 
       node.status({});
     }
-  }
+}
 
 function prepareParamsCommon(params, node, msg, cb) {
   var message;
@@ -172,7 +172,7 @@ function prepareParamsCommon(params, node, msg, cb) {
       params['owners']=msg.params['owners'];
     if (msg.params != null && msg.params.threshold != null)
       params['threshold']=msg.params['threshold'];
-    cb();
+    return cb();
   } else {
     console.log('else');
     node.status({fill:'red', shape:'ring', text:'payload is invalid'});          
@@ -312,7 +312,7 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
       break;
     case 'retrieveClassifiersList':
       node.service.listClassifiers(params, function(err, body, other) {
-          processResponse(err,body,feature,node,msg);
+        processResponse(err,body,feature,node,msg);
       });
       break;
     case 'retrieveClassifierDetails':
@@ -335,7 +335,7 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
 
   // This is the Watson Visual Recognition V3 Node
   function WatsonVisualRecognitionV3Node (config) {
-    var node = this, b, feature = config['image-feature'];
+    var node = this, b=false, feature = config['image-feature'];
     RED.nodes.createNode(this, config);
     node.on('input', function (msg) {      
       node.status({});
