@@ -291,6 +291,7 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
   function executeService(inputs, node, msg) {
     var params = inputs.params;
     var feature = inputs.feature;
+    var msg = inputs.msg;
 
     node.status({fill:'blue', shape:'dot', text:'Calling '+ feature + ' ...'});
     switch(feature) {
@@ -369,7 +370,8 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
       b=verifyServiceCredentials(node, msg);
       if (!b) {return;}
       inputs.params = {};
-      inputs.feature = feature; 
+      inputs.feature = feature;
+      inputs.msg=msg;
       executeService(inputs,node,msg);
   });
 }
