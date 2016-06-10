@@ -15,22 +15,20 @@
  **/
 
 module.exports = function (RED) {
-  var cfenv = require('cfenv');
-  var watson = require('watson-developer-cloud');
-
-  var imageType = require('image-type');
-  var url = require('url');
-  var temp = require('temp');
-  var fileType = require('file-type');
-  var fs = require('fs');
-  var async = require('async');
+  var cfenv = require('cfenv'),
+      watson = require('watson-developer-cloud'),
+      imageType = require('image-type'),
+      url = require('url'),
+      temp = require('temp'),
+      fileType = require('file-type'),
+      fs = require('fs'),
+      async = require('async'),
+      apikey, sAPIKey, service;
 
   // temp is being used for file streaming to allow the file to arrive so it can be processed. 
   temp.track();
 
-  var apikey, sAPIKey;
-
-  var service = cfenv.getAppEnv().getServiceCreds(/visual recognition/i);
+  service = cfenv.getAppEnv().getServiceCreds(/visual recognition/i);
 
   if (service) {
     sAPIKey = service.apikey;
@@ -68,42 +66,41 @@ module.exports = function (RED) {
   }
 
   function verifyInputs(feature, node, msg) {
-    var b=true;
+    var message, b=true;
     switch(feature) {
-      case 'classifyImage':
-      case 'detectFaces':
-      case 'recognizeText':
-        if (typeof msg.payload === 'boolean' || typeof msg.payload === 'number') {
-          this.status({fill:'red', shape:'ring', text:'bad format payload'}); 
-          var message = 'Bad format : msg.payload must be a URL string or a Node.js Buffer';
-          node.error(message, msg);
-          return false;
-        }
+    case 'classifyImage':
+    case 'detectFaces':
+    case 'recognizeText':
+      if (typeof msg.payload === 'boolean' || typeof msg.payload === 'number') {
+        this.status({fill:'red', shape:'ring', text:'bad format payload'}); 
+        message = 'Bad format : msg.payload must be a URL string or a Node.js Buffer';
+        node.error(message, msg);
+        return false;
+      }
     }
     return b;
   }
 
   function verifyServiceCredentials(node, msg) {
-      // If it is present the newly provided user entered key 
-      // takes precedence over the existing one. 
-      node.apikey = sAPIKey || node.credentials.apikey;
-      if (!node.apikey) {
-        node.status({fill:'red', shape:'ring', text:'missing credentials'});          
-        var message ='Missing Watson Visual Recognition API service credentials'; 
-        node.error(message, msg);
-        return false;
-      }
-      node.service = watson.visual_recognition({
-        api_key: node.apikey,
-        version: 'v3',
-        version_date: '2016-05-19'
-      });
-      return true;
+    // If it is present the newly provided user entered key 
+    // takes precedence over the existing one. 
+    node.apikey = sAPIKey || node.credentials.apikey;
+    if (!node.apikey) {
+      node.status({fill:'red', shape:'ring', text:'missing credentials'});          
+      var message ='Missing Watson Visual Recognition API service credentials'; 
+      node.error(message, msg);
+      return false;
+    }
+    node.service = watson.visual_recognition({
+      api_key: node.apikey,
+      version: 'v3',
+      version_date: '2016-05-19'
+    });
+    return true;
   }
 
 
   function processResponse(err, body, feature, node, msg) {
-    console.log('',err, body);
     if (err != null && body==null)
     {
       node.status({fill:'red', shape:'ring', 
@@ -120,10 +117,8 @@ module.exports = function (RED) {
       }
       node.error(err);
       return;
-    }
-    else if (err == null && body != null && body.images != null && 
-      body.images[0].error)
-    {
+    } else if (err == null && body != null && body.images != null && 
+      body.images[0].error) {
       var errDesc = body.images[0].error.description;
       var errId = body.images[0].error.error_id;
       node.status({fill:'red', shape:'ring', 
@@ -134,8 +129,7 @@ module.exports = function (RED) {
       console.log('Error:', errDesc);
       msg.payload='see msg.result.error';
       node.send(msg); 
-    }
-    else {
+    } else {
       if (feature === 'deleteClassifier')
       {
         msg.result = 'Successfully deleted classifier_id: '+ msg.params.classifier_id ;
@@ -173,12 +167,12 @@ function prepareParamsCommon(params, node, msg, cb) {
   } else if (urlCheck(msg.payload)) {
     params['url'] = msg.payload;
     if (msg.params != null && msg.params.classifier_ids != null)
-        params['classifier_ids']=msg.params['classifier_ids'];
+      params['classifier_ids']=msg.params['classifier_ids'];
     if (msg.params != null && msg.params.owners != null)
-        params['owners']=msg.params['owners'];
+      params['owners']=msg.params['owners'];
     if (msg.params != null && msg.params.threshold != null)
-        params['threshold']=msg.params['threshold'];
-      cb();
+      params['threshold']=msg.params['threshold'];
+    cb();
   } else {
     console.log('else');
     node.status({fill:'red', shape:'ring', text:'payload is invalid'});          
@@ -190,11 +184,8 @@ function prepareParamsCommon(params, node, msg, cb) {
 
 
 function prepareParamsCreateClassifier (params, node, msg, cb) {
-  var listParams = {};
-  var asyncTasks = [];
-  var prop = null;
-  for (var k in msg.params)
-  {
+  var listParams = {}, asyncTasks = [], prop = null;
+  for (var k in msg.params) {
     prop = k;
     if (prop.indexOf('_examples')>=0)
     {
@@ -260,12 +251,12 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
             node.service.deleteClassifier(parms, function(err, body) {
               if (err) {
                 node.error(err, msg);
-                console.log('Error with the removal of classifier_id '
-                  +parms.classifier_id +' : ' +  err);
+                console.log('Error with the removal of classifier_id ' +
+                  parms.classifier_id +' : ' + err);
                 return cb('error');
               } else {
-                console.log('Classifier ID '+ aClassifier.classifier_id 
-                  + ' deleted successfully.');
+                console.log('Classifier ID '+ aClassifier.classifier_id + 
+                  ' deleted successfully.');
                 nbdeleted++;
               }
               cb(null,parms.classifier_id);
@@ -288,77 +279,65 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
     }); // list classifiers
   }  // delete all func 
 
-  function executeService(inputs, node) {
-    var params = inputs.params;
-    var feature = inputs.feature;
-    var msg = inputs.msg;
-
+  function executeService(feature, params, node, msg) {
     node.status({fill:'blue', shape:'dot', text:'Calling '+ feature + ' ...'});
     switch(feature) {
-      case 'classifyImage':
-        prepareParamsCommon(params, node, msg, function () {
-          node.service.classify(params, function(err, body, other) {
-            processResponse(err,body,feature,node,msg);
-          });
+    case 'classifyImage':
+      prepareParamsCommon(params, node, msg, function () {
+        node.service.classify(params, function(err, body, other) {
+          processResponse(err,body,feature,node,msg);
         });
-        break;
-      case 'detectFaces':
-        prepareParamsCommon(params, node, msg, function () {
-          node.service.detectFaces(params, function(err, body, other) {
-            processResponse(err,body,feature,node,msg);
-          });
+      });
+      break;
+    case 'detectFaces':
+      prepareParamsCommon(params, node, msg, function () {
+        node.service.detectFaces(params, function(err, body, other) {
+          processResponse(err,body,feature,node,msg);
         });
-        break;
-      case 'recognizeText':
-        prepareParamsCommon(params, node, msg, function () {
-          node.service.recognizeText(params, function(err, body, other) {
-            processResponse(err,body,feature,node,msg);
-          });
+      });
+      break;
+    case 'recognizeText':
+      prepareParamsCommon(params, node, msg, function () {
+        node.service.recognizeText(params, function(err, body, other) {
+          processResponse(err,body,feature,node,msg);
         });
-        break;
-      case 'createClassifier':
-        prepareParamsCreateClassifier(params, node, msg, function () {
-          node.service.createClassifier(params, function(err, body, other) {
-            processResponse(err,body,feature,node,msg);
-          });
+      });
+      break;
+    case 'createClassifier':
+      prepareParamsCreateClassifier(params, node, msg, function () {
+        node.service.createClassifier(params, function(err, body, other) {
+          processResponse(err,body,feature,node,msg);
         });
-        break;
-      case 'retrieveClassifiersList':
-        node.service.listClassifiers(params, function(err, body, other) {
-            processResponse(err,body,feature,node,msg);
-        });
-        break;
-      case 'retrieveClassifierDetails':
-        params['classifier_id']=msg.params['classifier_id'];
-        node.service.getClassifier(params, function(err, body, other) {
-            processResponse(err,body,feature,node,msg);
-        });
-        break;
-      case 'deleteClassifier':
-        params['classifier_id']=msg.params['classifier_id'];
-        node.service.deleteClassifier(params, function(err, body, other) {
-            processResponse(err,body,feature,node,msg);
-        });
-        break;
-      case 'deleteAllClassifiers':
-        performDeleteAllClassifiers(params,node, msg);
-        break;
+      });
+      break;
+    case 'retrieveClassifiersList':
+      node.service.listClassifiers(params, function(err, body, other) {
+          processResponse(err,body,feature,node,msg);
+      });
+      break;
+    case 'retrieveClassifierDetails':
+      params['classifier_id']=msg.params['classifier_id'];
+      node.service.getClassifier(params, function(err, body, other) {
+          processResponse(err,body,feature,node,msg);
+      });
+      break;
+    case 'deleteClassifier':
+      params['classifier_id']=msg.params['classifier_id'];
+      node.service.deleteClassifier(params, function(err, body, other) {
+          processResponse(err,body,feature,node,msg);
+      });
+      break;
+    case 'deleteAllClassifiers':
+      performDeleteAllClassifiers(params,node, msg);
+      break;
     }
   }
 
-
-
-
-
   // This is the Watson Visual Recognition V3 Node
   function WatsonVisualRecognitionV3Node (config) {
-    var node = this;
-    var b;
-    var feature = config['image-feature'];
+    var node = this, b, feature = config['image-feature'];
     RED.nodes.createNode(this, config);
-    node.on('input', function (msg) {
-      var inputs= {};
-      
+    node.on('input', function (msg) {      
       node.status({});
       // so there is at most 1 temp file at a time (did not found a better solution...)
       temp.cleanup(); 
@@ -369,10 +348,7 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
       if (!b) {return;}
       b=verifyServiceCredentials(node, msg);
       if (!b) {return;}
-      inputs.params = {};
-      inputs.feature = feature;
-      inputs.msg = msg;
-      executeService(inputs,node);
+      executeService(feature,params,node,msg);
   });
 }
   
