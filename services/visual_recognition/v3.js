@@ -61,8 +61,7 @@ module.exports = function (RED) {
   function verifyPayload(node, msg) {
     if (!msg.payload) {
       this.status({fill:'red', shape:'ring', text:'missing payload'}); 
-      message = 'Missing property: msg.payload';
-      node.error(message, msg);
+      node.error('Missing property: msg.payload', msg);
       return false;
     }
     return true;
@@ -103,7 +102,8 @@ module.exports = function (RED) {
   }
 
 
-  function processResponse(err, body, other, feature, node, msg) {
+  function processResponse(err, body, feature, node, msg) {
+    console.log('',err, body);
     if (err != null && body==null)
     {
       node.status({fill:'red', shape:'ring', 
@@ -147,62 +147,6 @@ module.exports = function (RED) {
       node.status({});
     }
   }
-
-
-  function executeService(feature, params, node, msg) {
-    node.status({fill:'blue', shape:'dot', text:'Calling '+ feature + ' ...'});
-    switch(feature) {
-      case 'classifyImage':
-        prepareParamsCommon(params, node, msg, function () {
-          node.service.classify(params, function(err, body, other) {
-            processResponse(err,body,other, feature, node, msg);
-          });
-        });
-        break;
-      case 'detectFaces':
-        prepareParamsCommon(params, node, msg, function () {
-          node.service.detectFaces(params, function(err, body, other) {
-            processResponse(err,body,other, feature, node, msg);
-          });
-        });
-        break;
-      case 'recognizeText':
-        prepareParamsCommon(params, node, msg, function () {
-          node.service.recognizeText(params, function(err, body, other) {
-            processResponse(err,body,other, feature, node, msg);
-          });
-        });
-        break;
-      case 'createClassifier':
-        prepareParamsCreateClassifier(params, node, msg, function () {
-          node.service.createClassifier(params, function(err, body, other) {
-            processResponse(err,body,other, feature, node, msg);
-          });
-        });
-        break;
-      case 'retrieveClassifiersList':
-        node.service.listClassifiers(params, function(err, body, other) {
-            processResponse(err,body,other, feature, node, msg);
-        });
-        break;
-      case 'retrieveClassifierDetails':
-        params['classifier_id']=msg.params['classifier_id'];
-        node.service.getClassifier(params, function(err, body, other) {
-            processResponse(err,body,other, feature, node, msg);
-        });
-        break;
-      case 'deleteClassifier':
-        params['classifier_id']=msg.params['classifier_id'];
-        node.service.deleteClassifier(params, function(err, body, other) {
-            processResponse(err,body,other, feature, node, msg);
-        });
-        break;
-      case 'deleteAllClassifiers':
-        performDeleteAllClassifiers(params,node, msg);
-        break;
-    }
-  }
-
 
 function prepareParamsCommon(params, node, msg, cb) {
   var message;
@@ -342,7 +286,64 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
         });
         } // else
     }); // list classifiers
-}  // delete all func 
+  }  // delete all func 
+
+  function executeService(feature, params, node, msg) {
+    node.status({fill:'blue', shape:'dot', text:'Calling '+ feature + ' ...'});
+    switch(feature) {
+      case 'classifyImage':
+        prepareParamsCommon(params, node, msg, function () {
+          node.service.classify(params, function(err, body, other) {
+            processResponse(err,body,feature,node,msg);
+          });
+        });
+        break;
+      case 'detectFaces':
+        prepareParamsCommon(params, node, msg, function () {
+          node.service.detectFaces(params, function(err, body, other) {
+            processResponse(err,body,feature,node,msg);
+          });
+        });
+        break;
+      case 'recognizeText':
+        prepareParamsCommon(params, node, msg, function () {
+          node.service.recognizeText(params, function(err, body, other) {
+            processResponse(err,body,feature,node,msg);
+          });
+        });
+        break;
+      case 'createClassifier':
+        prepareParamsCreateClassifier(params, node, msg, function () {
+          node.service.createClassifier(params, function(err, body, other) {
+            processResponse(err,body,feature,node,msg);
+          });
+        });
+        break;
+      case 'retrieveClassifiersList':
+        node.service.listClassifiers(params, function(err, body, other) {
+            processResponse(err,body,feature,node,msg);
+        });
+        break;
+      case 'retrieveClassifierDetails':
+        params['classifier_id']=msg.params['classifier_id'];
+        node.service.getClassifier(params, function(err, body, other) {
+            processResponse(err,body,feature,node,msg);
+        });
+        break;
+      case 'deleteClassifier':
+        params['classifier_id']=msg.params['classifier_id'];
+        node.service.deleteClassifier(params, function(err, body, other) {
+            processResponse(err,body,feature,node,msg);
+        });
+        break;
+      case 'deleteAllClassifiers':
+        performDeleteAllClassifiers(params,node, msg);
+        break;
+    }
+  }
+
+
+
 
 
   // This is the Watson Visual Recognition V3 Node
@@ -363,7 +364,7 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
       if (!b) {return;}
       b=verifyServiceCredentials(node, msg);
       if (!b) {return;}
-      executeService(feature, params, node, msg);
+      executeService(feature,params,node,msg);
   });
 }
   
