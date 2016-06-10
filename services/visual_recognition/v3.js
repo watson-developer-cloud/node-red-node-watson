@@ -99,13 +99,11 @@ module.exports = function (RED) {
 
 
   function processResponse(err, body, feature, node, msg) {
-    if (err != null && body==null)
-    {
+    if (err != null && body==null) {
       node.status({fill:'red', shape:'ring', 
         text:'call to watson visual recognition v3 service failed'}); 
       msg.result = {};
-      if (err.code==null)
-      {
+      if (err.code==null) {
         msg.result['error']=err;
       } else {
         msg.result['error_code']= err.code;
@@ -124,12 +122,11 @@ module.exports = function (RED) {
       msg.result = {};
       msg.result['error_id']= errId;
       msg.result['error']= errDesc;
-      console.log('Error:', errDesc);
+      //console.log('Error:', errDesc);
       msg.payload='see msg.result.error';
       node.send(msg); 
     } else {
-      if (feature === 'deleteClassifier')
-      {
+      if (feature === 'deleteClassifier') {
         msg.result = 'Successfully deleted classifier_id: '+ msg.params.classifier_id ;
       } else {
         msg.result = body;
@@ -138,81 +135,85 @@ module.exports = function (RED) {
       node.send(msg); 
       node.status({});
     }
-}
-
-function prepareParamsCommon(params, node, msg, cb) {
-  if (imageCheck(msg.payload)) {
-    temp.open({suffix: '.' + fileType(msg.payload).ext}, function (err, info) {
-      if (err) {
-        this.status({fill:'red', shape:'ring', text:'unable to open image stream'});          
-        node.error('Node has been unable to open the image stream', msg);
-        return cb();
-      }  
-      stream_buffer(info.path, msg.payload, function () {
-        params['images_file'] = fs.createReadStream(info.path);
-        if (msg.params != null && msg.params.classifier_ids != null)
-          params['classifier_ids']=msg.params['classifier_ids'];
-        if (msg.params != null && msg.params.owners != null)
-          params['owners']=msg.params['owners'];
-        if (msg.params != null && msg.params.threshold != null)
-          params['threshold']=msg.params['threshold'];
-        cb();
-        });
-      }); 
-  } else if (urlCheck(msg.payload)) {
-    params['url'] = msg.payload;
-    if (msg.params != null && msg.params.classifier_ids != null)
-      params['classifier_ids']=msg.params['classifier_ids'];
-    if (msg.params != null && msg.params.owners != null)
-      params['owners']=msg.params['owners'];
-    if (msg.params != null && msg.params.threshold != null)
-      params['threshold']=msg.params['threshold'];
-    cb();
-  } else {
-    node.status({fill:'red', shape:'ring', text:'payload is invalid'});          
-    node.error('Payload must be either an image buffer or a string representing a url', msg);
   }
-}
 
-
-function addTask (asyncTasks, msg, key, listParams, node) {
-   asyncTasks.push(function (callback) {
-      var buffer = msg.params[key];
-      temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
+  function prepareParamsCommon(params, node, msg, cb) {
+    if (imageCheck(msg.payload)) {
+      temp.open({suffix: '.' + fileType(msg.payload).ext}, function (err, info) {
         if (err) {
-          node.status({fill:'red', shape:'ring', 
-                       text:'unable to open image stream'});          
+          this.status({fill:'red', shape:'ring', text:'unable to open image stream'});          
           node.error('Node has been unable to open the image stream', msg);
-          return callback('open error on '+key);
+          return cb();
         }  
-        stream_buffer(info.path, msg.params[key], function () {
-          listParams[key]=fs.createReadStream(info.path);
-          callback(null, key);
-        });
-      });
-  });
-}
+        stream_buffer(info.path, msg.payload, function () {
+          params['images_file'] = fs.createReadStream(info.path);
+          if (msg.params != null && msg.params.classifier_ids != null) {
+            params['classifier_ids']=msg.params['classifier_ids'];
+          }
+          if (msg.params != null && msg.params.owners != null) {
+            params['owners']=msg.params['owners'];
+          }
+          if (msg.params != null && msg.params.threshold != null) {
+            params['threshold']=msg.params['threshold'];
+          }
+          cb();
+          });
+        }); 
+    } else if (urlCheck(msg.payload)) {
+      params['url'] = msg.payload;
+      if (msg.params != null && msg.params.classifier_ids != null) {
+        params['classifier_ids']=msg.params['classifier_ids'];
+      }
+      if (msg.params != null && msg.params.owners != null) {
+        params['owners']=msg.params['owners'];
+      }
+      if (msg.params != null && msg.params.threshold != null) {
+        params['threshold']=msg.params['threshold'];
+      }
+      return cb();
+    } else {
+      node.status({fill:'red', shape:'ring', text:'payload is invalid'});          
+      node.error('Payload must be either an image buffer or a string representing a url', msg);
+    }
+  }
 
-function prepareParamsCreateClassifier (params, node, msg, cb) {
-  var listParams = {}, asyncTasks = [] ;
-  for (var key in msg.params) {
-    if (key.indexOf('_examples')>=0)
-    {
-      addTask(asyncTasks, msg, key, listParams, node);
-    } else if (key==='name') {
-      listParams[key]=msg.params[key];
-    }
-  } // for
-  async.parallel(asyncTasks, function(error, results){
-    if (error)
-    {
-      console.log('createClassifier ended with error ' + error);
-      throw error;
-    }
-    for (var p in listParams)
-      params[p]=listParams[p];
-    cb();
-  });
+
+  function addTask (asyncTasks, msg, key, listParams, node) {
+    asyncTasks.push(function (callback) {
+      var buffer = msg.params[key];
+        temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
+          if (err) {
+            node.status({fill:'red', shape:'ring', 
+                         text:'unable to open image stream'});          
+            node.error('Node has been unable to open the image stream', msg);
+            return callback('open error on '+key);
+          }  
+          stream_buffer(info.path, msg.params[key], function () {
+            listParams[key]=fs.createReadStream(info.path);
+            callback(null, key);
+          });
+        });
+    });
+  }
+
+  function prepareParamsCreateClassifier (params, node, msg, cb) {
+    var listParams = {}, asyncTasks = [] ;
+    for (var key in msg.params) {
+      if (key.indexOf('_examples')>=0) {
+        addTask(asyncTasks, msg, key, listParams, node);
+      } else if (key==='name') {
+        listParams[key]=msg.params[key];
+      }
+    } // for
+    async.parallel(asyncTasks, function(error, results){
+      if (error) {
+        console.log('createClassifier ended with error ' + error);
+        throw error;
+      }
+      for (p in listParams)
+        params[p]=listParams[p];
+      cb();
+    });
   }
 
   function performDeleteAllClassifiers(params, node, msg) {
@@ -335,8 +336,8 @@ function prepareParamsCreateClassifier (params, node, msg, cb) {
       b=verifyServiceCredentials(node, msg);
       if (!b) {return;}
       executeService(feature,params,node,msg);
-  });
-}
+    });
+  }
   
   RED.nodes.registerType('visual-recognition-v3', WatsonVisualRecognitionV3Node, {
     credentials: {
