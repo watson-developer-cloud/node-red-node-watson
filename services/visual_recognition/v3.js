@@ -214,7 +214,6 @@ module.exports = function (RED) {
           params[p] = listParams[p];
         }
       }
-      console.log('params', params);
       cb();
     });
   }
