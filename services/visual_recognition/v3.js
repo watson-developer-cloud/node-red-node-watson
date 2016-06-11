@@ -203,12 +203,14 @@ module.exports = function (RED) {
         listParams[k] = msg.params[k];
       }
     } 
+
     async.parallel(asyncTasks, function(error){
       if (error) {
         throw error;
       }
+
       for (var p in listParams) {
-        if (!p) {
+        if (p != null) {
           params[p] = listParams[p];
         }
       }
