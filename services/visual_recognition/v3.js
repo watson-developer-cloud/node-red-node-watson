@@ -304,7 +304,7 @@ module.exports = function (RED) {
     case 'retrieveClassifierDetails':
       params['classifier_id']=msg.params['classifier_id'];
       node.service.getClassifier(params, function(err, body, other) {
-          processResponse(err,body,feature,node,msg);
+        processResponse(err,body,feature,node,msg);
       });
       break;
     case 'deleteClassifier':
