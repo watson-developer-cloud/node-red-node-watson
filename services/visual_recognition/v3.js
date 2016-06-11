@@ -23,7 +23,7 @@ module.exports = function (RED) {
     fileType = require('file-type'),
     fs = require('fs'),
     async = require('async'),
-    apikey = null, sAPIKey=null, service=null;
+    sAPIKey=null, service=null;
 
   // temp is being used for file streaming to allow the file to arrive so it can be processed. 
   temp.track();
@@ -85,7 +85,8 @@ module.exports = function (RED) {
     node.apikey = sAPIKey || node.credentials.apikey;
     if (!node.apikey) {
       node.status({fill:'red', shape:'ring', text:'missing credentials'});          
-      var message ='Missing Watson Visual Recognition API service credentials'; 
+      var message ='Missing Watson Visual Recognition API service credentials';
+
       node.error(message, msg);
       return false;
     }
@@ -99,16 +100,16 @@ module.exports = function (RED) {
 
 
   function processResponse(err, body, feature, node, msg) {
-    if (err != null && body==null) {
+    if (err != null && body == null) {
       node.status({fill:'red', shape:'ring', 
         text:'call to watson visual recognition v3 service failed'}); 
       msg.result = {};
-      if (err.code==null) {
+      if (err.code == null) {
         msg.result['error']=err;
       } else {
-        msg.result['error_code']= err.code;
+        msg.result['error_code'] = err.code;
         if (!err.error) {
-          msg.result['error']= err.error;
+          msg.result['error'] = err.error;
         }        
       }
       node.error(err);
@@ -118,17 +119,17 @@ module.exports = function (RED) {
       node.status({fill:'red', shape:'ring', 
                    text:'call to watson visual recognition v3 service failed'}); 
       msg.result = {};
-      msg.result['error_id']= body.images[0].error.error_id;
-      msg.result['error']= body.images[0].error.description;
-      msg.payload='see msg.result.error';
+      msg.result['error_id'] = body.images[0].error.error_id;
+      msg.result['error'] = body.images[0].error.description;
+      msg.payload = 'see msg.result.error';
       node.send(msg); 
     } else {
       if (feature === 'deleteClassifier') {
-        msg.result = 'Successfully deleted classifier_id: '+ msg.params.classifier_id ;
+        msg.result = 'Successfully deleted classifier_id: ' + msg.params.classifier_id ;
       } else {
         msg.result = body;
       }
-      msg.payload='see msg.result'; // to remove any Buffer that could remains
+      msg.payload = 'see msg.result'; // to remove any Buffer that could remains
       node.send(msg); 
       node.status({});
     }
@@ -145,13 +146,13 @@ module.exports = function (RED) {
         stream_buffer(info.path, msg.payload, function () {
           params['images_file'] = fs.createReadStream(info.path);
           if (msg.params != null && msg.params.classifier_ids != null) {
-            params['classifier_ids']=msg.params['classifier_ids'];
+            params['classifier_ids'] = msg.params['classifier_ids'];
           }
           if (msg.params != null && msg.params.owners != null) {
-            params['owners']=msg.params['owners'];
+            params['owners'] = msg.params['owners'];
           }
           if (msg.params != null && msg.params.threshold != null) {
-            params['threshold']=msg.params['threshold'];
+            params['threshold'] = msg.params['threshold'];
           }
           cb();
         });
@@ -159,13 +160,13 @@ module.exports = function (RED) {
     } else if (urlCheck(msg.payload)) {
       params['url'] = msg.payload;
       if (msg.params != null && msg.params.classifier_ids != null) {
-        params['classifier_ids']=msg.params['classifier_ids'];
+        params['classifier_ids'] = msg.params['classifier_ids'];
       }
       if (msg.params != null && msg.params.owners != null) {
-        params['owners']=msg.params['owners'];
+        params['owners'] = msg.params['owners'];
       }
       if (msg.params != null && msg.params.threshold != null) {
-        params['threshold']=msg.params['threshold'];
+        params['threshold'] = msg.params['threshold'];
       }
       return cb();
     } else {
@@ -173,43 +174,42 @@ module.exports = function (RED) {
       node.error('Payload must be either an image buffer or a string representing a url', msg);
     }
   }
+  
 
-
-  function addTask (asyncTasks, msg, key, listParams, node) {
+  function addTask (asyncTasks, msg, k, listParams, node) {
     asyncTasks.push(function (callback) {
-      var buffer = msg.params[key];
+      var buffer = msg.params[k];
       temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
         if (err) {
           node.status({fill:'red', shape:'ring', 
                        text:'unable to open image stream'});          
           node.error('Node has been unable to open the image stream', msg);
-          return callback('open error on '+key);
+          return callback('open error on ' + k);
         }  
-        stream_buffer(info.path, msg.params[key], function () {
-          listParams[key]=fs.createReadStream(info.path);
-          callback(null, key);
+        stream_buffer(info.path, msg.params[k], function () {
+          listParams[k] = fs.createReadStream(info.path);
+          callback(null, k);
         });
       });
     });
   }
 
   function prepareParamsCreateClassifier (params, node, msg, cb) {
-    var listParams = {}, asyncTasks = [] , key=null;
-    for (key in msg.params) {
-      if (key.indexOf('_examples')>=0) {
-        addTask(asyncTasks, msg, key, listParams, node);
-      } else if (key==='name') {
-        listParams[key]=msg.params[key];
+    var listParams = {}, asyncTasks = [] , k = null;
+    for (k in msg.params) {
+      if (k.indexOf('_examples') >= 0) {
+        addTask(asyncTasks, msg, k, listParams, node);
+      } else if (k === 'name') {
+        listParams[k] = msg.params[k];
       }
-    } // for
-    async.parallel(asyncTasks, function(error, results){
+    } 
+    async.parallel(asyncTasks, function(error){
       if (error) {
-        //console.log('createClassifier ended with error ' + error);
         throw error;
       }
       for (var p in listParams) {
-        if (!p) { // for codacy
-          params[p]=listParams[p];
+        if (!p) {
+          params[p] = listParams[p];
         }
       }
       cb();
@@ -225,33 +225,30 @@ module.exports = function (RED) {
         node.error(err, msg);   
       } else {
         // Array to hold async tasks
-        var asyncTasks=[], nbTodelete=0, nbdeleted=0;
+        var asyncTasks = [], nbTodelete = 0, nbdeleted = 0;
         nbTodelete = body.classifiers.length;
         body.classifiers.forEach(function (aClassifier) {
           asyncTasks.push(function (cb) {
             var parms = {};
-            parms.classifier_id=aClassifier.classifier_id;
-            node.service.deleteClassifier(parms, function(err, body) {
+
+            parms.classifier_id = aClassifier.classifier_id;
+            node.service.deleteClassifier(parms, function(err) {
               if (err) {
                 node.error(err, msg);
-                //console.log('Error with the removal of classifier_id ' +
-                  //parms.classifier_id +' : ' + err);
                 return cb('error');
               }
-              //console.log('Classifier ID '+ aClassifier.classifier_id + 
-              //  ' deleted successfully.');
               nbdeleted++;
               cb(null,parms.classifier_id);
             });  
           });
         });      
         async.parallel(asyncTasks, function(error, deletedList){
-          if (deletedList.length===nbTodelete) {
-            msg.payload='see msg.result.error';
+          if (deletedList.length === nbTodelete) {
+            msg.payload = 'see msg.result.error';
             msg.result = 'All custom classifiers have been deleted.';
           } else {
-            msg.payload='see msg.result.error';
-            msg.result = 'Some Classifiers could have not been deleted;'+
+            msg.payload = 'see msg.result.error';
+            msg.result = 'Some Classifiers could have not been deleted;' +
             'See log for errors.';
           }
           node.send(msg);
@@ -259,27 +256,27 @@ module.exports = function (RED) {
         });
       }
     }); 
-  }  // delete all func 
+  }
 
   function executeService(feature, params, node, msg) {
     switch(feature) {
     case 'classifyImage':
       prepareParamsCommon(params, node, msg, function () {
-        node.service.classify(params, function(err, body, other) {
+        node.service.classify(params, function(err, body) {
           processResponse(err,body,feature,node,msg);
         });
       });
       break;
     case 'detectFaces':
       prepareParamsCommon(params, node, msg, function () {
-        node.service.detectFaces(params, function(err, body, other) {
+        node.service.detectFaces(params, function(err, body) {
           processResponse(err,body,feature,node,msg);
         });
       });
       break;
     case 'recognizeText':
       prepareParamsCommon(params, node, msg, function () {
-        node.service.recognizeText(params, function(err, body, other) {
+        node.service.recognizeText(params, function(err, body) {
           processResponse(err,body,feature,node,msg);
         });
       });
@@ -291,25 +288,25 @@ module.exports = function (RED) {
     switch(feature) {
     case 'createClassifier':
       prepareParamsCreateClassifier(params, node, msg, function () {
-        node.service.createClassifier(params, function(err, body, other) {
+        node.service.createClassifier(params, function(err, body) {
           processResponse(err,body,feature,node,msg);
         });
       });
       break;
     case 'retrieveClassifiersList':
-      node.service.listClassifiers(params, function(err, body, other) {
+      node.service.listClassifiers(params, function(err, body) {
         processResponse(err,body,feature,node,msg);
       });
       break;
     case 'retrieveClassifierDetails':
-      params['classifier_id']=msg.params['classifier_id'];
-      node.service.getClassifier(params, function(err, body, other) {
+      params['classifier_id'] = msg.params['classifier_id'];
+      node.service.getClassifier(params, function(err, body) {
         processResponse(err,body,feature,node,msg);
       });
       break;
     case 'deleteClassifier':
-      params['classifier_id']=msg.params['classifier_id'];
-      node.service.deleteClassifier(params, function(err, body, other) {
+      params['classifier_id'] = msg.params['classifier_id'];
+      node.service.deleteClassifier(params, function(err, body) {
         processResponse(err,body,feature,node,msg);
       });
       break;
@@ -320,8 +317,8 @@ module.exports = function (RED) {
   }
 
   function execute(feature, params, node, msg) {
-    node.status({fill:'blue', shape:'dot', text:'Calling '+ feature + ' ...'});
-    if (feature==='classifyImage'||feature==='detectFaces'||feature==='recognizeText') {
+    node.status({fill:'blue', shape:'dot' , text:'Calling ' + feature + ' ...'});
+    if (feature === 'classifyImage' || feature === 'detectFaces' || feature === 'recognizeText') {
       executeService(feature, params, node, msg);
     } else {
       executeUtilService(feature, params, node, msg);
@@ -330,24 +327,25 @@ module.exports = function (RED) {
 
   // This is the Watson Visual Recognition V3 Node
   function WatsonVisualRecognitionV3Node (config) {
-    var node = this, b=false, feature = config['image-feature'];
+    var node = this, b = false, feature = config['image-feature'];
     RED.nodes.createNode(this, config);
 
     node.on('input', function (msg) {    
       var params = {};
+
       node.status({});
       // so there is at most 1 temp file at a time (did not found a better solution...)
       temp.cleanup(); 
 
-      b=verifyPayload(node, msg);
+      b = verifyPayload(node, msg);
       if (!b) {
         return;
       }
-      b=verifyInputs(node, msg);
+      b = verifyInputs(node, msg);
       if (!b) {
         return;
       }
-      b=verifyServiceCredentials(node, msg);
+      b = verifyServiceCredentials(node, msg);
       if (!b) {
         return;
       }
