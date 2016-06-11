@@ -6,6 +6,7 @@ Node-RED Watson Nodes for IBM Bluemix
 ### New in version 0.4.5
 
 ### New in version 0.4.4
+- Visual Recognition v3 : added a Delete All Classifiers feature in the util node.
 - New palette category for deprecated Nodes, that are being retained for backward compatibity.
 - Bugfixes to Speech to Text.
 
