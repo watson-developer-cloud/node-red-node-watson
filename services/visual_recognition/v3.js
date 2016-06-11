@@ -310,7 +310,7 @@ module.exports = function (RED) {
     case 'deleteClassifier':
       params['classifier_id']=msg.params['classifier_id'];
       node.service.deleteClassifier(params, function(err, body, other) {
-          processResponse(err,body,feature,node,msg);
+        processResponse(err,body,feature,node,msg);
       });
       break;
     case 'deleteAllClassifiers':
