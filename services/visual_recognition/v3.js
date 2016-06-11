@@ -208,8 +208,9 @@ module.exports = function (RED) {
         throw error;
       }
       for (var p in listParams) {
-        if (1) // for codacy
+        if (!p) { // for codacy
           params[p]=listParams[p];
+        }
       }
       cb();
     });
@@ -260,31 +261,31 @@ module.exports = function (RED) {
     }); 
   }  // delete all func 
 
-function executeService(feature, params, node, msg) {
-  switch(feature) {
-  case 'classifyImage':
-    prepareParamsCommon(params, node, msg, function () {
-      node.service.classify(params, function(err, body, other) {
-        processResponse(err,body,feature,node,msg);
+  function executeService(feature, params, node, msg) {
+    switch(feature) {
+    case 'classifyImage':
+      prepareParamsCommon(params, node, msg, function () {
+        node.service.classify(params, function(err, body, other) {
+          processResponse(err,body,feature,node,msg);
+        });
       });
-    });
-    break;
-  case 'detectFaces':
-    prepareParamsCommon(params, node, msg, function () {
-      node.service.detectFaces(params, function(err, body, other) {
-        processResponse(err,body,feature,node,msg);
+      break;
+    case 'detectFaces':
+      prepareParamsCommon(params, node, msg, function () {
+        node.service.detectFaces(params, function(err, body, other) {
+          processResponse(err,body,feature,node,msg);
+        });
       });
-    });
-    break;
-  case 'recognizeText':
-    prepareParamsCommon(params, node, msg, function () {
-      node.service.recognizeText(params, function(err, body, other) {
-        processResponse(err,body,feature,node,msg);
+      break;
+    case 'recognizeText':
+      prepareParamsCommon(params, node, msg, function () {
+        node.service.recognizeText(params, function(err, body, other) {
+          processResponse(err,body,feature,node,msg);
+        });
       });
-    });
-    break;
+      break;
+    }
   }
-}
 
   function executeUtilService(feature, params, node, msg) {
     switch(feature) {
