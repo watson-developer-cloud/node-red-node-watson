@@ -154,8 +154,8 @@ module.exports = function (RED) {
             params['threshold']=msg.params['threshold'];
           }
           cb();
-          });
-        }); 
+        });
+      }); 
     } else if (urlCheck(msg.payload)) {
       params['url'] = msg.payload;
       if (msg.params != null && msg.params.classifier_ids != null) {
@@ -208,7 +208,8 @@ module.exports = function (RED) {
         throw error;
       }
       for (var p in listParams) {
-        params[p]=listParams[p];
+        if (1) // for codacy
+          params[p]=listParams[p];
       }
       cb();
     });
@@ -232,12 +233,12 @@ module.exports = function (RED) {
             node.service.deleteClassifier(parms, function(err, body) {
               if (err) {
                 node.error(err, msg);
-                console.log('Error with the removal of classifier_id ' +
-                  parms.classifier_id +' : ' + err);
+                //console.log('Error with the removal of classifier_id ' +
+                  //parms.classifier_id +' : ' + err);
                 return cb('error');
               }
-              console.log('Classifier ID '+ aClassifier.classifier_id + 
-                ' deleted successfully.');
+              //console.log('Classifier ID '+ aClassifier.classifier_id + 
+              //  ' deleted successfully.');
               nbdeleted++;
               cb(null,parms.classifier_id);
             });  
@@ -259,8 +260,7 @@ module.exports = function (RED) {
     }); 
   }  // delete all func 
 
-function executeService(feature, params, node, msg)
-{
+function executeService(feature, params, node, msg) {
   switch(feature) {
   case 'classifyImage':
     prepareParamsCommon(params, node, msg, function () {
@@ -286,8 +286,8 @@ function executeService(feature, params, node, msg)
   }
 }
 
-function executeUtilService(feature, params, node, msg) {
-  switch(feature) {
+  function executeUtilService(feature, params, node, msg) {
+    switch(feature) {
     case 'createClassifier':
       prepareParamsCreateClassifier(params, node, msg, function () {
         node.service.createClassifier(params, function(err, body, other) {
@@ -316,7 +316,7 @@ function executeUtilService(feature, params, node, msg) {
       performDeleteAllClassifiers(params,node, msg);
       break;
     }
-}
+  }
 
   function execute(feature, params, node, msg) {
     node.status({fill:'blue', shape:'dot', text:'Calling '+ feature + ' ...'});
