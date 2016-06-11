@@ -195,7 +195,7 @@ module.exports = function (RED) {
 
   function prepareParamsCreateClassifier (params, node, msg, cb) {
     var listParams = {}, asyncTasks = [] , key=null;
-    for (var key in msg.params) {
+    for (key in msg.params) {
       if (key.indexOf('_examples')>=0) {
         addTask(asyncTasks, msg, key, listParams, node);
       } else if (key==='name') {
@@ -259,30 +259,35 @@ module.exports = function (RED) {
     }); 
   }  // delete all func 
 
-  function executeService(feature, params, node, msg) {
-    node.status({fill:'blue', shape:'dot', text:'Calling '+ feature + ' ...'});
-    switch(feature) {
-    case 'classifyImage':
-      prepareParamsCommon(params, node, msg, function () {
-        node.service.classify(params, function(err, body, other) {
-          processResponse(err,body,feature,node,msg);
-        });
+function executeService(feature, params, node, msg)
+{
+  switch(feature) {
+  case 'classifyImage':
+    prepareParamsCommon(params, node, msg, function () {
+      node.service.classify(params, function(err, body, other) {
+        processResponse(err,body,feature,node,msg);
       });
-      break;
-    case 'detectFaces':
-      prepareParamsCommon(params, node, msg, function () {
-        node.service.detectFaces(params, function(err, body, other) {
-          processResponse(err,body,feature,node,msg);
-        });
+    });
+    break;
+  case 'detectFaces':
+    prepareParamsCommon(params, node, msg, function () {
+      node.service.detectFaces(params, function(err, body, other) {
+        processResponse(err,body,feature,node,msg);
       });
-      break;
-    case 'recognizeText':
-      prepareParamsCommon(params, node, msg, function () {
-        node.service.recognizeText(params, function(err, body, other) {
-          processResponse(err,body,feature,node,msg);
-        });
+    });
+    break;
+  case 'recognizeText':
+    prepareParamsCommon(params, node, msg, function () {
+      node.service.recognizeText(params, function(err, body, other) {
+        processResponse(err,body,feature,node,msg);
       });
-      break;
+    });
+    break;
+  }
+}
+
+function executeUtilService(feature, params, node, msg) {
+  switch(feature) {
     case 'createClassifier':
       prepareParamsCreateClassifier(params, node, msg, function () {
         node.service.createClassifier(params, function(err, body, other) {
@@ -311,6 +316,15 @@ module.exports = function (RED) {
       performDeleteAllClassifiers(params,node, msg);
       break;
     }
+}
+
+  function execute(feature, params, node, msg) {
+    node.status({fill:'blue', shape:'dot', text:'Calling '+ feature + ' ...'});
+    if (feature==='classifyImage'||feature==='detectFaces'||feature==='recognizeText') {
+      executeService(feature, params, node, msg);
+    } else {
+      executeUtilService(feature, params, node, msg);
+    }
   }
 
   // This is the Watson Visual Recognition V3 Node
@@ -336,7 +350,7 @@ module.exports = function (RED) {
       if (!b) {
         return;
       }
-      executeService(feature,params,node,msg);
+      execute(feature,params,node,msg);
     });
   }
   
