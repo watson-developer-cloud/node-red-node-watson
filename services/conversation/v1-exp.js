@@ -15,7 +15,7 @@
  **/
 
 module.exports = function (RED) {
-  var cfenv = require('cfenv'), watson = require('watson-developer-cloud'),
+  var cfenv = require('cfenv'), watson = require('watson-developer-cloud'), service = null,
   sUsername = null, sPassword = null;
   
   service = cfenv.getAppEnv().getServiceCreds(/conversation/i);
@@ -43,7 +43,7 @@ module.exports = function (RED) {
     // workspaceid can be either configured in the node, 
     // or sent into msg.params.workspace_id
     if (!config.workspaceid || '' !== config.workspaceid) {
-      node.workspaceid  = config.workspaceid;
+      node.workspaceid = config.workspaceid;
       return true;
     } else if (!msg.params || '' !== msg.params.workspace_id) {
       node.workspaceid = msg.params.workspace_id;
@@ -57,24 +57,24 @@ module.exports = function (RED) {
     // If it is present the newly provided user entered key 
     // takes precedence over the existing one. 
     //node.apikey = sAPIKey || node.credentials.apikey;
-    var username = sUsername || node.credentials.username;
-    var password = sPassword || node.credentials.password;
-    console.log('cred: ', username, password );
+    var userName = sUsername || node.credentials.username,
+    passWord = sPassword || node.credentials.password;
+    
     if (!username || !password) {
       node.status({fill:'red', shape:'ring', text:'missing credentials'});          
       node.error('Missing Watson Conversation API service credentials', msg);
       return false;
     }
     node.service = watson.conversation({
-      username: username,
-      password: password,
+      username: userName,
+      password: passWord,
       version_date: '2016-05-19',
       version: 'v1-experimental'
     });
     return true;
   }
 
-function processResponse(err, body, node, msg) {
+  function processResponse(err, body, node, msg) {
     if (err != null && body == null) {
       node.status({fill:'red', shape:'ring', 
         text:'call to watson conversation service failed'}); 
