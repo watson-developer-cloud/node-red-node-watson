@@ -16,7 +16,7 @@
 
 module.exports = function (RED) {
   var cfenv = require('cfenv'), watson = require('watson-developer-cloud'), service = null,
-  sUsername = null, sPassword = null;
+    sUsername = null, sPassword = null;
   
   service = cfenv.getAppEnv().getServiceCreds(/conversation/i);
 
@@ -58,9 +58,9 @@ module.exports = function (RED) {
     // takes precedence over the existing one. 
     //node.apikey = sAPIKey || node.credentials.apikey;
     var userName = sUsername || node.credentials.username,
-    passWord = sPassword || node.credentials.password;
+      passWord = sPassword || node.credentials.password;
     
-    if (!username || !password) {
+    if (!userName || !passWord) {
       node.status({fill:'red', shape:'ring', text:'missing credentials'});          
       node.error('Missing Watson Conversation API service credentials', msg);
       return false;
@@ -89,12 +89,11 @@ module.exports = function (RED) {
       }
       node.error(err);
       return;
-    } else {
-      msg.result = body;
-      msg.payload = 'see msg.result';
-      node.send(msg); 
-      node.status({});
     }
+    msg.result = body;
+    msg.payload = 'see msg.result';
+    node.send(msg); 
+    node.status({});
   }
 
   function execute(params, node, msg) {
