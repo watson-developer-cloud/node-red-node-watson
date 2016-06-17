@@ -37,6 +37,8 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
 
 - Concept Insights
     - Use concept graphs to tag and explore information and documents.
+- Conversation
+    - Add conversational capabilities into applications.
 - Dialog
     - Automate branching conversation between a user and your application.
     - Use natural language to automatically respond to user questions, cross-sell and up-sell, walk users through processes or applications, or even hand-hold users through difficult tasks.
