@@ -42,11 +42,14 @@ module.exports = function (RED) {
   function verifyInputs(node, msg, config) {
     // workspaceid can be either configured in the node,
     // or sent into msg.params.workspace_id
-    if (!config.workspaceid || config.workspaceid !== '') {
+    if (config.workspaceid && config.workspaceid) {
       node.workspaceid = config.workspaceid;
+      console.log('node.workspaceid', node.workspaceid);
       return true;
-    } else if (!msg.params || msg.params.workspace_id !== '') {
+    }
+    if (msg.params && msg.params.workspace_id) {
       node.workspaceid = msg.params.workspace_id;
+      console.log('node.workspaceid', node.workspaceid);
       return true;
     }
     node.error('Missing workspace_id. check node documentation.',msg);
