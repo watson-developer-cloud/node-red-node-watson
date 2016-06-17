@@ -45,7 +45,7 @@ module.exports = function (RED) {
     if (!config.workspaceid || config.workspaceid !== '') {
       node.workspaceid = config.workspaceid;
       return true;
-    } else if (!msg.params || '' !== msg.params.workspace_id) {
+    } else if (!msg.params || msg.params.workspace_id !== '') {
       node.workspaceid = msg.params.workspace_id;
       return true;
     }
@@ -108,7 +108,7 @@ module.exports = function (RED) {
   // This is the Watson Visual Recognition V3 Node
   function WatsonConversationV1ExpNode (config) {
     var node = this, b = false;
-    
+
     RED.nodes.createNode(this, config);
 
     node.on('input', function (msg) {    
