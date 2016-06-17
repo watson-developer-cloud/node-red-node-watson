@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="conversation-v1-experimental">
+<script type="text/x-red" data-template-name="watson-conversation-v1-experimental">
     <div id="credentials-check" class="form-row">
         <div class="form-tips">
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
@@ -27,7 +27,7 @@
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
-    </div>  
+    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -40,10 +40,10 @@
 </script>
 
 
-<script type="text/x-red" data-help-name="conversation-v1-experimental">
+<script type="text/x-red" data-help-name="watson-conversation-v1-experimental">
 	<p>With the IBM Watson™ Conversation service you can create cognitive agents – virtual agents that combine machine learning, natural language understanding, and integrated dialog scripting tools to provide outstanding customer engagements.</p>
-    
-    
+
+
     <p><b>Usage</b></p>
     <p>This node should be provided in input : </p>
     <ul>
@@ -62,14 +62,14 @@
 
     <p>For full details, please see the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/conversation/overview.shtml">Watson Conversation API documentation</a></p>
     <p>See also the <a href="https://watson-api-explorer.mybluemix.net/">API Explorer</a> and the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/conversation/tutorial_basic.shtml">Tutorial</a>.</p>
-    
+
     <p>Check the sample Flow for this node on  <a href="https://github.com/watson-developer-cloud/node-red-bluemix-starter">Watson Node-RED Starter</a></p>
 </script>
 
 
 <script type="text/javascript">
     (function() {
-        RED.nodes.registerType('conversation-v1-experimental', {
+        RED.nodes.registerType('watson-conversation-v1-experimental', {
             category: 'IBM Watson',
             defaults: {
               name: {value: ""},
