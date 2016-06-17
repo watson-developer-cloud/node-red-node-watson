@@ -42,7 +42,7 @@ module.exports = function (RED) {
   function verifyInputs(node, msg, config) {
     // workspaceid can be either configured in the node, 
     // or sent into msg.params.workspace_id
-    if (!config.workspaceid || '' !== config.workspaceid) {
+    if (!config.workspaceid || config.workspaceid !== '') {
       node.workspaceid = config.workspaceid;
       return true;
     } else if (!msg.params || '' !== msg.params.workspace_id) {
@@ -56,7 +56,6 @@ module.exports = function (RED) {
   function verifyServiceCredentials(node, msg) {
     // If it is present the newly provided user entered key 
     // takes precedence over the existing one. 
-    //node.apikey = sAPIKey || node.credentials.apikey;
     var userName = sUsername || node.credentials.username,
       passWord = sPassword || node.credentials.password;
     
@@ -80,7 +79,7 @@ module.exports = function (RED) {
         text:'call to watson conversation service failed'}); 
       msg.result = {};
       if (err.code == null) {
-        msg.result['error']=err;
+        msg.result['error'] = err;
       } else {
         msg.result['error_code'] = err.code;
         if (!err.error) {
@@ -98,8 +97,8 @@ module.exports = function (RED) {
 
   function execute(params, node, msg) {
     node.status({fill:'blue', shape:'dot' , text:'Calling Conversation service ...'});
-    params.workspace_id=node.workspaceid;
-    params.input={text:msg.payload};
+    params.workspace_id = node.workspaceid;
+    params.input = {text:msg.payload};
     // call POST /message through SDK
     node.service.message(params, function(err, body) {
       processResponse(err,body,node,msg);
@@ -109,6 +108,7 @@ module.exports = function (RED) {
   // This is the Watson Visual Recognition V3 Node
   function WatsonConversationV1ExpNode (config) {
     var node = this, b = false;
+    
     RED.nodes.createNode(this, config);
 
     node.on('input', function (msg) {    
