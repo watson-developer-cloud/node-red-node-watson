@@ -17,7 +17,7 @@
 module.exports = function (RED) {
   var cfenv = require('cfenv'), watson = require('watson-developer-cloud'), service = null,
     sUsername = null, sPassword = null;
-  
+
   service = cfenv.getAppEnv().getServiceCreds(/conversation/i);
 
   if (service) {
@@ -28,11 +28,11 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/watson-conversation/vcap', function (req, res) {
     res.json(service ? {bound_service: true} : null);
   });
- 
-  
+
+
   function verifyPayload(node, msg) {
     if (!msg.payload) {
-      this.status({fill:'red', shape:'ring', text:'missing payload'}); 
+      this.status({fill:'red', shape:'ring', text:'missing payload'});
       node.error('Missing property: msg.payload', msg);
       return false;
     }
@@ -40,7 +40,7 @@ module.exports = function (RED) {
   }
 
   function verifyInputs(node, msg, config) {
-    // workspaceid can be either configured in the node, 
+    // workspaceid can be either configured in the node,
     // or sent into msg.params.workspace_id
     if (!config.workspaceid || config.workspaceid !== '') {
       node.workspaceid = config.workspaceid;
@@ -54,13 +54,13 @@ module.exports = function (RED) {
   }
 
   function verifyServiceCredentials(node, msg) {
-    // If it is present the newly provided user entered key 
-    // takes precedence over the existing one. 
+    // If it is present the newly provided user entered key
+    // takes precedence over the existing one.
     var userName = sUsername || node.credentials.username,
       passWord = sPassword || node.credentials.password;
-    
+
     if (!userName || !passWord) {
-      node.status({fill:'red', shape:'ring', text:'missing credentials'});          
+      node.status({fill:'red', shape:'ring', text:'missing credentials'});
       node.error('Missing Watson Conversation API service credentials', msg);
       return false;
     }
@@ -75,8 +75,8 @@ module.exports = function (RED) {
 
   function processResponse(err, body, node, msg) {
     if (err != null && body == null) {
-      node.status({fill:'red', shape:'ring', 
-        text:'call to watson conversation service failed'}); 
+      node.status({fill:'red', shape:'ring',
+        text:'call to watson conversation service failed'});
       msg.result = {};
       if (err.code == null) {
         msg.result['error'] = err;
@@ -84,14 +84,14 @@ module.exports = function (RED) {
         msg.result['error_code'] = err.code;
         if (!err.error) {
           msg.result['error'] = err.error;
-        }        
+        }
       }
       node.error(err);
       return;
     }
     msg.result = body;
     msg.payload = 'see msg.result';
-    node.send(msg); 
+    node.send(msg);
     node.status({});
   }
 
@@ -111,7 +111,7 @@ module.exports = function (RED) {
 
     RED.nodes.createNode(this, config);
 
-    node.on('input', function (msg) {    
+    node.on('input', function (msg) {
       var params = {};
 
       node.status({});
@@ -131,8 +131,8 @@ module.exports = function (RED) {
       execute(params,node,msg);
     });
   }
-  
-  RED.nodes.registerType('conversation-v1-experimental', WatsonConversationV1ExpNode, {
+
+  RED.nodes.registerType('watson-conversation-v1-experimental', WatsonConversationV1ExpNode, {
     credentials: {
       username: {type:'text'},
       password: {type:'password'}
