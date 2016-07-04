@@ -52,7 +52,7 @@ module.exports = function (RED) {
 
   var apikey, s_apikey;
 
-  var service = cfenv.getAppEnv().getServiceCreds(/alchemy_api/i);
+  var service = cfenv.getAppEnv().getServiceCreds(/alchemy/i);
 
   console.log('======= Alchemy API Service Credentials ========');
   console.log(service);
