@@ -26,7 +26,7 @@ PayloadUtils.prototype = {
 
   // Function that checks if the input string is a url
   urlCheck: function(str) {
-    var parsed = url.parse(str)
+    var parsed = url.parse(str);
     return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
   }
 
