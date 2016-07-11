@@ -37,6 +37,8 @@ module.exports = function (RED) {
   var cfenv = require('cfenv');
   var watson = require('watson-developer-cloud');
 
+  var payloadutils = require('../../utilities/payload-utils');
+
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then the api key is stored in the variable s_apikey.
   //
@@ -109,8 +111,14 @@ module.exports = function (RED) {
       extract = enabled_features.join(",");
 
       //console.log("Will be looking for ", extract)
+      //var params = { text: msg.payload, extract: extract };
+      var params = { extract: extract };
 
-      var params = { text: msg.payload, extract: extract };
+      if (payloadutils.urlCheck(msg.payload)) {
+        params['url'] = msg.payload;
+      } else {
+        params['text'] = msg.payload;
+      }
 
       // Splice in the additional options from msg.alchemy_options
       // eg. The user may have entered msg.alchemy_options = {maxRetrieve: 2};

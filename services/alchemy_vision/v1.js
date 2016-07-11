@@ -28,24 +28,25 @@ module.exports = function (RED) {
   var watson = require('watson-developer-cloud');
 
   var imageType = require('image-type');
-  var url = require('url');
   var temp = require('temp');
   var fileType = require('file-type');
   var fs = require('fs');
 
-  // temp is being used for file streaming to allow the file to arrive so it can be processed. 
+  var payloadutils = require('../../utilities/payload-utils');
+
+  // temp is being used for file streaming to allow the file to arrive so it can be processed.
   temp.track();
 
-  // Require the Cloud Foundry Module to pull credentials from bound service 
-  // If they are found then the api key is stored in the variable s_apikey. 
+  // Require the Cloud Foundry Module to pull credentials from bound service
+  // If they are found then the api key is stored in the variable s_apikey.
   //
-  // This separation between s_apikey and apikey is to allow 
+  // This separation between s_apikey and apikey is to allow
   // the end user to modify the key  redentials when the service is not bound.
   // Otherwise, once set apikey is never reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
 
-  // Taking this line out as codacy was complaining about it. 
+  // Taking this line out as codacy was complaining about it.
   // var services = cfenv.getAppEnv().services,
 
   var apikey, s_apikey;
@@ -61,14 +62,9 @@ module.exports = function (RED) {
   });
 
   // Utility functions that check for image buffers, urls and stream data in
- 
+
   function imageCheck(data) {
     return data instanceof Buffer && imageType(data) !== null;
-  };
-
-  function urlCheck(str) {
-    var parsed = url.parse(str)
-    return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
   };
 
   function stream_buffer(file, contents, cb) {
@@ -78,8 +74,8 @@ module.exports = function (RED) {
     });
   };
 
-  // Utility function that performs the alchemy vision call. 
-  // the cleanup removes the temp storage, and I am not sure whether 
+  // Utility function that performs the alchemy vision call.
+  // the cleanup removes the temp storage, and I am not sure whether
   // it should be called here or after alchemy returns and passed
   // control back to cbdone.
 
@@ -95,7 +91,7 @@ module.exports = function (RED) {
       alchemy_vision.getImageKeywords(params, cbdone);
     } else if (feature == 'imageText') {
       alchemy_vision.getImageSceneText(params, cbdone);
-    }    
+    }
 
     if (cbcleanup) cbcleanup();
   }
@@ -109,19 +105,19 @@ module.exports = function (RED) {
 
     this.on('input', function (msg) {
       if (!msg.payload) {
-        this.status({fill:'red', shape:'ring', text:'missing payload'}); 
+        this.status({fill:'red', shape:'ring', text:'missing payload'});
         var message = 'Missing property: msg.payload';
         node.error(message, msg);
         return;
       }
 
-      // If it is present the newly provided user entered key takes precedence over the existing one. 
+      // If it is present the newly provided user entered key takes precedence over the existing one.
       apikey = s_apikey || this.credentials.apikey;
-      this.status({}); 
+      this.status({});
 
       if (!apikey) {
-        this.status({fill:'red', shape:'ring', text:'missing credentials'});          
-        var message ='Missing Alchemy API service credentials'; 
+        this.status({fill:'red', shape:'ring', text:'missing credentials'});
+        var message ='Missing Alchemy API service credentials';
         node.error(message, msg);
         return;
       }
@@ -130,17 +126,17 @@ module.exports = function (RED) {
       var feature = config["image-feature"];
 
       // Splice in the additional options from msg.alchemy_options
-      // eg. The user may have entered msg.alchemy_options = {knowledgeGraph: 1};     
+      // eg. The user may have entered msg.alchemy_options = {knowledgeGraph: 1};
       var params = {};
 
       for (var key in msg.alchemy_options) { params[key] = msg.alchemy_options[key]; }
 
-      // This is the callback after the call to the alchemy service.    
-      // Set up as a var within this scope, so it has access to node, msg etc. 
-      // in preparation for the Alchemy service action       
+      // This is the callback after the call to the alchemy service.
+      // Set up as a var within this scope, so it has access to node, msg etc.
+      // in preparation for the Alchemy service action
       var actionComplete = function(err, keywords) {
         if (err || keywords.status === 'ERROR') {
-          node.status({fill:'red', shape:'ring', text:'call to alchmeyapi vision service failed'}); 
+          node.status({fill:'red', shape:'ring', text:'call to alchmeyapi vision service failed'});
           console.log('Error:', msg, err);
           node.error(err, msg);
         }
@@ -148,35 +144,35 @@ module.exports = function (RED) {
           msg.result = keywords[FEATURE_RESPONSES[feature]] || [];
           msg.fullresult = {};
           msg.fullresult['all'] = keywords;
-          node.send(msg); 
-        }        
-      }        
-      
+          node.send(msg);
+        }
+      }
+
       // If the input is an image, need to stream the input in, giving time for the
-      // data to arrive, before invoking the service. 
+      // data to arrive, before invoking the service.
       if (imageCheck(msg.payload)) {
         temp.open({suffix: '.' + fileType(msg.payload).ext}, function (err, info) {
           if (err) {
-            this.status({fill:'red', shape:'ring', text:'unable to open image stream'});          
-            var message ='Node has been unable to open the image stream'; 
+            this.status({fill:'red', shape:'ring', text:'unable to open image stream'});
+            var message ='Node has been unable to open the image stream';
             node.error(message, msg);
-            return;        
-          }  
+            return;
+          }
 
           stream_buffer(info.path, msg.payload, function () {
             params['image'] = fs.createReadStream(info.path);
-            performAction(params, feature, actionComplete, temp.cleanup);        
+            performAction(params, feature, actionComplete, temp.cleanup);
           });
 
         });
-      } else if (urlCheck(msg.payload)) {
+      } else if (payloadutils.urlCheck(msg.payload)) {
         params['url'] = msg.payload;
         performAction(params, feature, actionComplete);
       } else {
-        this.status({fill:'red', shape:'ring', text:'payload is invalid'});          
-        var message ='Payload must be either an image buffer or a string representing a url'; 
+        this.status({fill:'red', shape:'ring', text:'payload is invalid'});
+        var message ='Payload must be either an image buffer or a string representing a url';
         node.error(message, msg);
-        return;        
+        return;
       }
 
     });
