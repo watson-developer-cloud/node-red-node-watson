@@ -49,7 +49,6 @@ module.exports = function (RED) {
     }
     if (msg.params && msg.params.workspace_id) {
       node.workspaceid = msg.params.workspace_id;
-      console.log('node.workspaceid', node.workspaceid);
       return true;
     }
     node.error('Missing workspace_id. check node documentation.',msg);
