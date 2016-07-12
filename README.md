@@ -9,6 +9,7 @@ Node-RED Watson Nodes for IBM Bluemix
 
 
 ### New in version 0.4.6
+- New Conversation V1 node
 - Bugfixes to Feature Extract node
 - Updated dependency to watson-developer-cloud node-SDK 1.12.2
 
