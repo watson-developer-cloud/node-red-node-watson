@@ -22,9 +22,9 @@ module.exports = function (RED) {
 
   temp.track();
 
-  // Require the Cloud Foundry Module to pull credentials from bound service 
-  // If they are found then they are stored in sUsername and sPassword, as the 
-  // service credentials. This separation from sUsername and username to allow 
+  // Require the Cloud Foundry Module to pull credentials from bound service
+  // If they are found then they are stored in sUsername and sPassword, as the
+  // service credentials. This separation from sUsername and username to allow
   // the end user to modify the node credentials when the service is not bound.
   // Otherwise, once set username would never get reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
@@ -43,8 +43,8 @@ module.exports = function (RED) {
   }
 
   // These are APIs that the node has created to allow it to dynamically fetch Bluemix
-  // credentials, and also translation models. This allows the node to keep up to 
-  // date with new tranlations, without the need for a code update of this node. 
+  // credentials, and also translation models. This allows the node to keep up to
+  // date with new tranlations, without the need for a code update of this node.
 
   // Node RED Admin - fetch and set vcap services
   RED.httpAdmin.get('/watson-translate/vcap', function (req, res) {
@@ -53,20 +53,20 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-translate/models', function (req, res) {
-    var lt = null; 
+    var lt = null;
 
     if(!username && !password) {
-      lt = watson.language_translation({
+      lt = watson.language_translator({
         username: req.query.un,
         password: req.query.pwd,
         version: 'v2'
-      });     
+      });
     } else {
-      lt = watson.language_translation({
+      lt = watson.language_translator({
         username: username,
         password: password,
         version: 'v2'
-      });    
+      });
     }
     lt.getModels({}, function (err, models) {
       if (err) {
@@ -79,9 +79,9 @@ module.exports = function (RED) {
   });
 
 
-  // This is the Language Translation Node. 
+  // This is the Language Translation Node.
   // The node supports four modes
-  // 
+  //
   // 1. translate, for which it will specify a domain, obtained from the available models
   //    along with source and target languages. The node will have only displayed
   //    available translations for the model / domain
@@ -92,23 +92,23 @@ module.exports = function (RED) {
   function SMTNode (config) {
     RED.nodes.createNode(this, config);
     var node = this;
- 
-    // this does nothing, but am keeping it with a commented out signature, as 
+
+    // this does nothing, but am keeping it with a commented out signature, as
     // it might come in handy in the future.
     this.on('close', function() {
     });
 
-                                                                               
-    // The node has received an input as part of a flow, need to determine 
-    // what the request is for, and based on that if the required fields 
-    // have been provided. 
+
+    // The node has received an input as part of a flow, need to determine
+    // what the request is for, and based on that if the required fields
+    // have been provided.
     this.on('input', function (msg) {
 
       var message = '';
 
-      // The dynamic nature of this node has caused problems with the password field. it is 
+      // The dynamic nature of this node has caused problems with the password field. it is
       // hidden but not a credential. If it is treated as a credential, it gets lost when there
-      // is a request to refresh the model list. 
+      // is a request to refresh the model list.
       //
       // Credentials are needed for each of the modes.
 
@@ -128,21 +128,21 @@ module.exports = function (RED) {
         node.send(msg);
         return;
       }
-      
-      // This declaration put here, as codeacy wants it before it is used 
+
+      // This declaration put here, as codeacy wants it before it is used
       // in the do functions below.
-      var language_translation = watson.language_translation({
+      var language_translation = watson.language_translator({
         username: username,
         password: password,
         version: 'v2'
       });
-      
-      // These are var functions that have been initialised here, so that 
-      // they are available for the instance of this node to use. 
-      // Tried to make these protoypes, but couldn't get them to be 
-      // invokedd. So instead have opted to go for vars. 
 
-      // If a translation is requested, then the model id will have been 
+      // These are var functions that have been initialised here, so that
+      // they are available for the instance of this node to use.
+      // Tried to make these protoypes, but couldn't get them to be
+      // invokedd. So instead have opted to go for vars.
+
+      // If a translation is requested, then the model id will have been
       // built by the calling function based on source, target and domain.
       var doTranslate = function(msg, model_id){
         node.status({
@@ -151,7 +151,7 @@ module.exports = function (RED) {
           text: 'requesting'
         });
 
-        // Please be careful when reading the below. The first parameter is 
+        // Please be careful when reading the below. The first parameter is
         // a structure, and the tabbing enforced by codeacy imho obfuscates
         // the code, rather than making it clearer. I would have liked an
         // extra couple of spaces.
@@ -170,10 +170,10 @@ module.exports = function (RED) {
           }
           node.send(msg);
         });
-      }; 
+      };
 
       // If training is requested then the glossary will be a file input. We are using temp
-      // to sync up the fetch of the file input stream, before invoking the train service. 
+      // to sync up the fetch of the file input stream, before invoking the train service.
       var doTrain = function(msg, model_id, filetype){
         node.status({
           fill: 'blue',
@@ -202,7 +202,7 @@ module.exports = function (RED) {
               break;
             }
 
-            language_translation.createModel(params, 
+            language_translation.createModel(params,
               function (err, model) {
                 node.status({})
                 if (err) {
@@ -227,7 +227,7 @@ module.exports = function (RED) {
           }
         });
         node.status({ });
-      }; 
+      };
 
       // Fetch the status of the trained model. It can only be used if the model is available. This
       // will also return any training errors. The full error reason is returned in msg.translation
@@ -235,7 +235,7 @@ module.exports = function (RED) {
         node.status({
           fill: 'blue',
           shape: 'dot',
-          text: 'requesting status for model ' + trainid, 
+          text: 'requesting status for model ' + trainid,
         });
 
         language_translation.getModel(
@@ -257,7 +257,7 @@ module.exports = function (RED) {
               node.status({});
             }
           }
-        );    
+        );
         node.status({ });
       };
 
@@ -267,7 +267,7 @@ module.exports = function (RED) {
         node.status({
           fill: 'blue',
           shape: 'dot',
-          text: 'deleting model ' + trainid, 
+          text: 'deleting model ' + trainid,
         });
 
         language_translation.deleteModel(
@@ -293,7 +293,7 @@ module.exports = function (RED) {
       };
 
       // Now that the do functions have been defined, can now determine what action this node
-      // is configured for. 
+      // is configured for.
 
       if (!msg.payload) {
         message = 'Missing property: msg.payload';
@@ -313,72 +313,72 @@ module.exports = function (RED) {
           node.send(msg);
           return;
         }
-        
+
         var srclang = msg.srclang || config.srclang;
-        
+
         if (!srclang) {
           node.warn('Missing source language, message not translated');
           node.send(msg);
           return;
         }
-        
+
         var destlang = msg.destlang || config.destlang;
-        
+
         if (!destlang) {
           node.warn('Missing target language, message not translated');
           node.send(msg);
           return;
         }
-        
+
         var model_id = '';
-        
+
         model_id = srclang + '-' + destlang;
         if (domain !== 'news') {
           model_id += ('-' + domain);
         }
         doTranslate(msg, model_id);
         break;
-      
+
       case 'custom':
         var custom = msg.custom || config.custom;
-      
+
         if (!custom) {
           node.warn('Missing customised model, message not translated');
           node.send(msg);
-          return;            
-        } 
+          return;
+        }
         doTranslate(msg, custom);
-        break; 
-      
+        break;
+
       case 'train':
         var basemodel = msg.basemodel || config.basemodel;
-      
+
         if (!basemodel) {
           node.warn('Base Model needs must be set for train mode');
-          node.send(msg);            
+          node.send(msg);
         }
-        
+
         var filetype = msg.filetype || config.filetype;
-        
+
         if (!filetype) {
           node.warn('Filetype needs must be set for train mode');
-          node.send(msg);                        
+          node.send(msg);
         }
         doTrain(msg, basemodel, filetype);
         break;
-      
+
       case 'getstatus':
-        var trainid = msg.trainid || config.trainid; 
-      
-        doGetStatus(msg, trainid);       
+        var trainid = msg.trainid || config.trainid;
+
+        doGetStatus(msg, trainid);
         break;
-      
+
       case 'delete':
-        var d_trainid = msg.trainid || config.trainid; 
-      
-        doDelete(msg, d_trainid);  
+        var d_trainid = msg.trainid || config.trainid;
+
+        doDelete(msg, d_trainid);
         break;
-      
+
       default:
         message = 'Unexpected Mode';
         node.status({
