@@ -40,19 +40,23 @@ module.exports = function (RED) {
   }
 
   function verifyInputs(node, msg, config) {
+    if (!config.workspaceid && !msg.params.workspace_id) {
+      node.error('Missing workspace_id. check node documentation.',msg);
+      return false;
+    }
     // workspaceid can be either configured in the node,
     // or sent into msg.params.workspace_id
     if (config.workspaceid && config.workspaceid) {
       node.workspaceid = config.workspaceid;
-      //console.log('node.workspaceid', node.workspaceid);
-      return true;
     }
     if (msg.params && msg.params.workspace_id) {
       node.workspaceid = msg.params.workspace_id;
-      return true;
     }
-    node.error('Missing workspace_id. check node documentation.',msg);
-    return false;
+    // option context in JSON format
+    if (msg.params && msg.params.context) {
+      node.context = msg.params.context;
+    }
+    return true;
   }
 
   function verifyServiceCredentials(node, msg) {
@@ -91,8 +95,7 @@ module.exports = function (RED) {
       node.error(err);
       return;
     }
-    msg.result = body;
-    msg.payload = 'see msg.result';
+    msg.payload = body;
     node.send(msg);
     node.status({});
   }
@@ -101,6 +104,7 @@ module.exports = function (RED) {
     node.status({fill:'blue', shape:'dot' , text:'Calling Conversation service ...'});
     params.workspace_id = node.workspaceid;
     params.input = {text:msg.payload};
+    params.context = 
     // call POST /message through SDK
     node.service.message(params, function(err, body) {
       processResponse(err,body,node,msg);
