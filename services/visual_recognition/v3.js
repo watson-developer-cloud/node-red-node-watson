@@ -25,19 +25,19 @@ module.exports = function (RED) {
     async = require('async'),
     sAPIKey=null, service=null;
 
-  // temp is being used for file streaming to allow the file to arrive so it can be processed. 
+  // temp is being used for file streaming to allow the file to arrive so it can be processed.
   temp.track();
 
   service = cfenv.getAppEnv().getServiceCreds(/visual recognition/i);
 
   if (service) {
-    sAPIKey = service.apikey;
+    sAPIKey = service.api_key;
   }
 
   RED.httpAdmin.get('/watson-visual-recognition/vcap', function (req, res) {
     res.json(service ? {bound_service: true} : null);
   });
- 
+
   function imageCheck(data) {
     return data instanceof Buffer && imageType(data) !== null;
   }
@@ -58,7 +58,7 @@ module.exports = function (RED) {
 
   function verifyPayload(node, msg) {
     if (!msg.payload) {
-      this.status({fill:'red', shape:'ring', text:'missing payload'}); 
+      this.status({fill:'red', shape:'ring', text:'missing payload'});
       node.error('Missing property: msg.payload', msg);
       return false;
     }
@@ -71,7 +71,7 @@ module.exports = function (RED) {
     case 'detectFaces':
     case 'recognizeText':
       if (typeof msg.payload === 'boolean' || typeof msg.payload === 'number') {
-        this.status({fill:'red', shape:'ring', text:'bad format payload'}); 
+        this.status({fill:'red', shape:'ring', text:'bad format payload'});
         node.error('Bad format : msg.payload must be a URL string or a Node.js Buffer', msg);
         return false;
       }
@@ -80,11 +80,11 @@ module.exports = function (RED) {
   }
 
   function verifyServiceCredentials(node, msg) {
-    // If it is present the newly provided user entered key 
-    // takes precedence over the existing one. 
+    // If it is present the newly provided user entered key
+    // takes precedence over the existing one.
     node.apikey = sAPIKey || node.credentials.apikey;
     if (!node.apikey) {
-      node.status({fill:'red', shape:'ring', text:'missing credentials'});          
+      node.status({fill:'red', shape:'ring', text:'missing credentials'});
       var message ='Missing Watson Visual Recognition API service credentials';
 
       node.error(message, msg);
@@ -101,8 +101,8 @@ module.exports = function (RED) {
 
   function processResponse(err, body, feature, node, msg) {
     if (err != null && body == null) {
-      node.status({fill:'red', shape:'ring', 
-        text:'call to watson visual recognition v3 service failed'}); 
+      node.status({fill:'red', shape:'ring',
+        text:'call to watson visual recognition v3 service failed'});
       msg.result = {};
       if (err.code == null) {
         msg.result['error']=err;
@@ -110,19 +110,19 @@ module.exports = function (RED) {
         msg.result['error_code'] = err.code;
         if (!err.error) {
           msg.result['error'] = err.error;
-        }        
+        }
       }
       node.error(err);
       return;
-    } else if (err == null && body != null && body.images != null && 
+    } else if (err == null && body != null && body.images != null &&
       body.images[0].error) {
-      node.status({fill:'red', shape:'ring', 
-                   text:'call to watson visual recognition v3 service failed'}); 
+      node.status({fill:'red', shape:'ring',
+                   text:'call to watson visual recognition v3 service failed'});
       msg.result = {};
       msg.result['error_id'] = body.images[0].error.error_id;
       msg.result['error'] = body.images[0].error.description;
       msg.payload = 'see msg.result.error';
-      node.send(msg); 
+      node.send(msg);
     } else {
       if (feature === 'deleteClassifier') {
         msg.result = 'Successfully deleted classifier_id: ' + msg.params.classifier_id ;
@@ -130,7 +130,7 @@ module.exports = function (RED) {
         msg.result = body;
       }
       msg.payload = 'see msg.result'; // to remove any Buffer that could remains
-      node.send(msg); 
+      node.send(msg);
       node.status({});
     }
   }
@@ -139,10 +139,10 @@ module.exports = function (RED) {
     if (imageCheck(msg.payload)) {
       temp.open({suffix: '.' + fileType(msg.payload).ext}, function (err, info) {
         if (err) {
-          this.status({fill:'red', shape:'ring', text:'unable to open image stream'});          
+          this.status({fill:'red', shape:'ring', text:'unable to open image stream'});
           node.error('Node has been unable to open the image stream', msg);
           return cb();
-        }  
+        }
         stream_buffer(info.path, msg.payload, function () {
           params['images_file'] = fs.createReadStream(info.path);
           if (msg.params != null && msg.params.classifier_ids != null) {
@@ -156,7 +156,7 @@ module.exports = function (RED) {
           }
           cb();
         });
-      }); 
+      });
     } else if (urlCheck(msg.payload)) {
       params['url'] = msg.payload;
       if (msg.params != null && msg.params.classifier_ids != null) {
@@ -170,22 +170,22 @@ module.exports = function (RED) {
       }
       return cb();
     } else {
-      node.status({fill:'red', shape:'ring', text:'payload is invalid'});          
+      node.status({fill:'red', shape:'ring', text:'payload is invalid'});
       node.error('Payload must be either an image buffer or a string representing a url', msg);
     }
   }
-  
+
 
   function addTask (asyncTasks, msg, k, listParams, node) {
     asyncTasks.push(function (callback) {
       var buffer = msg.params[k];
       temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
         if (err) {
-          node.status({fill:'red', shape:'ring', 
-                       text:'unable to open image stream'});          
+          node.status({fill:'red', shape:'ring',
+                       text:'unable to open image stream'});
           node.error('Node has been unable to open the image stream', msg);
           return callback('open error on ' + k);
-        }  
+        }
         stream_buffer(info.path, msg.params[k], function () {
           listParams[k] = fs.createReadStream(info.path);
           callback(null, k);
@@ -202,7 +202,7 @@ module.exports = function (RED) {
       } else if (k === 'name') {
         listParams[k] = msg.params[k];
       }
-    } 
+    }
 
     async.parallel(asyncTasks, function(error){
       if (error) {
@@ -222,9 +222,9 @@ module.exports = function (RED) {
     node.service.listClassifiers(params, function(err, body) {
       node.status({});
       if (err) {
-        node.status({fill:'red', shape:'ring', 
+        node.status({fill:'red', shape:'ring',
           text:'Delete All : call to listClassifiers failed'});
-        node.error(err, msg);   
+        node.error(err, msg);
       } else {
         // Array to hold async tasks
         var asyncTasks = [], nbTodelete = 0, nbdeleted = 0;
@@ -241,9 +241,9 @@ module.exports = function (RED) {
               }
               nbdeleted++;
               cb(null,parms.classifier_id);
-            });  
+            });
           });
-        });      
+        });
         async.parallel(asyncTasks, function(error, deletedList){
           if (deletedList.length === nbTodelete) {
             msg.payload = 'see msg.result.error';
@@ -254,10 +254,10 @@ module.exports = function (RED) {
             'See log for errors.';
           }
           node.send(msg);
-          node.status({});           
+          node.status({});
         });
       }
-    }); 
+    });
   }
 
   function executeService(feature, params, node, msg) {
@@ -332,12 +332,12 @@ module.exports = function (RED) {
     var node = this, b = false, feature = config['image-feature'];
     RED.nodes.createNode(this, config);
 
-    node.on('input', function (msg) {    
+    node.on('input', function (msg) {
       var params = {};
 
       node.status({});
       // so there is at most 1 temp file at a time (did not found a better solution...)
-      temp.cleanup(); 
+      temp.cleanup();
 
       b = verifyPayload(node, msg);
       if (!b) {
@@ -354,7 +354,7 @@ module.exports = function (RED) {
       execute(feature,params,node,msg);
     });
   }
-  
+
   RED.nodes.registerType('visual-recognition-v3', WatsonVisualRecognitionV3Node, {
     credentials: {
       apikey: {type:'password'}

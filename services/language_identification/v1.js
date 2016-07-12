@@ -55,7 +55,7 @@ module.exports = function (RED) {
 
       var watson = require('watson-developer-cloud');
 
-      var language_translation = watson.language_translation({
+      var language_translation = watson.language_translator({
         username: username,
         password: password,
         version: 'v2'
