@@ -44,7 +44,7 @@ module.exports = function (RED) {
     // or sent into msg.params.workspace_id
     if (config.workspaceid && config.workspaceid) {
       node.workspaceid = config.workspaceid;
-      console.log('node.workspaceid', node.workspaceid);
+      //console.log('node.workspaceid', node.workspaceid);
       return true;
     }
     if (msg.params && msg.params.workspace_id) {
