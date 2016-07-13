@@ -12,6 +12,7 @@ Node-RED Watson Nodes for IBM Bluemix
 - New Conversation V1 node
 - Bugfixes to Feature Extract node
 - Bugfixes to Visual Recognition node
+- Added in Japanese and Arabic to Personality Insights node
 - Updated dependency to watson-developer-cloud node-SDK 1.12.2
 
 ### New in version 0.4.5
