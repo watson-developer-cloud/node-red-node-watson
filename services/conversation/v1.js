@@ -83,15 +83,6 @@ module.exports = function (RED) {
     if (err != null && body == null) {
       node.status({fill:'red', shape:'ring',
         text:'call to watson conversation service failed'});
-      msg.result = {};
-      if (err.code == null) {
-        msg.result['error'] = err;
-      } else {
-        msg.result['error_code'] = err.code;
-        if (!err.error) {
-          msg.result['error'] = err.error;
-        }
-      }
       node.error(err);
       return;
     }
@@ -104,7 +95,7 @@ module.exports = function (RED) {
     node.status({fill:'blue', shape:'dot' , text:'Calling Conversation service ...'});
     params.workspace_id = node.workspaceid;
     params.input = {text:msg.payload};
-    params.context = 
+    params.context = node.context;
     // call POST /message through SDK
     node.service.message(params, function(err, body) {
       processResponse(err,body,node,msg);
