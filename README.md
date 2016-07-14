@@ -7,15 +7,17 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
-### New in version 0.4.7
-- Opps! fix to Conversation V1 node
+### New in version 0.4.8
+- Oops! fix to Conversation V1 node
 
+### New in version 0.4.7
+- Oops! fix to Conversation V1 node
 
 ### New in version 0.4.6
 - New Conversation V1 node
 - Bugfixes to Feature Extract node
 - Bugfixes to Visual Recognition node
-- Added in Japanese and Arabic to Personality Insights node
+- Added in Japanese and Arabic support to Personality Insights node
 - Updated dependency to watson-developer-cloud node-SDK 1.12.2
 
 ### New in version 0.4.5
