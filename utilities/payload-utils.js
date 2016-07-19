@@ -31,7 +31,7 @@ PayloadUtils.prototype = {
   urlCheck: function(str) {
     var parsed = url.parse(str);
     return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
-  };
+  },
 
   // Function that is syncing up the asynchronous nature of the stream
   // so that the full file can be sent to the API. 
@@ -40,7 +40,7 @@ PayloadUtils.prototype = {
       if (err) throw err;
       cb(fileType(contents).ext);
     });
-  };
+  },
 
   // Function that is syncing up the asynchronous nature of the stream
   // so that the full file can be sent to the API. 
@@ -65,7 +65,7 @@ PayloadUtils.prototype = {
     });
 
     request(url).pipe(wstream);
-  };
+  }
 };
 
 var payloadutils = new PayloadUtils();
