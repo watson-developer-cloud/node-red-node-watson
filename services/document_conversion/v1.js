@@ -59,14 +59,10 @@ module.exports = function(RED) {
 				version_date: '2015-12-01'
 			});
 			
-			var stream_buffer = payloadutils.stream_buffer;
-
-			var stream_url = payloadutils.stream_url;
-			
 			temp.open({suffix: '.cvt'}, function (err, info) {
 				if (err) throw err;
 			
-				var stream_payload = (typeof msg.payload === 'string') ? stream_url : stream_buffer;
+				var stream_payload = (typeof msg.payload === 'string') ? payloadutils.stream_url : payloadutils.stream_buffer;
 			
 				stream_payload(info.path, msg.payload, function (format) {
 					
