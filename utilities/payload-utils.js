@@ -31,7 +31,41 @@ PayloadUtils.prototype = {
   urlCheck: function(str) {
     var parsed = url.parse(str);
     return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
-  }
+  };
+
+  // Function that is syncing up the asynchronous nature of the stream
+  // so that the full file can be sent to the API. 
+  stream_buffer: function(file, contents, cb) {
+    fs.writeFile(file, contents, function (err) {
+      if (err) throw err;
+      cb(fileType(contents).ext);
+    });
+  };
+
+  // Function that is syncing up the asynchronous nature of the stream
+  // so that the full file can be sent to the API. 
+  stream_url: function(file, url, cb) {
+    var wstream = fs.createWriteStream(file);
+
+    wstream.on('finish', function () {
+      fs.readFile(file, function (err, buf) {
+        var fmt = null;
+        var error = null;
+
+        if (err) {
+          error = err;
+        }
+        if (fileType(buf)) {
+          fmt = fileType(buf).ext;
+        } else {
+          error = 'Unrecognised file format';
+        }
+        cb(error, fmt);
+      });
+    });
+
+    request(url).pipe(wstream);
+  };
 };
 
 var payloadutils = new PayloadUtils();

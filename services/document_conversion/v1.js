@@ -59,34 +59,9 @@ module.exports = function(RED) {
 				version_date: '2015-12-01'
 			});
 			
-			var stream_buffer = function (file, contents, cb) {
-				fs.writeFile(file, contents, function (err) {
-					if (err) throw err;
-					cb(fileType(contents).ext);
-				});
-			};
+			var stream_buffer = payloadutils.stream_buffer;
 
-			var stream_url = function(file, url, cb) {
-			    var wstream = fs.createWriteStream(file);
-
-			    wstream.on('finish', function () {
-			      fs.readFile(file, function (err, buf) {
-			        var fmt = null;
-			        var error = null;
-
-			        if (err) {
-			          error = err;
-			        }
-			        if (fileType(buf)) {
-			          fmt = fileType(buf).ext;
-			        } else {
-			          error = 'Unrecognised file format';
-			        }
-			        cb(error, fmt);
-			      });
-			    });
-			    request(url).pipe(wstream);
-  			};
+			var stream_url = payloadutils.stream_url;
 			
 			temp.open({suffix: '.cvt'}, function (err, info) {
 				if (err) throw err;
