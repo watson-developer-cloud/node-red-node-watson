@@ -12,7 +12,7 @@ module.exports = function(RED) {
 	var fs = require('fs');
 	var fileType = require('file-type');
 	var request = require('request');
-
+  	var payloadutils = require('../../utilities/payload-utils');
 	var appEnv	 = cfEnv.getAppEnv();
 
 	var converts = [];
@@ -59,30 +59,10 @@ module.exports = function(RED) {
 				version_date: '2015-12-01'
 			});
 			
-			var stream_buffer = function (file, contents, cb) {
-				fs.writeFile(file, contents, function (err) {
-					if (err) throw err;
-					cb(fileType(contents).ext);
-				});
-			};
-
-			var stream_url = function (file, location, cb) {
-				var wstream = fs.createWriteStream(file);
-				wstream.on('finish', function () {
-					fs.readFile(file, function (err, buf) {
-						if (err) {
-							throw (err);
-						}
-						cb(fileType(buf).ext);
-					});
-				});
-				request(location).pipe(wstream);
-			};
-			
 			temp.open({suffix: '.cvt'}, function (err, info) {
 				if (err) throw err;
 			
-				var stream_payload = (typeof msg.payload === 'string') ? stream_url : stream_buffer;
+				var stream_payload = (typeof msg.payload === 'string') ? payloadutils.stream_url : payloadutils.stream_buffer;
 			
 				stream_payload(info.path, msg.payload, function (format) {
 					
