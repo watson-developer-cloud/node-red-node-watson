@@ -14,14 +14,10 @@
  * limitations under the License.
  **/
 module.exports = function(RED) {
-  var http = require('http'),
-    https = require('https'),
+  var https = require('https'),
     cfEnv = require('cfenv'),
-    util = require('util'),
     watson = require('watson-developer-cloud'),
     fs = require('fs'),
-    fileType = require('file-type'),
-    request = require('request'),
     payloadutils = require('../../utilities/payload-utils'),
     appEnv = cfEnv.getAppEnv(),
     converts = [],
@@ -65,6 +61,7 @@ module.exports = function(RED) {
         version: 'v1',
         version_date: '2015-12-01'
       });
+      
       temp.open({
         suffix: '.cvt'
       }, function(err, info) {
