@@ -61,7 +61,6 @@ PayloadUtils.prototype = {
 				cb(error, fmt);
 			});
 		});
-
 		request(url).pipe(wstream);
 	}
 };

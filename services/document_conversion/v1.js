@@ -1,5 +1,4 @@
 module.exports = function(RED) {
-
 	var http = require('http');
 	var https = require('https');
 	var cfEnv = require('cfenv');
@@ -52,7 +51,6 @@ module.exports = function(RED) {
 				version: 'v1',
 				version_date: '2015-12-01'
 			});
-
 			temp.open({
 				suffix: '.cvt'
 			}, function(err, info) {
@@ -85,7 +83,6 @@ module.exports = function(RED) {
 					});
 				});
 			});
-
 		};
 		this.on('input', function(msg) {
 			this.doCall(msg);
