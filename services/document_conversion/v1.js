@@ -61,7 +61,7 @@ module.exports = function(RED) {
         version: 'v1',
         version_date: '2015-12-01'
       });
-      
+
       temp.open({
         suffix: '.cvt'
       }, function(err, info) {
@@ -69,30 +69,38 @@ module.exports = function(RED) {
           throw err;
         }
         var stream_payload = (typeof msg.payload === 'string') ? payloadutils.stream_url : payloadutils.stream_buffer;
-
-        stream_payload(info.path, msg.payload, function(format) {
-          node.status({
-            fill: 'blue',
-            shape: 'dot',
-            text: 'converting'
-          });
-          document_conversion.convert({
-            file: fs.createReadStream(info.path),
-            conversion_target: msg.target || node.target,
-            word: msg.word,
-            pdf: msg.pdf,
-            normalized_html: msg.normalized_html
-          }, function(err, response) {
-            node.status({});
-            if (err) {
-              node.error(err);
-            } else {
-              node.send({
-                'payload': response
-              });
-            }
-          });
-        });
+        if(typeof msg.payload === 'string' && !payloadutils.urlCheck(msg.payload)) {
+        	node.warn('Invalid URI, make sure to include the "http(s)" at the beginning.');
+        	node.status({
+	            fill: 'red',
+	            shape: 'dot',
+	            text: 'Invalid URI'
+	          });
+        } else {
+	        stream_payload(info.path, msg.payload, function(format) {
+	          node.status({
+	            fill: 'blue',
+	            shape: 'dot',
+	            text: 'converting'
+	          });
+	          document_conversion.convert({
+	            file: fs.createReadStream(info.path),
+	            conversion_target: msg.target || node.target,
+	            word: msg.word,
+	            pdf: msg.pdf,
+	            normalized_html: msg.normalized_html
+	          }, function(err, response) {
+	            node.status({});
+	            if (err) {
+	              node.error(err);
+	            } else {
+	              node.send({
+	                'payload': response
+	              });
+	            }
+	          });
+	        });
+        }
       });
     };
     this.on('input', function(msg) {
