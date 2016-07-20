@@ -63,8 +63,6 @@ PayloadUtils.prototype = {
         cb(error, fmt);
       });
     });
-    console.log('url', url)
-    console.log('wstram', wstream)
     request(url).pipe(wstream);
   }
 };
