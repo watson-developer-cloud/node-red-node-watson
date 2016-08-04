@@ -85,9 +85,7 @@ module.exports = function (RED) {
     node.apikey = sAPIKey || node.credentials.apikey;
     if (!node.apikey) {
       node.status({fill:'red', shape:'ring', text:'missing credentials'});
-      var message ='Missing Watson Visual Recognition API service credentials';
-
-      node.error(message, msg);
+      node.error('Missing Watson Visual Recognition API service credentials', msg);
       return false;
     }
     node.service = watson.visual_recognition({
@@ -154,6 +152,12 @@ module.exports = function (RED) {
           if (msg.params != null && msg.params.threshold != null) {
             params['threshold'] = msg.params['threshold'];
           }
+          if (node.config != null && node.config.lang != null) {
+            params['Accept-Language'] = node.config.lang;
+          }
+          if (msg.params != null && msg.params.accept_language != null) {
+            params['Accept-Language'] = msg.params['accept_language'];
+          }
           cb();
         });
       });
@@ -167,6 +171,12 @@ module.exports = function (RED) {
       }
       if (msg.params != null && msg.params.threshold != null) {
         params['threshold'] = msg.params['threshold'];
+      }
+      if (node.config != null && node.config.lang != null) {
+        params['Accept-Language'] = node.config.lang;
+      }
+      if (msg.params != null && msg.params.accept_language != null) {
+        params['Accept-Language'] = msg.params['accept_language'];
       }
       return cb();
     } else {
@@ -331,6 +341,7 @@ module.exports = function (RED) {
   function WatsonVisualRecognitionV3Node (config) {
     var node = this, b = false, feature = config['image-feature'];
     RED.nodes.createNode(this, config);
+    node.config = config;
 
     node.on('input', function (msg) {
       var params = {};
