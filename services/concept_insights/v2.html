@@ -39,7 +39,7 @@
         <label for="node-config-input-publiccorpus"><i class="fa fa-globe"></i> Public Corpus</label>
         <select type="text" id="node-config-input-publiccorpus">
             <option value="TEDTalks">TED Talks</option>
-            
+
         </select>
     </div>
 </script>
@@ -48,7 +48,7 @@
 (function() {
     RED.nodes.registerType('watson-concept-insights-corpus',{
         category: 'config',
-        defaults: { 
+        defaults: {
             cname:{value: ""},
             access:{value: "private"},
             corpusmode: {value: "user"},
@@ -111,6 +111,12 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-concept-insights-upload-document">
+    <p><b>NB:</b> The Watson Concept Insights service has been deprecated in favour of Concepts in
+    AlchemyLanguage. Once the service
+    has been switched off this node will no longer work. The node will be removed from the palette in a
+    future release. </p>
+    <br/>
+
     <p>The IBM Watson™ Concept Insights service enables you to identify conceptual associations in the content that you provide. Input content is auto-tagged against a concept graph, which is a formal representation of the relationships between concepts that are present in the data. The concept graph used by the Concept Insights service is based on content that has been ingested from the English language Wikipedia.</p>
     <p>The upload document node can be used to upload a document to a specified corpus for indexing and analysis. The file to be uploaded should be passed into the node on <code>msg.payload</code>.</p>
     <p>Supported <code>msg.payload</code> types:</b>.</p>
@@ -124,7 +130,7 @@
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-concept-insights-upload-document', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ""},
                 corpus: {value: "", type: 'watson-concept-insights-corpus'},
@@ -220,6 +226,11 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-concept-insights-search">
+     <p><b>NB:</b> The Watson Concept Insights service has been deprecated in favour of Concepts in
+     AlchemyLanguage. Once the service
+     has been switched off this node will no longer work. The node will be removed from the palette in a
+     future release. </p>
+    <br/>
     <p>The IBM Watson™ Concept Insights service enables you to identify conceptual associations in the content that you provide. Input content is auto-tagged against a concept graph, which is a formal representation of the relationships between concepts that are present in the data. The concept graph used by the Concept Insights service is based on content that has been ingested from the English language Wikipedia.</p>
     <p>The search node can be used to search a corpus or individual documents within a corpus. A corpus configuration can be specified within the node configuration panel. The node has two modes, <b>corpus</b> mode and <b>document</b> mode. In <b>corpus</b> mode, the following queries can be executed:</p>
     <ul>
@@ -242,7 +253,7 @@
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-concept-insights-search', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ""},
                 corpus: {value: "", type: 'watson-concept-insights-corpus'},
@@ -271,19 +282,19 @@
                 $('#node-input-mode').change(function () {
                     var mode = $('#node-input-mode').val();
                     $('.form-row.mode.' + mode +':not(.query)').show();
-                    $('.form-row.mode:not(.' + mode + ')').hide();  
+                    $('.form-row.mode:not(.' + mode + ')').hide();
                 });
 
                 $('#node-input-corpusapicall').change(function () {
-                    
+
                     $('#node-input-corpusapicall').change(function () {
                         var mode = $('#node-input-corpusapicall').val();
                         if (mode == 'documentlabel') {
-                          $('.form-row.mode.corpus.query').show();  
+                          $('.form-row.mode.corpus.query').show();
                         } else {
                           $('.form-row.mode.corpus.query').hide();
-                        }  
-                    }); 
+                        }
+                    });
                 });
 
                 $.getJSON('watson-concept-insights/vcap/').done(function (service) {
@@ -321,6 +332,11 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-concept-insights-search-concepts">
+    <p><b>NB:</b> The Watson Concept Insights service has been deprecated in favour of Concepts in
+    AlchemyLanguage. Once the service
+    has been switched off this node will no longer work. The node will be removed from the palette in a
+    future release. </p>
+    <br/>
     <p>The IBM Watson™ Concept Insights service enables you to identify conceptual associations in the content that you provide. Input content is auto-tagged against a concept graph, which is a formal representation of the relationships between concepts that are present in the data. The concept graph used by the Concept Insights service is based on content that has been ingested from the English language Wikipedia.</p>
     <p>The search concepts node can be used to search the English language Wikipedia content graph for concepts closely matching a given search term. The search term should be passed into the node on <code>msg.payload</code>.</p>
     <p>Supported <code>msg.payload</code> types:</b>.</p>
@@ -334,7 +350,7 @@
 <script type="text/javascript">
 (function() {
     RED.nodes.registerType('watson-concept-insights-search-concepts',{
-        category: 'IBM Watson',
+        category: 'Watson Deprecated',
         credentials: {
           username: {type:"text"},
           password: {type:"password"}
@@ -386,6 +402,11 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-concept-insights-related-concepts">
+    <p><b>NB:</b> The Watson Concept Insights service has been deprecated in favour of Concepts in
+    AlchemyLanguage. Once the service
+    has been switched off this node will no longer work. The node will be removed from the palette in a
+    future release. </p>
+    <br/>
     <p>The IBM Watson™ Concept Insights service enables you to identify conceptual associations in the content that you provide. Input content is auto-tagged against a concept graph, which is a formal representation of the relationships between concepts that are present in the data. The concept graph used by the Concept Insights service is based on content that has been ingested from the English language Wikipedia.</p>
     <p>The related concepts node returns related concepts for a given set of source concepts. The source concepts are passed in as an <b>array</b> on <code>msg.concepts</code> and the related concepts are returned on <code>msg.payload</code>.</p>
     <p>For more information about the Concept Insights service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/concept-insights.html">documentation</a>.</p>
@@ -394,7 +415,7 @@
 <script type="text/javascript">
 (function() {
     RED.nodes.registerType('watson-concept-insights-related-concepts',{
-        category: 'IBM Watson',
+        category: 'Watson Deprecated',
         credentials: {
           username: {type:"text"},
           password: {type:"password"}

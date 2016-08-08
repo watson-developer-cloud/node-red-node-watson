@@ -8,6 +8,7 @@ Node-RED Watson Nodes for IBM Bluemix
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 ### New in version 0.4.10
+- Moved Relationship Extraction and Concept Insights nodes to the deprecated list.
 
 ### New in version 0.4.9
 - Added in German and Japanese support to Natural Language Classifier node
