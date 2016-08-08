@@ -44,6 +44,11 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-relationship-extraction">
+    <p><b>NB:</b> The Watson Relationship Extraction service hase been deprecated. Once the service
+    has been switched off this node will no longer work. The node will be removed from the palette in a
+    future release. </p>
+    <br/>
+
     <p>The Relationship Extraction service intelligently finds relationships between sentence components (nouns, verbs,
     subjects, objects, etc.). From unstructured text, it can extract entities (such as people, locations, organizations,
     events), and the relationships between these entities (such as person employed-by organization, person resides-in location).</p>
@@ -60,7 +65,7 @@
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-relationship-extraction', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ""},
                 dataset: {value: "ie-en-news"}

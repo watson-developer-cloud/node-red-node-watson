@@ -30,10 +30,10 @@
   ],
   "node-red": {
     "nodes": {
-      "watson-concept-insights-v2": "services/concept_insights/v2.js",
       "watson-conversation-v1":"services/conversation/v1.js",
       "watson-conversation-v1-experimental":"services/conversation/v1-exp.js",
       "watson-document-conversion-v1": "services/document_conversion/v1.js",
+      "watson-concept-insights-v2": "services/concept_insights/v2.js",
       "watson-dialog-v1": "services/dialog/v1.js",
       "alchemy_language-v1": "services/alchemy_language/v1.js",
       "watson-language-identification-v1": "/services/language_identification/v1.js",
