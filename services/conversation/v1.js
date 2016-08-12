@@ -16,8 +16,8 @@
 
 module.exports = function (RED) {
   var cfenv = require('cfenv'), 
-      ConversationV1 = require('watson-developer-cloud/conversation/v1'), 
-      service = null, sUsername = null, sPassword = null;
+    ConversationV1 = require('watson-developer-cloud/conversation/v1'), 
+    service = null, sUsername = null, sPassword = null;
 
   service = cfenv.getAppEnv().getServiceCreds(/conversation/i);
 
@@ -38,6 +38,20 @@ module.exports = function (RED) {
       return false;
     }
     return true;
+  }
+
+  function verifyOptionalInputs(node, msg, config, params) {
+    // next 3 not documented but present in WDC Node SDK.
+    // optional output
+    if (msg.params && msg.params.output) {
+      params.output = msg.params.output;
+    }
+    if (msg.params && msg.params.entities) {
+      params.entities = msg.params.entities;
+    }
+    if (msg.params && msg.params.intents) {
+      params.intents = msg.params.intents;
+    }
   }
 
   function verifyInputs(node, msg, config, params) {
@@ -67,19 +81,6 @@ module.exports = function (RED) {
     return true;
   }
 
-  function verifyOptionalInputs(node, msg, config, params) {
-    // next 3 not documented but present in WDC Node SDK.
-    // optional output
-    if (msg.params && msg.params.output) {
-      params.output = msg.params.output;
-    }
-    if (msg.params && msg.params.entities) {
-      params.entities = msg.params.entities;
-    }
-    if (msg.params && msg.params.intents) {
-      params.intents = msg.params.intents;
-    }
-  }
 
   function verifyServiceCredentials(node, msg) {
     // If it is present the newly provided user entered key
