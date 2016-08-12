@@ -72,7 +72,7 @@ PayloadUtils.prototype = {
     var kuromoji = require('kuromoji'),
       fn = function(txt) { // default
         return txt.split(' ').length;
-      };
+      },
       dic_path = '/../node_modules/kuromoji/dist/dict',
       dic_dir = path.normalize(__dirname + dic_path),
       tokenizer = null;
