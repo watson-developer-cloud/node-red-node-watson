@@ -15,8 +15,9 @@
  **/
 
 module.exports = function (RED) {
-  var cfenv = require('cfenv'), ConversationV1 = require('watson-developer-cloud/conversation/v1'), service = null,
-    sUsername = null, sPassword = null;
+  var cfenv = require('cfenv'), 
+      ConversationV1 = require('watson-developer-cloud/conversation/v1'), 
+      service = null, sUsername = null, sPassword = null;
 
   service = cfenv.getAppEnv().getServiceCreds(/conversation/i);
 
@@ -62,6 +63,11 @@ module.exports = function (RED) {
     if (msg.params && msg.params.alternate_intents) {
       params.alternate_intents = msg.params.alternate_intents;
     }
+    verifyOptionalInputs(node, msg, config, params);
+    return true;
+  }
+
+  function verifyOptionalInputs(node, msg, config, params) {
     // next 3 not documented but present in WDC Node SDK.
     // optional output
     if (msg.params && msg.params.output) {
@@ -73,7 +79,6 @@ module.exports = function (RED) {
     if (msg.params && msg.params.intents) {
       params.intents = msg.params.intents;
     }
-    return true;
   }
 
   function verifyServiceCredentials(node, msg) {
