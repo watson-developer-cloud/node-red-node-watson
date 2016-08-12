@@ -53,11 +53,10 @@ module.exports = function (RED) {
           node.error(message, msg);
           return;
         }
-        var params = {
+        var rankername, params = {
           training_data: msg.payload
         };
 
-        var rankername;
         (config.rankername !== '') ? rankername = config.rankername : rankername = msg.ranker_name;
         if (rankername) {
           params.training_metadata = '{\"name\": \"'+rankername+'\"}';
@@ -129,7 +128,8 @@ module.exports = function (RED) {
         var clusterid;
         (config.clusterid !== '') ? clusterid = config.clusterid : clusterid = msg.cluster_id;
         var collectionname;
-        (config.collectionname !== '') ? collectionname = config.collectionname : collectionname = msg.collection_name;
+        (config.collectionname !== '') ? collectionname = config.collectionname
+         : collectionname = msg.collection_name;
         var params = {
           cluster_id: clusterid,
           collection_name: collectionname
@@ -259,7 +259,8 @@ module.exports = function (RED) {
           var clusterid;
           (config.clusterid !== '') ? clusterid = config.clusterid : clusterid = msg.cluster_id;
           var configname;
-          (config.configname !== '') ? configname = config.configname : configname = msg.configuration_name;
+          (config.configname !== '') ? configname = config.configname
+           : configname = msg.configuration_name;
           var params = {
             cluster_id: clusterid,
             config_name: configname,
