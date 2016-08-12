@@ -48,8 +48,13 @@
     <ul>
     <li><code>msg.payload</code> : the message of the conversation to analyse; Format: String </li>
     <li><code>msg.params.workspace_id</code> : unique identifier of the workspace to be used. Could be also configured in the node. Format: String </li>
-    <li><code>msg.params.context</code> : A optional context object that includes state information for the conversation. When you send multiple requests for the same conversation, include the context object from the response. (<a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">documentation</a>). Format: JSON </li>
+    <li><code>msg.params.context</code> (optional): A context object that includes state information for the conversation. When you send multiple requests for the same conversation, include the context object from the response. (<a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">documentation</a>). Format: JSON </li>
+    <li><code>msg.params.alternate_intents</code> (optional) : whether to return more than one intent. Default is false. Set to true to return all matching intents. For example, return all intents when the confidence is not high to allow users to choose their intent.</li>
+    <li><code>msg.params.output</code> (optional) : see API documentation </li>
+    <li><code>msg.params.entities</code> (optional) : see API documentation </li>
+    <li><code>msg.params.output</code> (optional) : see API documentation </li>
     </ul>
+    <p>See <a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">Conversation API documentation</a> for details.</p>
     <p>All Results will made available at <code>msg.payload</code> in JSON format. Check the  <a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">documentation</a> for details.</p>
 
     <p><b>Important</b> : before using this node, a workspace must be created and configured using the Watson Conversation Tool available in Bluemix, in the Watson Conversation instance detail page.</p>
