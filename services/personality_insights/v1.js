@@ -15,9 +15,10 @@
  **/
 
 module.exports = function (RED) {
-  var cfenv = require('cfenv');
+  var cfenv = require('cfenv'),
+  payloadutils = require('../../utilities/payload-utils');
 
-  var services = cfenv.getAppEnv().services, 
+  var services = cfenv.getAppEnv().services,
     service;
 
   var username, password;
@@ -35,7 +36,8 @@ module.exports = function (RED) {
 
   function Node(config) {
     RED.nodes.createNode(this,config);
-    var node = this;
+    var node = this,
+    wc = payloadutils.word_count(config.lang);
 
     this.on('input', function (msg) {
       if (!msg.payload) {
@@ -43,7 +45,7 @@ module.exports = function (RED) {
         node.error(message, msg)
         return;
       }
-      if (msg.payload.split(' ').length < 100) {
+      if (wc(msg.payload) < 100) {
         var message = 'Personality insights requires a minimum of one hundred words.';
         node.error(message, msg);
         return;
@@ -57,7 +59,7 @@ module.exports = function (RED) {
         node.error(message, msg);
         return;
       }
- 
+
       var watson = require('watson-developer-cloud');
 
       var personality_insights = watson.personality_insights({
@@ -86,3 +88,4 @@ module.exports = function (RED) {
     }
   });
 };
+
