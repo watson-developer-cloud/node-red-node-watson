@@ -8,7 +8,11 @@ Node-RED Watson Nodes for IBM Bluemix
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 ### New in version 0.4.10
+- Conversation : added optional alternate_intents, output, entities, intents in input params + some bug fix. (node object not used anymore to store "message" scoped data)
+- Retrieve and Rank : allow parameters to be passed into the retrieve and rank nodes on the msg object
 - Moved Relationship Extraction and Concept Insights nodes to the deprecated list.
+- Nodes are using Watson SDK for Node.js  v2.1.0
+
 
 ### New in version 0.4.9
 - Added in German and Japanese support to Natural Language Classifier node
