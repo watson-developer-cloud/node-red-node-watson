@@ -57,8 +57,10 @@ module.exports = function (RED) {
           training_data: msg.payload
         };
 
-        if (config.rankername) {
-          params.training_metadata = '{\"name\": \"'+config.rankername+'\"}';
+        var rankername;
+        (config.rankername !== '') ? rankername = config.rankername : rankername = msg.ranker_name;
+        if (rankername) {
+          params.training_metadata = '{\"name\": \"'+rankername+'\"}';
         }
         node.status({fill:'blue',shape:'ring',text:'Uploading training data'});
         retrieve_and_rank.createRanker(params, function(err, res) {
@@ -79,8 +81,10 @@ module.exports = function (RED) {
 
     this.on('input', function(msg) {
       setupRankRetrieveNode(msg,config,this,function(retrieve_and_rank) {
+        var rankerid;
+        (config.rankerid !== '') ? rankerid = config.rankerid : rankerid = msg.ranker_id;
         var params = {
-          ranker_id: config.rankerid
+          ranker_id: rankerid
         }
         switch (config.mode) {
           case 'list':
@@ -122,14 +126,19 @@ module.exports = function (RED) {
     this.on('input', function(msg) {
       setupRankRetrieveNode(msg,config,this,function(retrieve_and_rank) {
 
+        var clusterid;
+        (config.clusterid !== '') ? clusterid = config.clusterid : clusterid = msg.cluster_id;
+        var collectionname;
+        (config.collectionname !== '') ? collectionname = config.collectionname : collectionname = msg.collection_name;
         var params = {
-          cluster_id: config.clusterid,
-          collection_name: config.collectionname
+          cluster_id: clusterid,
+          collection_name: collectionname
         };
         //Get a Solr client for indexing and searching documents.
         var solrClient = retrieve_and_rank.createSolrClient(params);
 
-        var ranker_id = config.rankerid;
+        var rankerid;
+        (config.rankerid !== '') ? rankerid = config.rankerid : rankerid = msg.ranker_id;
         var question = msg.payload;
 
         var query;
@@ -137,7 +146,7 @@ module.exports = function (RED) {
         if(config.searchmode === 'search') {
           query = qs.stringify({q: question, fl: 'id,title'});
         } else {
-          query = qs.stringify({q: question, ranker_id: ranker_id, fl: 'id,title'});
+          query = qs.stringify({q: question, ranker_id: rankerid, fl: 'id,title'});
         }
 
         solrClient.get('fcselect', query, function(err, searchResponse) {
@@ -192,8 +201,10 @@ module.exports = function (RED) {
 
     this.on('input', function(msg) {
       setupRankRetrieveNode(msg,config,this,function(retrieve_and_rank) {
+        var clusterid;
+        (config.clusterid !== '') ? clusterid = config.clusterid : clusterid = msg.cluster_id;
         var params = {
-          cluster_id: config.clusterid
+          cluster_id: clusterid
         }
         switch (config.mode) {
           case 'list':
@@ -245,9 +256,13 @@ module.exports = function (RED) {
         }
 
         var uploadConfig = function(filePath,cb) {
+          var clusterid;
+          (config.clusterid !== '') ? clusterid = config.clusterid : clusterid = msg.cluster_id;
+          var configname;
+          (config.configname !== '') ? configname = config.configname : configname = msg.configuration_name;
           var params = {
-            cluster_id: config.clusterid,
-            config_name: config.configname,
+            cluster_id: clusterid,
+            config_name: configname,
             config_zip_path: filePath
           };
           if (!params.cluster_id || !params.config_name) {
@@ -283,9 +298,13 @@ module.exports = function (RED) {
 
     this.on('input', function(msg) {
       setupRankRetrieveNode(msg,config,this,function(retrieve_and_rank) {
+        var clusterid;
+        (config.clusterid !== '') ? clusterid = config.clusterid : clusterid = msg.cluster_id;
+        var configname;
+        (config.configname !== '') ? configname = config.configname : configname = msg.configuration_name;
         var params = {
-          cluster_id: config.clusterid,
-          config_name: config.configname
+          cluster_id: clusterid,
+          config_name: configname
         }
         switch (config.mode) {
           case 'list':
@@ -354,9 +373,14 @@ module.exports = function (RED) {
 
     this.on('input', function(msg) {
       setupRankRetrieveNode(msg,config,this,function(retrieve_and_rank) {
+        var clusterid;
+        (config.clusterid !== '') ? clusterid = config.clusterid : clusterid = msg.cluster_id;
+        var collectionname;
+        (config.collectionname !== '') ? collectionname = config.collectionname : collectionname = msg.collection_name;
+        
         var params = {
-          cluster_id: config.clusterid,
-          collection_name: config.collectionname
+          cluster_id: clusterid,
+          collection_name: collectionname
         }
         if (!params.cluster_id || !params.collection_name) {
           var message = 'Missing cluster id or collection name';
@@ -366,11 +390,13 @@ module.exports = function (RED) {
 
         switch (config.mode) {
           case 'create':
-            if (!config.configname) {
+            var configname;
+             (config.configname !== '') ? configname = config.configname : configname = msg.configuration_name;
+            params.config_name = configname;
+            if (!configname) {
               var message = 'Missing configuration name';
               return node.error(message, msg);
             } else {
-              params.config_name = config.configname;
               node.status({fill: 'blue', shape: 'ring', text: 'Creating solr collection' });
               retrieve_and_rank.createCollection(params,function(err,res) {
                 node.status({});
