@@ -9,7 +9,7 @@ Node-RED Watson Nodes for IBM Bluemix
 
 ### New in version 0.4.10
 - Conversation : added support for optional alternate_intents, output, entities and intents.
-- Converstaion : Bugfixes
+- Conversation : Bugfixes
 - Retrieve and Rank : allow parameters to be passed into the nodes on the msg object
 - Moved Relationship Extraction and Concept Insights nodes to the deprecated list.
 - Updated dependency to watson-developer-cloud node-SDK v2.1.0
