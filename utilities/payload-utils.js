@@ -69,7 +69,7 @@ PayloadUtils.prototype = {
 
   // Function that is returns a function to count
   // the characters in each language.
-  word_count: function(ct) {
+  word_count(ct) {
     var kuromoji = require('kuromoji'),
       fn = function(txt) {
         // default
