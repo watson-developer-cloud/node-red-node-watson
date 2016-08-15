@@ -16,7 +16,7 @@
 
 module.exports = function (RED) {
   var cfenv = require('cfenv'),
-  payloadutils = require('../../utilities/payload-utils');
+    payloadutils = require('../../utilities/payload-utils');
 
   var services = cfenv.getAppEnv().services,
     service;
