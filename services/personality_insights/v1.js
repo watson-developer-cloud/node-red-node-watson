@@ -37,7 +37,7 @@ module.exports = function (RED) {
   function Node(config) {
     RED.nodes.createNode(this,config);
     var node = this,
-    wc = payloadutils.word_count(config.lang);
+      wc = payloadutils.word_count(config.lang);
 
     this.on('input', function (msg) {
       if (!msg.payload) {

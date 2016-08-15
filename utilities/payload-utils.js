@@ -66,23 +66,29 @@ PayloadUtils.prototype = {
     });
     request(url).pipe(wstream);
   },
+
   // Function that is returns a function to count
   // the characters in each language.
   word_count: function(ct) {
     var kuromoji = require('kuromoji'),
-      fn = function(txt) { // default
+      fn = function(txt) {
+        // default
         return txt.split(' ').length;
       },
       dic_path = '/../node_modules/kuromoji/dist/dict',
       dic_dir = path.normalize(__dirname + dic_path),
       tokenizer = null;
+
     if (ct === 'ja') {
-            fn = function(txt) {
-              return tokenizer.tokenize(txt).length;
-            };
-            kuromoji.builder({dicPath: dic_dir}).build(function(err, tknz) {
-              tokenizer = tknz;
-            });
+      fn = function(txt) {
+        return tokenizer.tokenize(txt).length;
+      };
+      kuromoji.builder({dicPath: dic_dir}).build(function(err, tknz) {
+        if (err) {
+          throw err;
+        }
+        tokenizer = tknz;
+      });
     }
     return fn;
   }
