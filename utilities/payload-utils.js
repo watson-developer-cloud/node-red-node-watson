@@ -71,24 +71,24 @@ PayloadUtils.prototype = {
   // the characters in each language.
   word_count(ct) {
     var kuromoji = require('kuromoji'),
-      fn = function(txt) {
+      fn = function(txt, cb) {
         // default
-        return txt.split(' ').length;
+        return cb(txt.split(' ').length);
       },
       dic_path = '/../node_modules/kuromoji/dist/dict',
       dic_dir = path.normalize(__dirname + dic_path),
       tokenizer = null;
 
     if (ct === 'ja') {
-      fn = function(txt) {
-        return tokenizer.tokenize(txt).length;
+      fn = function(txt, cb) {
+        kuromoji.builder({dicPath: dic_dir}).build(function(err, tknz) {
+          if (err) {
+            throw err;
+          }
+          tokenizer = tknz;
+          return cb(tokenizer.tokenize(txt).length);
+        });
       };
-      kuromoji.builder({dicPath: dic_dir}).build(function(err, tknz) {
-        if (err) {
-          throw err;
-        }
-        tokenizer = tknz;
-      });
     }
     return fn;
   }

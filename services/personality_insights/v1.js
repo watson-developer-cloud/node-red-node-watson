@@ -40,44 +40,49 @@ module.exports = function (RED) {
       wc = payloadutils.word_count(config.lang);
 
     this.on('input', function (msg) {
+      var self = this;
+
       if (!msg.payload) {
         var message = 'Missing property: msg.payload';
         node.error(message, msg)
         return;
       }
-      if (wc(msg.payload) < 100) {
-        var message = 'Personality insights requires a minimum of one hundred words.';
-        node.error(message, msg);
-        return;
-      }
-
-      username = username || this.credentials.username;
-      password = password || this.credentials.password;
-
-      if (!username || !password) {
-        var message = 'Missing Personality Insights service credentials';
-        node.error(message, msg);
-        return;
-      }
-
-      var watson = require('watson-developer-cloud');
-
-      var personality_insights = watson.personality_insights({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
-
-      node.status({fill:"blue", shape:"dot", text:"requesting"});
-      personality_insights.profile({text: msg.payload, language: config.lang}, function (err, response) {
-        node.status({})
-        if (err) {
-          node.error(err, msg);
-        } else{
-          msg.insights = response.tree;
+      wc(msg.payload, function (length) {
+        if (length < 100) {
+          var message = 'Personality insights requires a minimum of one hundred words.';
+          node.error(message, msg);
+          return;
         }
 
-        node.send(msg);
+        username = username || self.credentials.username;
+        password = password || self.credentials.password;
+
+        if (!username || !password) {
+          var message = 'Missing Personality Insights service credentials';
+          node.error(message, msg);
+          return;
+        }
+
+        var watson = require('watson-developer-cloud');
+
+        var personality_insights = watson.personality_insights({
+          username: username,
+          password: password,
+          version: 'v2'
+        });
+
+        node.status({fill:"blue", shape:"dot", text:"requesting"});
+        personality_insights.profile({text: msg.payload, language: config.lang}, function (err, response) {
+          node.status({})
+          if (err) {
+            node.error(err, msg);
+          } else{
+            msg.insights = response.tree;
+          }
+
+          node.send(msg);
+        });
+
       });
     });
   }
