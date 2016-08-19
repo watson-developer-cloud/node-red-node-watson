@@ -16,7 +16,8 @@
 var url = require('url'),
   fs = require('fs'),
   fileType = require('file-type'),
-  request = require('request');
+  request = require('request'),
+  path = require('path');
 
 function PayloadUtils() {}
 
@@ -32,7 +33,7 @@ PayloadUtils.prototype = {
   },
 
   // Function that is syncing up the asynchronous nature of the stream
-  // so that the full file can be sent to the API. 
+  // so that the full file can be sent to the API.
   stream_buffer: function(file, contents, cb) {
     fs.writeFile(file, contents, function(err) {
       if (err) {
@@ -43,7 +44,7 @@ PayloadUtils.prototype = {
   },
 
   // Function that is syncing up the asynchronous nature of the stream
-  // so that the full file can be sent to the API. 
+  // so that the full file can be sent to the API.
   stream_url: function(file, url, cb) {
     var wstream = fs.createWriteStream(file);
 
@@ -64,6 +65,32 @@ PayloadUtils.prototype = {
       });
     });
     request(url).pipe(wstream);
+  },
+
+  // Function that is returns a function to count
+  // the characters in each language.
+  word_count(ct) {
+    var kuromoji = require('kuromoji'),
+      fn = function(txt, cb) {
+        // default
+        return cb(txt.split(' ').length);
+      },
+      dic_path = '/../node_modules/kuromoji/dist/dict',
+      dic_dir = path.normalize(__dirname + dic_path),
+      tokenizer = null;
+
+    if (ct === 'ja') {
+      fn = function(txt, cb) {
+        kuromoji.builder({dicPath: dic_dir}).build(function(err, tknz) {
+          if (err) {
+            throw err;
+          }
+          tokenizer = tknz;
+          return cb(tokenizer.tokenize(txt).length);
+        });
+      };
+    }
+    return fn;
   }
 };
 
