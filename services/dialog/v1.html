@@ -16,8 +16,8 @@
 
 <script type="text/javascript">
     RED.nodes.registerType('service-dialog', {
-            category: 'IBM Watson',
-            defaults: { 
+            category: 'Watson Deprecated',
+            defaults: {
                 name: {value: ""},
                 mode: {value: "converse"},
 				dialog: {value: ""},
@@ -35,9 +35,9 @@
             credentials: {
               username: {type:"text"},
               password: {type:"password"}
-            },						
+            },
 
-            oneditprepare: function() {					
+            oneditprepare: function() {
 				$('#node-input-mode').change(function () {
 					var mode = $('#node-input-mode').val();
 					if (mode == "list" || mode == "create") {
@@ -55,7 +55,7 @@
 						$('.form-row.mode.dialog').show();
 					}
 				})
-			  
+
                 $.getJSON('service-dialog/vcap/')
                   .done(function (service) {
                     $('.credentials').toggle(!service);
@@ -83,7 +83,7 @@
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
-    </div>	
+    </div>
     <div class="form-row">
         <label for="node-input-mode"><i class="fa fa-question"></i> Mode</label>
         <select type="text" id="node-input-mode" style="display: inline-block; width: 70%;" >
@@ -91,9 +91,9 @@
             <option value="list">List Available Dialogs</option>
             <option value="startconverse">Start Conversation</option>
             <option value="converse">Continue Conversation</option>
-            <option value="getprofile">List Profile Variables</option>	
-            <option value="delete">Delete a Dialog</option>  
-            <option value="deleteall">Delete all Dialogs</option>  
+            <option value="getprofile">List Profile Variables</option>
+            <option value="delete">Delete a Dialog</option>
+            <option value="deleteall">Delete all Dialogs</option>
         </select>
     </div>
     <div class="form-row mode dialog">
@@ -108,10 +108,14 @@
         <label for="node-input-converse"><i class="fa fa-tag"></i> Conversation ID</label>
         <input type="text" id="node-input-converse" placeholder="Conversation ID">
     </div>
-	
+
 </script>
 
 <script type="text/x-red" data-help-name="service-dialog">
+    <p><b>NB:</b> The Watson Dialog service hase been deprecated. Once the service
+      has been switched off this node will no longer work. The node will be removed from the palette in a
+      future release. </p>
+    <br/>
     <p>The IBM Watson Dialog service enables a developer to automate branching conversations between a user and your application. The Dialog service enables your applications to use natural language to automatically respond to user questions, cross-sell and up-sell, walk users through processes or applications, or even hand-hold users through difficult tasks. (<a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/dialog.html">service documentation</a>)</p>
 
     <p>Use the drop-down menu in the node configuration window to select the required mode.</p>
@@ -131,47 +135,47 @@
     <p><b>Note</b> : the Watson Dialog API support 3 files types : encrypted .mct, .json or .xml. This node currently supports only .xml</p>
     <p></p>
     <p><b>List Mode :</b></p>
-    <p>A list of the available dialogs is returned. For each a dialog id is given, this id is needed to 
+    <p>A list of the available dialogs is returned. For each a dialog id is given, this id is needed to
 	start a conversation.</p>
     <p>The list from the service will be returned on <code>msg.dialog</code>.</p>
     <p></p>
     <p><b>Start Conversation Mode :</b></p>
     <p>The conversation is started and the introduction salutation from the dialog is returned.</p>
-    <p>The Dialog Id can be passed either as a property or through a function</p>	
+    <p>The Dialog Id can be passed either as a property or through a function</p>
 	<pre><code>msg.payload="Hello !";
 msg.dialog_params = {};
 msg.dialog_params["dialog_id"] = "dialog id";
 return msg;</code></pre>
-	<p>In addition a client id and a converstion id are returned. These ids are needed to continue a conversation.</p> 
+	<p>In addition a client id and a converstion id are returned. These ids are needed to continue a conversation.</p>
     <p>The salutation from the service will be returned on <code>msg.dialog</code>.</p>
     <p></p>
     <p><b>Conversation Mode :</b></p>
-    <p>The conversation is continued.</p> 
-    <p>The Client and Conversation IDs can be passed either as properties or through a function</p>	
+    <p>The conversation is continued.</p>
+    <p>The Client and Conversation IDs can be passed either as properties or through a function</p>
 	<pre><code>msg.payload="what type of pizza do you have ?";
 msg.dialog_params = {};
 msg.dialog_params["client_id"] = "client id";
 msg.dialog_params["converse_id"] = "conversation id";
-return msg;</code></pre>	
+return msg;</code></pre>
     <p>The response from the service will be returned on <code>msg.dialog</code>.</p>
     <p></p>
     <p><b>List Profile Variables :</b></p>
     <p>Retrieves the profile variables that the dialog has set during the conversation. These can be
-	used to determine the state of the conversation, and by an applicaiton to perform any further actions.</p> 
-    <p>The Dialog, Client and Conversation IDs can be passed either as properties or through a function</p>	
+	used to determine the state of the conversation, and by an applicaiton to perform any further actions.</p>
+    <p>The Dialog, Client and Conversation IDs can be passed either as properties or through a function</p>
 	<pre><code>msg.dialog_params = {};
 msg.dialog_params["dialog_id"] = "dialog id";
 msg.dialog_params["client_id"] = "client id";
 msg.dialog_params["converse_id"] = "conversation id";
-return msg;</code></pre>	
+return msg;</code></pre>
     <p>The response from the service will be returned on <code>msg.dialog</code>.</p>
     <p></p>
     <p><b>Delete a Dialog :</b></p>
     <p>Delete all Dialogs and associated data (conversations, profiles variables). To be used with caution</p>
-    <p>The Dialog ID can be passed either as properties or through a function</p> 
+    <p>The Dialog ID can be passed either as properties or through a function</p>
     <pre><code>msg.dialog_params = {};
 msg.dialog_params["dialog_id"] = "dialog id";
-return msg;</code></pre>   
+return msg;</code></pre>
     <p></p>
     <p><b>Delete a Dialog :</b></p>
     <p>Delete a Dialog and all associated data (conversations, profiles variables). </p>
@@ -181,8 +185,7 @@ return msg;</code></pre>
     <p><b>Notice</b>: the Delete All mode is to be used with caution</p>
     <p></p>
 
-    <p>For more information about the Watson Dialog service, 
+    <p>For more information about the Watson Dialog service,
 	read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/dialog.html">documentation</a>.</p>
-	
-</script>
 
+</script>
