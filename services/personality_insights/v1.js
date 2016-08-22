@@ -63,12 +63,11 @@ module.exports = function (RED) {
           return;
         }
 
-        var watson = require('watson-developer-cloud');
+        var PersonalityInsightsV2 = require('watson-developer-cloud/personality-insights/v2');
 
-        var personality_insights = watson.personality_insights({
+        var personality_insights = new PersonalityInsightsV2({
           username: username,
-          password: password,
-          version: 'v2'
+          password: password
         });
 
         node.status({fill:"blue", shape:"dot", text:"requesting"});
@@ -93,4 +92,3 @@ module.exports = function (RED) {
     }
   });
 };
-
