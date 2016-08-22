@@ -7,6 +7,8 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.4.12
+
 ### New in version 0.4.11
 - Corrected word count for Japanese text in Personality Insights nodes.
 - Move Dialog to deprecated list.
