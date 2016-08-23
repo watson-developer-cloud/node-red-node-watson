@@ -11,6 +11,7 @@ Node-RED Watson Nodes for IBM Bluemix
 
 ### New in version 0.4.12
 - Emergency fix for node.js version compatibility problem, in payload-utils
+- Emergency fix for Watson Language Translation node detected proactively. (not reported)
 
 ### New in version 0.4.11
 - Corrected word count for Japanese text in Personality Insights nodes.

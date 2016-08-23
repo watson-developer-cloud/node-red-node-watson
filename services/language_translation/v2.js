@@ -220,6 +220,7 @@ module.exports = function (RED) {
                   msg.payload = 'Model ' + model.name + ' successfully sent for training with id: ' + model.model_id;
                   msg.trained_model_id = model.model_id;
                   node.send(msg);
+                  node.status({});
                 }
               }
             );
