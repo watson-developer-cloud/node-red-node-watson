@@ -250,7 +250,6 @@ module.exports = function (RED) {
                 text: 'call to translation service failed'
               });
               node.error(err, msg);
-              console.log('getStatus ('+trainid+') Error : ',err, model);
             } else {
               msg.payload = model.status;
               msg.translation = model;
