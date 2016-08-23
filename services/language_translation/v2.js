@@ -33,7 +33,7 @@ module.exports = function (RED) {
   // Not ever used, and codeacy complains about it.
   // var services = cfenv.getAppEnv().services;
 
-  var username, password, sUsername, sPassword;
+  var username = null, password = null, sUsername = null, sPassword = null;
 
   var service = cfenv.getAppEnv().getServiceCreds(/language translation/i)
 
@@ -93,6 +93,14 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
+    // The dynamic nature of this node has caused problems with the password field. it is
+    // hidden but not a credential. If it is treated as a credential, it gets lost when there
+    // is a request to refresh the model list.
+    // Credentials are needed for each of the modes.
+
+    username = sUsername || this.credentials.username;
+    password = sPassword || this.credentials.password || config.password;
+
     // this does nothing, but am keeping it with a commented out signature, as
     // it might come in handy in the future.
     this.on('close', function() {
@@ -105,15 +113,6 @@ module.exports = function (RED) {
     this.on('input', function (msg) {
 
       var message = '';
-
-      // The dynamic nature of this node has caused problems with the password field. it is
-      // hidden but not a credential. If it is treated as a credential, it gets lost when there
-      // is a request to refresh the model list.
-      //
-      // Credentials are needed for each of the modes.
-
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
 
       if (!username || !password) {
         message = 'Missing Language Translation service credentials';
