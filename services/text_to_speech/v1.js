@@ -43,27 +43,25 @@ module.exports = function(RED) {
   });
 
   // API used by widget to fetch available models
- RED.httpAdmin.get('/watson-text-to-speech/voices', function (req, res) {
-   var tts = watson.text_to_speech({
-     username: sUsername ? sUsername : req.query.un,
-     password: sPassword ? sPassword : req.query.pwd,
-     version: 'v1',
-     url: 'https://stream.watsonplatform.net/text-to-speech/api'
-   });
+  RED.httpAdmin.get('/watson-text-to-speech/voices', function (req, res) {
+    var tts = watson.text_to_speech({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd,
+      version: 'v1',
+      url: 'https://stream.watsonplatform.net/text-to-speech/api'
+    });
 
-   tts.voices({}, function(err, voices){
-     if (err) {
-       if (!err.error) {
-         err.error = 'Error ' + err.code + ' in fetching voices';
-       }
-       res.json(err);
-     } else {
-       res.json(voices);
-     }
-   });
- });
-
-
+    tts.voices({}, function(err, voices){
+      if (err) {
+        if (!err.error) {
+          err.error = 'Error ' + err.code + ' in fetching voices';
+        }
+        res.json(err);
+      } else {
+        res.json(voices);
+      }
+    });
+  });
 
   function Node(config) {
     RED.nodes.createNode(this, config);
@@ -77,7 +75,7 @@ module.exports = function(RED) {
       }
 
       username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password; ;
+      password = sPassword || this.credentials.password || config.password; 
 
       if (!username || !password) {
         var message = 'Missing Speech To Text service credentials';
