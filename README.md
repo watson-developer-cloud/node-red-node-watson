@@ -8,6 +8,8 @@ Node-RED Watson Nodes for IBM Bluemix
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 ### New in version 0.4.14
+- The dialog for the Test to Speech service now loads available voices dynamically. This allows
+new voices and languages to be identified without requiring a further code change. 
 
 ### New in version 0.4.13
 - Emergency fix for Watson Language Translation node. Bluemix credentials read too late.
