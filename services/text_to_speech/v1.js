@@ -16,18 +16,51 @@
 
 module.exports = function(RED) {
   var cfenv = require('cfenv');
+  var watson = require('watson-developer-cloud');
 
-  var username, password;
+  // Require the Cloud Foundry Module to pull credentials from bound service
+  // If they are found then the username and password will be stored in
+  // the variables sUsername and sPassword.
+  //
+  // This separation between sUsername and username is to allow
+  // the end user to modify the credentials when the service is not bound.
+  // Otherwise, once set credentials are never reset, resulting in a frustrated
+  // user who, when he errenously enters bad credentials, can't figure out why
+  // the edited ones are not being taken.
+
+  var username, password, sUsername, sPassword;
 
   var service = cfenv.getAppEnv().getServiceCreds(/text to speech/i)
 
   if (service) {
-    username = service.username;
-    password = service.password;
+    sUsername = service.username;
+    sPassword = service.password;
   }
 
+  // Node RED Admin - fetch and set vcap services
   RED.httpAdmin.get('/watson-text-to-speech/vcap', function(req, res) {
     res.json(service ? {bound_service: true} : null);
+  });
+
+  // API used by widget to fetch available models
+  RED.httpAdmin.get('/watson-text-to-speech/voices', function (req, res) {
+    var tts = watson.text_to_speech({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd,
+      version: 'v1',
+      url: 'https://stream.watsonplatform.net/text-to-speech/api'
+    });
+
+    tts.voices({}, function(err, voices){
+      if (err) {
+        if (!err.error) {
+          err.error = 'Error ' + err.code + ' in fetching voices';
+        }
+        res.json(err);
+      } else {
+        res.json(voices);
+      }
+    });
   });
 
   function Node(config) {
@@ -41,16 +74,14 @@ module.exports = function(RED) {
         return;
       }
 
-      username = username || this.credentials.username;
-      password = password || this.credentials.password;
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password || config.password; 
 
       if (!username || !password) {
         var message = 'Missing Speech To Text service credentials';
         node.error(message, msg);
         return;
       }
-
-      var watson = require('watson-developer-cloud');
 
       var text_to_speech = watson.text_to_speech({
         username: username,
