@@ -158,11 +158,9 @@ module.exports = function (RED) {
       // it should be called here or after the service returns and passed
       // control back to cbdone.
       function performAction(audio, format, cbdone, cbcleanup) {
-        var speech_to_text = watson.speech_to_text({
+        var speech_to_text = new sttV1({
           username: username,
-          password: password,
-          version: 'v1',
-          url: 'https://stream.watsonplatform.net/speech-to-text/api'
+          password: password
         });
 
         // If we get to here then the audio is in one of the supported formats.
