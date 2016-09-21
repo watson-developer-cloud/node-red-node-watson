@@ -40,6 +40,7 @@
       "alchemy_language-v1": "services/alchemy_language/v1.js",
       "watson-language-identification-v1": "/services/language_identification/v1.js",
       "watson-language-translate-v1": "services/language_translation/v2.js",
+      "watson-language-translate-util-v1": "services/language_translation_util/v2.js",
       "watson-natural-language-classifier-v1": "services/natural_language_classifier/v1.js",
       "alchemy-news-v1": "services/alchemy_data_news/v1.js",
       "watson-personality-insights-v1": "services/personality_insights/v1.js",

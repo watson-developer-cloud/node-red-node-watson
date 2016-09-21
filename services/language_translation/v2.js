@@ -136,6 +136,38 @@ module.exports = function (RED) {
         version: 'v2'
       });
 
+      ///////////////////////////////////////////////////////////////////
+      // AAM - getting the local/global scope for the language translation
+      var globalContext = this.context().global; // AAM
+      var tmpdomain = globalContext.get("g_domain");
+      var tmpsrc = globalContext.get("g_src");
+      var tmpdest = globalContext.get("g_dest");
+      var tmpmodel_id = globalContext.get("g_model_id");
+      var result = tmpmodel_id.split("-", 2);
+
+      // AAM -
+
+      // checkbox option
+      if (config.lgparams2 == false) {
+        if (tmpmodel_id.length > 1) {
+          msg.model_id = tmpmodel_id;
+          msg.srclang = result[0];
+          msg.destlang = result[1];
+          } else {
+            msg.model_id = config.domain;
+            msg.srclang = config.srclang;
+            msg.destlang = config.destlang
+          }
+
+      } else {
+        msg.model_id = config.domain;
+        msg.srclang = config.srclang;
+        msg.destlang = config.destlang;
+
+      }
+      // AAM
+      ///////////////////////////////////////////////////////////////////
+
       // These are var functions that have been initialised here, so that
       // they are available for the instance of this node to use.
       // Tried to make these protoypes, but couldn't get them to be
@@ -306,6 +338,7 @@ module.exports = function (RED) {
       // The required fields are checked, before the relevant function is invoked.
       switch (action) {
       case 'translate':
+
         var domain = msg.domain || config.domain;
 
         if (!domain) {
