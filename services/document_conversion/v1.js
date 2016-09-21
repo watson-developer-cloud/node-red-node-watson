@@ -103,7 +103,7 @@ module.exports = function(RED) {
 	            text: 'Invalid URI'
 	          });
         } else {
-	        stream_payload(info.path, msg.payload, function(format) {
+          stream_payload(info.path, msg.payload, function(format) {
             if ('zip' === format) {
               var f = fs.readFileSync(info.path);
               if (isDocx(f)) {
@@ -111,7 +111,7 @@ module.exports = function(RED) {
                 fs.rename(info.path, newfilename, function(err){
                   if (err) {
                     node.warn('Unable to handle docx file.');
-                  	node.status({
+                    node.status({
           	            fill: 'red',
           	            shape: 'dot',
           	            text: 'Error handling docx file'
@@ -126,7 +126,7 @@ module.exports = function(RED) {
             } else {
               node.performConversion(msg,info.path);
             }
-	        });
+          });
         }
       });
     };
