@@ -10,7 +10,7 @@ Node-RED Watson Nodes for IBM Bluemix
 ### New in version 0.4.17
 - Fixed Document Conversion node to handle docx documents
 
-### New in version 0.4.15
+### New in version 0.4.16
 - Oops! fix to Speech to Text Node
 
 ### New in version 0.4.15
