@@ -98,8 +98,13 @@
                     'ja-JP': 'Japanese'
                   };
 
+  // sorting functions
+  tts.onlyUnique = function (value, index, self) {
+    return self.indexOf(value) === index;
+  }
+
   // Called to complete the languages selection table
-  function processLanguages() {
+  tts.processLanguages = function () {
     if (!tts.languages && tts.voices) {
       tts.languages = tts.voices.map(function(m) {
         return m.language;
@@ -107,7 +112,7 @@
     }
     if (tts.languages) {
       $('select#node-input-lang').empty();
-      var unique_langs = tts.languages.filter(onlyUnique);
+      var unique_langs = tts.languages.filter(tts.onlyUnique);
 
       unique_langs.forEach(function(l) {
         var selectedText = '';
@@ -127,13 +132,13 @@
   }
 
  // Populate the Voices selection field
- function populateVoices() {
+ tts.populateVoices = function () {
    if (!tts.voicenames && tts.voices) {
      tts.voicenames = tts.voices.map(function(m) {
        //return m.name.split('_')[1];
        return m.name;
      });
-     var unique_voices = tts.voicenames.filter(onlyUnique);
+     var unique_voices = tts.voicenames.filter(tts.onlyUnique);
      tts.voicenames = unique_voices;
    }
    if (!tts.voicedata && tts.voicenames){
@@ -171,14 +176,14 @@
 
 
   // Called to work through the voices, completing the dyanmic selection fields.
-  function processVoices() {
+  tts.processVoices = function () {
     if (tts.voices) {
-      processLanguages();
-      populateVoices();
+      tts.processLanguages();
+      tts.populateVoices();
     }
   }
 
-  function visibilityCheck()
+  tts.visibilityCheck = function ()
   {
     if (tts.voices) {
       $('label#node-label-message').parent().hide();
@@ -194,14 +199,14 @@
 
   // Function called when either when the voices have been retrieved, or
   // on dialog load, if the voices has already been retrieved
-  function postVoiceCheck(){
-    processVoices();
-    visibilityCheck();
+  tts.postVoiceCheck = function (){
+    tts.processVoices();
+    tts.visibilityCheck();
   }
 
   // Retrieve the available voices from the server, if data is returned, then
   // can enable the dynamic selection fields.
-  function getVoices(){
+  tts.getVoices = function (){
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
@@ -211,7 +216,7 @@
         $('label#node-label-message').text(data.error);
       } else if (data.voices) {
         tts.voices = data.voices;
-        postVoiceCheck();
+        tts.postVoiceCheck();
       }
     }).fail(function (err) {
       $('label#node-label-message').parent().show();
@@ -226,7 +231,7 @@
   // restart, the settings for the dynamic fields are lost.
   // So hidden (text) fields are being used to squirrel away the values, so that
   // they can be restored.
-  function restoreFromHidden() {
+  tts.restoreFromHidden = function () {
     tts.language_selected = $('#node-input-langhidden').val();
     $('select#node-input-lang').val(tts.language_selected);
 
@@ -236,19 +241,19 @@
 
   // Simple check that is only invoked if the service is not bound into bluemix. In this case the
   // user has to provide credentials. Once there are credentials, then the tts.voices are retrieved.
-  function checkCredentials() {
+  tts.checkCredentials = function () {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
     if (u && u.length && p) {
       if (!tts.voices) {
-        getVoices();
+        tts.getVoices();
       }
     }
   }
 
   // Language Setting has changed, modofy voice options appropriately
-  function checkLanguage(){
+  tts.checkLanguage = function (){
     //var lang = $('#node-input-lang').val();
     //$('#node-input-voice option.' + lang).show();
     //$('#node-input-voice option:not(.' + lang + ')').hide();
@@ -259,32 +264,32 @@
   }
 
   // Voice Setting has changed, modofy voice options appropriately
-  function checkVoice(){
+  tts.checkVoice = function (){
     tts.voice_selected = $('#node-input-voice').val();
   }
 
 
   // Register the onchange handlers
-  function registerHandlers() {
+  tts.registerHandlers = function () {
     $('#node-input-username').change(function(val){
-      checkCredentials();
+      tts.checkCredentials();
     });
     $('#node-input-password').change(function(val){
-      checkCredentials();
+      tts.checkCredentials();
     });
     $('#node-input-lang').change(function () {
-      checkLanguage();
-      populateVoices();
+      tts.checkLanguage();
+      tts.populateVoices();
     });
     $('#node-input-voice').change(function () {
-      checkVoice();
+      tts.checkVoice();
     });
 
   }
 
   // Function to be used at the start, as don't want to expose any fields, unless the models are
   // available. The models can only be fetched if the credentials are available.
-  function hideEverything() {
+  tts.hideEverything = function () {
     if (!stt.models) {
       $('label#node-label-message').parent().hide();
       $('select#node-input-lang').parent().hide();
@@ -294,17 +299,18 @@
 
   // This is the on edit prepare function, which will be invoked everytime the dialog
   // is shown.
-  function oneditprepare() {
-    hideEverything();
-    restoreFromHidden();
-    registerHandlers();
+  function ttsoneditprepare() {
+    console.log('In on Edit Prepare');
+    tts.hideEverything();
+    tts.restoreFromHidden();
+    tts.registerHandlers();
 
     $.getJSON('watson-text-to-speech/vcap/')
      .done(function (service) {
-       restoreFromHidden();
+       tts.restoreFromHidden();
         $('.credentials').toggle(!service);
-        if (!tts.voices) {getVoices();}
-        else {postVoiceCheck();}
+        if (!tts.voices) {tts.getVoices();}
+        else {tts.postVoiceCheck();}
       })
     .fail(function () {
       $('.credentials').show();
@@ -314,7 +320,7 @@
   }
 
   // Save the values in the dyanmic lists to the hidden fields.
-  function oneditsave(){
+  function ttsoneditsave(){
     $('#node-input-langhidden').val(tts.language_selected);
     $('#node-input-voicehidden').val(tts.voice_selected);
   }
@@ -346,8 +352,8 @@
             labelStyle: function() {
                 return this.name ? "node_label_italic" : "";
             },
-            oneditsave: oneditsave,
-            oneditprepare: oneditprepare
+            oneditsave: ttsoneditsave,
+            oneditprepare: ttsoneditprepare
         });
      })();
 </script>
