@@ -67,7 +67,7 @@ module.exports = function (RED) {
         if (msg.user) {
           params.context = node.context().flow.get('context-' + msg.user);
         } else {
-          node.warn('Missing msg.user property. Multiuser conversation may not function as expected.', msg);
+          node.warn('Missing msg.user property, using global context. Multiuser conversation may not function as expected.', msg);
           params.context = node.context().flow.get('context');
         }
       } else {
@@ -86,7 +86,13 @@ module.exports = function (RED) {
     // option context in JSON format
     if (msg.params && msg.params.context) {
       if (config.context) {
-        node.warn('Overriding saved context');
+        node.warn('Overridden saved context');
+
+        if (msg.user) {
+          node.context().flow.set('context-' + msg.user, null);
+        } else {
+          node.context().flow.set('context', null);
+        }
       }
       params.context = msg.params.context;
     }
