@@ -62,8 +62,17 @@ module.exports = function (RED) {
     // mandatory message
     params.input = {text:msg.payload};
 
-    if (!config.multiuser) {
-      params.context = node.context().flow.get('context');
+    if (config.context) {
+      if (config.multiuser) {
+        if (msg.user) {
+          params.context = node.context().flow.get('context-' + msg.user);
+        } else {
+          node.warn('Missing msg.user property. Multiuser conversation may not function as expected.', msg);
+          params.context = node.context().flow.get('context');
+        }
+      } else {
+        params.context = node.context().flow.get('context');
+      }
     }
 
     // workspaceid can be either configured in the node,
@@ -76,6 +85,9 @@ module.exports = function (RED) {
     }
     // option context in JSON format
     if (msg.params && msg.params.context) {
+      if (config.context) {
+        node.warn('Overriding saved context');
+      }
       params.context = msg.params.context;
     }
     // optional alternate_intents : boolean
@@ -106,7 +118,7 @@ module.exports = function (RED) {
     return true;
   }
 
-  function processResponse(err, body, node, msg, multiuser) {
+  function processResponse(err, body, node, msg, config) {
     if (err != null && body == null) {
       node.error(err);
       node.status({fill:'red', shape:'ring',
@@ -116,19 +128,26 @@ module.exports = function (RED) {
     }
     msg.payload = body;
 
-    if (!multiuser) {
-      node.context().flow.set('context', body.context);
+    if (config.context) {
+      if (config.multiuser && msg.user) {
+        node.context().flow.set('context-' + msg.user, body.context);
+      } else {
+        if (msg.user) {
+          node.warn('msg.user ignored when multiple users not set in node');
+        }
+        node.context().flow.set('context', body.context);
+      }
     }
 
     node.send(msg);
     node.status({});
   }
 
-  function execute(params, node, msg, multiuser) {
+  function execute(params, node, msg, config) {
     node.status({fill:'blue', shape:'dot' , text:'Calling Conversation service ...'});
     // call POST /message through SDK
     node.service.message(params, function(err, body) {
-      processResponse(err, body, node, msg, multiuser);
+      processResponse(err, body, node, msg, config);
     });
   }
 
@@ -155,7 +174,7 @@ module.exports = function (RED) {
       if (!b) {
         return;
       }
-      execute(params, node, msg, config.multiuser);
+      execute(params, node, msg, config);
     });
   }
 
