@@ -36,7 +36,11 @@
         <label for="node-input-workspaceid"><i class="fa fa-tag"></i> Workspace ID</label>
         <input type="text" id="node-input-workspaceid" placeholder="WorkspaceID">
     </div>
-
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-multiuser" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-multiuser" style="width: 70%;"> Multiple Users</label>
+    </div>
 </script>
 
 
@@ -74,7 +78,8 @@
             category: 'IBM Watson',
             defaults: {
               name: {value: ""},
-              workspaceid: {value: ""}
+              workspaceid: {value: ""},
+              multiuser: {value: false}
             },
             credentials: {
               username: {type:"text"},
@@ -102,10 +107,7 @@
                   .always(function () {
                     $('#credentials-check').hide();
                   })
-
             }
         });
-
-
     })();
 </script>

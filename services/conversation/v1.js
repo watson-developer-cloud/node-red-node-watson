@@ -15,8 +15,8 @@
  **/
 
 module.exports = function (RED) {
-  var cfenv = require('cfenv'), 
-    ConversationV1 = require('watson-developer-cloud/conversation/v1'), 
+  var cfenv = require('cfenv'),
+    ConversationV1 = require('watson-developer-cloud/conversation/v1'),
     service = null, sUsername = null, sPassword = null;
 
   service = cfenv.getAppEnv().getServiceCreds(/conversation/i);
@@ -61,6 +61,11 @@ module.exports = function (RED) {
     }
     // mandatory message
     params.input = {text:msg.payload};
+
+    if (!config.multiuser) {
+      params.context = node.context().flow.get('context');
+    }
+
     // workspaceid can be either configured in the node,
     // or sent into msg.params.workspace_id
     if (config.workspaceid && config.workspaceid) {
@@ -101,24 +106,29 @@ module.exports = function (RED) {
     return true;
   }
 
-  function processResponse(err, body, node, msg) {
+  function processResponse(err, body, node, msg, multiuser) {
     if (err != null && body == null) {
       node.error(err);
       node.status({fill:'red', shape:'ring',
         text:'call to watson conversation service failed'});
-      
+
       return;
     }
     msg.payload = body;
+
+    if (!multiuser) {
+      node.context().flow.set('context', body.context);
+    }
+
     node.send(msg);
     node.status({});
   }
 
-  function execute(params, node, msg) {
+  function execute(params, node, msg, multiuser) {
     node.status({fill:'blue', shape:'dot' , text:'Calling Conversation service ...'});
     // call POST /message through SDK
     node.service.message(params, function(err, body) {
-      processResponse(err,body,node,msg);
+      processResponse(err, body, node, msg, multiuser);
     });
   }
 
@@ -145,7 +155,7 @@ module.exports = function (RED) {
       if (!b) {
         return;
       }
-      execute(params,node,msg);
+      execute(params, node, msg, config.multiuser);
     });
   }
 
