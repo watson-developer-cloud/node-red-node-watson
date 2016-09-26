@@ -75,6 +75,14 @@ module.exports = function (RED) {
       }
     }
 
+    if (msg.additional_context) {
+      params.context = params.context ? params.context : {};
+
+      for (var prop in msg.additional_context) {
+        params.context[prop] = msg.additional_context[prop];
+      }
+    }
+
     // workspaceid can be either configured in the node,
     // or sent into msg.params.workspace_id
     if (config.workspaceid && config.workspaceid) {
