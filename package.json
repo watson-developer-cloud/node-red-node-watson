@@ -52,6 +52,7 @@
       "watson-tone-analyzer-v3-beta": "services/tone_analyzer/v3-beta.js",
       "watson-visual-recognition-v1": "services/visual_recognition/v1.js",
       "watson-visual-recognition-v3": "services/visual_recognition/v3.js",
+      "watson-similarity-search-v3": "services/similarity_search/v3.js",
       "alchemy-vision-v1": "services/alchemy_vision/v1.js"
     }
   }
