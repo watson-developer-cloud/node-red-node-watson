@@ -25,10 +25,10 @@ module.exports = function (RED) {
   // Otherwise, once set username would never get reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
-  var username = null,
-      password = null,
-      sUsername = null,
-      sPassword = null;
+  var username = null;
+  var password = null;
+  var sUsername = null;
+  var sPassword = null;
 
   var service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
 
@@ -99,7 +99,7 @@ module.exports = function (RED) {
       // it will be used in order to make an array of arrays from the wanted options to populate a dashboard dropdown list
       // the entries of the array to be created would be 'domains', 'model_id', 'source' & 'target
       function capitalize (string) {
-          return string.charAt(0).toUpperCase() + string.slice(1);
+        return string.charAt(0).toUpperCase() + string.slice(1);
       }
 
       function makeLanguageBeautifier(string) {
@@ -180,23 +180,22 @@ module.exports = function (RED) {
 
             // Domains unique values
             ldom.forEach(function(item) {
-                msg.options_ldom[item] = item;
+              msg.options_ldom[item] = item;
             });
 
             // model_id unique values
             model_id_array.forEach(function(item) {
-                 msg.options_model_id[item] = item;
+              msg.options_model_id[item] = item;
             });
-
 
             // source language unique values
             src_lang_array.forEach(function(item) {
-                msg.options_src_lang[item] = item;
+              msg.options_src_lang[item] = item;
             });
 
             // target language unique values
             target_lang_array.forEach(function(item) {
-                msg.options_target_lang[item] = item;
+              msg.options_target_lang[item] = item;
             });
 
             msg.domains = Object.keys(msg.options_ldom);
@@ -208,8 +207,7 @@ module.exports = function (RED) {
             node.send(msg);
           }
         });
-      }
-      else {
+      } else {
         node.error('Error instantiating the language service',msg);
       }
     });
