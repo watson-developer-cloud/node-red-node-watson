@@ -131,7 +131,9 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
 - Relationship Extraction
     - Extract entities and their relationships from unstructured text
 - Retrieve and Rank
-    - Creates a trainable search engine for your data    
+    - Creates a trainable search engine for your data  
+- Similarity search
+    - Create and search against image collections  
 - Speech To Text
     - Convert audio containing speech to text
 - Text To Speech
