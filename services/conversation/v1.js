@@ -30,7 +30,6 @@ module.exports = function (RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
-
   function verifyPayload(node, msg) {
     if (!msg.payload) {
       node.status({fill:'red', shape:'ring', text:'missing payload'});
@@ -61,13 +60,16 @@ module.exports = function (RED) {
     }
     // mandatory message
     params.input = {text:msg.payload};
+    var prop = null;
 
     if (config.context) {
       if (config.multiuser) {
         if (msg.user) {
           params.context = node.context().flow.get('context-' + msg.user);
         } else {
-          node.warn('Missing msg.user property, using global context. Multiuser conversation may not function as expected.', msg);
+          var warning = 'Missing msg.user property, using global context. ' +
+            'Multiuser conversation may not function as expected.';
+          node.warn(warning, msg);
           params.context = node.context().flow.get('context');
         }
       } else {
@@ -78,8 +80,10 @@ module.exports = function (RED) {
     if (msg.additional_context) {
       params.context = params.context ? params.context : {};
 
-      for (var prop in msg.additional_context) {
-        params.context[prop] = msg.additional_context[prop];
+      for (prop in msg.additional_context) {
+        if (msg.additional_context.hasOwnProperty(prop)) {
+          params.context[prop] = msg.additional_context[prop];
+        }
       }
     }
 
@@ -133,11 +137,10 @@ module.exports = function (RED) {
   }
 
   function processResponse(err, body, node, msg, config) {
-    if (err != null && body == null) {
+    if (err !== null && body === null) {
       node.error(err);
       node.status({fill:'red', shape:'ring',
         text:'call to watson conversation service failed'});
-
       return;
     }
     msg.payload = body;
@@ -198,6 +201,4 @@ module.exports = function (RED) {
       password: {type:'password'}
     }
   });
-
-
 };

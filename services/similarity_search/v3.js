@@ -18,12 +18,11 @@ module.exports = function (RED) {
   var cfenv = require('cfenv'),
     watson = require('watson-developer-cloud'),
     imageType = require('image-type'),
-    url = require('url'),
     temp = require('temp'),
     fileType = require('file-type'),
     fs = require('fs'),
-    async = require('async'),
-    sAPIKey=null, service=null;
+    sAPIKey = null,
+    service = null;
 
   // temp is being used for file streaming to allow the file to arrive so it can be processed.
   temp.track();
@@ -42,11 +41,6 @@ module.exports = function (RED) {
     return data instanceof Buffer && imageType(data) !== null;
   }
 
-  function urlCheck(str) {
-    var parsed = url.parse(str);
-    return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
-  }
-
   function stream_buffer(file, contents, cb) {
     fs.writeFile(file, contents, function (err) {
       if (err) {
@@ -54,29 +48,6 @@ module.exports = function (RED) {
       }
       cb();
     });
-  }
-
-  function verifyPayload(node, msg) {
-    if (!msg.payload) {
-      this.status({fill:'red', shape:'ring', text:'missing payload'});
-      node.error('Missing property: msg.payload', msg);
-      return false;
-    }
-    return true;
-  }
-
-  function verifyInputs(feature, node, msg) {
-    switch(feature) {
-    case 'classifyImage':
-    case 'detectFaces':
-    case 'recognizeText':
-      if (typeof msg.payload === 'boolean' || typeof msg.payload === 'number') {
-        this.status({fill:'red', shape:'ring', text:'bad format payload'});
-        node.error('Bad format : msg.payload must be a URL string or a Node.js Buffer', msg);
-        return false;
-      }
-    }
-    return true;
   }
 
   function verifyServiceCredentials(node, msg) {
@@ -96,29 +67,28 @@ module.exports = function (RED) {
     return true;
   }
 
-
   function processResponse(err, body, feature, node, msg) {
-    if (err != null && body == null) {
+    if (err !== null && body === null) {
       node.status({fill:'red', shape:'ring',
         text:'call to watson similarity search v3 service failed'});
       msg.payload = {};
-      if (err.code == null) {
-        msg.payload['error']=err;
+      if (err.code === null) {
+        msg.payload.error = err;
       } else {
-        msg.payload['error_code'] = err.code;
+        msg.payload.error_code = err.code;
         if (!err.error) {
-          msg.payload['error'] = err.error;
+          msg.payload.error = err.error;
         }
       }
       node.error(err);
       return;
-    } else if (err == null && body != null && body.images != null &&
+    } else if (err === null && body !== null && body.images !== null &&
       body.images[0] && body.images[0].error) {
       node.status({fill:'red', shape:'ring',
-                   text:'call to watson visual recognition v3 service failed'});
+        text:'call to watson visual recognition v3 service failed'});
       msg.payload = {};
-      msg.payload['error_id'] = body.images[0].error.error_id;
-      msg.payload['error'] = body.images[0].error.description;
+      msg.payload.error_id = body.images[0].error.error_id;
+      msg.payload.error = body.images[0].error.description;
       node.send(msg);
     } else {
       if (feature === 'deleteClassifier') {
@@ -131,8 +101,8 @@ module.exports = function (RED) {
     }
   }
 
-  function processImage(params, node, feature, cb) {
-    image = params['image_file'];
+  function processImage(params, node, feature, cb, msg) {
+    var image = params.image_file;
     if (imageCheck(image)) {
       temp.open({suffix: '.' + fileType(image).ext}, function (err, info) {
         if (err) {
@@ -140,8 +110,9 @@ module.exports = function (RED) {
           node.error('Node has been unable to open the image stream', msg);
           return cb(feature, params);
         }
+
         stream_buffer(info.path, image, function () {
-          params['image_file'] = fs.createReadStream(info.path);
+          params.image_file = fs.createReadStream(info.path);
           cb(feature, params);
         });
       });
@@ -151,32 +122,18 @@ module.exports = function (RED) {
     }
   }
 
-
-  function addTask (asyncTasks, msg, k, listParams, node) {
-    asyncTasks.push(function (callback) {
-      var buffer = msg.params[k];
-      temp.open({suffix: '.' + fileType(buffer).ext}, function (err, info) {
-        if (err) {
-          node.status({fill:'red', shape:'ring',
-                       text:'unable to open image stream'});
-          node.error('Node has been unable to open the image stream', msg);
-          return callback('open error on ' + k);
-        }
-        stream_buffer(info.path, msg.params[k], function () {
-          listParams[k] = fs.createReadStream(info.path);
-          callback(null, k);
-        });
-      });
-    });
-  }
-
   function addParams(params, msg, paramsToAdd) {
+    var i = null,
+      param = null;
+
     for (i in paramsToAdd) {
-      param = paramsToAdd[i];
-      if (param === 'image_file') {
-        params['image_file'] = msg.payload;
-      } else {
-        params[param] = msg.params[param];
+      if (paramsToAdd.hasOwnProperty(i)) {
+        param = paramsToAdd[i];
+        if (param === 'image_file') {
+          params.image_file = msg.payload;
+        } else {
+          params[param] = msg.params[param];
+        }
       }
     }
     return params;
@@ -184,34 +141,37 @@ module.exports = function (RED) {
 
   function executeService(feature, params, node, msg) {
     var requiredParams = {
-      findSimilar: ['collection_id', 'image_file'],
-      createCollection: ['name'],
-      getCollection: ['collection_id'],
-      listCollections: [],
-      deleteCollection: ['collection_id'],
-      addImage: ['collection_id','image_file'],
-      listImages: ['collection_id'],
-      getImage: ['collection_id','image_id'],
-      deleteImage: ['collection_id','image_id'],
-      setImageMetadata: ['collection_id', 'image_id', 'metadata'],
-      getImageMetadata: ['collection_id', 'image_id'],
-      deleteImageMetadata: ['collection_id', 'image_id']
-    }
-    var optionalParams = {
-      findSimilar: ['limit'],
-      addImage: ['metadata']
-    }
+        findSimilar: ['collection_id', 'image_file'],
+        createCollection: ['name'],
+        getCollection: ['collection_id'],
+        listCollections: [],
+        deleteCollection: ['collection_id'],
+        addImage: ['collection_id','image_file'],
+        listImages: ['collection_id'],
+        getImage: ['collection_id','image_id'],
+        deleteImage: ['collection_id','image_id'],
+        setImageMetadata: ['collection_id', 'image_id', 'metadata'],
+        getImageMetadata: ['collection_id', 'image_id'],
+        deleteImageMetadata: ['collection_id', 'image_id']
+      },
+      optionalParams = {
+        findSimilar: ['limit'],
+        addImage: ['metadata']
+      };
     params = addParams(params, msg, requiredParams[feature]);
+
     if (feature in optionalParams) {
       params = addParams(params, msg, optionalParams[feature]);
     }
-    var callWatson = function(feature, params) {
+
+    function callWatson(feature, params) {
       node.service[feature](params, function (err, body) {
         processResponse(err, body, feature, node, msg);
       });
     }
+
     if ('image_file' in params) {
-      processImage(params, node, feature, callWatson);
+      processImage(params, node, feature, callWatson, msg);
     } else {
       callWatson(feature, params);
     }

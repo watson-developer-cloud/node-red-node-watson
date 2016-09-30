@@ -1,27 +1,20 @@
 /**
  * Copyright 2013,2016 IBM Corp.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
 
 module.exports = function (RED) {
-  var watson = require('watson-developer-cloud');
-  var cfenv = require('cfenv');
-  var fs = require('fs');
-  var temp = require('temp');
-
-  temp.track();
-
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then they are stored in sUsername and sPassword, as the
   // service credentials. This separation from sUsername and username to allow
@@ -29,13 +22,17 @@ module.exports = function (RED) {
   // Otherwise, once set username would never get reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
+  var watson = require('watson-developer-cloud'),
+    cfenv = require('cfenv'),
+    fs = require('fs'),
+    temp = require('temp'),
+    username = null,
+    password = null,
+    sUsername = null,
+    sPassword = null,
+    service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
 
-  // Not ever used, and codeacy complains about it.
-  // var services = cfenv.getAppEnv().services;
-
-  var username = null, password = null, sUsername = null, sPassword = null;
-
-  var service = cfenv.getAppEnv().getServiceCreds(/language translation/i)
+  temp.track();
 
   if (service) {
     sUsername = service.username;
@@ -111,8 +108,16 @@ module.exports = function (RED) {
     // what the request is for, and based on that if the required fields
     // have been provided.
     this.on('input', function (msg) {
-
-      var message = '';
+      var message = '',
+        action = msg.action || config.action,
+        globalContext = this.context().global,
+        tmpmodel_id = globalContext.get('g_model_id'),
+        result = '',
+        language_translation = watson.language_translator({
+          username: username,
+          password: password,
+          version: 'v2'
+        });
 
       if (!username || !password) {
         message = 'Missing Language Translation service credentials';
@@ -120,53 +125,28 @@ module.exports = function (RED) {
         return;
       }
 
-      var action = msg.action || config.action;
-
       if (!action) {
         node.warn('Missing action, please select one');
         node.send(msg);
         return;
       }
 
-      // This declaration put here, as codeacy wants it before it is used
-      // in the do functions below.
-      var language_translation = watson.language_translator({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
-
-      ///////////////////////////////////////////////////////////////////
-      // AAM - getting the local/global scope for the language translation
-      var globalContext = this.context().global; // AAM
-      var tmpdomain = globalContext.get("g_domain");
-      var tmpsrc = globalContext.get("g_src");
-      var tmpdest = globalContext.get("g_dest");
-      var tmpmodel_id = globalContext.get("g_model_id");
-      var result = tmpmodel_id.split("-", 2);
-
-      // AAM -
-
       // checkbox option
-      if (config.lgparams2 == false) {
+      if (config.lgparams2 === false) {
         if (tmpmodel_id.length > 1) {
           msg.model_id = tmpmodel_id;
           msg.srclang = result[0];
           msg.destlang = result[1];
-          } else {
-            msg.model_id = config.domain;
-            msg.srclang = config.srclang;
-            msg.destlang = config.destlang
-          }
-
+        } else {
+          msg.model_id = config.domain;
+          msg.srclang = config.srclang;
+          msg.destlang = config.destlang;
+        }
       } else {
         msg.model_id = config.domain;
         msg.srclang = config.srclang;
         msg.destlang = config.destlang;
-
       }
-      // AAM
-      ///////////////////////////////////////////////////////////////////
 
       // These are var functions that have been initialised here, so that
       // they are available for the instance of this node to use.
@@ -191,12 +171,12 @@ module.exports = function (RED) {
           model_id: model_id
         },
         function (err, response) {
-          node.status({})
+          node.status({});
           if (err) {
             node.error(err, msg);
           } else {
             msg.translation = {};
-            msg.translation['response'] = response;
+            msg.translation.response = response;
             msg.payload = response.translations[0].translation;
           }
           node.send(msg);
@@ -235,7 +215,7 @@ module.exports = function (RED) {
 
             language_translation.createModel(params,
               function (err, model) {
-                node.status({})
+                node.status({});
                 if (err) {
                   node.status({
                     fill: 'red',
@@ -290,9 +270,8 @@ module.exports = function (RED) {
             }
           }
         );
-        node.status({ });
+        node.status({});
       };
-
 
       // This removes the trained corpus
       var doDelete = function (msg, trainid) {
@@ -321,7 +300,7 @@ module.exports = function (RED) {
             }
           }
         );
-        node.status({ });
+        node.status({});
       };
 
       // Now that the do functions have been defined, can now determine what action this node
@@ -423,7 +402,6 @@ module.exports = function (RED) {
       }
     });
   }
-
 
   RED.nodes.registerType('watson-translate', SMTNode, {
     credentials: {
