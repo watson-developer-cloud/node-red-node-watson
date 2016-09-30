@@ -98,12 +98,6 @@ module.exports = function (RED) {
     username = sUsername || this.credentials.username;
     password = sPassword || this.credentials.password || config.password;
 
-    // this does nothing, but am keeping it with a commented out signature, as
-    // it might come in handy in the future.
-    this.on('close', function() {
-    });
-
-
     // The node has received an input as part of a flow, need to determine
     // what the request is for, and based on that if the required fields
     // have been provided.
@@ -134,6 +128,7 @@ module.exports = function (RED) {
       // checkbox option
       if (config.lgparams2 === false) {
         if (tmpmodel_id.length > 1) {
+          result = tmpmodel_id.split('-');
           msg.model_id = tmpmodel_id;
           msg.srclang = result[0];
           msg.destlang = result[1];
