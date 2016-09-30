@@ -36,7 +36,20 @@
         <label for="node-input-workspaceid"><i class="fa fa-tag"></i> Workspace ID</label>
         <input type="text" id="node-input-workspaceid" placeholder="WorkspaceID">
     </div>
-
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-context" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-context" style="width: 70%;"> Save context</label>
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-multiuser" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-multiuser" style="width: 70%;"> Multiple Users</label>
+    </div>
+    <div class="form-tips" id="conversation-form-tips">
+      <strong>Note:</strong> When using with multiple users, <code>msg.user</code> must be set.<br>
+      See info box for details.
+    </div>
 </script>
 
 
@@ -46,13 +59,15 @@
     <p><b>Usage</b></p>
     <p>This node should be provided in input : </p>
     <ul>
-    <li><code>msg.payload</code> : the message of the conversation to analyse; Format: String </li>
+    <li><code>msg.payload</code> : the message of the conversation to analyse. Format: String </li>
+    <li><code>msg.user</code> (optional): unique identifier of the user. This will be used to maintain the context of the conversation for each user when using with multiple users. Format: String </li>
     <li><code>msg.params.workspace_id</code> : unique identifier of the workspace to be used. Could be also configured in the node. Format: String </li>
-    <li><code>msg.params.context</code> (optional): A context object that includes state information for the conversation. When you send multiple requests for the same conversation, include the context object from the response. (<a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">documentation</a>). Format: JSON </li>
+    <li><code>msg.params.context</code> (optional): A context object that includes state information for the conversation. When you send multiple requests for the same conversation, include the context object from the response. (<a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">documentation</a>). This will overwrite any context saved in the node. Format: JSON </li>
     <li><code>msg.params.alternate_intents</code> (optional) : whether to return more than one intent. Default is false. Set to true to return all matching intents. For example, return all intents when the confidence is not high to allow users to choose their intent.</li>
     <li><code>msg.params.output</code> (optional) : see API documentation </li>
     <li><code>msg.params.entities</code> (optional) : see API documentation </li>
     <li><code>msg.params.output</code> (optional) : see API documentation </li>
+    <li><code>msg.additional_context</code> (optional) : additional properties that will be added to the context object. Format: Object </li>
     </ul>
     <p>See <a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">Conversation API documentation</a> for details.</p>
     <p>All Results will made available at <code>msg.payload</code> in JSON format. Check the  <a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">documentation</a> for details.</p>
@@ -69,12 +84,37 @@
 
 
 <script type="text/javascript">
+    var oneditprepare = function() {
+        $('input#node-input-context').change(function () {
+            var checked = $('input#node-input-context').prop('checked')
+            if (checked) {
+                $('input#node-input-multiuser').parent().show();
+                $('#conversation-form-tips').show();
+            } else {
+                $('input#node-input-multiuser').parent().hide();
+                $('#conversation-form-tips').hide();
+            }
+        });
+        $.getJSON('watson-conversation/vcap/')
+            .done(function (service) {
+              $('.credentials').toggle(!service);
+            })
+            .fail(function () {
+              $('.credentials').show();
+            })
+            .always(function () {
+              $('#credentials-check').hide();
+            })
+    };
+
     (function() {
         RED.nodes.registerType('watson-conversation-v1', {
             category: 'IBM Watson',
             defaults: {
               name: {value: ""},
-              workspaceid: {value: ""}
+              workspaceid: {value: ""},
+              multiuser: {value: false},
+              context: {value: true}
             },
             credentials: {
               username: {type:"text"},
@@ -91,21 +131,7 @@
             labelStyle: function() {
                 return this.name ? "node_label_italic" : "";
             },
-            oneditprepare: function() {
-              $.getJSON('watson-conversation/vcap/')
-                  .done(function (service) {
-                    $('.credentials').toggle(!service);
-                  })
-                  .fail(function () {
-                    $('.credentials').show();
-                  })
-                  .always(function () {
-                    $('#credentials-check').hide();
-                  })
-
-            }
+            oneditprepare: oneditprepare
         });
-
-
     })();
 </script>
