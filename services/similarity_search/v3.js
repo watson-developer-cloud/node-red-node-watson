@@ -68,7 +68,7 @@ module.exports = function (RED) {
   }
 
   function processResponse(err, body, feature, node, msg) {
-    if (err !== null && body === null) {
+    if (err != null && body == null) {
       node.status({fill:'red', shape:'ring',
         text:'call to watson similarity search v3 service failed'});
       msg.payload = {};
@@ -82,7 +82,7 @@ module.exports = function (RED) {
       }
       node.error(err);
       return;
-    } else if (err === null && body !== null && body.images !== null &&
+    } else if (err == null && body != null && body.images != null &&
       body.images[0] && body.images[0].error) {
       node.status({fill:'red', shape:'ring',
         text:'call to watson visual recognition v3 service failed'});

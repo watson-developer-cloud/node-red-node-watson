@@ -181,9 +181,8 @@
   var first_launch = true;
   var have_credentials = false;
   var using_local_credentials = false;
-  // Added for the parameter scope, intently declaring 2 variables
-  var using_local_parameters2 = false; // AAM
-  var using_gloabal_parameters2 = false; // AAM
+  var using_local_parameters2 = false;
+  var using_gloabal_parameters2 = false;
 
   var action = $('#node-input-action').val();
   var domain_selected = $('#node-input-domainhidden').val();
@@ -191,7 +190,7 @@
   var srclang_selected = $('#node-input-srclanghidden').val();
   var destlang_selected = $('#node-input-destlanghidden').val();
   var base_model_selected = $('#node-input-basemodelhidden').val();
-  var lg_parameters_selected2 = $('#node-input-ldparamshidden2').val(); // AAM
+  var lg_parameters_selected2 = $('#node-input-ldparamshidden2').val();
 
 
   var LANGUAGES = { 'ar' : 'Arabic',
@@ -233,8 +232,8 @@
         $('select#node-input-basemodel').parent().hide();
         $('select#node-input-filetype').parent().hide();
         $('input#node-input-trainid').parent().hide();
-        $('input#node-input-lgparams2').parent().hide(); // AAM (checkbox option)
-        $('#languagetranslation-form-tips').show(); // AAM
+        $('input#node-input-lgparams2').parent().hide();
+        $('#languagetranslation-form-tips').show();
     }
   }
 
@@ -427,8 +426,8 @@
           $('select#node-input-custom').parent().hide();
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
           $('input#node-input-trainid').parent('').hide();
-          $('input#node-input-lgparams2').parent().show(); // AAM (checkbox)
-          $('#languagetranslation-form-tips').show(); // AAM
+          $('input#node-input-lgparams2').parent().show();
+          $('#languagetranslation-form-tips').show();
           break;
         case 'custom':
           $('select#node-input-custom').parent().show();
@@ -436,8 +435,8 @@
           $('select#node-input-domain').parent().hide();
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
           $('input#node-input-trainid').parent('').hide();
-          $('input#node-input-lgparams2').parent().show(); // AAM (checkbox)
-          $('#languagetranslation-form-tips').show(); // AAM
+          $('input#node-input-lgparams2').parent().show();
+          $('#languagetranslation-form-tips').show();
           break;
         case 'train':
           $('select#node-input-custom').parent().hide();
@@ -445,8 +444,8 @@
           $('select#node-input-domain').parent().hide();
           $('select#node-input-basemodel, select#node-input-filetype').parent('').show();
           $('input#node-input-trainid').parent('').hide();
-          $('input#node-input-lgparams2').parent().show(); // AAM (checkbox)
-          $('#languagetranslation-form-tips').show(); // AAM
+          $('input#node-input-lgparams2').parent().show();
+          $('#languagetranslation-form-tips').show();
           break;
         case 'getstatus':
         case 'delete':
@@ -455,8 +454,8 @@
           $('select#node-input-srclang, select#node-input-destlang').parent().hide();
           $('select#node-input-domain').parent().hide();
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
-          $('input#node-input-lgparams2').parent().show(); // AAM (checkbox)
-          $('#languagetranslation-form-tips').show(); // AAM
+          $('input#node-input-lgparams2').parent().show();
+          $('#languagetranslation-form-tips').show();
           break;
       }
       checkDomains();
@@ -467,7 +466,6 @@
     }
   }
 
-  // AAM -----------------------------
   // UI Handler for the Parameter scope switch: Local or Global
   function checkParamScopeSelected(){
 
@@ -567,7 +565,6 @@
       base_model_selected = $('#node-input-basemodel').val();
     });
 
-    // AAM - parameters scope
     $('#node-input-lgparams2').change(function (val) {
       lg_parameters_selected = $('#node-input-lgparams2').val();
     });
@@ -593,14 +590,11 @@
     $('select#node-input-custom').val(custom_selected);
 
 
-    // AAM - Local or Global Parameters Scope
     lg_parameters_selected2 = $('input#node-input-lgparams2').prop('checked');
-//    $('select#node-input-lgparams2').val(lg_parameters_selected2);
 
   }
 
-  // This is the on edit prepare function, which will be invoked everytime the dialog
-  // is shown.
+  // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
   function oneditprepare() {
     hideAll();
     restoreHidden();
@@ -651,7 +645,7 @@
     $('#node-input-destlanghidden').val(destlang_selected);
     $('#node-input-basemodelhidden').val(base_model_selected);
     $('#node-input-customhidden').val(custom_selected);
-    $('#node-input-ldparamshidden2').val(lg_parameters_selected2); // AAM
+    $('#node-input-ldparamshidden2').val(lg_parameters_selected2);
   }
 
   // Define and run the function to register this node.
@@ -674,12 +668,12 @@
                 customhidden: {value: ''},
                 filetype: {value: 'forcedglossary'},
                 trainid: {value: ''},
-                lgparams2: {value: 'lparams'}, // AAM - parameter scope
-                ldparamshidden2: {value: ''} // AAM - parameter scope
+                lgparams2: {value: 'lparams'},
+                ldparamshidden2: {value: ''}
             },
             credentials: {
-              username: {type: 'text'} //,
-              // password: {type: 'text'}
+              username: {type: 'text'}
+              // password: {type: 'text'} << moved to keep track of previous data
             },
             color: "rgb(140, 198, 63)",
             inputs: 1,
