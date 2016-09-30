@@ -8,6 +8,17 @@ Node-RED Watson Nodes for IBM Bluemix
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 
+### New in version 0.4.19
+- New Similarity Search (Beta) Node
+- New Language Translation Util mode, to request available translation models
+- Translation Node now has option to look for global translation settings
+- Enhancements to Conversation Node
+ - Node has option to remember context
+ - Context support for single user and multi-user models
+ - Ability to reset context, including user specific reset
+ - Ability to splice in additional context variables.
+- Added Concept support to News Node
+
 ### New in version 0.4.18
 - Name space fixes to Text to Speech Node
 
