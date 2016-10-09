@@ -15,22 +15,18 @@
  **/
 
 module.exports = function (RED) {
-  var watson = require('watson-developer-cloud');
-  var cfenv = require('cfenv');
+  var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
+  cfenv = require('cfenv'),
+  username = null, password = null, sUsername = null, sPassword = null,
+  service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
+  endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
-  // Require the Cloud Foundry Module to pull credentials from bound service
-  // If they are found then they are stored in sUsername and sPassword, as the
-  // service credentials. This separation from sUsername and username to allow
-  // the end user to modify the node credentials when the service is not bound.
-  // Otherwise, once set username would never get reset, resulting in a frustrated
-  // user who, when he errenously enters bad credentials, can't figure out why
-  // the edited ones are not being taken.
-  var username = null;
-  var password = null;
-  var sUsername = null;
-  var sPassword = null;
+process.env.VCAP_SERVICES='{"VCAP_SERVICES":{"cloudantNoSQLDB":[{"credentials":{"host":"c12a4430-73e9-46d3-b2ca-1a68d5195e97-bluemix.cloudant.com","password":"a955edbb1be6105dae540a26bc1cc7a71f3b46f056a4db8896de6dc5b33cde61","port":443,"url":"https://c12a4430-73e9-46d3-b2ca-1a68d5195e97-bluemix:a955edbb1be6105dae540a26bc1cc7a71f3b46f056a4db8896de6dc5b33cde61@c12a4430-73e9-46d3-b2ca-1a68d5195e97-bluemix.cloudant.com","username":"c12a4430-73e9-46d3-b2ca-1a68d5195e97-bluemix"},"label":"cloudantNoSQLDB","name":"sample-node-red-cloudantNoSQLDB","plan":"Shared","provider":null,"syslog_drain_url":null,"tags":["data_management","ibm_created","ibm_dedicated_public"]}],"language_translator":[{"credentials":{"password":"z2uy1MUCBdp5","url":"https://gateway.watsonplatform.net/language-translator/api","username":"1d6d5991-8f9a-41db-9e2f-a35faf644953"},"label":"language_translator","name":"Language Translator-di","plan":"standard","provider":null,"syslog_drain_url":null,"tags":["watson","ibm_created","ibm_dedicated_public"]}],"speech_to_text":[{"credentials":{"password":"wr0QZQHpmqeE","url":"https://stream.watsonplatform.net/speech-to-text/api","username":"92b657d6-79b3-4602-bcf3-4224754cda84"},"label":"speech_to_text","name":"Speech to Text-qe","plan":"standard","provider":null,"syslog_drain_url":null,"tags":["watson","ibm_created","ibm_dedicated_public"]}],"text_to_speech":[{"credentials":{"password":"vKsiaNBfORVs","url":"https://stream.watsonplatform.net/text-to-speech/api","username":"8f7c2c38-d8ea-407f-8fb0-13682ddef14f"},"label":"text_to_speech","name":"Text to Speech-cx","plan":"standard","provider":null,"syslog_drain_url":null,"tags":["watson","ibm_created","ibm_dedicated_public"]}]}}';
+vcap = JSON.parse(process.env.VCAP_SERVICES || "{}");
+console.log('vcap: '+ JSON.stringify(vcap));
+service = vcap["VCAP_SERVICES"]["language_translator"];
+console.log('service: '+ JSON.stringify(service));
 
-  var service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
 
   if (service) {
     sUsername = service.username;
@@ -42,7 +38,7 @@ module.exports = function (RED) {
   // date with new tranlations, without the need for a code update of this node.
 
   // Node RED Admin - fetch and set vcap services
-  RED.httpAdmin.get('/watson-translate-util/vcap', function (req, res) {
+  RED.httpAdmin.get('/watson-translator-util/vcap', function (req, res) {
     res.json(service ? {bound_service: true} : null);
   });
 
@@ -80,10 +76,11 @@ module.exports = function (RED) {
         return;
       }
 
-      var lt = watson.language_translator({
+      var lt = new LanguageTranslatorV2({
         username: username,
         password: password,
-        version: 'v2'
+        version: 'v2',
+        url: endpointUrl
       });
 
       // set global variable in order to make them accessible for the tranlsation node
@@ -213,7 +210,7 @@ module.exports = function (RED) {
     });
   }
 
-  RED.nodes.registerType('watson-translate-util', SMTNode, {
+  RED.nodes.registerType('watson-translator-util', SMTNode, {
     credentials: {
       username: {type:'text'},
       password: {type:'password'}

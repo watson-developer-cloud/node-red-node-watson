@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="watson-translate-util">
+<script type="text/x-red" data-template-name="watson-translator-util">
     <div id="credentials-check" class="form-row">
         <div class="form-tips">
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
@@ -35,6 +35,10 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-translate-util">
+    <p><b>NB:</b> The Watson Language Translator service has been deprecated in favor of the new Watson Translator service. Once the service
+      has been switched off this node will no longer work. The node will be removed from the palette in a
+      future release. </p>
+    <br/>
     <p>The Language Translation Utility service enables you to discover parameters used by the language translation node.</p>
     <p></p>
     <p><b>Translation Mode Utility</b>.</p>
@@ -55,7 +59,7 @@
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-translate-util', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ""}
             },
