@@ -14,14 +14,14 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="watson-language-identification">
+<script type="text/x-red" data-template-name="watson-translator-util">
     <div id="credentials-check" class="form-row">
         <div class="form-tips">
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
         </div>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name (LTU)</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-row credentials" style="display: none;">
@@ -34,22 +34,28 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="watson-language-identification">
-    <p><b>NB:</b> The Watson Language Translation service has been deprecated in favor of the new Watson Translator service. Once the service
-      has been switched off this node will no longer work. The node will be removed from the palette in a
-      future release. </p>
-    <br/>
-    <p>The Language Identification service analyzes UTF-8 encoded text, detects the language used in that text, and displays the associated 5-letter ISO language code. </p>
-    <p>The text to detect should be passed in on <code>msg.payload</code>.</p>
-    <p>The ISO language code will be returned on <code>msg.lang</code>.</p>
-    <p>For more information about the Language Identification service,
-    read the <a href="https://www.ibm.com/watson/developercloud/language-translation.html">documentation</a>.</p>
+<script type="text/x-red" data-help-name="watson-translator-util">
+    <p>The language translator util node  enables you to discover parameters used by the language translation node.</p>
+    <p></p>
+    <p><b>Translation Mode Utility</b>.</p>
+    <p>The regular Watson Translator credentials should be set through the UI.</p>
+    <p>No input is needed for the node. The node fetches the information automatically.</p>
+    <p></p>
+    <p>When this node is used with the 'language translator' node, in the 'language translator' node the scope of variables should be set to global.</p>
+    <p></p>
+    <p>The node will return the following arrays:</p>
+    <p>Message model_id (e.g.: en-fr-conversational)<code>msg.model_id</code>.</p>
+    <p>Message Domains (e.g.: Conversational)<code>msg.domain</code>.</p>
+    <p>Message Source Language (e.g.: English)<code>msg.source</code>.</p>
+    <p>Message Target Language (e.g.: French)<code>msg.target</code>.</p>
+    <p>For more information about the Language Translator service, read the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/language-translation.html">documentation</a>.</p>
 </script>
+
 
 <script type="text/javascript">
     (function() {
-        RED.nodes.registerType('watson-language-identification', {
-            category: 'Watson Deprecated',
+        RED.nodes.registerType('watson-translator-util', {
+            category: 'IBM Watson',
             defaults: {
                 name: {value: ""}
             },
@@ -57,19 +63,19 @@
               username: {type:"text"},
               password: {type:"password"}
             },
-            color: "rgb(140, 198, 63)",
+            color: "rgb(84,149,230)",
             inputs: 1,
             outputs: 1,
             icon: "languageid.png",
-            paletteLabel: "language identification",
+            paletteLabel: "language translator util",
             label: function() {
-                return this.name || "language identification";
+                return this.name || "language translator util";
             },
             labelStyle: function() {
                 return this.name ? "node_label_italic" : "";
             },
             oneditprepare: function() {
-                $.getJSON('watson-language-identification/vcap/')
+                $.getJSON('watson-translator-util/vcap/')
                   .done(function (service) {
                     $('.credentials').toggle(!service);
                   })

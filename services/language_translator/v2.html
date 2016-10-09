@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="watson-translate">
+<script type="text/x-red" data-template-name="watson-translator">
     <div id="credentials-check" class="form-row">
         <div class="form-tips">
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
@@ -126,13 +126,8 @@
 
 </script>
 
-<script type="text/x-red" data-help-name="watson-translate">
-    <p><b>NB:</b> The Watson Language Translation service has been deprecated in favor of the new Watson Translator service. Once the service
-      has been switched off this node will no longer work. The node will be removed from the palette in a
-      future release. </p>
-    <br/>
-    <p>Packaged in with release 0.4.19 of node-red-node-watson</p>
-    <p>The Language Translation service enables you to translate text from one language to another and to add your own translation models.</p>
+<script type="text/x-red" data-help-name="watson-translator">
+    <p>The Watson Language Translator service enables you to translate text from one language to another and to add your own translation models.</p>
     <p></p>
     <p><b>Translation Mode</b>.</p>
     <p>The text to translate should be passed in on <code>msg.payload</code>.</p>
@@ -150,12 +145,12 @@
     <p>The full response from the service will be returned on <code>msg.translation</code></p>
     <p></p>
     <p><b>Training Mode</b>.</p>
-    <p>This mode enables you to add your own customized model to the Watson translation service. </p>
+    <p>This mode enables you to add your own customized model to the Watson Language Translator service. </p>
     <p>In the Dropbox node, you must specify one ore more of the following file options to customize the training:</p>
     <p>forced_glossary - A UTF-8 encoded TMX file that contains pairs of matching terms in the source and target language that are seen as absolute by the system. This file completely overwrites the original domain data.</p>
     <p>parallel_corpus - A UTF-8 encoded TMX file that contains matching phrases in the source and target language that serve as examples for Watson. Parallel corpora differ from glossaries because they do not overwrite the original domain data.</p>
     <p>monolingual_corpus - A UTF-8 encoded plain text file that contains a body of text in the target language that is related to what you are translating. A monolingual corpus helps improve literal translations to be more fluent and human.</p>
-    <p>The Language Translation Node will return the ID of the created customized model.</p>
+    <p>The Language Translator Node will return the ID of the created customized model.</p>
     <p></p>
     <p><b>Get Status Mode</b>.</p>
     <p>This mode allows you to get the status of a model sent to training by providing its ID.</p>
@@ -169,12 +164,12 @@
     <p></p>
     <p>This mode allows you to delete a model by providing its ID</p>
     <p><b>Parameters Scope</b>.</p>
-    <p>This parameter makes the language translation node to toogle using incoming parameters form the dashboard DropDown list or locally.</p>
+    <p>This parameter makes the language translation node to toogle using incoming parameters form the dashboard Dropdown list or locally.</p>
     <p>Values can be the followings:</p>
     <p><b>Local</b>  -  Local parametres if the node is used by its own (default value).</p>
-    <p><b>Global</b> -  Global parametres if the node is used with the 'language translation util' and 'dropdonw' node.
+    <p><b>Global</b> -  Global parametres if the node is used with the 'language translator util' and 'dropdown' node.
     Global parameters are set when <b>local in unchecked</b>.</p>
-    <p>For more information about the Language Translation service, read the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/language-translation.html">documentation</a>.</p>
+    <p>For more information about the Language Translator service, read the <a href="https://www.ibm.com/watson/developercloud/doc/language-translator">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
@@ -204,7 +199,6 @@
                     'es': 'Spanish',
                     'fr': 'French',
                     'it': 'Italian',
-                    'de': 'German',
                     'pt': 'Portuguese',
                     'ko': 'Korean',
                     'zh': 'Chinese'
@@ -269,7 +263,7 @@
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
-    $.getJSON('watson-translate/models/', {un: u, pwd: p}).done(function (data) {
+    $.getJSON('watson-translator/models/', {un: u, pwd: p}).done(function (data) {
       if (data.models) {
         models = data.models;
         have_credentials = true;
@@ -609,7 +603,7 @@
     // Look for VCAP Json file, done is called if found or not, with service indicating
     // if the translation service is actually bound into this application.
     if (!have_credentials) {
-      $.getJSON('watson-translate/vcap/')
+      $.getJSON('watson-translator/vcap/')
         .done(function (service) {
           // for some reason the getJSON resets the vars so need to restoreHidden again
           // so again.
@@ -656,8 +650,8 @@
 
   // Define and run the function to register this node.
   (function() {
-        RED.nodes.registerType('watson-translate', {
-            category: 'Watson Deprecated',
+        RED.nodes.registerType('watson-translator', {
+            category: 'IBM Watson',
             defaults: {
                 name: {value: ''},
                 action: {value: 'translate'},
@@ -681,13 +675,13 @@
               username: {type: 'text'}
               // password: {type: 'text'} << moved to keep track of previous data
             },
-            color: "rgb(140, 198, 63)",
+            color: "rgb(84,149,230)",
             inputs: 1,
             outputs: 1,
-            icon: "languageid.png",
-            paletteLabel: "language translation",
+            icon: "LanguageTranslator25x25.png",
+            paletteLabel: "language translator",
             label: function() {
-                return this.name || "language translation";
+                return this.name || "language translator";
             },
             labelStyle: function() {
                 return this.name ? "node_label_italic" : "";
