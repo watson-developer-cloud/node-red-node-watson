@@ -35,19 +35,18 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-language-translator-identify">
+    <p>Packaged in with release 0.4.21 of node-red-node-watson</p>
     <p>The Watson Language Translator service can be used to identify languages used in a text input. <p>
     <p>Node input : </p>
     <ul>
-    <li><code>msg.payload</code> : input text in UTF-8 format</li>
+    <li><code>msg.payload</code> : The input text to identify language against in UTF-8 format</li>
     </ul>
     <p>Node output : </p>
     <ul>
-    <li><code>msg.payload</code> : array of identified languages with the language 5-letter ISO language code with the associated confidence score</li>
+    <li><code>msg.lang</code> : The identified language with the highest confidence level</li>
+    <li><code>msg.languages</code> : array of identified languages with the language 5-letter ISO language code
+    with the associated confidence score</li>
     </ul>
-
-    analyzes UTF-8 encoded text, detects the languages used in that text, and displays the associated 5-letter ISO language code. </p>
-    <p>The text to detect should be passed in on <code>msg.payload</code>.</p>
-    <p>The ISO language code will be returned on <code>msg.lang</code>.</p>
     <p>For more information about the Language Identification service,
     read the service <a href="https://www.ibm.com/watson/developercloud/doc/language-translator/">documentation</a>.</p>
 </script>

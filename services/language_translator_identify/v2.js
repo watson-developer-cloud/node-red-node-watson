@@ -17,15 +17,16 @@
 module.exports = function (RED) {
   var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
     cfenv = require('cfenv'),
-    services = cfenv.getAppEnv().services,
     service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
     username = null,
     password = null,
+    sUsername = null,
+    sPassword = null,
     endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   if (service) {
-    username = service.username;
-    password = service.password;
+    sUsername = service.username;
+    sPassword = service.password;
   }
 
   RED.httpAdmin.get('/watson-language-translator-identify/vcap', function (req, res) {
@@ -35,7 +36,7 @@ module.exports = function (RED) {
   function Node (config) {
     var node = this;
     RED.nodes.createNode(this, config);
-    
+
     this.on('input', function (msg) {
       if (!msg.payload) {
         var message = 'Missing property: msg.payload';
@@ -43,8 +44,8 @@ module.exports = function (RED) {
         return;
       }
 
-      username = username || this.credentials.username;
-      password = password || this.credentials.password;
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password;
 
       if (!username || !password) {
         var message = 'Missing Watson Language Translator service credentials';
@@ -66,8 +67,8 @@ module.exports = function (RED) {
         if (err) {
           node.error(err, msg);
         } else {
-          msg.payload = response.languages
-          //msg.lang = response.languages[0]; // old identify API
+          msg.languages = response.languages
+          msg.lang = response.languages[0];
         }
         node.send(msg);
       });

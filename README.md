@@ -9,15 +9,8 @@ Node-RED Watson Nodes for IBM Bluemix
 
 
 ### New in version 0.4.21
-3 news nodes corresponding to the new Watson Translator API, in a blue color (matching Bluemix Tiles color)
-- new watson node "language translator"  (blue)
-- new watson node "language identify" (blue)
-- new watson node "language translator util"  (blue)
-
-The 3 following nodes are moved to Watson Deprecated :
-- watson node "language identification" (green)
-- watson node "language translation" (green)
-- watson node "language translation util (green)
+- Added Translation and Language Identify nodes for Language Translator Service (Blue Tiles)
+- Deprecated Translation and Language Indentification nodes for Language Translation (Green Tiles)
 
 ### New in version 0.4.20
 - Translation Node supports German

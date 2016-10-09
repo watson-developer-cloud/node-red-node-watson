@@ -173,45 +173,52 @@
 </script>
 
 <script type="text/javascript">
-  var models = null;
-  var domains = null;
-  var basemodels = null;
-  var custommodels = null;
-  var domain_type;
-  var first_launch = true;
-  var have_credentials = false;
-  var using_local_credentials = false;
-  var using_local_parameters2 = false;
-  var using_gloabal_parameters2 = false;
+  // Need to simulate a namespace, so that some of the variables don't leak across nodes
+  function Translator () {
+  }
 
-  var action = $('#node-input-action').val();
-  var domain_selected = $('#node-input-domainhidden').val();
-  var custom_selected = $('#node-input-customhidden').val();
-  var srclang_selected = $('#node-input-srclanghidden').val();
-  var destlang_selected = $('#node-input-destlanghidden').val();
-  var base_model_selected = $('#node-input-basemodelhidden').val();
-  var lg_parameters_selected2 = $('#node-input-ldparamshidden2').val();
+  // This is the namespace for tts.
+  var tor = new Translator();
+
+  tor.models = null;
+  tor.domains = null;
+  tor.basemodels = null;
+  tor.custommodels = null;
+  tor.domain_type;
+  tor.have_credentials = false;
+  tor.using_local_credentials = false;
+  tor.using_local_parameters2 = false;
+  tor.using_gloabal_parameters2 = false;
+
+  tor.action = $('#node-input-action').val();
+  tor.domain_selected = $('#node-input-domainhidden').val();
+  tor.custom_selected = $('#node-input-customhidden').val();
+  tor.srclang_selected = $('#node-input-srclanghidden').val();
+  tor.destlang_selected = $('#node-input-destlanghidden').val();
+  tor.base_model_selected = $('#node-input-basemodelhidden').val();
+  tor.lg_parameters_selected2 = $('#node-input-ldparamshidden2').val();
 
 
-  var LANGUAGES = { 'ar' : 'Arabic',
+  tor.LANGUAGES = { 'ar' : 'Arabic',
                     'arz': 'Spoken Arabic',
                     'en': 'English' ,
                     'es': 'Spanish',
                     'fr': 'French',
                     'it': 'Italian',
+                    'de': 'German',
                     'pt': 'Portuguese',
                     'ko': 'Korean',
                     'zh': 'Chinese'
                   };
 
   // convert an id in the form it-ko into Italian - Korean for display
-  function changeIdToText(id) {
+  tor.changeIdToText = function (id) {
     var txt = "";
     var langs = id.split('-');
     var first = true;
 
     langs.forEach(function(language){
-      txt += (LANGUAGES[language] ? LANGUAGES[language] : language);
+      txt += (tor.LANGUAGES[language] ? tor.LANGUAGES[language] : language);
       if (first) {
         txt += ' - ';
         first = false;
@@ -222,8 +229,8 @@
 
   // Function to be used at the start, as don't want to expose any fields, unless the model is
   // available. The model it self can only be fetched if the credentials are available.
-  function hideAll() {
-    if (!models) {
+  tor.hideAll = function () {
+    if (!tor.models) {
         $('#credentials-not-found').show();
         $('#node-input-action').parent().hide();
         $('select#node-input-srclang, select#node-input-destlang').parent().hide();
@@ -244,30 +251,30 @@
   // the model has been retrieved then this function is invoked to update what fields
   // are shown without the user having to close the dialog.
   // Problem is that the onchange is only invoked when the user tabs to another field.
-  function checkVisibility() {
-    if (models) {
+  tor.checkVisibility = function () {
+    if (tor.models) {
       $('#node-input-action').parent().show();
-      checkActionSelected();
+      tor.checkActionSelected();
     }
   }
 
   // sorting functions
-  function checkUnique(value, index, self) {
+  tor.checkUnique = function (value, index, self) {
     return self.indexOf(value) === index;
   }
 
 
   // Retrieve the available models from the server, if data is returned, then
   // can enable the dynamic selection fields.
-  function checkModels() {
+  tor.checkModels = function () {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
     $.getJSON('watson-translator/models/', {un: u, pwd: p}).done(function (data) {
       if (data.models) {
-        models = data.models;
-        have_credentials = true;
-        checkVisibility();
+        tor.models = data.models;
+        tor.have_credentials = true;
+        tor.checkVisibility();
       }
     }).fail(function (err) {
       console.log(err);
@@ -276,16 +283,16 @@
 
   // Simple check that is only invoked if the service is not bound into bluemix. In this case the
   // user has to provide credentials. Once there are credentials, then the models are retrieved.
-  function getCredentials() {
+  tor.getCredentials = function () {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
     if (u && u.length && p) {
-      if (!models) {
-        checkModels();
-        if (models) {$('#node-input-action').parent().show(); }
+      if (!tor.models) {
+        tor.checkModels();
+        if (tor.models) {$('#node-input-action').parent().show(); }
       }
-    } else if (!models) {
+    } else if (!tor.models) {
       $('#node-input-action').parent().hide();
     }
   }
@@ -293,24 +300,27 @@
   // function that is called when the domain or the source language is changed. In this case the
   // destination language selection field is dynamically repopulated, and reselected if the
   // previously selection is still in the new list.
-  function langDestAvailable() {
-    if (!domain_type) { return; }
+  tor.langDestAvailable = function () {
+    if (!tor.domain_type) { return; }
 
-    var pair_lang = domain_type.map(function (a) {
+    var pair_lang = tor.domain_type.map(function (a) {
       return a.model_id;
     });
 
     // need to do an exact source language match to allow for variations
     // like ar and arz. if the input is ar, then don't want it to match with arz
     var available_destlang = pair_lang.filter(function (model_id) {
-      return model_id.match('^' + srclang_selected + '-');
+      return model_id.match('^' + tor.srclang_selected + '-');
     });
+
+    // Flush out the list first
+    $('select#node-input-destlang').empty();
 
     available_destlang.forEach(function (val) {
       var lang = val.split('-')[1];
 
       var selectedText = '';
-      if (destlang_selected === lang) {
+      if (tor.destlang_selected === lang) {
         selectedText = 'selected="selected"';
       }
       $('select#node-input-destlang')
@@ -318,27 +328,27 @@
                       + '"' + lang + '"'
                       + selectedText
                       + '>'
-                      + (LANGUAGES[lang] ? LANGUAGES[lang] : lang)
+                      + (tor.LANGUAGES[lang] ? tor.LANGUAGES[lang] : lang)
                       + '</option>');
     });
-    destlang_selected = $('#node-input-destlang').val();
+    tor.destlang_selected = $('#node-input-destlang').val();
   }
 
   // Populates the domains selection field.
   // If domains have already been retrieved then no need to refetch them.
-  function checkDomains() {
-    if (!domains) {
-      domains = models.map(function (a) {
+  tor.checkDomains = function () {
+    if (!tor.domains) {
+      tor.domains = tor.models.map(function (a) {
         return a.domain;
       });
     }
-    if (domains && domains.length) {
+    if (tor.domains && tor.domains.length) {
       $('select#node-input-domain').empty();
-      var unique_domains = domains.filter(checkUnique);
+      var unique_domains = tor.domains.filter(tor.checkUnique);
 
       unique_domains.forEach(function(domain) {
         var selectedText = '';
-        if (domain_selected === domain) {
+        if (tor.domain_selected === domain) {
           selectedText = 'selected="selected"';
         }
         $('select#node-input-domain')
@@ -351,22 +361,22 @@
                         + '</option>');
       });
 
-    checkDomainSelected();
+    tor.checkDomainSelected();
     }
   }
 
   // Populates the base model field. These are the models that are available to be customised.
-  function checkBaseModels() {
-    if (!basemodels && models) {
-      basemodels = models.filter(function (model) {
+  tor.checkBaseModels = function () {
+    if (!tor.basemodels && tor.models) {
+      tor.basemodels = tor.models.filter(function (model) {
         return model.customizable === true;
       });
     }
-    if (basemodels) {
+    if (tor.basemodels) {
       $('select#node-input-basemodel').empty();
-      basemodels.forEach(function(base_model){
+      tor.basemodels.forEach(function(base_model){
         var selectedText = '';
-        if (base_model_selected === base_model.model_id) {
+        if (tor.base_model_selected === base_model.model_id) {
             selectedText = 'selected="selected"';
         }
         $('select#node-input-basemodel')
@@ -374,7 +384,7 @@
                           + '"' + base_model.model_id + '"'
                           + selectedText
                           + '>'
-                          + changeIdToText(base_model.model_id)
+                          + tor.changeIdToText(base_model.model_id)
                           + '</option>');
       });
     }
@@ -385,18 +395,18 @@
   // will happen is by a page refresh. Need to have a trigger everytime the create
   // new model is triggerd, but that is a little complicated and needs to be done on
   // a clear mind.
-  function checkCustomsAvailable() {
-    if (!custommodels && models) {
-      custommodels = models.filter(function (m) {
+  tor.checkCustomsAvailable = function () {
+    if (!tor.custommodels && tor.models) {
+      tor.custommodels = tor.models.filter(function (m) {
         return (m.base_model_id && ('' != m.base_model_id));
       });
     }
-    if (custommodels) {
+    if (tor.custommodels) {
       $('select#node-input-custom').empty();
 
-      custommodels.forEach(function(m){
+      tor.custommodels.forEach(function(m){
         var selectedText = '';
-        if (custom_selected === m.model_id) {
+        if (tor.custom_selected === m.model_id) {
             selectedText = 'selected="selected"';
         }
         $('select#node-input-custom')
@@ -415,11 +425,11 @@
 
   // UI Handler for the Mode / switch.
   // Princliple function is to show / hide the appropriate fields.
-  function checkActionSelected() {
-    action = $('#node-input-action').val();
-    if (models) {
+  tor.checkActionSelected = function () {
+    tor.action = $('#node-input-action').val();
+    if (tor.models) {
       $('#credentials-not-found').hide();
-      switch (action) {
+      switch (tor.action) {
         case 'translate':
           $('select#node-input-srclang, select#node-input-destlang').parent().show();
           $('select#node-input-domain').parent().show();
@@ -458,54 +468,53 @@
           $('#languagetranslation-form-tips').show();
           break;
       }
-      checkDomains();
-      checkBaseModels();
-      checkCustomsAvailable();
+      tor.checkDomains();
+      tor.checkBaseModels();
+      tor.checkCustomsAvailable();
     } else {
       $('#credentials-not-found').show();
     }
   }
 
   // UI Handler for the Parameter scope switch: Local or Global
-  function checkParamScopeSelected(){
-
-
-    // Checkbox control
-    lg_parameters_selected2 = $('input#node-input-lgparams2').prop('checked');
-    if (checked) {
-      using_gloabal_parameters2 = true;
-      using_local_parameters2 = false;
-    } else {
-      using_gloabal_parameters2 = false;
-      using_local_parameters2 = true;
-    }
-
-
-  }
+//  tor.checkParamScopeSelected = function (){
+//    // Checkbox control
+//    tor.lg_parameters_selected2 = $('input#node-input-lgparams2').prop('checked');
+//    if (checked) {
+//      tor.using_gloabal_parameters2 = true;
+//      tor.using_local_parameters2 = false;
+//    } else {
+//      tor.using_gloabal_parameters2 = false;
+//      tor.using_local_parameters2 = true;
+//    }
+//  }
 
 
   // UI Handler for the domain switch
   // Repopulate the source and languages based on the available translations for the domain
-  function checkDomainSelected(){
+  tor.checkDomainSelected = function (){
     $('#node-input-srclang').empty();
     $('#node-input-destlang').empty();
-    if (models && domains) {
-      domain_selected = $('#node-input-domain').val();
-      domain_type = models.filter(function (model) {
-        return model.domain === domain_selected && model.status === 'available';
+    if (tor.models && tor.domains) {
+      tor.domain_selected = $('#node-input-domain').val();
+      tor.domain_type = tor.models.filter(function (model) {
+        return model.domain === tor.domain_selected && model.status === 'available';
       });
-      var input_lang = domain_type.map(function (a) {
+      var input_lang = tor.domain_type.map(function (a) {
         return a.source;
       });
-      var output_lang = domain_type.map(function (a) {
+      var output_lang = tor.domain_type.map(function (a) {
         return a.target;
       });
-      input_lang_unique = input_lang.filter(checkUnique);
-      output_lang_unique = output_lang.filter(checkUnique);
+      input_lang_unique = input_lang.filter(tor.checkUnique);
+      output_lang_unique = output_lang.filter(tor.checkUnique);
 
+      // Flush out the List before repopulating it.
+      $('select#node-input-srclang').empty();
+      
       input_lang_unique.forEach(function(lang){
         var selectedText = '';
-        if (srclang_selected === lang) {
+        if (tor.srclang_selected === lang) {
           selectedText = 'selected="selected"';
         }
         $('select#node-input-srclang')
@@ -513,56 +522,56 @@
                         + '"' + lang + '"'
                         + selectedText
                         + '>'
-                        + (LANGUAGES[lang] ? LANGUAGES[lang] : lang)
+                        + (tor.LANGUAGES[lang] ? tor.LANGUAGES[lang] : lang)
                         + '</option>');
       });
       // Having repopulated the input language selection, the old selected item
       // may no longer be in the list, so refresh it.
-      srclang_selected = $('#node-input-srclang').val();
-      langDestAvailable();
+      tor.srclang_selected = $('#node-input-srclang').val();
+      tor.langDestAvailable();
     }
   }
 
 
   // Register the handlers for the fields
-  function UIListeners() {
+  tor.UIListeners = function () {
     $('#node-input-username').change(function(val){
-      getCredentials();
-      if (have_credentials) {
-        checkActionSelected();}
+      tor.getCredentials();
+      if (tor.have_credentials) {
+        tor.checkActionSelected();}
     });
     $('#node-input-password').change(function(val){
-      getCredentials();
-      if (have_credentials) {
-        checkActionSelected();
+      tor.getCredentials();
+      if (tor.have_credentials) {
+        tor.checkActionSelected();
       }
     });
 
     $('#node-input-action').change(function(val){
-      action = $('#node-input-action').val();
-      checkActionSelected();
+      tor.action = $('#node-input-action').val();
+      tor.checkActionSelected();
     });
 
     $('#node-input-domain').change(function (val) {
-      domain_selected = $('#node-input-domain').val();
-      checkDomainSelected();
+      tor.domain_selected = $('#node-input-domain').val();
+      tor.checkDomainSelected();
     });
 
     $('#node-input-custom').change(function () {
-      custom_selected = $('#node-input-custom').val();
+      tor.custom_selected = $('#node-input-custom').val();
     });
 
     $('#node-input-srclang').change(function () {
-      srclang_selected = $('#node-input-srclang').val();
-      langDestAvailable();
+      tor.srclang_selected = $('#node-input-srclang').val();
+      tor.langDestAvailable();
     });
 
     $('#node-input-destlang').change(function () {
-      destlang_selected = $('#node-input-destlang').val();
+      tor.destlang_selected = $('#node-input-destlang').val();
     });
 
     $('#node-input-basemodel').change(function (val) {
-      base_model_selected = $('#node-input-basemodel').val();
+      tor.base_model_selected = $('#node-input-basemodel').val();
     });
 
     $('#node-input-lgparams2').change(function (val) {
@@ -576,47 +585,47 @@
   // restart, the settings for the dynamic fields are lost.
   // So hidden (text) fields are being used to squirrel away the values, so that
   // they can be restored.
-  function restoreHidden() {
-    domain_selected = $('#node-input-domainhidden').val();
-    $('select#node-input-domain').val(domain_selected);
-    srclang_selected = $('#node-input-srclanghidden').val();
-    $('select#node-input-srslang').val(srclang_selected);
-    destlang_selected = $('#node-input-destlanghidden').val();
-    $('select#node-input-destlang').val(destlang_selected);
+  tor.restoreHidden = function () {
+    tor.domain_selected = $('#node-input-domainhidden').val();
+    $('select#node-input-domain').val(tor.domain_selected);
+    tor.srclang_selected = $('#node-input-srclanghidden').val();
+    $('select#node-input-srslang').val(tor.srclang_selected);
+    tor.destlang_selected = $('#node-input-destlanghidden').val();
+    $('select#node-input-destlang').val(tor.destlang_selected);
 
-    base_model_selected = $('#node-input-basemodelhidden').val();
-    $('select#node-input-basemodel').val(base_model_selected);
-    custom_selected = $('#node-input-customhidden').val();
-    $('select#node-input-custom').val(custom_selected);
+    tor.base_model_selected = $('#node-input-basemodelhidden').val();
+    $('select#node-input-basemodel').val(tor.base_model_selected);
+    tor.custom_selected = $('#node-input-customhidden').val();
+    $('select#node-input-custom').val(tor.custom_selected);
 
 
-    lg_parameters_selected2 = $('input#node-input-lgparams2').prop('checked');
+    tor.lg_parameters_selected2 = $('input#node-input-lgparams2').prop('checked');
 
   }
 
   // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
   function oneditprepare() {
-    hideAll();
-    restoreHidden();
+    tor.hideAll();
+    tor.restoreHidden();
 
-    UIListeners();
+    tor.UIListeners();
     // Look for VCAP Json file, done is called if found or not, with service indicating
     // if the translation service is actually bound into this application.
-    if (!have_credentials) {
+    if (!tor.have_credentials) {
       $.getJSON('watson-translator/vcap/')
         .done(function (service) {
           // for some reason the getJSON resets the vars so need to restoreHidden again
           // so again.
-          restoreHidden();
+          tor.restoreHidden();
           $('.credentials').toggle(!service);
           if (!service) {
             // no bound service, so check local settings to see if they are valid
-            using_local_credentials = true;
-            getCredentials();
+            tor.using_local_credentials = true;
+            tor.getCredentials();
           } else {
             // credentials are only valid if we can get hold of the models using them
-            using_local_credentials = false;
-            if (!models) {checkModels();}
+            tor.using_local_credentials = false;
+            if (!tor.models) {tor.checkModels();}
           }
         }).fail(function () {
           $('.credentials').show();
@@ -625,27 +634,27 @@
         });
     }
     // credentials can be set during the oneditprepare process, so check again.
-    if (have_credentials || using_local_credentials)
+    if (tor.have_credentials || tor.using_local_credentials)
     {
       $('#credentials-check').hide();
-      if (have_credentials) {
+      if (tor.have_credentials) {
         $('#credentials-not-found').hide();
       }
-      if (using_local_credentials) {
+      if (tor.using_local_credentials) {
         $('.credentials').show();
       }
-      checkActionSelected();
+      tor.checkActionSelected();
     }
   }
 
   // Save the values in the dyanmic lists to the hidden fields.
   function oneditsave(){
-    $('#node-input-domainhidden').val(domain_selected);
-    $('#node-input-srclanghidden').val(srclang_selected);
-    $('#node-input-destlanghidden').val(destlang_selected);
-    $('#node-input-basemodelhidden').val(base_model_selected);
-    $('#node-input-customhidden').val(custom_selected);
-    $('#node-input-ldparamshidden2').val(lg_parameters_selected2);
+    $('#node-input-domainhidden').val(tor.domain_selected);
+    $('#node-input-srclanghidden').val(tor.srclang_selected);
+    $('#node-input-destlanghidden').val(tor.destlang_selected);
+    $('#node-input-basemodelhidden').val(tor.base_model_selected);
+    $('#node-input-customhidden').val(tor.custom_selected);
+    $('#node-input-ldparamshidden2').val(tor.lg_parameters_selected2);
   }
 
   // Define and run the function to register this node.

@@ -52,23 +52,13 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-translator/models', function (req, res) {
-    var lt = null;
+    var lt = new LanguageTranslatorV2({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd,
+      version: 'v2',
+      url: endpointUrl
+    });
 
-    if(!username && !password) {
-      lt = new LanguageTranslatorV2({
-        username: req.query.un,
-        password: req.query.pwd,
-        version: 'v2',
-        url: endpointUrl
-      });
-    } else {
-      lt = new LanguageTranslatorV2({
-        username: username,
-        password: password,
-        version: 'v2',
-        url: endpointUrl
-      });
-    }
     lt.getModels({}, function (err, models) {
       if (err) {
         res.json(err);
