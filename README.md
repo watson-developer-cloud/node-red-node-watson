@@ -7,8 +7,6 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
-### New in version 0.4.20
-- Translation Node supports German
 
 ### New in version 0.4.21
 3 news nodes corresponding to the new Watson Translator API, in a blue color (matching Bluemix Tiles color)
@@ -21,6 +19,8 @@ The 3 following nodes are moved to Watson Deprecated :
 - watson node "language translation" (green)
 - watson node "language translation util (green)
 
+### New in version 0.4.20
+- Translation Node supports German
 
 ### New in version 0.4.19
 - New Similarity Search (Beta) Node
