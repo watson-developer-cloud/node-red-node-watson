@@ -25,6 +25,8 @@
             <i class="fa fa-question-circle"></i><b> Could not bind to service. </b> This node can not be further configured without a valid service. Try entering valid credentials?
         </div>
     </div>
+    <div id="id-error-getting-models" class="form-row">
+    </div>
 
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -111,7 +113,7 @@
         <input type="text" id="node-input-trainid" placeholder="Model ID">
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
        <label for="node-input-lgparams2"><i class="fa fa-cog"></i> Parameters Scope</label>
        <input type="checkbox" id="node-input-lgparams2" style="display: inline-block; width: auto; vertical-align: top;">
        <label for="node-input-lgparams2" style="width: 70%;"> Use Local Parameters</label>
@@ -229,6 +231,7 @@
   // Function to be used at the start, as don't want to expose any fields, unless the model is
   // available. The model it self can only be fetched if the credentials are available.
   function hideAll() {
+    $('#id-error-getting-models').hide();
     if (!models) {
         $('#credentials-not-found').show();
         $('#node-input-action').parent().hide();
@@ -266,18 +269,18 @@
   // Retrieve the available models from the server, if data is returned, then
   // can enable the dynamic selection fields.
   function checkModels() {
-    console.log('In checkModels');
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
     $.getJSON('watson-translate/models/', {un: u, pwd: p}).done(function (data) {
-      console.log('Checking returned models');
-      console.log(data);
       if (data.models) {
-        console.log('Models Found');
+        $('#id-error-getting-models').hide();
         models = data.models;
         have_credentials = true;
         checkVisibility();
+      } else if (data.error){
+        $('#id-error-getting-models').show();
+        $('#id-error-getting-models').text(data.error);
       }
     }).fail(function (err) {
       console.log(err);
