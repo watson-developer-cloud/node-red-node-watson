@@ -1,6 +1,6 @@
 {
   "name": "node-red-node-watson",
-  "version": "0.4.20",
+  "version": "0.4.21",
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
     "alchemy-api": "^1.3.0",
@@ -11,7 +11,7 @@
     "temp": "^0.8.3",
     "qs": "6.x",
 	  "image-type": "^2.0.2",
-    "watson-developer-cloud": "^2.1.0",
+    "watson-developer-cloud": "^2.4.6",
     "kuromoji": "^0.0.5",
     "is-docx": "^0.0.3"
   },
@@ -37,7 +37,9 @@
       "watson-document-conversion-v1": "services/document_conversion/v1.js",
       "watson-concept-insights-v2": "services/concept_insights/v2.js",
       "watson-dialog-v1": "services/dialog/v1.js",
-      "alchemy_language-v1": "services/alchemy_language/v1.js",
+      "watson-language-translator-v2": "services/language_translator/v2.js",
+      "watson-language-translator-identify-v2": "services/language_translator_identify/v2.js",
+      "watson-language-translator-util-v2": "services/language_translator_util/v2.js",
       "watson-language-identification-v1": "/services/language_identification/v1.js",
       "watson-language-translate-v1": "services/language_translation/v2.js",
       "watson-language-translate-util-v1": "services/language_translation_util/v2.js",
@@ -54,7 +56,8 @@
       "watson-visual-recognition-v1": "services/visual_recognition/v1.js",
       "watson-visual-recognition-v3": "services/visual_recognition/v3.js",
       "watson-similarity-search-v3": "services/similarity_search/v3.js",
-      "alchemy-vision-v1": "services/alchemy_vision/v1.js"
+      "alchemy-vision-v1": "services/alchemy_vision/v1.js",
+      "alchemy_language-v1": "services/alchemy_language/v1.js"
     }
   }
 }
