@@ -58,7 +58,6 @@ module.exports = function (RED) {
         password: password,
         version: 'v2',
         url: endpointUrl
-
       });
 
       node.status({fill:'blue', shape:'dot', text:'requesting'});
