@@ -272,6 +272,7 @@
 
     $.getJSON('watson-translate/models/', {un: u, pwd: p}).done(function (data) {
       console.log('Checking returned models');
+      console.log(data);
       if (data.models) {
         console.log('Models Found');
         models = data.models;
