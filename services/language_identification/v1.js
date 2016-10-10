@@ -16,6 +16,7 @@
 
 module.exports = function (RED) {
   var cfenv = require('cfenv'),
+    LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
     service = cfenv.getAppEnv().getServiceCreds(/language translation/i)
     username = null,
     password = null,
