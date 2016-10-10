@@ -101,13 +101,13 @@ module.exports = function (RED) {
         globalContext = this.context().global,
         tmpmodel_id = globalContext.get('g_model_id'),
         result = '',
-        language_translator = new LanguageTranslatorV2({
+        language_translation = new LanguageTranslatorV2({
           username: username,
           password: password,
           version: 'v2',
           url: endpointUrl
         });
-        
+
       if (!username || !password) {
         message = 'Missing Language Translation service credentials';
         node.error(message, msg);
