@@ -15,8 +15,9 @@
  **/
 
 module.exports = function (RED) {
-  var watson = require('watson-developer-cloud');
+  var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2');
   var cfenv = require('cfenv');
+  var endpointUrl = 'https://gateway.watsonplatform.net/language-translation/api';
 
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then they are stored in sUsername and sPassword, as the
@@ -80,10 +81,11 @@ module.exports = function (RED) {
         return;
       }
 
-      var lt = watson.language_translator({
+      var lt = new LanguageTranslatorV2({
         username: username,
         password: password,
-        version: 'v2'
+        version: 'v2',
+        url: endpointUrl
       });
 
       // set global variable in order to make them accessible for the tranlsation node
