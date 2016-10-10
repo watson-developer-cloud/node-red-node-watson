@@ -30,7 +30,7 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
-    service = cfenv.getAppEnv().getServiceCreds(/^Language Translation/);
+    service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
 
   temp.track();
 
