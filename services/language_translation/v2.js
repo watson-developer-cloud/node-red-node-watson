@@ -50,7 +50,7 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-translate/models', function (req, res) {
-    var lt = watson.language_translator({
+    var lt = watson.language_translation({
         username: sUsername ? sUsername : req.query.un,
         password: sPassword ? sPassword : req.query.pwd,
         version: 'v2'
