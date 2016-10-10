@@ -15,22 +15,11 @@
  **/
 
 module.exports = function (RED) {
-  var watson = require('watson-developer-cloud');
-  var cfenv = require('cfenv');
-
-  // Require the Cloud Foundry Module to pull credentials from bound service
-  // If they are found then they are stored in sUsername and sPassword, as the
-  // service credentials. This separation from sUsername and username to allow
-  // the end user to modify the node credentials when the service is not bound.
-  // Otherwise, once set username would never get reset, resulting in a frustrated
-  // user who, when he errenously enters bad credentials, can't figure out why
-  // the edited ones are not being taken.
-  var username = null;
-  var password = null;
-  var sUsername = null;
-  var sPassword = null;
-
-  var service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
+  var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
+  cfenv = require('cfenv'),
+  username = null, password = null, sUsername = null, sPassword = null,
+  service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
+  endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   if (service) {
     sUsername = service.username;
@@ -42,7 +31,7 @@ module.exports = function (RED) {
   // date with new tranlations, without the need for a code update of this node.
 
   // Node RED Admin - fetch and set vcap services
-  RED.httpAdmin.get('/watson-translate-util/vcap', function (req, res) {
+  RED.httpAdmin.get('/watson-translator-util/vcap', function (req, res) {
     res.json(service ? {bound_service: true} : null);
   });
 
@@ -80,10 +69,11 @@ module.exports = function (RED) {
         return;
       }
 
-      var lt = watson.language_translator({
+      var lt = new LanguageTranslatorV2({
         username: username,
         password: password,
-        version: 'v2'
+        version: 'v2',
+        url: endpointUrl
       });
 
       // set global variable in order to make them accessible for the tranlsation node
@@ -213,7 +203,7 @@ module.exports = function (RED) {
     });
   }
 
-  RED.nodes.registerType('watson-translate-util', SMTNode, {
+  RED.nodes.registerType('watson-translator-util', SMTNode, {
     credentials: {
       username: {type:'text'},
       password: {type:'password'}
