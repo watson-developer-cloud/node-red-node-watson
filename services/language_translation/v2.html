@@ -266,11 +266,14 @@
   // Retrieve the available models from the server, if data is returned, then
   // can enable the dynamic selection fields.
   function checkModels() {
+    console.log('In checkModels');
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
     $.getJSON('watson-translate/models/', {un: u, pwd: p}).done(function (data) {
+      console.log('Checking returned models');
       if (data.models) {
+        console.log('Models Found');
         models = data.models;
         have_credentials = true;
         checkVisibility();
