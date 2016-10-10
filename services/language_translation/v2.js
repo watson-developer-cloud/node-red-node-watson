@@ -30,7 +30,7 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
-    service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
+    service = cfenv.getAppEnv().getServiceCreds(/^Language Translation/);
 
   temp.track();
 
@@ -50,7 +50,7 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-translate/models', function (req, res) {
-    var lt = watson.language_translation({
+    var lt = watson.language_translator({
         username: sUsername ? sUsername : req.query.un,
         password: sPassword ? sPassword : req.query.pwd,
         version: 'v2'
