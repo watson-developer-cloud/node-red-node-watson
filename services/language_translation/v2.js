@@ -30,7 +30,7 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
-    service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
+    service = cfenv.getAppEnv().getServiceCreds(/^Language Translation/);
 
   temp.track();
 
@@ -55,7 +55,7 @@ module.exports = function (RED) {
         password: sPassword ? sPassword : req.query.pwd,
         version: 'v2'
       });
-      
+
     lt.getModels({}, function (err, models) {
       if (err) {
         res.json(err);
