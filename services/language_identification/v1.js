@@ -15,18 +15,17 @@
  **/
 
 module.exports = function (RED) {
-  var cfenv = require('cfenv');
-
-  var services = cfenv.getAppEnv().services,
-    service;
-
-  var username, password;
-
-  var service = cfenv.getAppEnv().getServiceCreds(/language translation/i)
+  var cfenv = require('cfenv'),
+    service = cfenv.getAppEnv().getServiceCreds(/language translation/i)
+    username = null,
+    password = null,
+    sUsername = null,
+    sPassword = null,
+    endpointUrl = 'https://gateway.watsonplatform.net/language-translation/api';
 
   if (service) {
-    username = service.username;
-    password = service.password;
+    sUsername = service.username;
+    sPassword = service.password;
   }
 
   RED.httpAdmin.get('/watson-language-identification/vcap', function (req, res) {
@@ -44,8 +43,8 @@ module.exports = function (RED) {
         return;
       }
 
-      username = username || this.credentials.username;
-      password = password || this.credentials.password;
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password;
 
       if (!username || !password) {
         var message = 'Missing Language Identification service credentials';
@@ -53,12 +52,11 @@ module.exports = function (RED) {
         return;
       }
 
-      var watson = require('watson-developer-cloud');
-
-      var language_translation = watson.language_translator({
+      var language_translation = new LanguageTranslatorV2({
         username: username,
         password: password,
-        version: 'v2'
+        version: 'v2',
+        url: endpointUrl
       });
 
       node.status({fill:"blue", shape:"dot", text:"requesting"});
