@@ -22,7 +22,7 @@ module.exports = function (RED) {
   // Otherwise, once set username would never get reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
-  var watson = require('watson-developer-cloud'),
+  var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
     cfenv = require('cfenv'),
     fs = require('fs'),
     temp = require('temp'),
@@ -31,6 +31,8 @@ module.exports = function (RED) {
     sUsername = null,
     sPassword = null,
     service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
+    endpointUrl = 'https://gateway.watsonplatform.net/language-translation/api';
+
 
   temp.track();
 
@@ -50,12 +52,13 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-translate/models', function (req, res) {
-    var lt = watson.language_translator({
-        username: sUsername ? sUsername : req.query.un,
-        password: sPassword ? sPassword : req.query.pwd,
-        version: 'v2'
-      });
-      
+    var lt = new LanguageTranslatorV2({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd,
+      version: 'v2',
+      url: endpointUrl
+    });
+
     lt.getModels({}, function (err, models) {
       if (err) {
         res.json(err);
@@ -98,10 +101,11 @@ module.exports = function (RED) {
         globalContext = this.context().global,
         tmpmodel_id = globalContext.get('g_model_id'),
         result = '',
-        language_translation = watson.language_translator({
+        language_translation = new LanguageTranslatorV2({
           username: username,
           password: password,
-          version: 'v2'
+          version: 'v2',
+          url: endpointUrl
         });
 
       if (!username || !password) {
