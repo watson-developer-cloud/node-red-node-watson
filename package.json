@@ -1,6 +1,6 @@
 {
   "name": "node-red-node-watson",
-  "version": "0.4.21",
+  "version": "0.4.22",
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
     "alchemy-api": "^1.3.0",
@@ -36,8 +36,9 @@
       "watson-conversation-v1-experimental":"services/conversation/v1-exp.js",
       "watson-document-conversion-v1": "services/document_conversion/v1.js",
       "watson-concept-insights-v2": "services/concept_insights/v2.js",
+      "alchemy-date-extraction": "services/alchemy_date_extraction/v1.js",
       "watson-dialog-v1": "services/dialog/v1.js",
-      "alchemy_language-v1": "services/alchemy_language/v1.js",      
+      "alchemy_language-v1": "services/alchemy_language/v1.js",
       "watson-language-translator-v2": "services/language_translator/v2.js",
       "watson-language-translator-identify-v2": "services/language_translator_identify/v2.js",
       "watson-language-translator-util-v2": "services/language_translator_util/v2.js",
