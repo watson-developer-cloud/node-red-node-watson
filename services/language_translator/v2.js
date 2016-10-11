@@ -30,11 +30,11 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
-    service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
-    endpointUrl = 'https://gateway.watsonplatform.net/language-translation/api';
-
+    service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
+    endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   temp.track();
+
 
   if (service) {
     sUsername = service.username;
@@ -46,12 +46,12 @@ module.exports = function (RED) {
   // date with new tranlations, without the need for a code update of this node.
 
   // Node RED Admin - fetch and set vcap services
-  RED.httpAdmin.get('/watson-translate/vcap', function (req, res) {
+  RED.httpAdmin.get('/watson-translator/vcap', function (req, res) {
     res.json(service ? {bound_service: true} : null);
   });
 
   // API used by widget to fetch available models
-  RED.httpAdmin.get('/watson-translate/models', function (req, res) {
+  RED.httpAdmin.get('/watson-translator/models', function (req, res) {
     var lt = new LanguageTranslatorV2({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
@@ -101,7 +101,7 @@ module.exports = function (RED) {
         globalContext = this.context().global,
         tmpmodel_id = globalContext.get('g_model_id'),
         result = '',
-        language_translation = new LanguageTranslatorV2({
+        language_translator = new LanguageTranslatorV2({
           username: username,
           password: password,
           version: 'v2',
@@ -109,7 +109,7 @@ module.exports = function (RED) {
         });
 
       if (!username || !password) {
-        message = 'Missing Language Translation service credentials';
+        message = 'Missing Watson Language Translator service credentials';
         node.error(message, msg);
         return;
       }
@@ -156,7 +156,7 @@ module.exports = function (RED) {
         // a structure, and the tabbing enforced by codeacy imho obfuscates
         // the code, rather than making it clearer. I would have liked an
         // extra couple of spaces.
-        language_translation.translate({
+        language_translator.translate({
           text: msg.payload,
           model_id: model_id
         },
@@ -164,6 +164,7 @@ module.exports = function (RED) {
           node.status({});
           if (err) {
             node.error(err, msg);
+            console.log('err:', err);
           } else {
             msg.translation = {};
             msg.translation.response = response;
@@ -203,7 +204,7 @@ module.exports = function (RED) {
               break;
             }
 
-            language_translation.createModel(params,
+            language_translator.createModel(params,
               function (err, model) {
                 node.status({});
                 if (err) {
@@ -240,7 +241,7 @@ module.exports = function (RED) {
           text: 'requesting status for model ' + trainid,
         });
 
-        language_translation.getModel(
+        language_translator.getModel(
           {
             model_id: trainid,
           },
@@ -271,7 +272,7 @@ module.exports = function (RED) {
           text: 'deleting model ' + trainid,
         });
 
-        language_translation.deleteModel(
+        language_translator.deleteModel(
           {
             model_id: trainid,
           },
@@ -393,7 +394,7 @@ module.exports = function (RED) {
     });
   }
 
-  RED.nodes.registerType('watson-translate', SMTNode, {
+  RED.nodes.registerType('watson-translator', SMTNode, {
     credentials: {
       username: {type:'text'},
       password: {type:'password'}

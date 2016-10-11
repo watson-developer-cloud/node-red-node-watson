@@ -7,7 +7,36 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+
+### New in version 0.4.21
+- Added Translation and Language Identify nodes for Language Translator Service (Blue Tiles)
+- Deprecated Translation and Language Indentification nodes for Language Translation (Green Tiles)
+
+### New in version 0.4.20
+- Translation Node supports German
+
+### New in version 0.4.19
+- New Similarity Search (Beta) Node
+- New Language Translation Util mode, to request available translation models
+- Translation Node now has option to look for global translation settings
+- Enhancements to Conversation Node
+ - Node has option to remember context
+ - Context support for single user and multi-user models
+ - Ability to reset context, including user specific reset
+ - Ability to splice in additional context variables.
+- Added Concept support to News Node
+
+### New in version 0.4.18
+- Name space fixes to Text to Speech Node
+
+### New in version 0.4.17
+- Fixed how Document Conversion node was handling docx files
+
+### New in version 0.4.16
+- Oops! fix to Speech to Text Node
+
 ### New in version 0.4.15
+- Name space fixes to Speech to Text Node
 
 ### New in version 0.4.14
 - The dialog for the Text to Speech service now loads available voices dynamically. This allows
@@ -109,7 +138,9 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
 - Relationship Extraction
     - Extract entities and their relationships from unstructured text
 - Retrieve and Rank
-    - Creates a trainable search engine for your data    
+    - Creates a trainable search engine for your data  
+- Similarity search
+    - Create and search against image collections  
 - Speech To Text
     - Convert audio containing speech to text
 - Text To Speech

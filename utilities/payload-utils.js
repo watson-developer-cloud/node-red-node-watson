@@ -67,6 +67,27 @@ PayloadUtils.prototype = {
     request(url).pipe(wstream);
   },
 
+  // Function that matches the buffer streaming so that they can be used together.
+  stream_url_format: function(file, url, cb) {
+    var wstream = fs.createWriteStream(file);
+
+    wstream.on('finish', function() {
+      fs.readFile(file, function(err, buf) {
+        var fmt = null,
+          error = null;
+
+        if (err) {
+          throw err;
+        }
+        if (fileType(buf)) {
+          fmt = fileType(buf).ext;
+        } 
+        cb(fmt);
+      });
+    });
+    request(url).pipe(wstream);
+  },
+
   // Function that is returns a function to count
   // the characters in each language.
   word_count: function(ct) {
