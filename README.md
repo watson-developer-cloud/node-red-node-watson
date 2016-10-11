@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.4.22
+- Added new Date Extraction Node
+- Visual Recognition Node, now defaults detection setting and language on initial initialisation.
 
 ### New in version 0.4.21
 - Added Translation and Language Identify nodes for Language Translator Service (Blue Tiles)
@@ -113,6 +116,8 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
     - Use concept graphs to tag and explore information and documents.
 - Conversation
     - Add conversational capabilities into applications.
+- Date Extraction
+    - Uses AlchemyAPI Date Extraction to detect natural language date/time expressions from text
 - Dialog
     - Automate branching conversation between a user and your application.
     - Use natural language to automatically respond to user questions, cross-sell and up-sell, walk users through processes or applications, or even hand-hold users through difficult tasks.
