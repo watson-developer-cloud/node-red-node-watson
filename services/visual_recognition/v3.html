@@ -27,9 +27,9 @@
     <div class="form-row">
         <label for="node-input-image-feature"><i class="fa fa-book"></i> Detect: </label>
         <select type="text" id="node-input-image-feature" style="display: inline-block; width: 70%;">
-            <option value="classifyImage">Classify an image</option>
+            <option selected="selected" value="classifyImage">Classify an image</option>
             <option value="detectFaces">Detect Faces</option>
-            <option value="recognizeText">Recognize Text</option>            
+            <option value="recognizeText">Recognize Text</option>
         </select>
     </div>
     <div class="form-row">
@@ -39,7 +39,7 @@
     <div class="form-row" id="lang-group">
         <label for="node-input-lang-label"><i class="fa fa-language"></i> Language</label>
         <select type="text" id="node-input-lang" style="display: inline-block; width: 70%;" >
-            <option value="en">English</option>
+            <option selected="selected" value="en">English</option>
             <option value="es">Spanish</option>
             <option value="ar">Arabic</option>
             <option value="ja">Japanese</option>
@@ -79,7 +79,7 @@
     <ul>
         <li><b>Classify an image</b> Upload images or URLs to identify built-in classifiers by default. To identify custom classifiers, include the classifier_ids or owners parameters. Images must be in .jpeg, .jpg or .png format.</li>
         <li><b>Detect Faces</b> : analyze faces in images and get data about them, such as estimated age and gender. Images must be in .jpeg, .jpg or .png format.</li>
-        <li><b>Recognize Text</b> : recognizes text in images. This is a beta function of the Visual Recognition service that supports only English language text identification</li>        
+        <li><b>Recognize Text</b> : recognizes text in images. This is a beta function of the Visual Recognition service that supports only English language text identification</li>
     </ul>
 
     <p>All Results will made available at <code>msg.result</code></p>
@@ -113,75 +113,23 @@
 
     <br/>
     <p>For full details on the feature details and response values, please see the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/">Watson Visual Recognition (v3) API documentation</a></p>
-    
+
     <p>Check the sample Flow for this node on  <a href="https://github.com/watson-developer-cloud/node-red-bluemix-starter">Watson Node-RED Starter</a></p>
 </script>
 
 
-<script type="text/x-red" data-help-name="visual-recognition-util-v3">
-	<p> This node enables you to use the training features of the Watson Visual Recognition service V3 that aims to identify scenes, objects, faces, and text in images you upload to the service. Using this node you can create and train a custom classifier to identify subjects that suit your needs.</p>
-    <p>The following features are available :</p>
-    <ul>
-        <li><b>Create a classifier</b> </li>
-        <li><b>Retrieve a list of custom classifier</b></li>
-        <li><b>Retrieve classifier details</b></li>
-        <li><b>Delete a classifier</b></li>
-        <li><b>Delete all classifiers</b></li>
-    </ul>
-
-    <p>All Results will made available at <code>msg.result</code></p>
-
-    <p><b>Create a Classifier</b></p>
-    <p>this feature should be provided in input : </p>
-    <ul>
-    <li><code>msg.params["name"]</code> : a string name that will be used as prefix for the returned classifier_id (Required)</li>
-    <li><code>msg.params["{classname}_positive_examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images. (Required)</li>
-    <li><code>msg.params["negative_examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images.(Optional)</li>
-    </ul>
-    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#create_a_classifier">API documentation</a>.</p>
-
-    <p><b>Retrieve classifiers list</b></p>
-    <p>this feature does not need input params.</p>
-
-    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#retrieve_a_list_of_classifiers">API documentation</a>.</p>
-    
-    <p><b>Retrieve a classifier details</b></p>
-    <p>this feature should be provided in input : </p>
-    <ul>
-    <li><code>msg.params["classifier_id"]</code> : the classifier_id (string) (Required)</li>
-    </ul>
-    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#retrieve_classifier_details">API documentation</a>.</p>
-    
-    <p><b>Delete a classifier </b></p>
-    <p>this feature should be provided in input : </p>
-    <ul>
-    <li><code>msg.params["classifier_id"]</code> : the classifier_id (string) (Required)</li>
-    </ul>
-    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#delete_a_classifier">API documentation</a>.</p>
-
-    <p>For full details on the feature details and response values, please see the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/">Watson Visual Recognition (v3) API documentation</a></p>
-
-    <p><b>Delete All Classifiers</b></p>
-    <p>This feature simply delete all custom classifiers associated to the service instance. This feature does not need input params.</p>
-
-    <br/>
-    <p>For full details on the feature details and response values, please see the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/">Watson Visual Recognition (v3) API documentation</a></p>
-    
-    <p>Check the sample Flow for this node on  <a href="https://github.com/watson-developer-cloud/node-red-bluemix-starter">Watson Node-RED Starter</a></p>
-    
-</script>
 
 
 <script type="text/javascript">
 
 // Need to simulate a namespace, as some of the variables had started to leak across nodes
   function VISUALRECOGNITIONV3 () {
-    var language_selected = '';
-  }  
+  }
 
-  // This is the namespace for visualrecognitionv3. Currently only contains models, but more vars and functions may need to be 
+  // This is the namespace for visualrecognitionv3. Currently only contains models, but more vars and functions may need to be
   // moved in if there is a clash with other nodes.
   var visualrecognitionv3 = new VISUALRECOGNITIONV3();
+  visualrecognitionv3.language_selected = '';
 
   // Save the values in the dynamic lists to the hidden fields.
   function oneditsave(){
@@ -224,10 +172,28 @@
                     $('#credentials-check').hide();
                   });
 
+              // Default the type of extraction, as its coming up blank,
+              // which is confusing our users
+              var currfeature = $('#node-input-image-feature').val();
+              if (!currfeature) {
+                $("#node-input-image-feature option[value='classifyImage']").prop('selected', true);  
+              }
+
               // update list of ruleset for the selected service when the service changes
+              // The language is needed for the classifyImage, and if not set causes
+              // problems downstream. So if it is not set will default to English.
+              // Even though selected='selected' is set in the html for the dialog it
+              // doesn't appear.
               $('#node-input-image-feature').change(function() {
                 var selectedFeature = $('#node-input-image-feature');
                 if (selectedFeature.val() == 'classifyImage') {
+                    var currvalue = $('#node-input-lang').val();
+                    if (!currvalue) {
+                      if (!visualrecognitionv3.language_selected) {
+                        visualrecognitionv3.language_selected = 'en';
+                        $("#node-input-lang option[value='en']").prop('selected', true);
+                      }
+                    }
                     $('#lang-group').show();
                 }
                 else {
@@ -274,4 +240,57 @@
             }
         });
     })();
+</script>
+
+<script type="text/x-red" data-help-name="visual-recognition-util-v3">
+	<p> This node enables you to use the training features of the Watson Visual Recognition service V3 that aims to identify scenes, objects, faces, and text in images you upload to the service. Using this node you can create and train a custom classifier to identify subjects that suit your needs.</p>
+    <p>The following features are available :</p>
+    <ul>
+        <li><b>Create a classifier</b> </li>
+        <li><b>Retrieve a list of custom classifier</b></li>
+        <li><b>Retrieve classifier details</b></li>
+        <li><b>Delete a classifier</b></li>
+        <li><b>Delete all classifiers</b></li>
+    </ul>
+
+    <p>All Results will made available at <code>msg.result</code></p>
+
+    <p><b>Create a Classifier</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+    <li><code>msg.params["name"]</code> : a string name that will be used as prefix for the returned classifier_id (Required)</li>
+    <li><code>msg.params["{classname}_positive_examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images. (Required)</li>
+    <li><code>msg.params["negative_examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images.(Optional)</li>
+    </ul>
+    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#create_a_classifier">API documentation</a>.</p>
+
+    <p><b>Retrieve classifiers list</b></p>
+    <p>this feature does not need input params.</p>
+
+    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#retrieve_a_list_of_classifiers">API documentation</a>.</p>
+
+    <p><b>Retrieve a classifier details</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+    <li><code>msg.params["classifier_id"]</code> : the classifier_id (string) (Required)</li>
+    </ul>
+    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#retrieve_classifier_details">API documentation</a>.</p>
+
+    <p><b>Delete a classifier </b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+    <li><code>msg.params["classifier_id"]</code> : the classifier_id (string) (Required)</li>
+    </ul>
+    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#delete_a_classifier">API documentation</a>.</p>
+
+    <p>For full details on the feature details and response values, please see the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/">Watson Visual Recognition (v3) API documentation</a></p>
+
+    <p><b>Delete All Classifiers</b></p>
+    <p>This feature simply delete all custom classifiers associated to the service instance. This feature does not need input params.</p>
+
+    <br/>
+    <p>For full details on the feature details and response values, please see the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/">Watson Visual Recognition (v3) API documentation</a></p>
+
+    <p>Check the sample Flow for this node on  <a href="https://github.com/watson-developer-cloud/node-red-bluemix-starter">Watson Node-RED Starter</a></p>
+
 </script>
