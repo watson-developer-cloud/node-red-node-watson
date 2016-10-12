@@ -515,7 +515,7 @@ module.exports = function (RED) {
     password = password || this.credentials.password;
 
     if (!username || !password) {
-      message = 'Missing Concept Insights service credentials';
+      message = 'Missing Retrieve and Rank service credentials';
       return node.error(message, msg);
     }
 
