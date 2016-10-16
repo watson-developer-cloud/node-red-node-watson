@@ -176,6 +176,9 @@ module.exports = function (RED) {
 
       // If training is requested then the glossary will be a file input. We are using temp
       // to sync up the fetch of the file input stream, before invoking the train service.
+      // If the file comes from a file-inject then the file will not have a filename assoicated
+      // with it. In this case a temporary filename is given to the file. The file name submitted
+      // to the service cannot have a '.' else it will throw a 400 error.
       var doTrain = function(msg, model_id, filetype){
         node.status({
           fill: 'blue',
@@ -189,8 +192,13 @@ module.exports = function (RED) {
           if (!err) {
             fs.write(info.fd, msg.payload);
             var params = {};
+
             // only letters and numbers allowed in the submitted file name
-            params.name = msg.filename.replace(/[^0-9a-z]/gi, '');
+            // Default the name to a string representing now
+            params.name = (new Date()).toString().replace(/[^0-9a-z]/gi, '');
+            if (msg.filename) {
+              params.name = msg.filename.replace(/[^0-9a-z]/gi, '');
+            }
             params.base_model_id = model_id;
             switch (filetype) {
             case 'forcedglossary':
