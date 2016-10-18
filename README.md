@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.4.24
+- Bugfixes to Language Translator Train Node
+
 ### New in version 0.4.23
 - Fix to Language Translator Train Node to allow it work with File Inject
 
