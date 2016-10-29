@@ -175,21 +175,48 @@ module.exports = function (RED) {
 
       // If training is requested then the glossary will be a file input. We are using temp
       // to sync up the fetch of the file input stream, before invoking the train service.
+      // If the file comes from a file-inject then the file will not have a filename assoicated
+      // with it. In this case a temporary filename is given to the file. The file name submitted
+      // to the service cannot have a '.' else it will throw a 400 error.
       var doTrain = function(msg, model_id, filetype){
         node.status({
           fill: 'blue',
           shape: 'dot',
-          text: 'requesting training'
+          text: 'processing data buffer for training request'
         });
 
         temp.open({
           suffix: '.xml'
-        }, function(err, info){
-          if (!err) {
-            fs.write(info.fd, msg.payload);
+        }, function(err, info) {
+          if (err) {
+            node.status({
+              fill: 'red',
+              shape: 'dot',
+              text: 'Error receiving the data buffer for training'
+            });
+            throw err;
+          }
+
+          // Syncing up the asynchronous nature of the stream
+          // so that the full file can be sent to the API.
+          fs.writeFile(info.path, msg.payload, function(err) {
+            if (err) {
+              node.status({
+                fill: 'red',
+                shape: 'dot',
+                text: 'Error processing data buffer for training'
+              });
+              throw err;
+            }
+
             var params = {};
+
             // only letters and numbers allowed in the submitted file name
-            params.name = msg.filename.replace(/[^0-9a-z]/gi, '');
+            // Default the name to a string representing now
+            params.name = (new Date()).toString().replace(/[^0-9a-z]/gi, '');
+            if (msg.filename) {
+              params.name = msg.filename.replace(/[^0-9a-z]/gi, '');
+            }
             params.base_model_id = model_id;
             switch (filetype) {
             case 'forcedglossary':
@@ -226,10 +253,10 @@ module.exports = function (RED) {
                 }
               }
             );
-          }
+          });
         });
-        node.status({ });
       };
+
 
       // Fetch the status of the trained model. It can only be used if the model is available. This
       // will also return any training errors. The full error reason is returned in msg.translation
