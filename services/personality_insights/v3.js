@@ -41,9 +41,8 @@ module.exports = function (RED) {
   // This function prepares the params object for the
   // call to Personality Insights
   function prepareParams(msg, config) {
-    var params = {};
-
-    var inputlang = config.inputlang ? config.inputlang : 'en',
+    var params = {},
+      inputlang = config.inputlang ? config.inputlang : 'en',
       outputlang = config.outputlang ? config.outputlang : 'en';
 
     if (msg.piparams) {
