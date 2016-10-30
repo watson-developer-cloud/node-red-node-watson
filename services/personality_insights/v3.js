@@ -43,28 +43,29 @@ module.exports = function (RED) {
   function Node(config) {
     RED.nodes.createNode(this,config);
     var node = this,
-      wc = payloadutils.word_count(config.inputlang);
+      wc = payloadutils.word_count(config.inputlang),
+      message = '';
 
     this.on('input', function (msg) {
       //var self = this;
 
       if (!msg.payload) {
-        var message = 'Missing property: msg.payload';
+        message = 'Missing property: msg.payload';
         node.status({fill:'red', shape:'ring', text:'missing payload'});
-        node.error(message, msg)
+        node.error(message, msg);
         return;
       }
 
       if ('string' !== typeof(msg.payload)) {
-        var message = 'submitted msg.payload is not text';
+        message = 'submitted msg.payload is not text';
         node.status({fill:'red', shape:'ring', text:'payload is not text'});
-        node.error(message, msg)
+        node.error(message, msg);
         return;
       }
 
       wc(msg.payload, function (length) {
         if (length < 100) {
-          var message = 'Personality insights requires a minimum of one hundred words.'
+          message = 'Personality insights requires a minimum of one hundred words.'
                             + ' Only ' + length + ' submitted';
           node.status({fill:'red', shape:'ring', text:'insufficient words submitted'});
           node.error(message, msg);
@@ -75,7 +76,7 @@ module.exports = function (RED) {
         password = sPassword || node.credentials.password;
 
         if (!username || !password) {
-          var message = 'Missing Personality Insights service credentials';
+          message = 'Missing Personality Insights service credentials';
           node.status({fill:'red', shape:'ring', text:'missing credentials'});
           node.error(message, msg);
           return;
@@ -87,8 +88,8 @@ module.exports = function (RED) {
           version_date: '2016-10-20'
         });
 
-        var inputlang = config.inputlang ? config.inputlang : 'en';
-        var outputlang = config.outputlang ? config.outputlang : 'en';
+        var inputlang = config.inputlang ? config.inputlang : 'en',
+          outputlang = config.outputlang ? config.outputlang : 'en';
 
         if (msg.piparams) {
           if (msg.piparams.inputlanguage
