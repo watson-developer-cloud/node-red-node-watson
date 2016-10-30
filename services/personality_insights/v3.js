@@ -40,7 +40,7 @@ module.exports = function (RED) {
 
   // This function prepares the params object for the
   // call to Personality Insights
-  function PrepareParams(msg, config) {
+  function prepareParams(msg, config) {
     var params = {};
 
     var inputlang = config.inputlang ? config.inputlang : 'en',
@@ -98,8 +98,8 @@ module.exports = function (RED) {
 
       wc(msg.payload, function (length) {
         if (length < 100) {
-          message = 'Personality insights requires a minimum of one hundred words.'
-                            + ' Only ' + length + ' submitted';
+          message = 'Personality insights requires a minimum of one hundred words.' +
+                            ' Only ' + length + ' submitted';
           node.status({fill:'red', shape:'ring', text:'insufficient words submitted'});
           node.error(message, msg);
           return;
@@ -115,7 +115,7 @@ module.exports = function (RED) {
           return;
         }
 
-        var params = PrepareParams(msg, config),
+        var params = prepareParams(msg, config),
           personality_insights = new PersonalityInsightsV3({
             username: username,
             password: password,
