@@ -38,6 +38,39 @@ module.exports = function (RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
+  // This function prepares the params object for the
+  // call to Personality Insights
+  function PrepareParams(msg, config) {
+    var params = {};
+
+    var inputlang = config.inputlang ? config.inputlang : 'en',
+      outputlang = config.outputlang ? config.outputlang : 'en';
+
+    if (msg.piparams) {
+      if (msg.piparams.inputlanguage &&
+            -1 < VALID_INPUT_LANGUAGES.indexOf(msg.piparams.inputlanguage)) {
+        inputlang = msg.piparams.inputlanguage;
+      }
+      if (msg.piparams.responselanguage &&
+            -1 < VALID_RESPONSE_LANGUAGES.indexOf(msg.piparams.responselanguage)) {
+        outputlang = msg.piparams.responselanguage;
+      }
+    }
+
+    params = {
+      text: msg.payload,
+      consumption_preferences: config.consumption ? config.consumption : false,
+      raw_scores: config.rawscores ? config.rawscores : false,
+      headers: {
+        'content-language': inputlang,
+        'accept-language': outputlang,
+        'accept': 'application/json'
+      }
+    };
+
+    return params;
+  }
+
   // This is the start of the Node Code. In this case only on input
   // is being processed.
   function Node(config) {
@@ -82,35 +115,12 @@ module.exports = function (RED) {
           return;
         }
 
-        var inputlang = config.inputlang ? config.inputlang : 'en',
-          outputlang = config.outputlang ? config.outputlang : 'en',
+        var params = PrepareParams(msg, config),
           personality_insights = new PersonalityInsightsV3({
-          username: username,
-          password: password,
-          version_date: '2016-10-20'
-        });
-
-        if (msg.piparams) {
-          if (msg.piparams.inputlanguage &&
-                -1 < VALID_INPUT_LANGUAGES.indexOf(msg.piparams.inputlanguage)) {
-            inputlang = msg.piparams.inputlanguage;
-          }
-          if (msg.piparams.responselanguage &&
-                -1 < VALID_RESPONSE_LANGUAGES.indexOf(msg.piparams.responselanguage)) {
-            outputlang = msg.piparams.responselanguage;
-          }
-        }
-
-        var params = {
-          text: msg.payload,
-          consumption_preferences: config.consumption ? config.consumption : false,
-          raw_scores: config.rawscores ? config.rawscores : false,
-          headers: {
-            'content-language': inputlang,
-            'accept-language': outputlang,
-            'accept': 'application/json'
-          }
-        };
+            username: username,
+            password: password,
+            version_date: '2016-10-20'
+          });
 
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         personality_insights.profile(params, function(err, response){
