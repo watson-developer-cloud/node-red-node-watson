@@ -44,7 +44,15 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-personality-insights">
-    <p>The Personality Insights service uses linguistic analytics to infer personality and social characteristics, including Big Five, Needs, and Values, from text.</p>
+    <p><b>NB:</b> This Node makes use of V2 of the Watson Personality Insights service has been
+      <b>deprecated</b> in favor
+      of V3 of the service. Once the V2 service
+      has been switched off this node will no longer work. This node will be removed from the palette in a
+      future release. Please use the Personality Insights node that supports V3 of the service.
+    </p>
+    <br/>
+
+    <p>The Personality Insights V2 service uses linguistic analytics to infer personality and social characteristics, including Big Five, Needs, and Values, from text.</p>
     <p>The text (minimum of a hundred words) to analyse should be passed in on <code>msg.payload</code>.</p>
     <p>You can set the source text language to be either English or Spanish.</p>
     <p>The insights will be returned as a tree on <code>msg.insights</code>.</p>
@@ -54,7 +62,7 @@
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-personality-insights', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ""},
                 lang: {value: "en"}
