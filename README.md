@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.4.27
+-  Change color of V3 Personality Insights Node
+
 ### New in version 0.4.26
 -  New V3 Personality Insights Node
 -  Deprecated V2 Personality Insights Node
