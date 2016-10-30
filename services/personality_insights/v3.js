@@ -82,23 +82,22 @@ module.exports = function (RED) {
           return;
         }
 
-        var personality_insights = new PersonalityInsightsV3({
+        var inputlang = config.inputlang ? config.inputlang : 'en',
+          outputlang = config.outputlang ? config.outputlang : 'en',
+          personality_insights = new PersonalityInsightsV3({
           username: username,
           password: password,
           version_date: '2016-10-20'
         });
 
-        var inputlang = config.inputlang ? config.inputlang : 'en',
-          outputlang = config.outputlang ? config.outputlang : 'en';
-
         if (msg.piparams) {
-          if (msg.piparams.inputlanguage
-                && -1 < VALID_INPUT_LANGUAGES.indexOf(msg.piparams.inputlanguage)) {
-            inputlang =  msg.piparams.inputlanguage;
+          if (msg.piparams.inputlanguage &&
+                -1 < VALID_INPUT_LANGUAGES.indexOf(msg.piparams.inputlanguage)) {
+            inputlang = msg.piparams.inputlanguage;
           }
-          if (msg.piparams.responselanguage
-                && -1 < VALID_RESPONSE_LANGUAGES.indexOf(msg.piparams.responselanguage)) {
-            outputlang =  msg.piparams.responselanguage;
+          if (msg.piparams.responselanguage &&
+                -1 < VALID_RESPONSE_LANGUAGES.indexOf(msg.piparams.responselanguage)) {
+            outputlang = msg.piparams.responselanguage;
           }
         }
 
@@ -113,9 +112,9 @@ module.exports = function (RED) {
           }
         };
 
-        node.status({fill:"blue", shape:"dot", text:"requesting"});
+        node.status({fill:'blue', shape:'dot', text:'requesting'});
         personality_insights.profile(params, function(err, response){
-          node.status({})
+          node.status({});
           if (err) {
             node.status({fill:'red', shape:'ring', text:'processing error'});
             node.error(err, msg);
@@ -130,10 +129,10 @@ module.exports = function (RED) {
     });
   }
 
-  RED.nodes.registerType("watson-personality-insights-v3",Node,{
-     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
+  RED.nodes.registerType('watson-personality-insights-v3',Node,{
+    credentials: {
+      username: {type:'text'},
+      password: {type:'password'}
     }
   });
 };
