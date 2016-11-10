@@ -17,7 +17,7 @@
 module.exports = function (RED) {
 
   function buildParams(msg,config) {
-    params = {};
+    var params = {};
     if (msg.discoveryparams && msg.discoveryparams.envrionmentname) {
       params.name = msg.discoveryparams.envrionmentname;
     } else if (config.envrionmentname) {
@@ -70,20 +70,19 @@ module.exports = function (RED) {
       node.status({fill:'blue', shape:'dot', text:'requesting'});
 
       discovery.getEnvironments(params, function (err, response) {
-        node.status({})
+        node.status({});
         if (err) {
           console.log(err);
           node.status({fill:'red', shape:'dot', text:err.error});
           node.error(err, msg);
         } else {
-          console.log(response);
-            msg.environments = response.environments ? response.environments : [];
+          msg.environments = response.environments ? response.environments : [];
         }
         node.send(msg);
       });
     });
   }
-  
+
   RED.nodes.registerType('watson-discovery', Node, {
     credentials: {
       username: {type:'text'},
