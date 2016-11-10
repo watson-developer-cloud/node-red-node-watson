@@ -1,0 +1,100 @@
+<!--
+  Copyright 2016 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-discovery">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row">
+        <label for="node-input-environmentname"><i class="fa fa-tag"></i> Environment Name</label>
+        <input type="text" id="node-input-envrionmentname" placeholder="">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-discovery">
+    <p>This is the Node for the V1 Experimental Watson Discovery service.</p>
+    <p>This version of the Node will only list the envrionments created for
+      the service.
+    </p>
+    <p>The node does not need any input. If the envrionment name field is left blank
+      it will list all envrionments created for the instance of the Discovery service.
+      If the envrionment name is specified, then only the details for
+      the Discovery envrionment with the specified name will be returned.
+    </p>
+    <p>The environment being requested can be overridden by specifying the search name
+      in <code>msg.discoveryparams.envrionmentname</code>
+    </p>
+
+    <p>Node output : </p>
+    <ul>
+      <li><code>msg.envrionments</code> : A list of the envrionments created under
+      the Discovery service instance.</li>
+    </ul>
+    <p>For more information about the Discovery service,
+    read the service <a href="https://www.ibm.com/watson/developercloud/doc/discovery/">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-discovery', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                envrionmentname: {value: ""}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(84,149,230)",
+            inputs: 1,
+            outputs: 1,
+            icon: "discovery.png",
+            paletteLabel: "discovery",
+            label: function() {
+                return this.name || "discovery";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $.getJSON('watson-discovery/vcap/')
+                  .done(function (service) {
+                    $('.credentials').toggle(!service);
+                  })
+                  .fail(function () {
+                    $('.credentials').show();
+                  }).always(function () {
+                    $('#credentials-check').hide();
+                  })
+            }
+        });
+    })();
+</script>
