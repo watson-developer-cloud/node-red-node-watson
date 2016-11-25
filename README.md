@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.4.28
+-  New V1 Experimental Discovery Node
+
 ### New in version 0.4.27
 -  Change color of V3 Personality Insights Node
 
@@ -137,6 +140,8 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
 - Dialog
     - Automate branching conversation between a user and your application.
     - Use natural language to automatically respond to user questions, cross-sell and up-sell, walk users through processes or applications, or even hand-hold users through difficult tasks.
+- Discovery
+    - List environments created for the Discovery service
 - Document Conversion
     - Prepare documents for the Retrieve and Rank service.
 - Feature Extract
