@@ -146,11 +146,14 @@
     <p></p>
     <p><b>Training Mode</b>.</p>
     <p>This mode enables you to add your own customized model to the Watson Language Translator service. </p>
-    <p>In the Dropbox node, you must specify one ore more of the following file options to customize the training:</p>
+    <p>In <code>msg.payload</code>, (this can be through box, dropbox or a file-inject node.
+       you must specify one of the following file options to customize the training:</p>
     <p>forced_glossary - A UTF-8 encoded TMX file that contains pairs of matching terms in the source and target language that are seen as absolute by the system. This file completely overwrites the original domain data.</p>
     <p>parallel_corpus - A UTF-8 encoded TMX file that contains matching phrases in the source and target language that serve as examples for Watson. Parallel corpora differ from glossaries because they do not overwrite the original domain data.</p>
     <p>monolingual_corpus - A UTF-8 encoded plain text file that contains a body of text in the target language that is related to what you are translating. A monolingual corpus helps improve literal translations to be more fluent and human.</p>
     <p>The Language Translator Node will return the ID of the created customized model.</p>
+    <p<b>Note:</b>As the input file is expected on msg.payload, only one file can be specified. This is
+    an enforced restriction by this Node. The service API allows more than one file to be specified.</p>
     <p></p>
     <p><b>Get Status Mode</b>.</p>
     <p>This mode allows you to get the status of a model sent to training by providing its ID.</p>
@@ -511,7 +514,7 @@
 
       // Flush out the List before repopulating it.
       $('select#node-input-srclang').empty();
-      
+
       input_lang_unique.forEach(function(lang){
         var selectedText = '';
         if (tor.srclang_selected === lang) {
