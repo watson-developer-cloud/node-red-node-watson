@@ -93,12 +93,11 @@ module.exports = function(RED) {
       console.log('Checking Credentials');
       if (node && node.username && node.password) {
         return true;
-      } else {
-        node.status({fill:'red', shape:'ring', text:'missing credentials'});
-        node.error('Missing Watson Document Conversion API service credentials', msg);
-        return false;
       }
-    }
+      node.status({fill:'red', shape:'ring', text:'missing credentials'});
+      node.error('Missing Watson Document Conversion API service credentials', msg);
+      return false;
+    };
 
     this.doCall = function(msg) {
       temp.open({
