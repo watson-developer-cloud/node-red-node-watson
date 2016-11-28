@@ -7,6 +7,10 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.4.29
+-  Fix to Document Conversion Node to preserve full msg object
+-  Fix to Language Translator Node train mode documentation
+
 ### New in version 0.4.28
 -  New V1 Experimental Discovery Node
 
