@@ -82,15 +82,11 @@ module.exports = function(RED) {
         } else {
           msg.payload = response;
           node.send(msg);
-          //node.send({
-          //  'payload': response
-          //});
         }
       });
     };
 
     this.verifyCredentials = function(msg) {
-      console.log('Checking Credentials');
       if (node && node.username && node.password) {
         return true;
       }
