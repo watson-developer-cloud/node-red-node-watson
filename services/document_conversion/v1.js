@@ -80,12 +80,25 @@ module.exports = function(RED) {
         if (err) {
           node.error(err);
         } else {
-          node.send({
-            'payload': response
-          });
+          msg.payload = response;
+          node.send(msg);
+          //node.send({
+          //  'payload': response
+          //});
         }
       });
     };
+
+    this.verifyCredentials = function(msg) {
+      console.log('Checking Credentials');
+      if (node && node.username && node.password) {
+        return true;
+      } else {
+        node.status({fill:'red', shape:'ring', text:'missing credentials'});
+        node.error('Missing Watson Document Conversion API service credentials', msg);
+        return false;
+      }
+    }
 
     this.doCall = function(msg) {
       temp.open({
@@ -132,7 +145,9 @@ module.exports = function(RED) {
     };
 
     this.on('input', function(msg) {
-      this.doCall(msg);
+      if (this.verifyCredentials(msg)) {
+        this.doCall(msg);
+      }
     });
   }
   RED.nodes.registerType('convert', ConvertNode);
