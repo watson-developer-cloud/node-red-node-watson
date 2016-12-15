@@ -25,7 +25,7 @@ ServiceUtils.prototype = {
     for (var service in services) {
       if (services[service].hasOwnProperty('credentials')) {
         if(services[service].credentials.hasOwnProperty('url')){
-          if(services[service].credentials.url.search(regex) == 0){
+          if(services[service].credentials.url.search(regex) === 0){
             return true;
           }
         }
