@@ -43,7 +43,7 @@ module.exports = function (RED) {
   }
 
   RED.httpAdmin.get('/watson-discovery/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+    res.json(dservice ? {bound_service: true} : null);
     //res.json(serviceutils.checkServiceBound('discovery'));
   });
 
