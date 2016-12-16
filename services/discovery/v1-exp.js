@@ -29,16 +29,16 @@ module.exports = function (RED) {
   var DiscoveryV1Experimental = require('watson-developer-cloud/discovery/v1-experimental'),
     cfenv = require('cfenv'),
     serviceutils = require('../../utilities/service-utils');
-    service = cfenv.getAppEnv().getServiceCreds(/discovery/i),
+    dservice = cfenv.getAppEnv().getServiceCreds(/discovery/i),
     username = null,
     password = null,
     sUsername = null,
     sPassword = null;
 
   console.log('==========Logging for Discovery=============================');
-  if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
+  if (dservice) {
+    sUsername = dservice.username;
+    sPassword = dservice.password;
     console.log('will be using credentials :' + sUsername + ':' + sPassword);
   }
 
@@ -57,6 +57,10 @@ module.exports = function (RED) {
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
+
+      console.log('+++++++++++++++++++++++++++++');
+      console.log('Using credentials for Discovery ' + username + ':' + password);
+      console.log('Based on ' + sUsername + ':' + sPassword);
 
       if (!username || !password) {
         message = 'Missing Watson Discovery service credentials';
