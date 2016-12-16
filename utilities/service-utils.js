@@ -20,17 +20,22 @@ function ServiceUtils() {}
 ServiceUtils.prototype = {
   //function to determine if WDC service is bound
   checkServiceBound: function(serviceName) {
+    console.log('---------------- Looking for :' + serviceName);
     var regex = new RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
     var services = appEnv.getServices();
+    console.log('will be looking in: ');
+    console.log(services);
     for (var service in services) {
       if (services[service].hasOwnProperty('credentials')) {
         if(services[service].credentials.hasOwnProperty('url')){
           if(services[service].credentials.url.search(regex) === 0){
+            console.log('found');
             return true;
           }
         }
       }
     }
+    console.log('not found');
     return false;
   },
 };

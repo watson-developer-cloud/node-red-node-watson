@@ -28,6 +28,7 @@ module.exports = function (RED) {
 
   var DiscoveryV1Experimental = require('watson-developer-cloud/discovery/v1-experimental'),
     cfenv = require('cfenv'),
+    serviceutils = require('../../utilities/service-utils');
     service = cfenv.getAppEnv().getServiceCreds(/discovery/i),
     username = null,
     password = null,
@@ -40,7 +41,8 @@ module.exports = function (RED) {
   }
 
   RED.httpAdmin.get('/watson-discovery/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+    //res.json(service ? {bound_service: true} : null);
+    res.json(serviceutils.checkServiceBound('discovery'));
   });
 
   function Node (config) {
