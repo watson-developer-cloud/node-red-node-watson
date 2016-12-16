@@ -35,6 +35,7 @@ module.exports = function (RED) {
     sUsername = null,
     sPassword = null;
 
+  console.log('==========Logging for Discovery=============================');
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
