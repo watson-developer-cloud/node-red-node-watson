@@ -38,6 +38,7 @@ module.exports = function (RED) {
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    console.log('will be using credentials :' + sUsername + ':' + sPassword);
   }
 
   RED.httpAdmin.get('/watson-discovery/vcap', function (req, res) {
