@@ -38,11 +38,9 @@ module.exports = function (RED) {
     sUsername = null,
     sPassword = null;
 
-  console.log('==========Logging for Discovery=============================');
   if (dservice) {
     sUsername = dservice.username;
     sPassword = dservice.password;
-    console.log('will be using credentials :' + sUsername + ':' + sPassword);
   }
 
   RED.httpAdmin.get('/watson-discovery/vcap', function (req, res) {
@@ -60,10 +58,6 @@ module.exports = function (RED) {
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
-
-      console.log('+++++++++++++++++++++++++++++');
-      console.log('Using credentials for Discovery ' + username + ':' + password);
-      console.log('Based on ' + sUsername + ':' + sPassword);
 
       if (!username || !password) {
         message = 'Missing Watson Discovery service credentials';
@@ -83,7 +77,6 @@ module.exports = function (RED) {
       discovery.getEnvironments(params, function (err, response) {
         node.status({});
         if (err) {
-          console.log(err);
           node.status({fill:'red', shape:'dot', text:err.error});
           node.error(err, msg);
         } else {

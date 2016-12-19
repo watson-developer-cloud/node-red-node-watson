@@ -39,12 +39,12 @@ ServiceUtils.prototype = {
 
   // Check for service return a boolean to indicate if it is bound in
   checkServiceBound: function(serviceName) {
-    return checkCFForService(servieName, true);
+    return ServiceUtils.prototype.checkCFForService(serviceName, true);
   },
 
   // Check for and return bound servie
   getServiceCreds: function(serviceName) {
-    return checkCFForService(servieName, false);
+    return ServiceUtils.prototype.checkCFForService(serviceName, false);
   }
 
 };
