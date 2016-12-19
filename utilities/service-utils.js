@@ -44,7 +44,7 @@ ServiceUtils.prototype = {
 
   //function to determine if WDC service is bound
   getServiceCreds: function(serviceName) {
-    console.log('---------------- Looking for :' + serviceName);
+    console.log('-+-+-+-+-+-+--+-------- getServiceCreds Looking for :' + serviceName);
     var regex = new RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
     var services = appEnv.getServices();
     console.log('will be looking in: ');
