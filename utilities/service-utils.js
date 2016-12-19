@@ -18,7 +18,10 @@ var appEnv = cfenv.getAppEnv();
 
 function ServiceUtils() {}
 ServiceUtils.prototype = {
-  //function to determine if WDC service is bound
+  //function to determine if WDC service is bound. A simple check on
+  // name may fail because of duplicate usage. This function verifies
+  // that the url associated with the service, contains the matched
+  // input value, hence reducing the chances of a false match.
   checkServiceBound: function(serviceName) {
     console.log('---------------- Looking for :' + serviceName);
     var regex = new RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
@@ -38,6 +41,29 @@ ServiceUtils.prototype = {
     console.log('not found');
     return false;
   },
+
+  //function to determine if WDC service is bound
+  getServiceCreds: function(serviceName) {
+    console.log('---------------- Looking for :' + serviceName);
+    var regex = new RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
+    var services = appEnv.getServices();
+    console.log('will be looking in: ');
+    console.log(services);
+    for (var service in services) {
+      if (services[service].hasOwnProperty('credentials')) {
+        if(services[service].credentials.hasOwnProperty('url')){
+          if(services[service].credentials.url.search(regex) === 0){
+            console.log('found');
+            return services[service].credentials;
+          }
+        }
+      }
+    }
+    console.log('not found');
+    return null;
+  },
+
+
 };
 
 var serviceutils = new ServiceUtils();

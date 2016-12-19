@@ -16,6 +16,8 @@
 
 module.exports = function (RED) {
 
+  const SERVICE_IDENTIFIER = 'discovery';
+
   function buildParams(msg,config) {
     var params = {};
     if (msg.discoveryparams && msg.discoveryparams.envrionmentname) {
@@ -27,9 +29,10 @@ module.exports = function (RED) {
   }
 
   var DiscoveryV1Experimental = require('watson-developer-cloud/discovery/v1-experimental'),
-    cfenv = require('cfenv'),
+    //cfenv = require('cfenv'),
     serviceutils = require('../../utilities/service-utils'),
-    dservice = cfenv.getAppEnv().getServiceCreds(/discovery/i),
+    //dservice = cfenv.getAppEnv().getServiceCreds(/discovery/i),
+    dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
     username = null,
     password = null,
     sUsername = null,
@@ -44,7 +47,7 @@ module.exports = function (RED) {
 
   RED.httpAdmin.get('/watson-discovery/vcap', function (req, res) {
     //res.json(dservice ? {bound_service: true} : null);
-    res.json(serviceutils.checkServiceBound('discovery'));
+    res.json(serviceutils.checkServiceBound(SERVICE_IDENTIFIER));
   });
 
   function Node (config) {
