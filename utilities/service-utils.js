@@ -22,47 +22,30 @@ ServiceUtils.prototype = {
   // name may fail because of duplicate usage. This function verifies
   // that the url associated with the service, contains the matched
   // input value, hence reducing the chances of a false match.
+  checkCFForService: function(serviceName, returnBoolean) {
+    var regex = new RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
+    var services = appEnv.getServices();
+    for (var service in services) {
+      if (services[service].hasOwnProperty('credentials')) {
+        if(services[service].credentials.hasOwnProperty('url')){
+          if(services[service].credentials.url.search(regex) === 0){
+            return returnBoolean ? true : services[service].credentials;
+            }
+          }
+        }
+      }
+    return returnBoolean ? false : null;
+  },
+
+  // Check for service return a boolean to indicate if it is bound in
   checkServiceBound: function(serviceName) {
-    console.log('---------------- Looking for :' + serviceName);
-    var regex = new RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
-    var services = appEnv.getServices();
-    console.log('will be looking in: ');
-    console.log(services);
-    for (var service in services) {
-      if (services[service].hasOwnProperty('credentials')) {
-        if(services[service].credentials.hasOwnProperty('url')){
-          if(services[service].credentials.url.search(regex) === 0){
-            console.log('found');
-            return true;
-          }
-        }
-      }
-    }
-    console.log('not found');
-    return false;
+    return checkCFForService(servieName, true);
   },
 
-  //function to determine if WDC service is bound
+  // Check for and return bound servie
   getServiceCreds: function(serviceName) {
-    console.log('-+-+-+-+-+-+--+-------- getServiceCreds Looking for :' + serviceName);
-    var regex = new RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
-    var services = appEnv.getServices();
-    console.log('will be looking in: ');
-    console.log(services);
-    for (var service in services) {
-      if (services[service].hasOwnProperty('credentials')) {
-        if(services[service].credentials.hasOwnProperty('url')){
-          if(services[service].credentials.url.search(regex) === 0){
-            console.log('found');
-            return services[service].credentials;
-          }
-        }
-      }
-    }
-    console.log('not found');
-    return null;
-  },
-
+    return checkCFForService(servieName, false);
+  }
 
 };
 
