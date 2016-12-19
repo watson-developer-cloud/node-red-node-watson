@@ -20,12 +20,80 @@ module.exports = function (RED) {
 
   function buildParams(msg,config) {
     var params = {};
-    if (msg.discoveryparams && msg.discoveryparams.envrionmentname) {
-      params.name = msg.discoveryparams.envrionmentname;
-    } else if (config.envrionmentname) {
-      params.name = config.envrionmentname;
+    if (msg.discoveryparams && msg.discoveryparams.environmentname) {
+      params.name = msg.discoveryparams.environmentname;
+    } else if (config.environmentname) {
+      params.name = config.environmentname;
     }
+
+    if (msg.discoveryparams && msg.discoveryparams.environmentid) {
+      params.environment_id = msg.discoveryparams.environmentid;
+    } else if (config.environmentid) {
+      params.environment_id = config.environmentid;
+    }
+
     return params;
+  }
+
+  function checkParams(method, params){
+    var response = '';
+    switch (method) {
+      case 'getEnvironmentDetails':
+        if (!params.environment_id) {
+          response = 'Missing Environment ID'
+        }
+        break;
+    }
+    return response;
+  }
+
+  function reportError(node, msg, message) {
+    var messageTxt = message.error ? message.error : message;
+    node.status({fill:'red', shape:'dot', text: messageTxt});
+    node.error(message, msg);
+  }
+
+  function executeListEnvrionments(node, discovery, params, msg) {
+    discovery.getEnvironments(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err.error);
+      } else {
+        msg.environments = response.environments ? response.environments : [];
+      }
+      node.send(msg);
+    });
+  }
+
+  function executeEnvrionmentDetails(node, discovery, params, msg) {
+    discovery.getEnvironment(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err.error);
+      } else {
+        msg.environment_details = response;
+      }
+      node.send(msg);
+    });
+  }
+
+
+  function executeMethod(node, method, params, msg) {
+    var discovery = new DiscoveryV1Experimental({
+      username: username,
+      password: password,
+      version_date: '2016-11-07'
+    });
+
+    switch (method) {
+      case 'listEnvrionments':
+        executeListEnvrionments(node, discovery, params, msg);
+        break;
+      case 'getEnvironmentDetails':
+        executeEnvrionmentDetails(node, discovery, params, msg);
+        break;
+    }
+
   }
 
   var DiscoveryV1Experimental = require('watson-developer-cloud/discovery/v1-experimental'),
@@ -48,42 +116,37 @@ module.exports = function (RED) {
     res.json(serviceutils.checkServiceBound(SERVICE_IDENTIFIER));
   });
 
+
   function Node (config) {
     var node = this;
     RED.nodes.createNode(this, config);
 
     this.on('input', function (msg) {
-      var message = '',
+      var method = config['discovery-method'];
+        message = '',
         params = {};
+
+      console.log("--------  Testing the Discovery Service --------");
+      console.log('method is ' + method);
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
 
       if (!username || !password) {
         message = 'Missing Watson Discovery service credentials';
-        node.error(message, msg);
+        reportError(node,msg,message)
         return;
       }
 
-      var discovery = new DiscoveryV1Experimental({
-        username: username,
-        password: password,
-        version_date: '2016-11-07'
-      });
-
       params = buildParams(msg,config);
-      node.status({fill:'blue', shape:'dot', text:'requesting'});
+      message = checkParams(method, params);
+      if (message) {
+        reportError(node,msg,message)
+        return;
+      }
 
-      discovery.getEnvironments(params, function (err, response) {
-        node.status({});
-        if (err) {
-          node.status({fill:'red', shape:'dot', text:err.error});
-          node.error(err, msg);
-        } else {
-          msg.environments = response.environments ? response.environments : [];
-        }
-        node.send(msg);
-      });
+      node.status({fill:'blue', shape:'dot', text:'requesting'});
+      executeMethod(node, method, params, msg);
     });
   }
 

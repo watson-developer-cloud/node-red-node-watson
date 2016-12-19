@@ -32,43 +32,125 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+
+    <div class="form-row">
+        <label for="node-input-discovery-method"><i class="fa fa-book"></i> Method: </label>
+        <select type="text" id="node-input-discovery-method" style="display: inline-block; width: 70%;">
+            <option value="listEnvrionments">List existing envionments</option>
+            <option value="getEnvironmentDetails">Retrieve environment details</option>
+        </select>
+    </div>
+
     <div class="form-row">
         <label for="node-input-environmentname"><i class="fa fa-tag"></i> Environment Name</label>
-        <input type="text" id="node-input-envrionmentname" placeholder="">
+        <input type="text" id="node-input-environmentname" placeholder="">
     </div>
+    <div class="form-row">
+        <label for="node-input-environmentid"><i class="fa fa-tag"></i> Environment ID</label>
+        <input type="text" id="node-input-environmentid" placeholder="">
+    </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-discovery">
-    <p>Testing - 001</p>
     <p>This is the Node for the V1 Experimental Watson Discovery service.</p>
-    <p>This version of the Node will only list the envrionments created for
-      the service.
-    </p>
-    <p>The node does not need any input. If the envrionment name field is left blank
+    <p>The following methods are available:</p>
+    <ul>
+        <li>
+            <p><b>List Existing Envrionments</b><p>
+            <p>The node does not need any input. If the envrionment name field is left blank
       it will list all envrionments created for the instance of the Discovery service.
       If the envrionment name is specified, then only the details for
       the Discovery envrionment with the specified name will be returned.
-    </p>
-    <p>The environment being requested can be overridden by specifying the search name
-      in <code>msg.discoveryparams.envrionmentname</code>
-    </p>
-
-    <p>Node output : </p>
-    <ul>
-      <li><code>msg.envrionments</code> : A list of the envrionments created under
-      the Discovery service instance.</li>
+            </p>
+            <p>The environment being requested can be overridden by specifying the search name
+      in <code>msg.discoveryparams.environmentname</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.envrionments</code> : A list of the envrionments created under
+              the Discovery service instance.</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
+            <p><b>Get Envrionment Details</b><p>
+            <p>The node needs an Environment ID as input.
+            </p>
+            <p>The environment being requested can be overridden by specifying the search name
+      in <code>msg.discoveryparams.environmentid</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.envrionment_details</code> : Details of the requestd environment.</li>
+              </ul>
+        </li>
     </ul>
     <p>For more information about the Discovery service,
     read the service <a href="https://www.ibm.com/watson/developercloud/doc/discovery/">documentation</a>.</p>
+
 </script>
 
 <script type="text/javascript">
+
+    // Need to simulate a namespace, so that some of the variables don't leak across nodes
+    function DiscoveryExperimental () {}
+
+    // This is the namespace for this version of this Node.
+    var disExp = new DiscoveryExperimental();
+
+    //disExp.abc = 'abc';
+    disExp.hideAll = function() {
+      $('#node-input-environmentname').parent().hide();
+      $('#node-input-environmentid').parent().hide();
+    };
+
+    disExp.processSelectedMethod = function(method) {
+      disExp.hideAll();
+      switch (method) {
+        case 'listEnvrionments':
+          $('#node-input-environmentname').parent().show();
+          break;
+        case 'getEnvironmentDetails':
+          $('#node-input-environmentid').parent().show();
+          break;
+      }
+    }
+
+    disExp.UIListeners = function () {
+      $('#node-input-discovery-method').change(function(val){
+        var method = $('#node-input-discovery-method').val();
+        disExp.processSelectedMethod(method);
+      });
+    }
+
+    disExp.checkForPrepare = function () {
+      disExp.hideAll();
+      disExp.UIListeners();
+    };
+
+    // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
+    function oneditprepare() {
+      disExp.checkForPrepare();
+      $.getJSON('watson-discovery/vcap/')
+        .done(function (service) {
+          $('.credentials').toggle(!service);
+        })
+        .fail(function () {
+          $('.credentials').show();
+        }).always(function () {
+          $('#credentials-check').hide();
+        })
+    }
+
     (function() {
         RED.nodes.registerType('watson-discovery', {
             category: 'IBM Watson',
             defaults: {
                 name: {value: ""},
-                envrionmentname: {value: ""}
+                environmentname: {value: ""},
+                environmentid: {value: ""},
+                "discovery-method": {value:"listEnvrionments"}
             },
             credentials: {
               username: {type:"text"},
@@ -85,17 +167,7 @@
             labelStyle: function() {
                 return this.name ? "node_label_italic" : "";
             },
-            oneditprepare: function() {
-                $.getJSON('watson-discovery/vcap/')
-                  .done(function (service) {
-                    $('.credentials').toggle(!service);
-                  })
-                  .fail(function () {
-                    $('.credentials').show();
-                  }).always(function () {
-                    $('#credentials-check').hide();
-                  })
-            }
+            oneditprepare: oneditprepare
         });
     })();
 </script>
