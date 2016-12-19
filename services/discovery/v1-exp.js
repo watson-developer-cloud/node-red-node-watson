@@ -18,7 +18,7 @@ module.exports = function (RED) {
 
   const SERVICE_IDENTIFIER = 'discovery';
 
-  function buildParams(msg,config) {
+  function buildParams(msg, config) {
     var params = {};
     if (msg.discoveryparams && msg.discoveryparams.environmentname) {
       params.name = msg.discoveryparams.environmentname;
@@ -26,22 +26,48 @@ module.exports = function (RED) {
       params.name = config.environmentname;
     }
 
-    if (msg.discoveryparams && msg.discoveryparams.environmentid) {
-      params.environment_id = msg.discoveryparams.environmentid;
-    } else if (config.environmentid) {
-      params.environment_id = config.environmentid;
+    if (msg.discoveryparams && msg.discoveryparams.environment_id) {
+      params.environment_id = msg.discoveryparams.environment_id;
+    } else if (config.environment_id) {
+      params.environment_id = config.environment_id;
+    }
+
+    if (msg.discoveryparams && msg.discoveryparams.collection_id) {
+      params.environment_id = msg.discoveryparams.collection_id;
+    } else if (config.collection_id) {
+      params.collection_id = config.collection_id;
     }
 
     return params;
   }
 
+  function paramEnvCheck(params) {
+    response = '';
+    if (!params.environment_id) {
+      response = 'Missing Environment ID ';
+    }
+    return response;
+  }
+
+  function paramCollectionCheck(params) {
+    response = '';
+    if (!params.collection_id) {
+      response = 'Missing Collection ID ';
+    }
+    return response;
+  }
+
+
   function checkParams(method, params){
     var response = '';
     switch (method) {
       case 'getEnvironmentDetails':
-        if (!params.environment_id) {
-          response = 'Missing Environment ID'
-        }
+      case 'listCollections':
+        response = paramEnvCheck(params);
+        break;
+      case 'getCollectionDetails':
+        response = paramEnvCheck(params)
+            + paramCollectionCheck(params);
         break;
     }
     return response;
@@ -77,6 +103,29 @@ module.exports = function (RED) {
     });
   }
 
+  function executeListCollections(node, discovery, params, msg) {
+    discovery.getCollections(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err.error);
+      } else {
+        msg.collections = response.collections ? response.collections : [];
+      }
+      node.send(msg);
+    });
+  }
+
+  function executeGetCollectionDetails(node, discovery, params, msg) {
+    discovery.getCollection(params, params.collection_id, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err.error);
+      } else {
+        msg.collection_details = response;
+      }
+      node.send(msg);
+    });
+  }
 
   function executeMethod(node, method, params, msg) {
     var discovery = new DiscoveryV1Experimental({
@@ -91,6 +140,12 @@ module.exports = function (RED) {
         break;
       case 'getEnvironmentDetails':
         executeEnvrionmentDetails(node, discovery, params, msg);
+        break;
+      case 'listCollections':
+        executeListCollections(node, discovery, params, msg);
+        break;
+      case 'getCollectionDetails':
+        executeGetCollectionDetails(node, discovery, params, msg);
         break;
     }
 
@@ -126,20 +181,18 @@ module.exports = function (RED) {
         message = '',
         params = {};
 
-      console.log("--------  Testing the Discovery Service --------");
-      console.log('method is ' + method);
-
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
 
       if (!username || !password) {
         message = 'Missing Watson Discovery service credentials';
-        reportError(node,msg,message)
-        return;
+      } else if (!method || '' == method) {
+        message = 'Required Discovery method has not been specified';
+      } else {
+        params = buildParams(msg,config);
+        message = checkParams(method, params);
       }
 
-      params = buildParams(msg,config);
-      message = checkParams(method, params);
       if (message) {
         reportError(node,msg,message)
         return;
