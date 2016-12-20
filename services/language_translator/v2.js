@@ -22,15 +22,18 @@ module.exports = function (RED) {
   // Otherwise, once set username would never get reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
+  const SERVICE_IDENTIFIER = 'language-translator';
   var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
-    cfenv = require('cfenv'),
+    //cfenv = require('cfenv'),
+    serviceutils = require('../../utilities/service-utils'),
     fs = require('fs'),
     temp = require('temp'),
     username = null,
     password = null,
     sUsername = null,
     sPassword = null,
-    service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
+    //service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
+    service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   temp.track();
@@ -124,18 +127,11 @@ module.exports = function (RED) {
       if (config.lgparams2 === false) {
         if (tmpmodel_id.length > 1) {
           result = tmpmodel_id.split('-');
-          msg.model_id = tmpmodel_id;
+          //msg.model_id = tmpmodel_id;
+          msg.domain = result[2];
           msg.srclang = result[0];
           msg.destlang = result[1];
-        } else {
-          msg.model_id = config.domain;
-          msg.srclang = config.srclang;
-          msg.destlang = config.destlang;
         }
-      } else {
-        msg.model_id = config.domain;
-        msg.srclang = config.srclang;
-        msg.destlang = config.destlang;
       }
 
       // These are var functions that have been initialised here, so that

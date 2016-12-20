@@ -15,9 +15,12 @@
  **/
 
 module.exports = function (RED) {
+  const SERVICE_IDENTIFIER = 'language-translator';
   var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
-    cfenv = require('cfenv'),
-    service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
+    //cfenv = require('cfenv'),
+    serviceutils = require('../../utilities/service-utils'),
+    //service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
+    service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
     sUsername = null,
