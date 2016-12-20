@@ -23,6 +23,10 @@ DiscoveryUtils.prototype = {
       params.name = msg.discoveryparams.environmentname;
     } else if (config.environmentname) {
       params.name = config.environmentname;
+    } else if (msg.discoveryparams && msg.discoveryparams.configurationname) {
+      params.name = msg.discoveryparams.configurationname;
+    } else if (config.configurationname) {
+      params.name = config.cofigurationname;
     }
 
     if (msg.discoveryparams && msg.discoveryparams.environment_id) {
@@ -32,9 +36,15 @@ DiscoveryUtils.prototype = {
     }
 
     if (msg.discoveryparams && msg.discoveryparams.collection_id) {
-      params.environment_id = msg.discoveryparams.collection_id;
+      params.collection_id = msg.discoveryparams.collection_id;
     } else if (config.collection_id) {
       params.collection_id = config.collection_id;
+    }
+
+    if (msg.discoveryparams && msg.discoveryparams.configuration_id) {
+      params.configuration_id = msg.discoveryparams.configuration_id;
+    } else if (config.configuration_id) {
+      params.configuration_id = config.configuration_id;
     }
 
     return params;
@@ -52,6 +62,14 @@ DiscoveryUtils.prototype = {
     response = '';
     if (!params.collection_id) {
       response = 'Missing Collection ID ';
+    }
+    return response;
+  },
+
+  paramConfigurationCheck: function (params) {
+    response = '';
+    if (!params.configuration_id) {
+      response = 'Missing Configuration ID ';
     }
     return response;
   },

@@ -32,6 +32,11 @@ module.exports = function (RED) {
         break;
       case 'listConfigurations':
         response = discoveryutils.paramEnvCheck(params);
+        break;
+      case 'getConfigurationDetails':
+        response = discoveryutils.paramEnvCheck(params)
+            + discoveryutils.paramConfigurationCheck(params);
+        break;
     }
     return response;
   }
@@ -96,6 +101,17 @@ module.exports = function (RED) {
     });
   }
 
+  function executeGetConfigurationDetails(node, discovery, params, msg) {
+    discovery.getConfiguration(params, function (err, response) {
+      node.status({});
+      if (err) {
+        discoveryutils.reportError(node, msg, err.error);
+      } else {
+        msg.configuration_details = response;
+      }
+      node.send(msg);
+    });
+  }
 
   function executeMethod(node, method, params, msg) {
     var discovery = new DiscoveryV1({
@@ -119,6 +135,9 @@ module.exports = function (RED) {
         break;
       case 'listConfigurations':
         executeListConfigurations(node, discovery, params, msg);
+        break;
+      case 'getConfigurationDetails':
+        executeGetConfigurationDetails(node, discovery, params, msg);
         break;
     }
 
