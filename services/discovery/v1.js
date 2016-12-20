@@ -27,6 +27,7 @@ module.exports = function (RED) {
         response = discoveryutils.paramEnvCheck(params);
         break;
       case 'getCollectionDetails':
+      case 'query':
         response = discoveryutils.paramEnvCheck(params)
             + discoveryutils.paramCollectionCheck(params);
         break;
@@ -113,11 +114,23 @@ module.exports = function (RED) {
     });
   }
 
+  function executeQuery(node, discovery, params, msg) {
+    discovery.query(params, function (err, response) {
+      node.status({});
+      if (err) {
+        discoveryutils.reportError(node, msg, err.error);
+      } else {
+        msg.search_results = response;
+      }
+      node.send(msg);
+    });
+  }
+
   function executeMethod(node, method, params, msg) {
     var discovery = new DiscoveryV1({
       username: username,
       password: password,
-      version_date: '2016-11-07'
+      version_date: '2016-12-15'
     });
 
     switch (method) {
@@ -138,6 +151,9 @@ module.exports = function (RED) {
         break;
       case 'getConfigurationDetails':
         executeGetConfigurationDetails(node, discovery, params, msg);
+        break;
+      case 'query':
+        executeQuery(node, discovery, params, msg);
         break;
     }
 

@@ -47,6 +47,10 @@ DiscoveryUtils.prototype = {
       params.configuration_id = config.configuration_id;
     }
 
+    if (config.count) {
+      params.count = config.count;
+    }
+
     return params;
   },
 

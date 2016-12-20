@@ -42,6 +42,7 @@
             <option value="getCollectionDetails">Retrieve collection details</option>
             <option value="listConfigurations">List existing configurations</option>
             <option value="getConfigurationDetails">Retrieve configuration details</option>
+            <option value="query">Search in collection</option>
         </select>
     </div>
 
@@ -65,6 +66,10 @@
         <label for="node-input-configuration_id"><i class="fa fa-tag"></i> Configuration ID</label>
         <input type="text" id="node-input-configuration_id" placeholder="">
     </div>
+    <div class="form-row">
+        <label for="node-input-count"><i class="fa fa-tag"></i> Number of documents</label>
+        <input type="text" id="node-input-count" placeholder="">
+    </div>
 
 </script>
 
@@ -74,7 +79,7 @@
     <ul>
         <li>
             <p><b>List Existing Envrionments</b><p>
-            <p>The node does not need any input. If the envrionment name field is left blank
+            <p>For this methong the node does not need any input. If the envrionment name field is left blank
       it will list all envrionments created for the instance of the Discovery service.
       If the envrionment name is specified, then only the details for
       the Discovery envrionment with the specified name will be returned.
@@ -91,7 +96,7 @@
         <br/>
         <li>
             <p><b>Get Envrionment Details</b><p>
-            <p>The node needs an Environment ID as input.
+            <p>For this method the node needs an Environment ID as input.
             </p>
             <p>The environment being requested can be overridden by specifying the search id
       in <code>msg.discoveryparams.environment_id</code>
@@ -104,7 +109,7 @@
         <br/>
         <li>
             <p><b>List Existing Collections</b><p>
-            <p>The node needs an Environment ID as input.</p>
+            <p>For this method the node needs an Environment ID as input.</p>
             <p>The Environment ID for the collection list being requested can be overridden by specifying the search id
       in <code>msg.discoveryparams.environment_id</code>
             </p>
@@ -117,7 +122,7 @@
         <br/>
         <li>
             <p><b>Get Collections Details</b><p>
-            <p>The node needs an Environment ID and Collection ID as input.
+            <p>For this methond the node needs an Environment ID and Collection ID as input.
             </p>
             <p>The collection being requested can be overridden by specifying the
             search ids in
@@ -132,7 +137,7 @@
         <br/>
         <li>
             <p><b>List Existing Configurations</b><p>
-            <p>The node needs an Environment ID as input.</p>
+            <p>For this method the node needs an Environment ID as input.</p>
             <p>and an optional Configuration name to show only the
                configuration with the given name.</p>
             <p>The Environment ID for the configuration list being requested can be
@@ -151,7 +156,7 @@
         <br/>
         <li>
             <p><b>Get Configuration Details</b><p>
-            <p>The node needs an Environment ID and Configuration ID as input.</p>
+            <p>For this method node needs an Environment ID and Configuration ID as input.</p>
             <p>The Environment and Configuration IDs for the configuration being
                requested can be
                overridden by specifying the environment id in
@@ -163,6 +168,22 @@
               <ul>
                 <li><code>msg.configuration_details</code> : Details the
                   requested configuration.</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
+            <p><b>Search in Collection</b><p>
+            <p>For this method the node needs an Environment ID and Collection ID as input.
+            </p>
+            <p>The collection being requested can be overridden by specifying the
+            search ids in
+            <code>msg.discoveryparams.environment_id</code>
+            and <code>msg.discoveryparams.collection_id</code>
+            </p>
+            <p>Optionally you can specify the number of documents to retrieve.</p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.search_results</code> : Details of the requested collection.</li>
               </ul>
         </li>
 
@@ -188,31 +209,46 @@
       $('#node-input-collection_id').parent().hide();
       $('#node-input-configurationname').parent().hide();
       $('#node-input-configuration_id').parent().hide();
+      $('#node-input-count').parent().hide();
     };
+
+    disV1.showSelectedFields = function(fields) {
+      for (i = 0; i < fields.length; i++) {
+        $(fields[i]).parent().show();
+      }
+    }
 
     disV1.processSelectedMethod = function(method) {
       disV1.hideAll();
+      fields = [];
       switch (method) {
         case 'listEnvrionments':
-          $('#node-input-environmentname').parent().show();
+          fields.push('#node-input-environmentname');
           break;
         case 'getEnvironmentDetails':
         case 'listCollections':
-          $('#node-input-environment_id').parent().show();
+          fields.push('#node-input-environment_id');
           break;
         case 'getCollectionDetails':
-          $('#node-input-environment_id').parent().show();
-          $('#node-input-collection_id').parent().show();
+          fields.push('#node-input-environment_id'
+                          + ', #node-input-collection_id');
           break;
         case 'listConfigurations':
-          $('#node-input-environment_id').parent().show();
-          $('#node-input-configurationname').parent().show();
+          fields.push('#node-input-environment_id'
+                          + ', #node-input-configurationname');
           break;
         case 'getConfigurationDetails':
-          $('#node-input-environment_id').parent().show();
-          $('#node-input-configuration_id').parent().show();
+          fields.push('#node-input-environment_id'
+                         + ', #node-input-configuration_id');
+          break;
+        case 'query':
+          fields.push('#node-input-environment_id'
+                         + ', #node-input-collection_id'
+                         + ', #node-input-count');
           break;
       }
+      console.log('two');
+      disV1.showSelectedFields(fields);
     }
 
     disV1.UIListeners = function () {
@@ -251,6 +287,7 @@
                 collection_id: {value: ""},
                 configurationname: {value: ""},
                 configuration_id: {value: ""},
+                count: {value: "1"},
                 "discovery-method": {value:"listEnvrionments"}
             },
             credentials: {
