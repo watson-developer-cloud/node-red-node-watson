@@ -67,7 +67,7 @@ DiscoveryUtils.prototype = {
   },
 
   paramEnvCheck: function (params) {
-    response = '';
+    var response = '';
     if (!params.environment_id) {
       response = 'Missing Environment ID ';
     }
@@ -75,7 +75,7 @@ DiscoveryUtils.prototype = {
   },
 
   paramCollectionCheck: function (params) {
-    response = '';
+    var response = '';
     if (!params.collection_id) {
       response = 'Missing Collection ID ';
     }
@@ -83,7 +83,7 @@ DiscoveryUtils.prototype = {
   },
 
   paramConfigurationCheck: function (params) {
-    response = '';
+    var response = '';
     if (!params.configuration_id) {
       response = 'Missing Configuration ID ';
     }

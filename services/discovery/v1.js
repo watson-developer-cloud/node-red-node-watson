@@ -182,7 +182,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
 
     this.on('input', function (msg) {
-      var method = config['discovery-method'];
+      var method = config['discovery-method']
         message = '',
         params = {};
 
@@ -191,7 +191,7 @@ module.exports = function (RED) {
 
       if (!username || !password) {
         message = 'Missing Watson Discovery service credentials';
-      } else if (!method || '' == method) {
+      } else if (!method || '' === method) {
         message = 'Required Discovery method has not been specified';
       } else {
         params = discoveryutils.buildParams(msg,config);
@@ -199,7 +199,7 @@ module.exports = function (RED) {
       }
 
       if (message) {
-        discoveryutils.reportError(node,msg,message)
+        discoveryutils.reportError(node,msg,message);
         return;
       }
 
