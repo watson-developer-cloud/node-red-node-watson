@@ -17,73 +17,28 @@
 module.exports = function (RED) {
 
   const SERVICE_IDENTIFIER = 'discovery';
-
-  function buildParams(msg, config) {
-    var params = {};
-    if (msg.discoveryparams && msg.discoveryparams.environmentname) {
-      params.name = msg.discoveryparams.environmentname;
-    } else if (config.environmentname) {
-      params.name = config.environmentname;
-    }
-
-    if (msg.discoveryparams && msg.discoveryparams.environment_id) {
-      params.environment_id = msg.discoveryparams.environment_id;
-    } else if (config.environment_id) {
-      params.environment_id = config.environment_id;
-    }
-
-    if (msg.discoveryparams && msg.discoveryparams.collection_id) {
-      params.environment_id = msg.discoveryparams.collection_id;
-    } else if (config.collection_id) {
-      params.collection_id = config.collection_id;
-    }
-
-    return params;
-  }
-
-  function paramEnvCheck(params) {
-    response = '';
-    if (!params.environment_id) {
-      response = 'Missing Environment ID ';
-    }
-    return response;
-  }
-
-  function paramCollectionCheck(params) {
-    response = '';
-    if (!params.collection_id) {
-      response = 'Missing Collection ID ';
-    }
-    return response;
-  }
-
+  var discoveryutils = require('./discovery-utils');
 
   function checkParams(method, params){
     var response = '';
     switch (method) {
       case 'getEnvironmentDetails':
       case 'listCollections':
-        response = paramEnvCheck(params);
+        response = discoveryutils.paramEnvCheck(params);
         break;
       case 'getCollectionDetails':
-        response = paramEnvCheck(params)
-            + paramCollectionCheck(params);
+        response = discoveryutils.paramEnvCheck(params)
+            + discoveryutils.paramCollectionCheck(params);
         break;
     }
     return response;
-  }
-
-  function reportError(node, msg, message) {
-    var messageTxt = message.error ? message.error : message;
-    node.status({fill:'red', shape:'dot', text: messageTxt});
-    node.error(message, msg);
   }
 
   function executeListEnvrionments(node, discovery, params, msg) {
     discovery.getEnvironments(params, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err.error);
+        discoveryutils.reportError(node, msg, err.error);
       } else {
         msg.environments = response.environments ? response.environments : [];
       }
@@ -95,7 +50,7 @@ module.exports = function (RED) {
     discovery.getEnvironment(params, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err.error);
+        discoveryutils.reportError(node, msg, err.error);
       } else {
         msg.environment_details = response;
       }
@@ -107,7 +62,7 @@ module.exports = function (RED) {
     discovery.getCollections(params, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err.error);
+        discoveryutils.reportError(node, msg, err.error);
       } else {
         msg.collections = response.collections ? response.collections : [];
       }
@@ -119,7 +74,7 @@ module.exports = function (RED) {
     discovery.getCollection(params, params.collection_id, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err.error);
+        discoveryutils.reportError(node, msg, err.error);
       } else {
         msg.collection_details = response;
       }
@@ -189,12 +144,12 @@ module.exports = function (RED) {
       } else if (!method || '' == method) {
         message = 'Required Discovery method has not been specified';
       } else {
-        params = buildParams(msg,config);
+        params = discoveryutils.buildParams(msg,config);
         message = checkParams(method, params);
       }
 
       if (message) {
-        reportError(node,msg,message)
+        discoveryutils.reportError(node,msg,message)
         return;
       }
 
