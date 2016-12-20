@@ -30,6 +30,8 @@ module.exports = function (RED) {
         response = discoveryutils.paramEnvCheck(params)
             + discoveryutils.paramCollectionCheck(params);
         break;
+      case 'listConfigurations':
+        response = discoveryutils.paramEnvCheck(params);
     }
     return response;
   }
@@ -82,6 +84,19 @@ module.exports = function (RED) {
     });
   }
 
+  function executeListConfigurations(node, discovery, params, msg) {
+    discovery.getConfigurations(params, function (err, response) {
+      node.status({});
+      if (err) {
+        discoveryutils.reportError(node, msg, err.error);
+      } else {
+        msg.configurations = response.configurations ? response.configurations : [];
+      }
+      node.send(msg);
+    });
+  }
+
+
   function executeMethod(node, method, params, msg) {
     var discovery = new DiscoveryV1({
       username: username,
@@ -101,6 +116,9 @@ module.exports = function (RED) {
         break;
       case 'getCollectionDetails':
         executeGetCollectionDetails(node, discovery, params, msg);
+        break;
+      case 'listConfigurations':
+        executeListConfigurations(node, discovery, params, msg);
         break;
     }
 

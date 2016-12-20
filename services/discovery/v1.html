@@ -40,6 +40,7 @@
             <option value="getEnvironmentDetails">Retrieve environment details</option>
             <option value="listCollections">List existing collections</option>
             <option value="getCollectionDetails">Retrieve collection details</option>
+            <option value="listConfigurations">List existing configurations</option>
         </select>
     </div>
 
@@ -54,6 +55,10 @@
     <div class="form-row">
         <label for="node-input-collection_id"><i class="fa fa-tag"></i> Collection ID</label>
         <input type="text" id="node-input-collection_id" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-configurationname"><i class="fa fa-tag"></i> Configuration Name</label>
+        <input type="text" id="node-input-configurationname" placeholder="">
     </div>
 
 </script>
@@ -111,8 +116,8 @@
             </p>
             <p>The collection being requested can be overridden by specifying the
             search ids in
-            <code>msg.discoveryparams.environment_id/code>
-            and <code>msg.discoveryparams.collection_id/code>
+            <code>msg.discoveryparams.environment_id</code>
+            and <code>msg.discoveryparams.collection_id</code>
             </p>
             <p>Node output : </p>
               <ul>
@@ -120,7 +125,26 @@
               </ul>
         </li>
         <br/>
+        <li>
+            <p><b>List Existing Configurations</b><p>
+            <p>The node needs an Environment ID as input.</p>
+            <p>and an optional Configuration name to show only the
+               configuration with the given name.</p>
+            <p>The Environment ID for the collection list being requested can be
+               overridden by specifying the environment id in
+               <code>msg.discoveryparams.environment_id</code>
+               The configuration name can be overridden by specifying the name inspect
+               <code>msg.discoveryparams.configuration_name</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.configurations</code> : A list of the configurations
+                  created under
+                  the environment in the Discovery service instance.</li>
+              </ul>
+        </li>
     </ul>
+
     <p>For more information about the Discovery service,
     read the service <a href="https://www.ibm.com/watson/developercloud/doc/discovery/">documentation</a>.</p>
 
@@ -139,6 +163,7 @@
       $('#node-input-environmentname').parent().hide();
       $('#node-input-environment_id').parent().hide();
       $('#node-input-collection_id').parent().hide();
+      $('#node-input-configurationname').parent().hide();
     };
 
     disV1.processSelectedMethod = function(method) {
@@ -154,6 +179,10 @@
         case 'getCollectionDetails':
           $('#node-input-environment_id').parent().show();
           $('#node-input-collection_id').parent().show();
+          break;
+        case 'listConfigurations':
+          $('#node-input-environment_id').parent().show();
+          $('#node-input-configurationname').parent().show();
           break;
       }
     }
@@ -192,6 +221,7 @@
                 environmentname: {value: ""},
                 environment_id: {value: ""},
                 collection_id: {value: ""},
+                configurationname: {value: ""},
                 "discovery-method": {value:"listEnvrionments"}
             },
             credentials: {
