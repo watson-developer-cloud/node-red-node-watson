@@ -22,22 +22,22 @@ module.exports = function (RED) {
   function checkParams(method, params){
     var response = '';
     switch (method) {
-      case 'getEnvironmentDetails':
-      case 'listCollections':
-        response = discoveryutils.paramEnvCheck(params);
-        break;
-      case 'getCollectionDetails':
-      case 'query':
-        response = discoveryutils.paramEnvCheck(params)
+    case 'getEnvironmentDetails':
+    case 'listCollections':
+      response = discoveryutils.paramEnvCheck(params);
+      break;
+    case 'getCollectionDetails':
+    case 'query':
+      response = discoveryutils.paramEnvCheck(params)
             + discoveryutils.paramCollectionCheck(params);
-        break;
-      case 'listConfigurations':
-        response = discoveryutils.paramEnvCheck(params);
-        break;
-      case 'getConfigurationDetails':
-        response = discoveryutils.paramEnvCheck(params)
+      break;
+    case 'listConfigurations':
+      response = discoveryutils.paramEnvCheck(params);
+      break;
+    case 'getConfigurationDetails':
+      response = discoveryutils.paramEnvCheck(params)
             + discoveryutils.paramConfigurationCheck(params);
-        break;
+      break;
     }
     return response;
   }
@@ -134,27 +134,27 @@ module.exports = function (RED) {
     });
 
     switch (method) {
-      case 'listEnvrionments':
-        executeListEnvrionments(node, discovery, params, msg);
-        break;
-      case 'getEnvironmentDetails':
-        executeEnvrionmentDetails(node, discovery, params, msg);
-        break;
-      case 'listCollections':
-        executeListCollections(node, discovery, params, msg);
-        break;
-      case 'getCollectionDetails':
-        executeGetCollectionDetails(node, discovery, params, msg);
-        break;
-      case 'listConfigurations':
-        executeListConfigurations(node, discovery, params, msg);
-        break;
-      case 'getConfigurationDetails':
-        executeGetConfigurationDetails(node, discovery, params, msg);
-        break;
-      case 'query':
-        executeQuery(node, discovery, params, msg);
-        break;
+    case 'listEnvrionments':
+      executeListEnvrionments(node, discovery, params, msg);
+      break;
+    case 'getEnvironmentDetails':
+      executeEnvrionmentDetails(node, discovery, params, msg);
+      break;
+    case 'listCollections':
+      executeListCollections(node, discovery, params, msg);
+      break;
+    case 'getCollectionDetails':
+      executeGetCollectionDetails(node, discovery, params, msg);
+      break;
+    case 'listConfigurations':
+      executeListConfigurations(node, discovery, params, msg);
+      break;
+    case 'getConfigurationDetails':
+      executeGetConfigurationDetails(node, discovery, params, msg);
+      break;
+    case 'query':
+      executeQuery(node, discovery, params, msg);
+      break;
     }
 
   }
@@ -182,7 +182,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
 
     this.on('input', function (msg) {
-      var method = config['discovery-method']
+      var method = config['discovery-method'],
         message = '',
         params = {};
 
