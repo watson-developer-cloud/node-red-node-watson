@@ -11,6 +11,7 @@ Node-RED Watson Nodes for IBM Bluemix
 - New services utilities to handle node-red app name clash problems
 - New V1 Discovery Node
 - Implementation of Discovery Node query, list and get details methods
+- Fix to Translator Node which was ignoring any override values set in the msg object
 
 ### New in version 0.4.29
 -  Fix to Document Conversion Node to preserve full msg object
