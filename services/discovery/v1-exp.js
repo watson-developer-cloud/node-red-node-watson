@@ -35,8 +35,8 @@ module.exports = function (RED) {
       response = discoveryutils.paramEnvCheck(params);
       break;
     case 'getCollectionDetails':
-      response = discoveryutils.paramEnvCheck(params)
-            + discoveryutils.paramCollectionCheck(params);
+      response = discoveryutils.paramEnvCheck(params) +
+             discoveryutils.paramCollectionCheck(params);
       break;
     }
     return response;
