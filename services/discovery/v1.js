@@ -71,7 +71,7 @@ module.exports = function (RED) {
   }
 
   function executeGetCollectionDetails(node, discovery, params, msg) {
-    discovery.getCollection(params, params.collection_id, function (err, response) {
+    discovery.getCollection(params, function (err, response) {
       node.status({});
       if (err) {
         discoveryutils.reportError(node, msg, err.error);
@@ -83,7 +83,7 @@ module.exports = function (RED) {
   }
 
   function executeMethod(node, method, params, msg) {
-    var discovery = new DiscoveryV1Experimental({
+    var discovery = new DiscoveryV1({
       username: username,
       password: password,
       version_date: '2016-11-07'
@@ -106,7 +106,7 @@ module.exports = function (RED) {
 
   }
 
-  var DiscoveryV1Experimental = require('watson-developer-cloud/discovery/v1-experimental'),
+  var DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
     serviceutils = require('../../utilities/service-utils'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
@@ -155,7 +155,7 @@ module.exports = function (RED) {
     });
   }
 
-  RED.nodes.registerType('watson-discovery', Node, {
+  RED.nodes.registerType('watson-discovery-v1', Node, {
     credentials: {
       username: {type:'text'},
       password: {type:'password'}

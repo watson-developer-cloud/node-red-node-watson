@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="watson-discovery">
+<script type="text/x-red" data-template-name="watson-discovery-v1">
     <div id="credentials-check" class="form-row">
         <div class="form-tips">
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
@@ -58,9 +58,8 @@
 
 </script>
 
-<script type="text/x-red" data-help-name="watson-discovery">
-    <p>This is the Node for the V1 Experimental Watson Discovery service.</p>
-    <p>This Experimental node has now been deprecated.</p>
+<script type="text/x-red" data-help-name="watson-discovery-v1">
+    <p>This is the Node for the V1 Watson Discovery service.</p>
     <p>The following methods are available:</p>
     <ul>
         <li>
@@ -130,20 +129,20 @@
 <script type="text/javascript">
 
     // Need to simulate a namespace, so that some of the variables don't leak across nodes
-    function DiscoveryExperimental () {}
+    function DiscoveryExperimentalV1 () {}
 
     // This is the namespace for this version of this Node.
-    var disExp = new DiscoveryExperimental();
+    var disV1 = new DiscoveryExperimentalV1();
 
-    //disExp.abc = 'abc';
-    disExp.hideAll = function() {
+    //disV1.abc = 'abc';
+    disV1.hideAll = function() {
       $('#node-input-environmentname').parent().hide();
       $('#node-input-environment_id').parent().hide();
       $('#node-input-collection_id').parent().hide();
     };
 
-    disExp.processSelectedMethod = function(method) {
-      disExp.hideAll();
+    disV1.processSelectedMethod = function(method) {
+      disV1.hideAll();
       switch (method) {
         case 'listEnvrionments':
           $('#node-input-environmentname').parent().show();
@@ -159,21 +158,21 @@
       }
     }
 
-    disExp.UIListeners = function () {
+    disV1.UIListeners = function () {
       $('#node-input-discovery-method').change(function(val){
         var method = $('#node-input-discovery-method').val();
-        disExp.processSelectedMethod(method);
+        disV1.processSelectedMethod(method);
       });
     }
 
-    disExp.checkForPrepare = function () {
-      disExp.hideAll();
-      disExp.UIListeners();
+    disV1.checkForPrepare = function () {
+      disV1.hideAll();
+      disV1.UIListeners();
     };
 
     // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
     function oneditprepare() {
-      disExp.checkForPrepare();
+      disV1.checkForPrepare();
       $.getJSON('watson-discovery/vcap/')
         .done(function (service) {
           $('.credentials').toggle(!service);
@@ -186,8 +185,8 @@
     }
 
     (function() {
-        RED.nodes.registerType('watson-discovery', {
-            category: 'Watson Deprecated',
+        RED.nodes.registerType('watson-discovery-v1', {
+            category: 'IBM Watson',
             defaults: {
                 name: {value: ""},
                 environmentname: {value: ""},
@@ -199,7 +198,7 @@
               username: {type:"text"},
               password: {type:"password"}
             },
-            color: "rgb(84,149,230)",
+            color: "rgb(230,140,80)",
             inputs: 1,
             outputs: 1,
             icon: "discovery.png",
