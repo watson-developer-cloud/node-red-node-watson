@@ -17,7 +17,14 @@
 module.exports = function (RED) {
 
   const SERVICE_IDENTIFIER = 'discovery';
-  var discoveryutils = require('./discovery-utils');
+  var discoveryutils = require('./discovery-utils'),
+    DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
+    serviceutils = require('../../utilities/service-utils'),
+    dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
+    username = null,
+    password = null,
+    sUsername = null,
+    sPassword = null;
 
   function checkParams(method, params){
     var response = '';
@@ -158,14 +165,6 @@ module.exports = function (RED) {
     }
 
   }
-
-  var DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
-    serviceutils = require('../../utilities/service-utils'),
-    dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = null,
-    password = null,
-    sUsername = null,
-    sPassword = null;
 
   if (dservice) {
     sUsername = dservice.username;

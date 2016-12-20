@@ -30,10 +30,10 @@ ServiceUtils.prototype = {
         if(services[service].credentials.hasOwnProperty('url')){
           if(services[service].credentials.url.search(regex) === 0){
             return returnBoolean ? true : services[service].credentials;
-            }
           }
         }
       }
+    }
     return returnBoolean ? false : null;
   },
 
