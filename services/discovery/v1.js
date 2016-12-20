@@ -35,15 +35,15 @@ module.exports = function (RED) {
       break;
     case 'getCollectionDetails':
     case 'query':
-      response = discoveryutils.paramEnvCheck(params)
-            + discoveryutils.paramCollectionCheck(params);
+      response = discoveryutils.paramEnvCheck(params) +
+             discoveryutils.paramCollectionCheck(params);
       break;
     case 'listConfigurations':
       response = discoveryutils.paramEnvCheck(params);
       break;
     case 'getConfigurationDetails':
-      response = discoveryutils.paramEnvCheck(params)
-            + discoveryutils.paramConfigurationCheck(params);
+      response = discoveryutils.paramEnvCheck(params) +
+             discoveryutils.paramConfigurationCheck(params);
       break;
     }
     return response;

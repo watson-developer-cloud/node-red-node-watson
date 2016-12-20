@@ -17,7 +17,15 @@
 module.exports = function (RED) {
 
   const SERVICE_IDENTIFIER = 'discovery';
-  var discoveryutils = require('./discovery-utils');
+  var discoveryutils = require('./discovery-utils'),
+    DiscoveryV1Experimental = require('watson-developer-cloud/discovery/v1-experimental'),
+    serviceutils = require('../../utilities/service-utils'),
+    dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
+    username = null,
+    password = null,
+    sUsername = null,
+    sPassword = null;
+
 
   function checkParams(method, params){
     var response = '';
@@ -90,29 +98,21 @@ module.exports = function (RED) {
     });
 
     switch (method) {
-      case 'listEnvrionments':
-        executeListEnvrionments(node, discovery, params, msg);
-        break;
-      case 'getEnvironmentDetails':
-        executeEnvrionmentDetails(node, discovery, params, msg);
-        break;
-      case 'listCollections':
-        executeListCollections(node, discovery, params, msg);
-        break;
-      case 'getCollectionDetails':
-        executeGetCollectionDetails(node, discovery, params, msg);
-        break;
+    case 'listEnvrionments':
+      executeListEnvrionments(node, discovery, params, msg);
+      break;
+    case 'getEnvironmentDetails':
+      executeEnvrionmentDetails(node, discovery, params, msg);
+      break;
+    case 'listCollections':
+      executeListCollections(node, discovery, params, msg);
+      break;
+    case 'getCollectionDetails':
+      executeGetCollectionDetails(node, discovery, params, msg);
+      break;
     }
 
   }
-
-  var DiscoveryV1Experimental = require('watson-developer-cloud/discovery/v1-experimental'),
-    serviceutils = require('../../utilities/service-utils'),
-    dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = null,
-    password = null,
-    sUsername = null,
-    sPassword = null;
 
   if (dservice) {
     sUsername = dservice.username;
