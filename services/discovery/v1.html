@@ -70,6 +70,22 @@
         <label for="node-input-count"><i class="fa fa-tag"></i> Number of documents</label>
         <input type="text" id="node-input-count" placeholder="">
     </div>
+    <div class="form-row">
+        <label for="node-input-query"><i class="fa fa-tag"></i> Query for Search</label>
+        <input type="text" id="node-input-query" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-filter"><i class="fa fa-tag"></i> Filter for Search</label>
+        <input type="text" id="node-input-filter" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-aggregation"><i class="fa fa-tag"></i> Aggregation for Search</label>
+        <input type="text" id="node-input-aggregation" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-return"><i class="fa fa-tag"></i> List of sections to return</label>
+        <input type="text" id="node-input-return" placeholder="">
+    </div>
 
 </script>
 
@@ -180,7 +196,11 @@
             <code>msg.discoveryparams.environment_id</code>
             and <code>msg.discoveryparams.collection_id</code>
             </p>
-            <p>Optionally you can specify the number of documents to retrieve.</p>
+            <p>Optionally you can specify the number of documents to retrieve, a
+               query to find the most relevant search results, a filter
+               to limit the search results an aggregation to return an
+               exact result, and a comma separated list of the sections of the
+               documents to return.</p>
             <p>Node output : </p>
               <ul>
                 <li><code>msg.search_results</code> : Details of the requested collection.</li>
@@ -210,6 +230,10 @@
       $('#node-input-configurationname').parent().hide();
       $('#node-input-configuration_id').parent().hide();
       $('#node-input-count').parent().hide();
+      $('#node-input-query').parent().hide();
+      $('#node-input-filter').parent().hide();
+      $('#node-input-aggregation').parent().hide();
+      $('#node-input-return').parent().hide();
     };
 
     disV1.showSelectedFields = function(fields) {
@@ -244,10 +268,13 @@
         case 'query':
           fields.push('#node-input-environment_id'
                          + ', #node-input-collection_id'
-                         + ', #node-input-count');
+                         + ', #node-input-count'
+                         + ', #node-input-query'
+                         + ', #node-input-filter'
+                         + ', #node-input-aggregation'
+                         + ', #node-input-return');
           break;
       }
-      console.log('two');
       disV1.showSelectedFields(fields);
     }
 
@@ -288,6 +315,10 @@
                 configurationname: {value: ""},
                 configuration_id: {value: ""},
                 count: {value: "1"},
+                query: {value: ""},
+                filter: {value: ""},
+                aggregation: {value: ""},
+                return: {value: ""},
                 "discovery-method": {value:"listEnvrionments"}
             },
             credentials: {

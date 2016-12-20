@@ -50,6 +50,18 @@ DiscoveryUtils.prototype = {
     if (config.count) {
       params.count = config.count;
     }
+    if (config.query) {
+      params.query = config.query;
+    }
+    if (config.filter) {
+      params.filter = config.filter;
+    }
+    if (config.aggregation) {
+      params.aggregation = config.aggregation;
+    }
+    if (config.return) {
+      params.return = config.return;
+    }
 
     return params;
   },
