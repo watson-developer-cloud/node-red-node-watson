@@ -1,0 +1,126 @@
+<!--
+  Copyright 2016 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-discovery-v1-query-builder">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-discovery-v1-query-builder">
+    <p>This is the Query Builder Node for the V1 Watson Discovery service.</p>
+    <p>Use this node upflow of a Watson Discovery Node to build the query to be used
+    by the Discovery Node</p>
+    </ul>
+
+    <p>For more information about the Discovery service,
+    read the service <a href="https://www.ibm.com/watson/developercloud/doc/discovery/">documentation</a>.</p>
+
+</script>
+
+<script type="text/javascript">
+
+    // Need to simulate a namespace, so that some of the variables don't leak across nodes
+    function DiscoveryQueryBuilderV1 () {}
+
+    // This is the namespace for this version of this Node.
+    var disQB = new DiscoveryQueryBuilderV1();
+
+    //disV1.abc = 'abc';
+    disQB.hideAll = function() {
+      //$('#node-input-environmentname').parent().hide();
+      //$('#node-input-environment_id').parent().hide();
+      //$('#node-input-collection_id').parent().hide();
+      //$('#node-input-configurationname').parent().hide();
+      //$('#node-input-configuration_id').parent().hide();
+      //$('#node-input-count').parent().hide();
+      //$('#node-input-query').parent().hide();
+      //$('#node-input-filter').parent().hide();
+      //$('#node-input-aggregation').parent().hide();
+      //$('#node-input-return').parent().hide();
+    };
+
+    disQB.showSelectedFields = function(fields) {
+      //for (i = 0; i < fields.length; i++) {
+      //  $(fields[i]).parent().show();
+      //}
+    }
+
+    disQB.UIListeners = function () {
+      //$('#node-input-discovery-method').change(function(val){
+      //  var method = $('#node-input-discovery-method').val();
+      //  disV1.processSelectedMethod(method);
+      //});
+    }
+
+    disQB.checkForPrepare = function () {
+      disQB.hideAll();
+      disQB.UIListeners();
+    };
+
+    // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
+    function oneditprepare() {
+      disQB.checkForPrepare();
+      $.getJSON('watson-discovery-v1-query-builder/vcap/')
+        .done(function (service) {
+          $('.credentials').toggle(!service);
+        })
+        .fail(function () {
+          $('.credentials').show();
+        }).always(function () {
+          $('#credentials-check').hide();
+        })
+    }
+
+    (function() {
+        RED.nodes.registerType('watson-discovery-v1-query-builder', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: "rgb(200,140,80)",
+            inputs: 1,
+            outputs: 1,
+            icon: "discovery.png",
+            paletteLabel: "discovery query builder",
+            label: function() {
+                return this.name || "discovery query builder";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: oneditprepare
+        });
+    })();
+</script>
