@@ -37,6 +37,9 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available envrionments
   RED.httpAdmin.get('/watson-discovery-v1-query-builder/envrionments', function (req, res) {
+    console.log('----- Pre Environment Check on Credentials ');
+    console.log(sUsername);
+    console.log(sPassword);
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,

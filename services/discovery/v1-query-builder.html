@@ -176,6 +176,7 @@
         console.log(data);
         $('#something-went-wrong').hide();
         if (data.error) {
+          console.log(data);
           $('#something-went-wrong').show();
           $('input#node-input-errorwarning').val(data.error);
         }
@@ -186,7 +187,7 @@
           disQB.checkVisibility();
         }
       }).fail(function (err) {
-        //console.log(err);
+        console.log(err);
         //console.log(err.status);
         var txt = 'Got server error ';
         if (err.status) {
