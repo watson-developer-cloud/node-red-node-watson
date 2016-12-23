@@ -35,6 +35,30 @@ module.exports = function (RED) {
     res.json(serviceutils.checkServiceBound(SERVICE_IDENTIFIER));
   });
 
+  // API used by widget to fetch available envrionments
+  RED.httpAdmin.get('/watson-discovery-v1-query-builder/envrionments', function (req, res) {
+    var discovery = new DiscoveryV1({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd,
+      version_date: '2016-12-15'
+    });
+
+    console.log('Need to fetch envrionments here');
+    discovery.getEnvironments({}, function (err, response) {
+    //lt.getModels({}, function (err, models) {
+      if (err) {
+        res.json(err);
+      }
+      else {
+        console.log('List of Envrionments :')
+        console.log(response);
+        res.json(response.environments ? response.environments : response);
+        //res.json(models);
+      }
+    });
+  });
+
+
 
   function Node (config) {
     var node = this;

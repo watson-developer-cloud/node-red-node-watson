@@ -20,6 +20,22 @@
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
         </div>
     </div>
+    <div id="credentials-not-found" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Could not bind to service.
+            </b> This node can not be further configured without a valid service.
+            Try entering valid credentials?
+        </div>
+    </div>
+    <div id="something-went-wrong" class="form-row">
+        <div class="form-tips">
+            <div>
+                <input disabled type="text" id="node-input-errorwarning"/>
+            </div>
+        </div>
+    </div>
+
+
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -32,6 +48,17 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+
+    <div class="form-row">
+        <label for="node-input-environment"><i class="fa fa-book"></i> Environment</label>
+        <select type="text" id="node-input-environment" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-environmenthidden"/>
+    </div>
+
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-discovery-v1-query-builder">
@@ -52,19 +79,20 @@
 
     // This is the namespace for this version of this Node.
     var disQB = new DiscoveryQueryBuilderV1();
+    disQB.environments = null;
 
-    //disV1.abc = 'abc';
+    // Initially assume that we dont have credentials and that neither system
+    // nor local set have been provided.
+    disQB.have_credentials = false;
+    disQB.using_local_credentials = true;
+
+    disQB.environment_selected = $('#node-input-environmenthidden').val();
+
+
     disQB.hideAll = function() {
-      //$('#node-input-environmentname').parent().hide();
-      //$('#node-input-environment_id').parent().hide();
-      //$('#node-input-collection_id').parent().hide();
-      //$('#node-input-configurationname').parent().hide();
-      //$('#node-input-configuration_id').parent().hide();
-      //$('#node-input-count').parent().hide();
-      //$('#node-input-query').parent().hide();
-      //$('#node-input-filter').parent().hide();
-      //$('#node-input-aggregation').parent().hide();
-      //$('#node-input-return').parent().hide();
+      $('#credentials-not-found').show();
+      $('#something-went-wrong').hide();
+      $('#node-input-environment').parent().hide();
     };
 
     disQB.showSelectedFields = function(fields) {
@@ -78,6 +106,18 @@
       //  var method = $('#node-input-discovery-method').val();
       //  disV1.processSelectedMethod(method);
       //});
+      $('#node-input-username').change(function(val){
+        disQB.getCredentials();
+        //if (tor.have_credentials) {
+        //  tor.checkActionSelected();}
+      });
+      $('#node-input-password').change(function(val){
+        disQB.getCredentials();
+        //if (tor.have_credentials) {
+        //  tor.checkActionSelected();
+        //}
+      });
+
     }
 
     disQB.checkForPrepare = function () {
@@ -85,29 +125,176 @@
       disQB.UIListeners();
     };
 
+    disQB.populateEnvironments = function() {
+      if (disQB.environments && disQB.environments.length) {
+        $('select#node-input-environment').empty();
+        // var unique_envs = tor.domains.filter(tor.checkUnique);
+
+        disQB.environments.forEach(function(env) {
+          var selectedText = '';
+          if (disQB.environment_selected === env.environment_id) {
+            selectedText = 'selected="selected"';
+          }
+          $('select#node-input-environment')
+            .append('<option value='
+                          + '"' + env.environment_id + '"'
+                          + selectedText
+                          + '>'
+                          + env.name
+                          + '</option>');
+        });
+      //tor.checkDomainSelected();
+      }
+    };
+
+    // If we have models, then certain fields can be shown.
+    // this is invoked in the process tha obtains the models, which may be
+    // after the dialog is shown.
+    // ie. all the fields are initially hidden, but once the credentials are valid and
+    // the model has been retrieved then this function is invoked to update what fields
+    // are shown without the user having to close the dialog.
+    // Problem is that the onchange is only invoked when the user tabs to another field.
+    disQB.checkVisibility = function () {
+      if (disQB.environments) {
+        //$('#node-input-action').parent().show();
+        //tor.checkActionSelected();
+        $('select#node-input-environment').parent().show();
+        disQB.populateEnvironments();
+      }
+    }
+
+
+    // Retrieve the available environments from the server, if data is returned, then
+    // can enable the dynamic selection fields.
+    disQB.checkEnvironments = function () {
+      var u = $('#node-input-username').val();
+      var p = $('#node-input-password').val();
+
+      $.getJSON('/watson-discovery-v1-query-builder/envrionments/',
+                 {un: u, pwd: p}
+      ).done(function (data) {
+        console.log(data);
+        $('#something-went-wrong').hide();
+        if (data.error) {
+          $('#something-went-wrong').show();
+          $('input#node-input-errorwarning').val(data.error);
+        }
+        else {
+          $('#credentials-not-found').hide();
+          disQB.environments = data;
+          disQB.have_credentials = true;
+          disQB.checkVisibility();
+        }
+      }).fail(function (err) {
+        //console.log(err);
+        //console.log(err.status);
+        var txt = 'Got server error ';
+        if (err.status) {
+          txt += '(' + err.status + ') '
+        }
+        txt += 'when trying to retrieve available envrionments';
+        $('#something-went-wrong').show();
+        $('input#node-input-errorwarning').val(txt);
+      }).always(function () {
+      });
+    }
+
+
+    // Simple check that is only invoked if the service is not bound into bluemix.
+    // In this case the user has to provide credentials. Once there are credentials,
+    // then the discovery environments are retrieved.
+    disQB.getCredentials = function () {
+      var u = $('#node-input-username').val();
+      var p = $('#node-input-password').val();
+
+      console.log('Looking for Credentials');
+      if (u && u.length && p) {
+        if (!disQB.environments) {
+          disQB.checkEnvironments();
+          if (disQB.environments) {
+            //$('#credentials-not-found').hide();
+            //$('#node-input-action').parent().show();
+          }
+        }
+      } else if (!disQB.environments) {
+        //$('#node-input-action').parent().hide();
+        //$('#credentials-not-found').hide();
+      }
+    }
+
+    // The dynamic nature of the selection fields in this node has caused problems.
+    // Whenever there is a fetch for the models, on a page refresh or applicaiton
+    // restart, the settings for the dynamic fields are lost.
+    // So hidden (text) fields are being used to squirrel away the values, so that
+    // they can be restored.
+    disQB.restoreHidden = function () {
+      disQB.environment_selected = $('#node-input-environmenthidden').val();
+      $('select#node-input-environment').val(disQB.environment_selected);
+    }
+
+
     // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
     function oneditprepare() {
+      disQB.hideAll();
+      disQB.restoreHidden();
+
       disQB.checkForPrepare();
-      $.getJSON('watson-discovery-v1-query-builder/vcap/')
-        .done(function (service) {
-          $('.credentials').toggle(!service);
-        })
-        .fail(function () {
+      if (!disQB.have_credentials) {
+        $.getJSON('watson-discovery-v1-query-builder/vcap/')
+          .done(function (service) {
+            $('.credentials').toggle(!service);
+            // for some reason the getJSON resets the vars so need to restoreHidden again
+            // so again.
+            disQB.restoreHidden();
+            if (!service) {
+              // no bound service, so check local settings to see if they are valid
+              disQB.using_local_credentials = true;
+              disQB.getCredentials();
+            } else {
+              // credentials are only valid if we can get hold of the models using them
+              disQB.using_local_credentials = false;
+              if (!disQB.environments) {disQB.checkEnvironments();}
+            }
+          })
+          .fail(function () {
+            $('.credentials').show();
+          }).always(function () {
+            $('#credentials-check').hide();
+          })
+      }
+      // credentials can be set during the oneditprepare process, so check again.
+      if (disQB.have_credentials || disQB.using_local_credentials)
+      {
+        $('#credentials-check').hide();
+        if (disQB.have_credentials) {
+          $('#credentials-not-found').hide();
+        }
+        if (disQB.using_local_credentials) {
           $('.credentials').show();
-        }).always(function () {
-          $('#credentials-check').hide();
-        })
+        }
+        disQB.checkVisibility();
+        //disQB.checkActionSelected();
+      }
+    }
+
+    // Save the values in the dyanmic lists to the hidden fields.
+    function oneditsave(){
+      disQB.environment_selected = $('#node-input-environment').val();
+      $('#node-input-environmenthidden').val(disQB.environment_selected);
     }
 
     (function() {
         RED.nodes.registerType('watson-discovery-v1-query-builder', {
             category: 'IBM Watson',
             defaults: {
-                name: {value: ""}
+                name: {value: ""},
+                password: {value: ''},
+                environmenthidden: {value: ''},
+                environmenthidden: {value: ''}
             },
             credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
+              username: {type:"text"} //,
+              // password: {type:"password"}
             },
             color: "rgb(200,140,80)",
             inputs: 1,
@@ -120,7 +307,8 @@
             labelStyle: function() {
                 return this.name ? "node_label_italic" : "";
             },
-            oneditprepare: oneditprepare
+            oneditprepare: oneditprepare,
+            oneditsave: oneditsave
         });
     })();
 </script>
