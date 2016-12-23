@@ -170,7 +170,7 @@
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
 
-      $.getJSON('/watson-discovery-v1-query-builder/envrionments/',
+      $.getJSON('watson-discovery-v1-query-builder/environments',
                  {un: u, pwd: p}
       ).done(function (data) {
         console.log(data);
