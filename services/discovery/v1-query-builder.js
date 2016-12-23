@@ -59,14 +59,13 @@ module.exports = function (RED) {
   });
 
 
-
   function Node (config) {
     var node = this;
     RED.nodes.createNode(this, config);
 
     this.on('input', function (msg) {
       // Simply return params for query on msg object
-      msg.discoveryparams = {};
+      msg.discoveryparams = discoveryutils.buildMsgOverrides(msg, config);      
       node.send(msg);
     });
   }

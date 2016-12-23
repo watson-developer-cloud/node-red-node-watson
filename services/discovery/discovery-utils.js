@@ -66,6 +66,14 @@ DiscoveryUtils.prototype = {
     return params;
   },
 
+  buildMsgOverrides: function(msg, config) {
+    var params = {};
+    if (config.environment) {
+      params.environment_id = config.environment;
+    }
+    return params;
+  },
+
   paramEnvCheck: function (params) {
     var response = '';
     if (!params.environment_id) {
