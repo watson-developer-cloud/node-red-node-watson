@@ -35,7 +35,7 @@ module.exports = function (RED) {
     res.json(serviceutils.checkServiceBound(SERVICE_IDENTIFIER));
   });
 
-  // API used by widget to fetch available envrionments
+  // API used by widget to fetch available environments
   RED.httpAdmin.get('/watson-discovery-v1-query-builder/environments', function (req, res) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
@@ -58,6 +58,29 @@ module.exports = function (RED) {
     });
   });
 
+  // API used by widget to fetch available collections in environment
+  RED.httpAdmin.get('/watson-discovery-v1-query-builder/collections', function (req, res) {
+    var discovery = new DiscoveryV1({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd,
+      version_date: '2016-12-15'
+    });
+
+//    console.log('Need to fetch envrionments here');
+    discovery.getCollections({environment_id: req.query.environment_id},
+                              function (err, response) {
+    //lt.getModels({}, function (err, models) {
+      if (err) {
+        res.json(err);
+      }
+      else {
+        console.log('List of Collections :')
+        console.log(response);
+        res.json(response.collections ? response.collections : response);
+        //res.json(models);
+      }
+    });
+  });
 
   function Node (config) {
     var node = this;
@@ -65,7 +88,7 @@ module.exports = function (RED) {
 
     this.on('input', function (msg) {
       // Simply return params for query on msg object
-      msg.discoveryparams = discoveryutils.buildMsgOverrides(msg, config);      
+      msg.discoveryparams = discoveryutils.buildMsgOverrides(msg, config);
       node.send(msg);
     });
   }

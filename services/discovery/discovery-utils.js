@@ -71,6 +71,9 @@ DiscoveryUtils.prototype = {
     if (config.environment) {
       params.environment_id = config.environment;
     }
+    if (config.collection) {
+      params.collection_id = config.collection;
+    }
     return params;
   },
 

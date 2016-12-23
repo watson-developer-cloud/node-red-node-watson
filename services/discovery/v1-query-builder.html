@@ -58,6 +58,16 @@
         <input type="hidden" id="node-input-environmenthidden"/>
     </div>
 
+    <div class="form-row">
+        <label for="node-input-collection"><i class="fa fa-book"></i> Collection</label>
+        <select type="text" id="node-input-collection" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-collectionhidden"/>
+    </div>
+
+
 
 </script>
 
@@ -80,6 +90,7 @@
     // This is the namespace for this version of this Node.
     var disQB = new DiscoveryQueryBuilderV1();
     disQB.environments = null;
+    disQB.collections = {};
 
     // Initially assume that we dont have credentials and that neither system
     // nor local set have been provided.
@@ -87,12 +98,14 @@
     disQB.using_local_credentials = true;
 
     disQB.environment_selected = $('#node-input-environmenthidden').val();
+    disQB.collection_selected = $('#node-input-collectionhidden').val();
 
 
     disQB.hideAll = function() {
       $('#credentials-not-found').show();
       $('#something-went-wrong').hide();
       $('#node-input-environment').parent().hide();
+      $('#node-input-collection').parent().hide();
     };
 
     disQB.showSelectedFields = function(fields) {
@@ -117,13 +130,42 @@
         //  tor.checkActionSelected();
         //}
       });
-
+      $('#node-input-environment').change(function (val) {
+        //console.log('Env Change');
+        disQB.environment_selected = $('#node-input-environment').val();
+        //console.log(disQB.environment_selected);
+        //console.log(disQB.collectionCheck());
+        if (disQB.environment_selected &&
+              !disQB.collectionCheck()) {
+          //console.log('Env Change - Looking for Collections');
+          disQB.getCollections();
+        }
+        else if (disQB.environment_selected) {
+          disQB.populateCollections();
+        }
+      });
+      $('#node-input-collection').change(function (val) {
+        disQB.collection_selected = $('#node-input-collection').val();
+      });
     }
 
     disQB.checkForPrepare = function () {
       disQB.hideAll();
       disQB.UIListeners();
     };
+
+    disQB.collectionCheck = function () {
+      return disQB.collectionCheckForEnv(disQB.environment_selected);
+    }
+
+    disQB.collectionCheckForEnv = function (env) {
+      var coll = null;
+      if (disQB.collections && disQB.collections[env])
+      {
+        coll = disQB.collections[env];
+      }
+      return coll;
+    }
 
     disQB.populateEnvironments = function() {
       if (disQB.environments && disQB.environments.length) {
@@ -143,9 +185,40 @@
                           + env.name
                           + '</option>');
         });
-      //tor.checkDomainSelected();
+        //tor.checkDomainSelected();
+        if (!disQB.collectionCheck()) {
+          disQB.getCollections();
+        }
       }
     };
+
+    disQB.populateCollections = function() {
+      var coll = disQB.collectionCheck();
+      if (coll && coll.length) {
+        $('select#node-input-collection').empty();
+        // var unique_envs = tor.domains.filter(tor.checkUnique);
+
+        coll.forEach(function(c) {
+          var selectedText = '';
+          if (disQB.collection_selected === c.collection_id) {
+            selectedText = 'selected="selected"';
+          }
+          $('select#node-input-collection')
+            .append('<option value='
+                          + '"' + c.collection_id + '"'
+                          + selectedText
+                          + '>'
+                          + c.name
+                          + '</option>');
+        });
+        //tor.checkDomainSelected();
+        //if (!disQB.collectionCheck()) {
+        //  disQB.getCollections();
+        //}
+      }
+    };
+
+
 
     // If we have models, then certain fields can be shown.
     // this is invoked in the process tha obtains the models, which may be
@@ -154,7 +227,7 @@
     // the model has been retrieved then this function is invoked to update what fields
     // are shown without the user having to close the dialog.
     // Problem is that the onchange is only invoked when the user tabs to another field.
-    disQB.checkVisibility = function () {
+    disQB.showEnvironments = function () {
       if (disQB.environments) {
         //$('#node-input-action').parent().show();
         //tor.checkActionSelected();
@@ -163,10 +236,19 @@
       }
     }
 
+    disQB.showCollections = function () {
+      if (disQB.collections && disQB.collectionCheck()) {
+        //$('#node-input-action').parent().show();
+        //tor.checkActionSelected();
+        $('select#node-input-collection').parent().show();
+        disQB.populateCollections();
+      }
+    }
+
 
     // Retrieve the available environments from the server, if data is returned, then
     // can enable the dynamic selection fields.
-    disQB.checkEnvironments = function () {
+    disQB.getEnvironments = function () {
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
 
@@ -184,7 +266,7 @@
           $('#credentials-not-found').hide();
           disQB.environments = data;
           disQB.have_credentials = true;
-          disQB.checkVisibility();
+          disQB.showEnvironments();
         }
       }).fail(function (err) {
         console.log(err);
@@ -200,6 +282,46 @@
       });
     }
 
+    // Retrieve the available collections in the selected envrionment from the server,
+    // if data is returned, then can enable the dynamic selection fields.
+    disQB.getCollections = function () {
+      var u = $('#node-input-username').val();
+      var p = $('#node-input-password').val();
+
+      console.log('In Collection Retrieval Stage');
+
+      $.getJSON('watson-discovery-v1-query-builder/collections',
+                 {un: u, pwd: p,
+                  environment_id: disQB.environment_selected}
+      ).done(function (data) {
+        console.log(data);
+        $('#something-went-wrong').hide();
+        if (data.error) {
+          console.log(data);
+          $('#something-went-wrong').show();
+          $('input#node-input-errorwarning').val(data.error);
+        }
+        else {
+          $('#credentials-not-found').hide();
+          disQB.collections[disQB.environment_selected] = data;
+          //disQB.have_credentials = true;
+          disQB.showCollections();
+        }
+      }).fail(function (err) {
+        console.log(err);
+        //console.log(err.status);
+        var txt = 'Got server error ';
+        if (err.status) {
+          txt += '(' + err.status + ') '
+        }
+        txt += 'when trying to retrieve available collections';
+        $('#something-went-wrong').show();
+        $('input#node-input-errorwarning').val(txt);
+      }).always(function () {
+      });
+
+    }
+
 
     // Simple check that is only invoked if the service is not bound into bluemix.
     // In this case the user has to provide credentials. Once there are credentials,
@@ -211,7 +333,7 @@
       console.log('Looking for Credentials');
       if (u && u.length && p) {
         if (!disQB.environments) {
-          disQB.checkEnvironments();
+          disQB.getEnvironments();
           if (disQB.environments) {
             //$('#credentials-not-found').hide();
             //$('#node-input-action').parent().show();
@@ -231,6 +353,9 @@
     disQB.restoreHidden = function () {
       disQB.environment_selected = $('#node-input-environmenthidden').val();
       $('select#node-input-environment').val(disQB.environment_selected);
+
+      disQB.collection_selected = $('#node-input-collectionhidden').val();
+      $('select#node-input-collection').val(disQB.collection_selected);
     }
 
 
@@ -254,7 +379,7 @@
             } else {
               // credentials are only valid if we can get hold of the models using them
               disQB.using_local_credentials = false;
-              if (!disQB.environments) {disQB.checkEnvironments();}
+              if (!disQB.environments) {disQB.getEnvironments();}
             }
           })
           .fail(function () {
@@ -273,7 +398,8 @@
         if (disQB.using_local_credentials) {
           $('.credentials').show();
         }
-        disQB.checkVisibility();
+        disQB.showEnvironments();
+        disQB.showCollections();
         //disQB.checkActionSelected();
       }
     }
@@ -282,6 +408,9 @@
     function oneditsave(){
       disQB.environment_selected = $('#node-input-environment').val();
       $('#node-input-environmenthidden').val(disQB.environment_selected);
+
+      disQB.collection_selected = $('#node-input-collection').val();
+      $('#node-input-collectionhidden').val(disQB.collection_selected);
     }
 
     (function() {
@@ -291,7 +420,9 @@
                 name: {value: ""},
                 password: {value: ''},
                 environment: {value: ''},
-                environmenthidden: {value: ''}
+                environmenthidden: {value: ''},
+                collection: {value: ''},
+                collectionhidden: {value: ''}
             },
             credentials: {
               username: {type:"text"} //,
