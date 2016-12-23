@@ -37,36 +37,25 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available envrionments
   RED.httpAdmin.get('/watson-discovery-v1-query-builder/environments', function (req, res) {
-    console.log('----- Pre Environment Check on Credentials ');
-    console.log(sUsername);
-    console.log(sPassword);
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
       version_date: '2016-12-15'
     });
 
-    var xxx = { error: 'Testing for Bluemix Settings' ,
-                sUsername : sUsername,
-                password: sPassword,
-                req_un: req.query.un,
-                req_pwd: req.query.pwd
-    };
-    res.json(xxx);
-
 //    console.log('Need to fetch envrionments here');
-//    discovery.getEnvironments({}, function (err, response) {
+    discovery.getEnvironments({}, function (err, response) {
     //lt.getModels({}, function (err, models) {
-//      if (err) {
-//        res.json(err);
-//      }
-//      else {
-//        console.log('List of Envrionments :')
-//        console.log(response);
-//        res.json(response.environments ? response.environments : response);
+      if (err) {
+        res.json(err);
+      }
+      else {
+        console.log('List of Envrionments :')
+        console.log(response);
+        res.json(response.environments ? response.environments : response);
         //res.json(models);
-//      }
-//    });
+      }
+    });
   });
 
 
