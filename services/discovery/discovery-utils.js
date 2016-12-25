@@ -17,8 +17,7 @@
 function DiscoveryUtils() {}
 DiscoveryUtils.prototype = {
 
-  buildParams: function(msg, config) {
-    var params = {};
+  buildParamsForName: function(msg, config, params) {
     if (msg.discoveryparams && msg.discoveryparams.environmentname) {
       params.name = msg.discoveryparams.environmentname;
     } else if (config.environmentname) {
@@ -28,39 +27,63 @@ DiscoveryUtils.prototype = {
     } else if (config.configurationname) {
       params.name = config.cofigurationname;
     }
+    return params;
+  },
 
-    if (msg.discoveryparams && msg.discoveryparams.environment_id) {
-      params.environment_id = msg.discoveryparams.environment_id;
-    } else if (config.environment_id) {
-      params.environment_id = config.environment_id;
+  buildParamsFor: function(msg, config, params, field) {
+    if (msg.discoveryparams && msg.discoveryparams[field]) {
+      params[field] = msg.discoveryparams[field];
+    } else if (config[field]) {
+      params[field] = config[field];
     }
+    return params;
+  },
 
-    if (msg.discoveryparams && msg.discoveryparams.collection_id) {
-      params.collection_id = msg.discoveryparams.collection_id;
-    } else if (config.collection_id) {
-      params.collection_id = config.collection_id;
+  buildParamsFromConfig: function(config, params, field) {
+    if (config[field]) {
+      params[field] = config[field];
     }
+    return params;
+  },
 
-    if (msg.discoveryparams && msg.discoveryparams.configuration_id) {
-      params.configuration_id = msg.discoveryparams.configuration_id;
-    } else if (config.configuration_id) {
-      params.configuration_id = config.configuration_id;
-    }
+  buildParams: function(msg, config) {
+    var params = {};
 
-    if (config.count) {
-      params.count = config.count;
+    params = DiscoveryUtils.prototype.buildParamsForName(msg, config, params);
+
+    ['environment_id','collection_id','configuration_id','query'].forEach(function(f) {
+      params = DiscoveryUtils.prototype.buildParamsFor(msg, config, params, f);
+    });
+
+    ['count','filter','aggregation','return'].forEach(function(f) {
+      params = DiscoveryUtils.prototype.buildParamsFromConfig(config, params, f);
+    });
+
+    return params;
+  },
+
+  buildMsgOverrides: function(msg, config) {
+    var params = {};
+    if (config.environment) {
+      params.environment_id = config.environment;
     }
-    if (config.query) {
-      params.query = config.query;
+    if (config.collection) {
+      params.collection_id = config.collection;
     }
-    if (config.filter) {
-      params.filter = config.filter;
+    if (config.query1 && config.queryvalue1) {
+      params.query = config.query1 + ':"' + config.queryvalue1 + '"';
     }
-    if (config.aggregation) {
-      params.aggregation = config.aggregation;
+    if (config.query2 && config.queryvalue2) {
+      if (params.query) {
+        params.query += ',';
+      }
+      params.query += config.query2 + ':"' + config.queryvalue2 + '"';
     }
-    if (config.return) {
-      params.return = config.return;
+    if (config.query3 && config.queryvalue3) {
+      if (params.query) {
+        params.query += ',';
+      }
+      params.query += config.query3 + ':"' + config.queryvalue3 + '"';
     }
 
     return params;
@@ -88,6 +111,53 @@ DiscoveryUtils.prototype = {
       response = 'Missing Configuration ID ';
     }
     return response;
+  },
+
+  // Looking for Text, Type and label
+  buildFieldByStep: function(d, fields, txt) {
+    for (var k in d) {
+      var t = txt;
+      if (isNaN(k)) {
+        t += txt ? '.' : '';
+        t += k;
+      }
+
+      if ('object' === typeof d[k]) {
+        fields = DiscoveryUtils.prototype.buildFieldByStep(d[k], fields, t);
+      } else {
+        switch (k) {
+        case 'text':
+        case 'type':
+        case 'label':
+          fields.push(t);
+          break;
+        }
+      }
+    }
+    return fields;
+  },
+
+  // sorting functions
+  uniqueFilter: function (value, index, self) {
+    return self.indexOf(value) === index;
+  },
+
+  // Looking for Text, Type and label
+  buildFieldList: function(schemaData) {
+    var fields = [];
+    if ('object' === typeof schemaData) {
+      for (var k in schemaData) {
+        if ('results' === k &&
+                'object' === typeof schemaData[k] &&
+                'object' === typeof schemaData[k][0]) {
+          fields = DiscoveryUtils.prototype.buildFieldByStep(schemaData[k][0], fields, '');
+        }
+      }
+      if (fields.length) {
+        fields = fields.filter(DiscoveryUtils.prototype.uniqueFilter);
+      }
+    }
+    return fields;
   },
 
   reportError: function (node, msg, message) {

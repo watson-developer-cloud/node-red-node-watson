@@ -1,6 +1,6 @@
 {
   "name": "node-red-node-watson",
-  "version": "0.4.30",
+  "version": "0.4.31",
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
     "alchemy-api": "^1.3.0",
@@ -35,6 +35,7 @@
       "watson-conversation-v1":"services/conversation/v1.js",
       "watson-conversation-v1-experimental":"services/conversation/v1-exp.js",
       "watson-discovery-v1":"services/discovery/v1.js",
+      "watson-discovery-v1-query-builder":"services/discovery/v1-query-builder.js",
       "watson-discovery-v1-experimental":"services/discovery/v1-exp.js",
       "watson-document-conversion-v1": "services/document_conversion/v1.js",
       "watson-concept-insights-v2": "services/concept_insights/v2.js",
