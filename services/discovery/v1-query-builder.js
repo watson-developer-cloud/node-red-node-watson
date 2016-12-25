@@ -65,8 +65,7 @@ module.exports = function (RED) {
       function (err, response) {
         if (err) {
           res.json(err);
-        }
-        else {
+        } else {
           res.json(response.collections ? response.collections : response);
         }
       }
