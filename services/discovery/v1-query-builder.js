@@ -94,7 +94,6 @@ module.exports = function (RED) {
     });
   });
 
-
   function Node (config) {
     var node = this;
     RED.nodes.createNode(this, config);

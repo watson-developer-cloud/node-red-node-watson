@@ -106,7 +106,13 @@
     <p>This is the Query Builder Node for the V1 Watson Discovery service.</p>
     <p>Use this node upflow of a Watson Discovery Node to build the query to be used
     by the Discovery Node</p>
-    </ul>
+
+    <p>The node fetches the searchable fields in the collection and allows you to
+      set upto 3 query search items.
+    </p>
+    <p>The output from the Node is an object in <code>msg.discoveryparams</code>
+    that the Watson Discovery Node uses as override settings.
+    </p>
 
     <p>For more information about the Discovery service,
     read the service <a href="https://www.ibm.com/watson/developercloud/doc/discovery/">documentation</a>.</p>
@@ -136,6 +142,8 @@
     disQB.query3_selected = $('#node-input-query3hidden').val();
 
 
+    // Nothing is to be shown unless the values to show in the listCollections
+    // can be obtained from the service.
     disQB.hideAll = function() {
       $('#credentials-not-found').show();
       $('#something-went-wrong').hide();
@@ -152,6 +160,10 @@
       }
     }
 
+    // Set up listeners for the select lists to determine if the subsequent
+    // list boxes need refreshing. ie. A change in selected Envionment, needs
+    // the collection list to be revised. A change in selected collection, needs
+    // the schema lists to be revised.
     disQB.UIListeners = function () {
       $('#node-input-username').change(function(val){
         disQB.getCredentials();
@@ -197,11 +209,13 @@
 
     }
 
+    // The dialog is about to be shown.
     disQB.checkForPrepare = function () {
       disQB.hideAll();
       disQB.UIListeners();
     };
 
+    // Search the cache for a collection
     disQB.collectionCheckForEnv = function (env) {
       var coll = null;
       if (disQB.collections && disQB.collections[env])
@@ -211,10 +225,12 @@
       return coll;
     }
 
+    // Search the collection cache for the selected envrionment
     disQB.collectionCheck = function () {
       return disQB.collectionCheckForEnv(disQB.environment_selected);
     }
 
+    // Search for a collection schema
     disQB.schemaCheckForCollection = function (coll) {
       var schema = null;
       if (disQB.schemas && disQB.schemas[coll])
@@ -224,10 +240,12 @@
       return schema;
     }
 
+    // Search the schema cache for the selected collection.
     disQB.schemaCheck = function () {
       return disQB.schemaCheckForCollection(disQB.collection_selected);
     }
 
+    // Fill up the Envrionment switch list
     disQB.populateEnvironments = function() {
       if (disQB.environments && disQB.environments.length) {
         $('select#node-input-environment').empty();
@@ -251,6 +269,7 @@
       }
     };
 
+    // Fill up the collection switch list
     disQB.populateCollections = function() {
       var coll = disQB.collectionCheck();
       if (coll && coll.length) {
@@ -275,6 +294,7 @@
       }
     };
 
+    // Fill up the 3 schema switch lists
     disQB.populateSchemas = function() {
       var schema = disQB.schemaCheck();
       if (schema && schema.length) {
@@ -321,13 +341,8 @@
     };
 
 
-    // If we have models, then certain fields can be shown.
-    // this is invoked in the process tha obtains the models, which may be
-    // after the dialog is shown.
-    // ie. all the fields are initially hidden, but once the credentials are valid and
-    // the model has been retrieved then this function is invoked to update what fields
-    // are shown without the user having to close the dialog.
-    // Problem is that the onchange is only invoked when the user tabs to another field.
+    // If we have a list of envrionments, then the
+    // environment switch list can be shown.
     disQB.showEnvironments = function () {
       if (disQB.environments) {
         $('select#node-input-environment').parent().show();
@@ -335,6 +350,8 @@
       }
     }
 
+    // If we have a collection for the envrionment, then the
+    // collection switch list can be shown.
     disQB.showCollections = function () {
       if (disQB.collections && disQB.collectionCheck()) {
         $('select#node-input-collection').parent().show();
@@ -342,6 +359,8 @@
       }
     }
 
+    // If we have a schema for the collection, then the
+    // three query switch lists can be shown.
     disQB.showSchemas = function () {
       if (disQB.schemas && disQB.schemaCheck()) {
         $('select#node-input-query1').parent().show();
@@ -350,7 +369,6 @@
         disQB.populateSchemas();
       }
     }
-
 
     // Retrieve the available environments from the server, if data is returned, then
     // can enable the dynamic selection fields.
