@@ -89,6 +89,17 @@
         <input type="hidden" id="node-input-queryvalue2hidden"/>
     </div>
 
+    <div class="form-row">
+        <label for="node-input-query3"><i class="fa fa-book"></i> Query Key 3</label>
+        <select type="text" id="node-input-query3" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+        <input type="text" id="node-input-queryvalue3" placeholder="">
+    </div>
+    <div>
+        <input type="hidden" id="node-input-query3hidden"/>
+        <input type="hidden" id="node-input-queryvalue3hidden"/>
+    </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-discovery-v1-query-builder">
@@ -122,6 +133,7 @@
     disQB.collection_selected = $('#node-input-collectionhidden').val();
     disQB.query1_selected = $('#node-input-query1hidden').val();
     disQB.query2_selected = $('#node-input-query2hidden').val();
+    disQB.query3_selected = $('#node-input-query3hidden').val();
 
 
     disQB.hideAll = function() {
@@ -131,6 +143,7 @@
       $('#node-input-collection').parent().hide();
       $('#node-input-query1').parent().hide();
       $('#node-input-query2').parent().hide();
+      $('#node-input-query3').parent().hide();
     };
 
     disQB.showSelectedFields = function(fields) {
@@ -177,6 +190,11 @@
       $('#node-input-query2').change(function (val) {
         disQB.query2_selected = $('#node-input-query2').val();
       });
+
+      $('#node-input-query3').change(function (val) {
+        disQB.query3_selected = $('#node-input-query3').val();
+      });
+
     }
 
     disQB.checkForPrepare = function () {
@@ -262,15 +280,20 @@
       if (schema && schema.length) {
         $('select#node-input-query1').empty();
         $('select#node-input-query2').empty();
+        $('select#node-input-query3').empty();
 
         schema.forEach(function(s) {
           var selected1Text = '';
           var selected2Text = '';
+          var selected3Text = '';
           if (disQB.query1_selected === s) {
             selected1Text = 'selected="selected"';
           }
           if (disQB.query2_selected === s) {
             selected2Text = 'selected="selected"';
+          }
+          if (disQB.query3_selected === s) {
+            selected3Text = 'selected="selected"';
           }
           $('select#node-input-query1')
             .append('<option value='
@@ -283,6 +306,13 @@
             .append('<option value='
                           + '"' + s + '"'
                           + selected2Text
+                          + '>'
+                          + s
+                          + '</option>');
+          $('select#node-input-query3')
+            .append('<option value='
+                          + '"' + s + '"'
+                          + selected3Text
                           + '>'
                           + s
                           + '</option>');
@@ -316,6 +346,7 @@
       if (disQB.schemas && disQB.schemaCheck()) {
         $('select#node-input-query1').parent().show();
         $('select#node-input-query2').parent().show();
+        $('select#node-input-query3').parent().show();
         disQB.populateSchemas();
       }
     }
@@ -455,6 +486,12 @@
 
       disQB.queryvalue2_selected = $('#node-input-queryvalue2hidden').val();
       $('select#node-input-queryvalue2').val(disQB.queryvalue2_selected);
+
+      disQB.query3_selected = $('#node-input-query3hidden').val();
+      $('select#node-input-query3').val(disQB.query3_selected);
+
+      disQB.queryvalue3_selected = $('#node-input-queryvalue3hidden').val();
+      $('select#node-input-queryvalue3').val(disQB.queryvalue3_selected);
     }
 
 
@@ -522,6 +559,12 @@
 
       disQB.queryvalue2_selected = $('#node-input-queryvalue2').val();
       $('#node-input-queryvalue2hidden').val(disQB.queryvalue2_selected);
+
+      disQB.query3_selected = $('#node-input-query3').val();
+      $('#node-input-query3hidden').val(disQB.query3_selected);
+
+      disQB.queryvalue3_selected = $('#node-input-queryvalue3').val();
+      $('#node-input-queryvalue3hidden').val(disQB.queryvalue3_selected);
     }
 
     (function() {
@@ -541,7 +584,11 @@
                 query2: {value: ''},
                 query2hidden: {value: ''},
                 queryvalue2: {value: ''},
-                queryvalue2hidden: {value: ''}
+                queryvalue2hidden: {value: ''},
+                query3: {value: ''},
+                query3hidden: {value: ''},
+                queryvalue3: {value: ''},
+                queryvalue3hidden: {value: ''}
             },
             credentials: {
               username: {type:"text"} //,

@@ -79,6 +79,12 @@ DiscoveryUtils.prototype = {
       }
       params.query += config.query2 + ':"' + config.queryvalue2 + '"';
     }
+    if (config.query3 && config.queryvalue3) {
+      if (params.query) {
+        params.query += ',';
+      }
+      params.query += config.query3 + ':"' + config.queryvalue3 + '"';
+    }
 
     return params;
   },
