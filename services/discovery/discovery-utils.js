@@ -73,6 +73,12 @@ DiscoveryUtils.prototype = {
     if (config.query1 && config.queryvalue1) {
       params.query = config.query1 + ':"' + config.queryvalue1 + '"';
     }
+    if (config.query2 && config.queryvalue2) {
+      if (params.query) {
+        params.query += ',';
+      }
+      params.query += config.query2 + ':"' + config.queryvalue2 + '"';
+    }
 
     return params;
   },

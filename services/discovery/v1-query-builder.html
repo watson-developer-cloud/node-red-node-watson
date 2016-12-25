@@ -78,6 +78,17 @@
         <input type="hidden" id="node-input-queryvalue1hidden"/>
     </div>
 
+    <div class="form-row">
+        <label for="node-input-query2"><i class="fa fa-book"></i> Query Key 2</label>
+        <select type="text" id="node-input-query2" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+        <input type="text" id="node-input-queryvalue2" placeholder="">
+    </div>
+    <div>
+        <input type="hidden" id="node-input-query2hidden"/>
+        <input type="hidden" id="node-input-queryvalue2hidden"/>
+    </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-discovery-v1-query-builder">
@@ -110,6 +121,7 @@
     disQB.environment_selected = $('#node-input-environmenthidden').val();
     disQB.collection_selected = $('#node-input-collectionhidden').val();
     disQB.query1_selected = $('#node-input-query1hidden').val();
+    disQB.query2_selected = $('#node-input-query2hidden').val();
 
 
     disQB.hideAll = function() {
@@ -118,6 +130,7 @@
       $('#node-input-environment').parent().hide();
       $('#node-input-collection').parent().hide();
       $('#node-input-query1').parent().hide();
+      $('#node-input-query2').parent().hide();
     };
 
     disQB.showSelectedFields = function(fields) {
@@ -159,6 +172,10 @@
 
       $('#node-input-query1').change(function (val) {
         disQB.query1_selected = $('#node-input-query1').val();
+      });
+
+      $('#node-input-query2').change(function (val) {
+        disQB.query2_selected = $('#node-input-query2').val();
       });
     }
 
@@ -244,16 +261,28 @@
       var schema = disQB.schemaCheck();
       if (schema && schema.length) {
         $('select#node-input-query1').empty();
+        $('select#node-input-query2').empty();
 
         schema.forEach(function(s) {
-          var selectedText = '';
+          var selected1Text = '';
+          var selected2Text = '';
           if (disQB.query1_selected === s) {
-            selectedText = 'selected="selected"';
+            selected1Text = 'selected="selected"';
+          }
+          if (disQB.query2_selected === s) {
+            selected2Text = 'selected="selected"';
           }
           $('select#node-input-query1')
             .append('<option value='
                           + '"' + s + '"'
-                          + selectedText
+                          + selected1Text
+                          + '>'
+                          + s
+                          + '</option>');
+          $('select#node-input-query2')
+            .append('<option value='
+                          + '"' + s + '"'
+                          + selected2Text
                           + '>'
                           + s
                           + '</option>');
@@ -286,6 +315,7 @@
     disQB.showSchemas = function () {
       if (disQB.schemas && disQB.schemaCheck()) {
         $('select#node-input-query1').parent().show();
+        $('select#node-input-query2').parent().show();
         disQB.populateSchemas();
       }
     }
@@ -419,6 +449,12 @@
 
       disQB.queryvalue1_selected = $('#node-input-queryvalue1hidden').val();
       $('select#node-input-queryvalue1').val(disQB.queryvalue1_selected);
+
+      disQB.query2_selected = $('#node-input-query2hidden').val();
+      $('select#node-input-query2').val(disQB.query2_selected);
+
+      disQB.queryvalue2_selected = $('#node-input-queryvalue2hidden').val();
+      $('select#node-input-queryvalue2').val(disQB.queryvalue2_selected);
     }
 
 
@@ -480,6 +516,12 @@
 
       disQB.queryvalue1_selected = $('#node-input-queryvalue1').val();
       $('#node-input-queryvalue1hidden').val(disQB.queryvalue1_selected);
+
+      disQB.query2_selected = $('#node-input-query2').val();
+      $('#node-input-query2hidden').val(disQB.query2_selected);
+
+      disQB.queryvalue2_selected = $('#node-input-queryvalue2').val();
+      $('#node-input-queryvalue2hidden').val(disQB.queryvalue2_selected);
     }
 
     (function() {
@@ -495,7 +537,11 @@
                 query1: {value: ''},
                 query1hidden: {value: ''},
                 queryvalue1: {value: ''},
-                queryvalue1hidden: {value: ''}
+                queryvalue1hidden: {value: ''},
+                query2: {value: ''},
+                query2hidden: {value: ''},
+                queryvalue2: {value: ''},
+                queryvalue2hidden: {value: ''}
             },
             credentials: {
               username: {type:"text"} //,
