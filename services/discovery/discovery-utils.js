@@ -147,7 +147,7 @@ DiscoveryUtils.prototype = {
     var fields = [];
     if ('object' === typeof schemaData) {
       for (var k in schemaData) {
-        if ('results' == k &&
+        if ('results' === k &&
                 'object' === typeof schemaData[k] &&
                 'object' === typeof schemaData[k][0]) {
           fields = DiscoveryUtils.prototype.buildFieldByStep(schemaData[k][0], fields, '');

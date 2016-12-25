@@ -46,8 +46,7 @@ module.exports = function (RED) {
     discovery.getEnvironments({}, function (err, response) {
       if (err) {
         res.json(err);
-      }
-      else {
+      } else {
         res.json(response.environments ? response.environments : response);
       }
     });
