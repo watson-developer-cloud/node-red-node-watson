@@ -115,7 +115,7 @@ DiscoveryUtils.prototype = {
 
   // Looking for Text, Type and label
   buildFieldByStep: function(d, fields, txt) {
-    for (k in d) {
+    for (var k in d) {
       var t = txt;
       if (isNaN(k)) {
         t += txt ? '.' : '';
@@ -146,7 +146,7 @@ DiscoveryUtils.prototype = {
   buildFieldList: function(schemaData) {
     var fields = [];
     if ('object' === typeof schemaData) {
-      for (k in schemaData) {
+      for (var k in schemaData) {
         if ('results' == k &&
                 'object' === typeof schemaData[k] &&
                 'object' === typeof schemaData[k][0]) {
@@ -157,7 +157,7 @@ DiscoveryUtils.prototype = {
         fields = fields.filter(DiscoveryUtils.prototype.uniqueFilter);
       }
     }
-    return fields
+    return fields;
   },
 
   reportError: function (node, msg, message) {

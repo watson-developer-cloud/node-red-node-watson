@@ -81,9 +81,9 @@ module.exports = function (RED) {
     });
 
     discovery.query({environment_id: req.query.environment_id,
-                              collection_id: req.query.collection_id,
-                              count: 1},
-                              function (err, response) {
+                     collection_id: req.query.collection_id,
+                     count: 1},
+                     function (err, response) {
       if (err) {
         res.json(err);
       }
