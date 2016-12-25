@@ -43,17 +43,12 @@ module.exports = function (RED) {
       version_date: '2016-12-15'
     });
 
-//    console.log('Need to fetch envrionments here');
     discovery.getEnvironments({}, function (err, response) {
-    //lt.getModels({}, function (err, models) {
       if (err) {
         res.json(err);
       }
       else {
-        console.log('List of Envrionments :')
-        console.log(response);
         res.json(response.environments ? response.environments : response);
-        //res.json(models);
       }
     });
   });
@@ -66,21 +61,39 @@ module.exports = function (RED) {
       version_date: '2016-12-15'
     });
 
-//    console.log('Need to fetch envrionments here');
     discovery.getCollections({environment_id: req.query.environment_id},
                               function (err, response) {
-    //lt.getModels({}, function (err, models) {
       if (err) {
         res.json(err);
       }
       else {
-        console.log('List of Collections :')
-        console.log(response);
         res.json(response.collections ? response.collections : response);
-        //res.json(models);
       }
     });
   });
+
+  // API used by widget to fetch available collections in environment
+  RED.httpAdmin.get('/watson-discovery-v1-query-builder/schemas', function (req, res) {
+    var discovery = new DiscoveryV1({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd,
+      version_date: '2016-12-15'
+    });
+
+    discovery.query({environment_id: req.query.environment_id,
+                              collection_id: req.query.collection_id,
+                              count: 1},
+                              function (err, response) {
+      if (err) {
+        res.json(err);
+      }
+      else {
+        var fieldList = discoveryutils.buildFieldList(response);
+        res.json(fieldList);
+      }
+    });
+  });
+
 
   function Node (config) {
     var node = this;

@@ -67,7 +67,16 @@
         <input type="hidden" id="node-input-collectionhidden"/>
     </div>
 
-
+    <div class="form-row">
+        <label for="node-input-query1"><i class="fa fa-book"></i> Query Key 1</label>
+        <select type="text" id="node-input-query1" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+        <input type="text" id="node-input-queryvalue1" placeholder="">
+    </div>
+    <div>
+        <input type="hidden" id="node-input-query1hidden"/>
+        <input type="hidden" id="node-input-queryvalue1hidden"/>
+    </div>
 
 </script>
 
@@ -91,6 +100,7 @@
     var disQB = new DiscoveryQueryBuilderV1();
     disQB.environments = null;
     disQB.collections = {};
+    disQB.schemas = {};
 
     // Initially assume that we dont have credentials and that neither system
     // nor local set have been provided.
@@ -99,6 +109,7 @@
 
     disQB.environment_selected = $('#node-input-environmenthidden').val();
     disQB.collection_selected = $('#node-input-collectionhidden').val();
+    disQB.query1_selected = $('#node-input-query1hidden').val();
 
 
     disQB.hideAll = function() {
@@ -106,46 +117,48 @@
       $('#something-went-wrong').hide();
       $('#node-input-environment').parent().hide();
       $('#node-input-collection').parent().hide();
+      $('#node-input-query1').parent().hide();
     };
 
     disQB.showSelectedFields = function(fields) {
-      //for (i = 0; i < fields.length; i++) {
-      //  $(fields[i]).parent().show();
-      //}
+      for (i = 0; i < fields.length; i++) {
+        $(fields[i]).parent().show();
+      }
     }
 
     disQB.UIListeners = function () {
-      //$('#node-input-discovery-method').change(function(val){
-      //  var method = $('#node-input-discovery-method').val();
-      //  disV1.processSelectedMethod(method);
-      //});
       $('#node-input-username').change(function(val){
         disQB.getCredentials();
-        //if (tor.have_credentials) {
-        //  tor.checkActionSelected();}
       });
+
       $('#node-input-password').change(function(val){
         disQB.getCredentials();
-        //if (tor.have_credentials) {
-        //  tor.checkActionSelected();
-        //}
       });
+
       $('#node-input-environment').change(function (val) {
-        //console.log('Env Change');
         disQB.environment_selected = $('#node-input-environment').val();
-        //console.log(disQB.environment_selected);
-        //console.log(disQB.collectionCheck());
         if (disQB.environment_selected &&
               !disQB.collectionCheck()) {
-          //console.log('Env Change - Looking for Collections');
           disQB.getCollections();
         }
         else if (disQB.environment_selected) {
           disQB.populateCollections();
         }
       });
+
       $('#node-input-collection').change(function (val) {
         disQB.collection_selected = $('#node-input-collection').val();
+        if (disQB.collection_selected &&
+              !disQB.schemaCheck()) {
+          disQB.getSchemas();
+        }
+        else if (disQB.collection_selected) {
+          disQB.populateSchemas();
+        }
+      });
+
+      $('#node-input-query1').change(function (val) {
+        disQB.query1_selected = $('#node-input-query1').val();
       });
     }
 
@@ -153,10 +166,6 @@
       disQB.hideAll();
       disQB.UIListeners();
     };
-
-    disQB.collectionCheck = function () {
-      return disQB.collectionCheckForEnv(disQB.environment_selected);
-    }
 
     disQB.collectionCheckForEnv = function (env) {
       var coll = null;
@@ -167,10 +176,26 @@
       return coll;
     }
 
+    disQB.collectionCheck = function () {
+      return disQB.collectionCheckForEnv(disQB.environment_selected);
+    }
+
+    disQB.schemaCheckForCollection = function (coll) {
+      var schema = null;
+      if (disQB.schemas && disQB.schemas[coll])
+      {
+        schema = disQB.schemas[coll];
+      }
+      return schema;
+    }
+
+    disQB.schemaCheck = function () {
+      return disQB.schemaCheckForCollection(disQB.collection_selected);
+    }
+
     disQB.populateEnvironments = function() {
       if (disQB.environments && disQB.environments.length) {
         $('select#node-input-environment').empty();
-        // var unique_envs = tor.domains.filter(tor.checkUnique);
 
         disQB.environments.forEach(function(env) {
           var selectedText = '';
@@ -185,7 +210,6 @@
                           + env.name
                           + '</option>');
         });
-        //tor.checkDomainSelected();
         if (!disQB.collectionCheck()) {
           disQB.getCollections();
         }
@@ -196,7 +220,6 @@
       var coll = disQB.collectionCheck();
       if (coll && coll.length) {
         $('select#node-input-collection').empty();
-        // var unique_envs = tor.domains.filter(tor.checkUnique);
 
         coll.forEach(function(c) {
           var selectedText = '';
@@ -211,13 +234,32 @@
                           + c.name
                           + '</option>');
         });
-        //tor.checkDomainSelected();
-        //if (!disQB.collectionCheck()) {
-        //  disQB.getCollections();
-        //}
+        if (!disQB.schemaCheck()) {
+          disQB.getSchemas();
+        }
       }
     };
 
+    disQB.populateSchemas = function() {
+      var schema = disQB.schemaCheck();
+      if (schema && schema.length) {
+        $('select#node-input-query1').empty();
+
+        schema.forEach(function(s) {
+          var selectedText = '';
+          if (disQB.query1_selected === s) {
+            selectedText = 'selected="selected"';
+          }
+          $('select#node-input-query1')
+            .append('<option value='
+                          + '"' + s + '"'
+                          + selectedText
+                          + '>'
+                          + s
+                          + '</option>');
+        });
+      }
+    };
 
 
     // If we have models, then certain fields can be shown.
@@ -229,8 +271,6 @@
     // Problem is that the onchange is only invoked when the user tabs to another field.
     disQB.showEnvironments = function () {
       if (disQB.environments) {
-        //$('#node-input-action').parent().show();
-        //tor.checkActionSelected();
         $('select#node-input-environment').parent().show();
         disQB.populateEnvironments();
       }
@@ -238,10 +278,15 @@
 
     disQB.showCollections = function () {
       if (disQB.collections && disQB.collectionCheck()) {
-        //$('#node-input-action').parent().show();
-        //tor.checkActionSelected();
         $('select#node-input-collection').parent().show();
         disQB.populateCollections();
+      }
+    }
+
+    disQB.showSchemas = function () {
+      if (disQB.schemas && disQB.schemaCheck()) {
+        $('select#node-input-query1').parent().show();
+        disQB.populateSchemas();
       }
     }
 
@@ -255,10 +300,8 @@
       $.getJSON('watson-discovery-v1-query-builder/environments',
                  {un: u, pwd: p}
       ).done(function (data) {
-        console.log(data);
         $('#something-went-wrong').hide();
         if (data.error) {
-          console.log(data);
           $('#something-went-wrong').show();
           $('input#node-input-errorwarning').val(data.error);
         }
@@ -269,8 +312,6 @@
           disQB.showEnvironments();
         }
       }).fail(function (err) {
-        console.log(err);
-        //console.log(err.status);
         var txt = 'Got server error ';
         if (err.status) {
           txt += '(' + err.status + ') '
@@ -288,28 +329,20 @@
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
 
-      console.log('In Collection Retrieval Stage');
-
       $.getJSON('watson-discovery-v1-query-builder/collections',
                  {un: u, pwd: p,
                   environment_id: disQB.environment_selected}
       ).done(function (data) {
-        console.log(data);
         $('#something-went-wrong').hide();
         if (data.error) {
-          console.log(data);
           $('#something-went-wrong').show();
           $('input#node-input-errorwarning').val(data.error);
         }
         else {
-          $('#credentials-not-found').hide();
           disQB.collections[disQB.environment_selected] = data;
-          //disQB.have_credentials = true;
           disQB.showCollections();
         }
       }).fail(function (err) {
-        console.log(err);
-        //console.log(err.status);
         var txt = 'Got server error ';
         if (err.status) {
           txt += '(' + err.status + ') '
@@ -319,7 +352,39 @@
         $('input#node-input-errorwarning').val(txt);
       }).always(function () {
       });
+    }
 
+    // Retrieve the available collections in the selected envrionment from the server,
+    // if data is returned, then can enable the dynamic selection fields.
+    disQB.getSchemas = function () {
+      var u = $('#node-input-username').val();
+      var p = $('#node-input-password').val();
+
+      $.getJSON('watson-discovery-v1-query-builder/schemas',
+                 {un: u, pwd: p,
+                  environment_id: disQB.environment_selected,
+                  collection_id: disQB.collection_selected
+                 }
+      ).done(function (data) {
+        $('#something-went-wrong').hide();
+        if (data.error) {
+          $('#something-went-wrong').show();
+          $('input#node-input-errorwarning').val(data.error);
+        }
+        else {
+          disQB.schemas[disQB.collection_selected] = data;
+          disQB.showSchemas();
+        }
+      }).fail(function (err) {
+        var txt = 'Got server error ';
+        if (err.status) {
+          txt += '(' + err.status + ') '
+        }
+        txt += 'when trying to retrieve available schemas for collection';
+        $('#something-went-wrong').show();
+        $('input#node-input-errorwarning').val(txt);
+      }).always(function () {
+      });
     }
 
 
@@ -330,18 +395,10 @@
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
 
-      console.log('Looking for Credentials');
       if (u && u.length && p) {
         if (!disQB.environments) {
           disQB.getEnvironments();
-          if (disQB.environments) {
-            //$('#credentials-not-found').hide();
-            //$('#node-input-action').parent().show();
-          }
         }
-      } else if (!disQB.environments) {
-        //$('#node-input-action').parent().hide();
-        //$('#credentials-not-found').hide();
       }
     }
 
@@ -356,6 +413,12 @@
 
       disQB.collection_selected = $('#node-input-collectionhidden').val();
       $('select#node-input-collection').val(disQB.collection_selected);
+
+      disQB.query1_selected = $('#node-input-query1hidden').val();
+      $('select#node-input-query1').val(disQB.query1_selected);
+
+      disQB.queryvalue1_selected = $('#node-input-queryvalue1hidden').val();
+      $('select#node-input-queryvalue1').val(disQB.queryvalue1_selected);
     }
 
 
@@ -400,7 +463,7 @@
         }
         disQB.showEnvironments();
         disQB.showCollections();
-        //disQB.checkActionSelected();
+        disQB.showSchemas();
       }
     }
 
@@ -411,6 +474,12 @@
 
       disQB.collection_selected = $('#node-input-collection').val();
       $('#node-input-collectionhidden').val(disQB.collection_selected);
+
+      disQB.query1_selected = $('#node-input-query1').val();
+      $('#node-input-query1hidden').val(disQB.query1_selected);
+
+      disQB.queryvalue1_selected = $('#node-input-queryvalue1').val();
+      $('#node-input-queryvalue1hidden').val(disQB.queryvalue1_selected);
     }
 
     (function() {
@@ -422,7 +491,11 @@
                 environment: {value: ''},
                 environmenthidden: {value: ''},
                 collection: {value: ''},
-                collectionhidden: {value: ''}
+                collectionhidden: {value: ''},
+                query1: {value: ''},
+                query1hidden: {value: ''},
+                queryvalue1: {value: ''},
+                queryvalue1hidden: {value: ''}
             },
             credentials: {
               username: {type:"text"} //,
