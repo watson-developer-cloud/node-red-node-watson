@@ -87,8 +87,7 @@ module.exports = function (RED) {
       function (err, response) {
         if (err) {
           res.json(err);
-        }
-        else {
+        } else {
           var fieldList = discoveryutils.buildFieldList(response);
           res.json(fieldList);
         }
