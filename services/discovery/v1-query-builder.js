@@ -61,15 +61,17 @@ module.exports = function (RED) {
       version_date: '2016-12-15'
     });
 
-    discovery.getCollections({environment_id: req.query.environment_id},
-                              function (err, response) {
-      if (err) {
-        res.json(err);
+    discovery.getCollections({
+      environment_id: req.query.environment_id},
+      function (err, response) {
+        if (err) {
+          res.json(err);
+        }
+        else {
+          res.json(response.collections ? response.collections : response);
+        }
       }
-      else {
-        res.json(response.collections ? response.collections : response);
-      }
-    });
+    );
   });
 
   // API used by widget to fetch available collections in environment
@@ -80,18 +82,20 @@ module.exports = function (RED) {
       version_date: '2016-12-15'
     });
 
-    discovery.query({environment_id: req.query.environment_id,
-                     collection_id: req.query.collection_id,
-                     count: 1},
-                     function (err, response) {
-      if (err) {
-        res.json(err);
+    discovery.query({
+      environment_id: req.query.environment_id,
+      collection_id: req.query.collection_id,
+      count: 1},
+      function (err, response) {
+        if (err) {
+          res.json(err);
+        }
+        else {
+          var fieldList = discoveryutils.buildFieldList(response);
+          res.json(fieldList);
+        }
       }
-      else {
-        var fieldList = discoveryutils.buildFieldList(response);
-        res.json(fieldList);
-      }
-    });
+    );
   });
 
   function Node (config) {
