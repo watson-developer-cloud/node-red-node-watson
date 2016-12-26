@@ -15,8 +15,11 @@
  **/
 
 module.exports = function(RED) {
+  const SERVICE_IDENTIFIER = 'text-to-speech';
   var cfenv = require('cfenv');
-  var watson = require('watson-developer-cloud');
+  //var watson = require('watson-developer-cloud');
+  var TextToSpeechV1 = require('watson-developer-cloud/text-to-speech/v1');
+  var serviceutils = require('../../utilities/service-utils');
 
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then the username and password will be stored in
@@ -30,7 +33,8 @@ module.exports = function(RED) {
 
   var username, password, sUsername, sPassword;
 
-  var service = cfenv.getAppEnv().getServiceCreds(/text to speech/i)
+  //var service = cfenv.getAppEnv().getServiceCreds(/text to speech/i)
+  var service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
     sUsername = service.username;
@@ -44,11 +48,12 @@ module.exports = function(RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-text-to-speech/voices', function (req, res) {
-    var tts = watson.text_to_speech({
+    //var tts = watson.text_to_speech({
+    var tts = new TextToSpeechV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd,
-      version: 'v1',
-      url: 'https://stream.watsonplatform.net/text-to-speech/api'
+      password: sPassword ? sPassword : req.query.pwd //,
+      //version: 'v1',
+      //url: 'https://stream.watsonplatform.net/text-to-speech/api'
     });
 
     tts.voices({}, function(err, voices){
@@ -75,7 +80,7 @@ module.exports = function(RED) {
       }
 
       username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password; 
+      password = sPassword || this.credentials.password || config.password;
 
       if (!username || !password) {
         var message = 'Missing Speech To Text service credentials';
@@ -83,11 +88,12 @@ module.exports = function(RED) {
         return;
       }
 
-      var text_to_speech = watson.text_to_speech({
+      //var text_to_speech = watson.text_to_speech({
+      var text_to_speech = new TextToSpeechV1({
         username: username,
-        password: password,
-        version: 'v1',
-        url: 'https://stream.watsonplatform.net/text-to-speech/api'
+        password: password //,
+        //version: 'v1',
+        //url: 'https://stream.watsonplatform.net/text-to-speech/api'
       });
 
       var params = {

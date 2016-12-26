@@ -28,7 +28,7 @@ module.exports = function (RED) {
   var sttV1 = require('watson-developer-cloud/speech-to-text/v1');
 
   //var service = cfenv.getAppEnv().getServiceCreds(/speech to text/i);
-  var  service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
+  var service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then the username and password will be stored in
