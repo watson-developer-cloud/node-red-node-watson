@@ -9,6 +9,7 @@ Node-RED Watson Nodes for IBM Bluemix
 
 ### New in version 0.4.32
 - Added diarization support to STT Node via the parameter speaker_labels
+- STT and TTS node use url based services utility to detect bound service.
 
 ### New in version 0.4.31
 - New V1 Query Builder Node for the Discovery Node
