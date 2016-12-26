@@ -15,16 +15,16 @@
  **/
 
 module.exports = function (RED) {
-  var request = require('request');
-  var cfenv = require('cfenv');
-  var temp = require('temp');
-  var url = require('url');
-  var fs = require('fs');
-  var fileType = require('file-type');
-  //var watson = require('watson-developer-cloud');
-  var sttV1 = require('watson-developer-cloud/speech-to-text/v1');
-
-  var service = cfenv.getAppEnv().getServiceCreds(/speech to text/i);
+  const SERVICE_IDENTIFIER = 'speech-to-text';
+  var request = require('request'),
+    cfenv = require('cfenv'),
+    temp = require('temp'),
+    url = require('url'),
+    fs = require('fs'),
+    fileType = require('file-type'),
+    serviceutils = require('../../utilities/service-utils'),
+    sttV1 = require('watson-developer-cloud/speech-to-text/v1'),
+    service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then the username and password will be stored in
@@ -174,7 +174,8 @@ module.exports = function (RED) {
           audio: audio,
           content_type: 'audio/' + format,
           model: model,
-          continuous: config.continuous
+          continuous: config.continuous ? config.continuous : false,
+          speaker_labels: config.speakerlabels ? config.speakerlabels : false
         };
 
         node.status({fill:'blue', shape:'dot', text:'requesting'});
