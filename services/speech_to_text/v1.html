@@ -62,6 +62,12 @@
         <input type="checkbox" id="node-input-continuous"></input>
         </select>
     </div>
+    <div class="form-row">
+        <label for="node-input-speakerlabels"><i class="fa fa-audio-o"></i> Speaker Labels</label>
+        <input type="checkbox" id="node-input-speakerlabels"></input>
+        </select>
+    </div>
+
 
 </script>
 
@@ -82,6 +88,8 @@
     source sampling rates, <b>Narrowband (8KHz) and Broadband (16Khz)</b>. Higher sample rates will be downsampled
     automatically but the is not true in reverse.</p>
     <p>Use the continuous property to choose whether the decoding should stop at the first pause or wait until the end of the file.</p>
+    <p>Use the speaker label property to  identify which individuals spoke which words in a multi-participant exchange.
+    </p>
     <p>The returned audio transcription will be returned on <code>msg.transcription</code>.</p>
     <p>The full response, including alternative transcriptions can be found on
     <code>msg.fullresult</code>.</p>
@@ -126,6 +134,7 @@
       $('#credentials-not-found').show();
       $('label#node-label-message').parent().hide();
       $('input#node-input-continuous').parent().hide();
+      $('input#node-input-speakerlabels').parent().hide();
       $('select#node-input-lang').parent().hide();
       $('select#node-input-band').parent().hide();
     }
@@ -137,11 +146,13 @@
     if (stt.models) {
       $('label#node-label-message').parent().hide();
       $('input#node-input-continuous').parent().show();
+      $('input#node-input-speakerlabels').parent().show();
       $('select#node-input-lang').parent().show();
       $('select#node-input-band').parent().show();
     } else {
       $('label#node-label-message').parent().hide();
       $('input#node-input-continuous').parent().hide();
+      $('input#node-input-speakerlabels').parent().hide();
       $('select#node-input-lang').parent().hide();
       $('select#node-input-band').parent().hide();
     }
@@ -323,6 +334,7 @@
             defaults: {
                 name: {value: ''},
                 continuous: {value: true},
+                speakerlabels: {value: true},
                 lang: {value: ''},
                 langhidden: {value: ''},
                 band: {value: ''},
