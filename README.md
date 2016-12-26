@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.4.32
+- Added diarization support to STT Node via the parameter speaker_labels
+
 ### New in version 0.4.31
 - New V1 Query Builder Node for the Discovery Node
 
