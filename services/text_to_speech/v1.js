@@ -17,7 +17,6 @@
 module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'text-to-speech';
   var cfenv = require('cfenv');
-  //var watson = require('watson-developer-cloud');
   var TextToSpeechV1 = require('watson-developer-cloud/text-to-speech/v1');
   var serviceutils = require('../../utilities/service-utils');
 
@@ -48,12 +47,9 @@ module.exports = function(RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-text-to-speech/voices', function (req, res) {
-    //var tts = watson.text_to_speech({
     var tts = new TextToSpeechV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd //,
-      //version: 'v1',
-      //url: 'https://stream.watsonplatform.net/text-to-speech/api'
+      password: sPassword ? sPassword : req.query.pwd
     });
 
     tts.voices({}, function(err, voices){
@@ -88,12 +84,9 @@ module.exports = function(RED) {
         return;
       }
 
-      //var text_to_speech = watson.text_to_speech({
       var text_to_speech = new TextToSpeechV1({
         username: username,
-        password: password //,
-        //version: 'v1',
-        //url: 'https://stream.watsonplatform.net/text-to-speech/api'
+        password: password 
       });
 
       var params = {
