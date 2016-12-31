@@ -119,7 +119,7 @@ module.exports = function (RED) {
           personality_insights = new PersonalityInsightsV3({
             username: username,
             password: password,
-            version_date: '2016-10-20'
+            version_date: '2016-12-15'
           });
 
         node.status({fill:'blue', shape:'dot', text:'requesting'});
