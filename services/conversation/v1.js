@@ -15,11 +15,12 @@
  **/
 
 module.exports = function (RED) {
-  var cfenv = require('cfenv'),
-    ConversationV1 = require('watson-developer-cloud/conversation/v1'),
+  const SERVICE_IDENTIFIER = 'conversation';
+  var ConversationV1 = require('watson-developer-cloud/conversation/v1'),
+    serviceutils = require('../../utilities/service-utils'),
     service = null, sUsername = null, sPassword = null;
 
-  service = cfenv.getAppEnv().getServiceCreds(/conversation/i);
+  service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
 
   if (service) {
     sUsername = service.username;
@@ -131,7 +132,7 @@ module.exports = function (RED) {
     node.service = new ConversationV1({
       username: userName,
       password: passWord,
-      version_date: '2016-07-11'
+      version_date: '2016-09-20'
     });
     return true;
   }
