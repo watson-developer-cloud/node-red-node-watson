@@ -17,10 +17,8 @@
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'personality-insights';
   var PersonalityInsightsV3 = require('watson-developer-cloud/personality-insights/v3'),
-    //cfenv = require('cfenv'),
     payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
-    //service = cfenv.getAppEnv().getServiceCreds(/personality insights/i),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
