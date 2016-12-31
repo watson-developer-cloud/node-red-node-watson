@@ -9,7 +9,7 @@ Node-RED Watson Nodes for IBM Bluemix
 
 ### New in version 0.4.33
 - Personality Insights node updated to latest December 15, 2016 GloVe profiles.
-- Conversation node updated to use url based services utility to detect bound service.
+- Conversation and Alchemy Feature Extract nodes updated to use url based services utility to detect bound service.
 
 ### New in version 0.4.32
 - Added diarization support to STT Node via the parameter speaker_labels

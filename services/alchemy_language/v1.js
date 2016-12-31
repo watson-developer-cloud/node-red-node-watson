@@ -33,11 +33,13 @@ var FEATURES = {
 };
 
 module.exports = function (RED) {
+  const SERVICE_IDENTIFIER = 'gateway-a\.watsonplatform\.net';
 
-  var cfenv = require('cfenv');
   var watson = require('watson-developer-cloud');
 
-  var payloadutils = require('../../utilities/payload-utils');
+  var payloadutils = require('../../utilities/payload-utils'),
+    serviceutils = require('../../utilities/service-utils');
+
 
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then the api key is stored in the variable s_apikey.
@@ -54,7 +56,7 @@ module.exports = function (RED) {
 
   var apikey, s_apikey;
 
-  var service = cfenv.getAppEnv().getServiceCreds(/alchemy/i);
+  var service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
     s_apikey = service.apikey;
