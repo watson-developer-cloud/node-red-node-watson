@@ -22,9 +22,13 @@ ServiceUtils.prototype = {
   // name may fail because of duplicate usage. This function verifies
   // that the url associated with the service, contains the matched
   // input value, hence reducing the chances of a false match.
-  checkCFForService: function(serviceName, returnBoolean) {
-    var regex = new RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
+  checkCFForService: function(serviceName, returnBoolean, alchemyRegex) {
+    var regex = alchemyRegex ?
+                RegExp('(http|https)(://)('+serviceName+').*') :
+                RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
+
     var services = appEnv.getServices();
+
     for (var service in services) {
       if (services[service].hasOwnProperty('credentials')) {
         if(services[service].credentials.hasOwnProperty('url')){
@@ -39,13 +43,17 @@ ServiceUtils.prototype = {
 
   // Check for service return a boolean to indicate if it is bound in
   checkServiceBound: function(serviceName) {
-    return ServiceUtils.prototype.checkCFForService(serviceName, true);
+    return ServiceUtils.prototype.checkCFForService(serviceName, true, false);
   },
 
   // Check for and return bound servie
   getServiceCreds: function(serviceName) {
-    return ServiceUtils.prototype.checkCFForService(serviceName, false);
-  }
+    return ServiceUtils.prototype.checkCFForService(serviceName, false, false);
+  },
+
+  getServiceCredsAlchemy: function(serviceName) {
+    return ServiceUtils.prototype.checkCFForService(serviceName, false, true);
+  },
 
 };
 

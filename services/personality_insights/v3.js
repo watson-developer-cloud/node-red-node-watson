@@ -15,10 +15,11 @@
  **/
 
 module.exports = function (RED) {
+  const SERVICE_IDENTIFIER = 'personality-insights';
   var PersonalityInsightsV3 = require('watson-developer-cloud/personality-insights/v3'),
-    cfenv = require('cfenv'),
     payloadutils = require('../../utilities/payload-utils'),
-    service = cfenv.getAppEnv().getServiceCreds(/personality insights/i),
+    serviceutils = require('../../utilities/service-utils'),
+    service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
     sUsername = null,
@@ -118,7 +119,7 @@ module.exports = function (RED) {
           personality_insights = new PersonalityInsightsV3({
             username: username,
             password: password,
-            version_date: '2016-10-20'
+            version_date: '2016-12-15'
           });
 
         node.status({fill:'blue', shape:'dot', text:'requesting'});
