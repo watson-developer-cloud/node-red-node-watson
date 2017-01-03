@@ -31,10 +31,7 @@ ServiceUtils.prototype = {
     for (var service in services) {
       if (services[service].hasOwnProperty('credentials')) {
         if(services[service].credentials.hasOwnProperty('url')){
-          console.log('comparing against');
-          console.log(services[service].credentials.url);
           if(services[service].credentials.url.search(regex) === 0){
-            console.log('found match');
             return returnBoolean ? true : services[service].credentials;
           }
         }

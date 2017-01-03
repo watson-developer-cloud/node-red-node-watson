@@ -36,7 +36,6 @@ module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'gateway-a.watsonplatform.net';
 
   var watson = require('watson-developer-cloud');
-  var cfenv = require('cfenv');
 
   var payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils');
@@ -58,7 +57,6 @@ module.exports = function (RED) {
   var apikey, s_apikey;
 
   var service = serviceutils.getServiceCredsAlchemy(SERVICE_IDENTIFIER);
-  //var service = cfenv.getAppEnv().getServiceCreds(/alchemy/i);
 
   if (service) {
     s_apikey = service.apikey;
