@@ -16,10 +16,11 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'gateway-a.watsonplatform.net';
-  var watson = require('watson-developer-cloud');
-
-  var payloadutils = require('../../utilities/payload-utils'),
-    serviceutils = require('../../utilities/service-utils');
+  var watson = require('watson-developer-cloud'),
+    payloadutils = require('../../utilities/payload-utils'),
+    serviceutils = require('../../utilities/service-utils'),
+    apikey, s_apikey,
+    service = serviceutils.getServiceCredsAlchemy(SERVICE_IDENTIFIER);
 
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then the api key is stored in the variable s_apikey.
@@ -29,14 +30,6 @@ module.exports = function (RED) {
   // Otherwise, once set apikey is never reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
-
-  // Taking this line out as codacy was complaining about it.
-  // var services = cfenv.getAppEnv().services;
-  var service;
-
-  var apikey, s_apikey;
-
-  var service = serviceutils.getServiceCredsAlchemy(SERVICE_IDENTIFIER);
 
   if (service) {
     s_apikey = service.apikey;

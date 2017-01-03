@@ -23,8 +23,9 @@ ServiceUtils.prototype = {
   // that the url associated with the service, contains the matched
   // input value, hence reducing the chances of a false match.
   checkCFForService: function(serviceName, returnBoolean, alchemyRegex) {
-    var regex = alchemyRegex ? RegExp('(http|https)(://)('+serviceName+').*')
-                         : RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
+    var regex = alchemyRegex ?
+                RegExp('(http|https)(://)('+serviceName+').*') :
+                RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
 
     var services = appEnv.getServices();
 
