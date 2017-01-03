@@ -33,7 +33,7 @@ var FEATURES = {
 };
 
 module.exports = function (RED) {
-  const SERVICE_IDENTIFIER = 'gateway-a\.watsonplatform\.net';
+  const SERVICE_IDENTIFIER = 'gateway-a\\.watsonplatform\\.net';
 
   var watson = require('watson-developer-cloud');
   var cfenv = require('cfenv');
@@ -57,8 +57,8 @@ module.exports = function (RED) {
 
   var apikey, s_apikey;
 
-  //var service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
-  var service = cfenv.getAppEnv().getServiceCreds(/alchemy/i);
+  var service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
+  //var service = cfenv.getAppEnv().getServiceCreds(/alchemy/i);
 
   if (service) {
     s_apikey = service.apikey;

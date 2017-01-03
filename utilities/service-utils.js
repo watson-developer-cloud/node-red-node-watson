@@ -25,6 +25,7 @@ ServiceUtils.prototype = {
   checkCFForService: function(serviceName, returnBoolean) {
     var regex = new RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
     var services = appEnv.getServices();
+
     for (var service in services) {
       if (services[service].hasOwnProperty('credentials')) {
         if(services[service].credentials.hasOwnProperty('url')){
