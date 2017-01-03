@@ -33,7 +33,7 @@ var FEATURES = {
 };
 
 module.exports = function (RED) {
-  const SERVICE_IDENTIFIER = 'gateway-a\\.watsonplatform\\.net';
+  const SERVICE_IDENTIFIER = 'gateway-a.watsonplatform.net';
 
   var watson = require('watson-developer-cloud');
   var cfenv = require('cfenv');
