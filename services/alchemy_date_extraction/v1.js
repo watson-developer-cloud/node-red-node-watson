@@ -15,7 +15,7 @@
  **/
 
 module.exports = function (RED) {
-  const SERVICE_IDENTIFIER = 'gateway-a\.watsonplatform\.net';
+  const SERVICE_IDENTIFIER = 'gateway-a.watsonplatform.net';
   var watson = require('watson-developer-cloud');
 
   var payloadutils = require('../../utilities/payload-utils'),
@@ -36,7 +36,7 @@ module.exports = function (RED) {
 
   var apikey, s_apikey;
 
-  var service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
+  var service = serviceutils.getServiceCredsAlchemy(SERVICE_IDENTIFIER);
 
   if (service) {
     s_apikey = service.apikey;

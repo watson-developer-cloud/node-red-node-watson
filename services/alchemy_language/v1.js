@@ -57,7 +57,7 @@ module.exports = function (RED) {
 
   var apikey, s_apikey;
 
-  var service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
+  var service = serviceutils.getServiceCredsAlchemy(SERVICE_IDENTIFIER);
   //var service = cfenv.getAppEnv().getServiceCreds(/alchemy/i);
 
   if (service) {
