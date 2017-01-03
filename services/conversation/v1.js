@@ -20,7 +20,7 @@ module.exports = function (RED) {
     serviceutils = require('../../utilities/service-utils'),
     service = null, sUsername = null, sPassword = null;
 
-  service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
+  service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
     sUsername = service.username;
