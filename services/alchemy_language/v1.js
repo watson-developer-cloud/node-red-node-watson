@@ -29,9 +29,7 @@ var FEATURES = {
   'relation': 'relations',
   'pub-date': 'publicationDate',
   'doc-sentiment': 'docSentiment',
-  'doc-emotion': 'docEmotions' //,
-  //'entity-sentiment': 'entitySentiment',
-  //'entity-emotion': 'entityEmotion'
+  'doc-emotion': 'docEmotions'
 };
 
 module.exports = function (RED) {
@@ -66,7 +64,7 @@ module.exports = function (RED) {
   function buildParams(wanted_features, config, msg) {
     // The watson node-SDK expects the features as a single string.
 
-    var params = { extract: wanted_features.join(",") };
+    var params = { extract: wanted_features.join(',') };
 
     if (config['entity-sentiment']) {
       params.sentiment = '1';
@@ -74,7 +72,7 @@ module.exports = function (RED) {
     if (config['entity-emotion']) {
       params.emotion = '1';
     }
-    
+
     if (payloadutils.urlCheck(msg.payload)) {
       params['url'] = msg.payload;
     } else {
