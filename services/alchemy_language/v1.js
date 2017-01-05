@@ -29,7 +29,9 @@ var FEATURES = {
   'relation': 'relations',
   'pub-date': 'publicationDate',
   'doc-sentiment': 'docSentiment',
-  'doc-emotion': 'docEmotions'
+  'doc-emotion': 'docEmotions' //,
+  //'entity-sentiment': 'entitySentiment',
+  //'entity-emotion': 'entityEmotion'
 };
 
 module.exports = function (RED) {
@@ -60,6 +62,27 @@ module.exports = function (RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
+
+  function buildParams(wanted_features, config, msg) {
+    // The watson node-SDK expects the features as a single string.
+
+    var params = { extract: wanted_features.join(",") };
+
+    if (config['entity-sentiment']) {
+      params.sentiment = '1';
+    }
+    if (config['entity-emotion']) {
+      params.emotion = '1';
+    }
+    
+    if (payloadutils.urlCheck(msg.payload)) {
+      params['url'] = msg.payload;
+    } else {
+      params['text'] = msg.payload;
+    }
+
+    return params;
+  }
 
   // This is the Alchemy Data Node
 
@@ -102,19 +125,7 @@ module.exports = function (RED) {
         return;
       }
 
-      // The watson node-SDK expects the features as a single string.
-      var extract = "" ;
-      extract = enabled_features.join(",");
-
-      //console.log("Will be looking for ", extract)
-      //var params = { text: msg.payload, extract: extract };
-      var params = { extract: extract };
-
-      if (payloadutils.urlCheck(msg.payload)) {
-        params['url'] = msg.payload;
-      } else {
-        params['text'] = msg.payload;
-      }
+      var params = buildParams(enabled_features, config, msg);
 
       // Splice in the additional options from msg.alchemy_options
       // eg. The user may have entered msg.alchemy_options = {maxRetrieve: 2};
