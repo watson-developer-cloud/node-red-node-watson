@@ -10,6 +10,7 @@ Node-RED Watson Nodes for IBM Bluemix
 ### New in version 0.4.34
 - Added Keyword and Entity emotion and sentiment as options on Alchemy Feature Extract Node.
 - Allow Conversation credentials to be provided on msg.params
+- Similarity Search and Visual Recognition Nodes updated to use url based services to detect bound service.
 
 ### New in version 0.4.33
 - Personality Insights node updated to latest December 15, 2016 GloVe profiles.
