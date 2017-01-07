@@ -121,17 +121,20 @@ module.exports = function (RED) {
   function verifyServiceCredentials(node, msg) {
     // If it is present the newly provided user entered key
     // takes precedence over the existing one.
+    // If msg.params contain credentials then these will Overridde
+    // the bound or configured credentials.
     var userName = sUsername || node.credentials.username,
       passWord = sPassword || node.credentials.password;
 
-    if (!userName || !passWord) {
+    if ( !(userName || msg.params.username) ||
+           !(passWord || msg.params.password) ) {
       node.status({fill:'red', shape:'ring', text:'missing credentials'});
       node.error('Missing Watson Conversation API service credentials', msg);
       return false;
     }
     node.service = new ConversationV1({
-      username: userName,
-      password: passWord,
+      username: msg.params.username ? msg.params.username : userName,
+      password: msg.params.password ? msg.params.password :passWord,
       version_date: '2016-09-20'
     });
     return true;

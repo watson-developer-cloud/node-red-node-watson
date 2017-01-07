@@ -15,7 +15,8 @@
  **/
 
 module.exports = function (RED) {
-  var cfenv = require('cfenv'),
+  const SERVICE_IDENTIFIER = 'visual-recognition';
+  var serviceutils = require('../../utilities/service-utils'),
     watson = require('watson-developer-cloud'),
     imageType = require('image-type'),
     temp = require('temp'),
@@ -27,7 +28,7 @@ module.exports = function (RED) {
   // temp is being used for file streaming to allow the file to arrive so it can be processed.
   temp.track();
 
-  service = cfenv.getAppEnv().getServiceCreds(/visual recognition/i);
+  service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
     sAPIKey = service.api_key;
