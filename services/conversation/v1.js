@@ -133,8 +133,8 @@ module.exports = function (RED) {
       return false;
     }
     node.service = new ConversationV1({
-      username: msg.params.username ? msg.params.username : userName,
-      password: msg.params.password ? msg.params.password :passWord,
+      username: userName, // msg.params.username ? msg.params.username : userName,
+      password: passWord, //msg.params.password ? msg.params.password :passWord,
       version_date: '2016-09-20'
     });
     return true;
