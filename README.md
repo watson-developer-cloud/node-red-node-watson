@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.4.35
+- Fixed bug in Conversation node, when no msg.params defined.
+
 ### New in version 0.4.34
 - Added Keyword and Entity emotion and sentiment as options on Alchemy Feature Extract Node.
 - Allow Conversation credentials to be provided on msg.params
