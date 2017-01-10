@@ -136,6 +136,7 @@ module.exports = function (RED) {
     if (msg.params) {
       if (msg.params.username) {
         userName = msg.params.username;
+        node.log('overriding username', msg);
       }
       if (msg.params.password) {
         passWord = msg.params.password;
