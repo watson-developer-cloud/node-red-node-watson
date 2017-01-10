@@ -132,9 +132,19 @@ module.exports = function (RED) {
       node.error('Missing Watson Conversation API service credentials', msg);
       return false;
     }
+
+    if (msg.params) {
+      if (msg.params.username) {
+        userName = msg.params.username;
+      }
+      if (msg.params.password) {
+        passWord = msg.params.password;
+      }
+    }
+
     node.service = new ConversationV1({
-      username: userName, // msg.params.username ? msg.params.username : userName,
-      password: passWord, //msg.params.password ? msg.params.password :passWord,
+      username: userName,
+      password: passWord,
       version_date: '2016-09-20'
     });
     return true;
