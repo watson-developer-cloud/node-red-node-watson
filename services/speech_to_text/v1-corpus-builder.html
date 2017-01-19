@@ -47,6 +47,7 @@
             <option value="getCustomisation">Get Customization</option>
             <option value="addCorpus">Add Corpus</option>
             <option value="getCorpora">Get Corpora</option>
+            <option value="deleteCorpus">Delete Corpus</option>
         </select>
     </div>
 
@@ -154,8 +155,6 @@
     $('select#node-input-stt-base-model').val(stt.model_selected);
   }
 
-
-
   sttv1qbb.processSelectedMethod = function(method) {
     sttv1qbb.hideEverything();
     fields = [];
@@ -170,6 +169,7 @@
         fields.push('#node-input-stt-custom-id');
         break;
       case 'addCorpus':
+      case 'deleteCorpus':
           fields.push('#node-input-stt-custom-id'
                          + ', #node-input-stt-corpus-name');
           break;

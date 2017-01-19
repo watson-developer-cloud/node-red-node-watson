@@ -114,6 +114,18 @@ module.exports = function (RED) {
     });
   }
 
+  function executeDeleteCorpus(node, stt, params, msg) {
+    stt.deleteCorpus(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err);
+      } else {
+        msg['delcorpusresponse'] = response ;
+      }
+      node.send(msg);
+    });
+  }
+
   function executeMethod(node, method, params, msg) {
     var stt = new sttV1({
       username: username,
@@ -137,6 +149,9 @@ module.exports = function (RED) {
       break;
     case 'getCorpora':
       executeGetCorpora(node, stt, params, msg);
+      break;
+    case 'deleteCorpus':
+      executeDeleteCorpus(node, stt, params, msg);
       break;
     }
   }
