@@ -1,0 +1,364 @@
+<!--
+  Copyright 2017 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-speech-to-text-v1-query-builder">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+
+    <div>
+        <label id="node-label-message"><i class="fa fa-exclamation-triangle"></i></label>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name"></input>
+    </div>
+
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username"></input>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password"></input>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-lang"><i class="fa fa-language"></i> Language</label>
+        <select type="text" id="node-input-lang" style="display: inline-block; width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-langhidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-band"><i class="fa fa-audio-o"></i> Quality</label>
+        <select type="text" id="node-input-band" style="display: inline-block; width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-bandhidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-continuous"><i class="fa fa-audio-o"></i> Continuous</label>
+        <input type="checkbox" id="node-input-continuous"></input>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-speakerlabels"><i class="fa fa-audio-o"></i> Speaker Labels</label>
+        <input type="checkbox" id="node-input-speakerlabels"></input>
+        </select>
+    </div>
+
+
+</script>
+
+<script type="text/x-red" data-help-name="watson-speech-to-text-v1-query-builder">
+    <p>The Speech To Text converts the human voice into the written word. This service uses machine intelligence to
+    combine information about grammar and language structure with knowledge of the composition of the audio signal to
+    generate a more accurate transcription</p>
+    <p>The audio file to be analysed should be passed in on <code>msg.payload</code>.</p>
+    <p>Supported <code>msg.payload</code> types:</b>.</p>
+    <ul>
+        <li><b>String</b> URL to audio</li>
+        <li><b>Buffer</b> Raw Audio Bytes</li>
+    </ul>
+    <p>Audio must be a <b>WAV, FLAC or OGG encoded file</b>.</p>
+    <p>Speech To Text supports decoding speech from three languages: <b>English, Spanish, Japanese, Brazilian Portuguese
+    and Mandarin Chinese</b>. This option can be modified in the configuration panel.</p>
+    <p>Along with the language, you can also configure the source audio quality. The service supports two different
+    source sampling rates, <b>Narrowband (8KHz) and Broadband (16Khz)</b>. Higher sample rates will be downsampled
+    automatically but the is not true in reverse.</p>
+    <p>Use the continuous property to choose whether the decoding should stop at the first pause or wait until the end of the file.</p>
+    <p>Use the speaker label property to  identify which individuals spoke which words in a multi-participant exchange.
+    </p>
+    <p>The returned audio transcription will be returned on <code>msg.transcription</code>.</p>
+    <p>The full response, including alternative transcriptions can be found on
+    <code>msg.fullresult</code>.</p>
+    <p>For more information about the Speech To Text service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/speech-to-text.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+
+  // Need to simulate a namespace, as some of the variables had started to leak across nodes
+  function STTV1QBB () {
+  }
+
+
+  // This is the namespace for sttv1qbb. Currently only contains models, but more vars and functions may need to be
+  // moved in if there is a clash with other nodes.
+  var sttv1qbb = new STTV1QBB();
+  sttv1qbb.models = null;
+  sttv1qbb.languages = null;
+  sttv1qbb.bands = null;
+  sttv1qbb.language_selected = '';
+  sttv1qbb.band_selected = '';
+
+  sttv1qbb.LANGUAGES = { 'en-US': 'US English',
+                    'pt-BR': 'Portuguese Braziilian',
+                    'en-UK': 'UK English' ,
+                    'fr-FR': 'French',
+                    'zh-CN': 'Mandarin',
+                    'es-ES': 'Spanish',
+                    'ar-AR': 'Arablic',
+                    'ja-JP': 'Japanese'
+                  };
+
+  // sorting functions
+  sttv1qbb.onlyUnique = function (value, index, self) {
+    return self.indexOf(value) === index;
+  }
+
+  // Function to be used at the start, as don't want to expose any fields, unless the models are
+  // available. The models can only be fetched if the credentials are available.
+  sttv1qbb.hideEverything = function () {
+    if (!sttv1qbb.models) {
+      $('#credentials-not-found').show();
+      $('label#node-label-message').parent().hide();
+      $('input#node-input-continuous').parent().hide();
+      $('input#node-input-speakerlabels').parent().hide();
+      $('select#node-input-lang').parent().hide();
+      $('select#node-input-band').parent().hide();
+    }
+  }
+
+  // Check if there is a model then can show the fields.
+  // available. The models can only be fetched if the credentials are available.
+  sttv1qbb.VisibilityCheck = function () {
+    if (sttv1qbb.models) {
+      $('label#node-label-message').parent().hide();
+      $('input#node-input-continuous').parent().show();
+      $('input#node-input-speakerlabels').parent().show();
+      $('select#node-input-lang').parent().show();
+      $('select#node-input-band').parent().show();
+    } else {
+      $('label#node-label-message').parent().hide();
+      $('input#node-input-continuous').parent().hide();
+      $('input#node-input-speakerlabels').parent().hide();
+      $('select#node-input-lang').parent().hide();
+      $('select#node-input-band').parent().hide();
+    }
+  }
+
+
+  // Simple check that is only invoked if the service is not bound into bluemix. In this case the
+  // user has to provide credentials. Once there are credentials, then the sttv1qbb.models are retrieved.
+  sttv1qbb.checkCredentials = function () {
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+
+    if (u && u.length && p) {
+      if (!sttv1qbb.models) {
+        sttv1qbb.getModels();
+      }
+    }
+  }
+
+  // Populate the quality select field
+  sttv1qbb.populateBands = function () {
+    if (!sttv1qbb.bands && sttv1qbb.models) {
+      sttv1qbb.bands = sttv1qbb.models.map(function(m) {
+        return m.name.split('_')[1];
+      });
+      var unique_bands = sttv1qbb.bands.filter(sttv1qbb.onlyUnique);
+      sttv1qbb.bands = unique_bands;
+    }
+
+    if (sttv1qbb.bands) {
+      $('select#node-input-band').empty();
+
+      sttv1qbb.bands.forEach(function(b) {
+        var selectedText = '';
+        if (sttv1qbb.band_selected === b) {
+          selectedText = 'selected="selected"';
+        }
+        $('select#node-input-band')
+          .append('<option value='
+                        + '"' + b + '"'
+                        + selectedText
+                        + '>'
+                        + b
+                        + '</option>');
+      });
+    }
+  }
+
+  // Register the handlers for the fields
+  sttv1qbb.handlersUI = function () {
+    $('#node-input-username').change(function(val){
+      sttv1qbb.checkCredentials();
+    });
+    $('#node-input-password').change(function(val){
+      sttv1qbb.checkCredentials();
+    });
+
+    $('#node-input-lang').change(function (val) {
+      sttv1qbb.language_selected = $('#node-input-lang').val();
+      sttv1qbb.populateBands();
+    });
+
+    $('#node-input-band').change(function (val) {
+      sttv1qbb.band_selected = $('#node-input-band').val();
+    });
+  }
+
+  // Function called when either when the models have been retrieved, or
+  // on dialog load, if the model has already been retrieved
+  sttv1qbb.postModelCheck = function () {
+    sttv1qbb.processModels();
+    sttv1qbb.VisibilityCheck();
+  }
+
+  // Retrieve the available models from the server, if data is returned, then
+  // can enable the dynamic selection fields.
+  sttv1qbb.getModels = function (haveCredentials) {
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+
+    $.getJSON('watson-speech-to-text-v1-query-builder/models/', {un: u, pwd: p}).done(function (data) {
+      if (data.error) {
+        $('label#node-label-message').parent().show();
+        $('label#node-label-message').text(data.error);
+      } else if (data.models) {
+        console.log('models found');
+        console.log(data.models);
+        sttv1qbb.models = data.models;
+        //have_credentials = true;
+        sttv1qbb.postModelCheck();
+      }
+    }).fail(function (err) {
+      $('label#node-label-message').parent().show();
+      $('label#node-label-message').text('Error trying to determine available service models');
+
+    }).always(function () {});
+  }
+
+  // Called to complete the languages selection table
+  sttv1qbb.processsttv1qbbLanguages = function () {
+    if (!sttv1qbb.languages && sttv1qbb.models) {
+      sttv1qbb.languages = sttv1qbb.models.map(function(m) {
+        return m.language;
+      });
+    }
+    if (sttv1qbb.languages) {
+      $('select#node-input-lang').empty();
+      var unique_langs = sttv1qbb.languages.filter(sttv1qbb.onlyUnique);
+
+      unique_langs.forEach(function(l) {
+        var selectedText = '';
+        if (sttv1qbb.language_selected === l) {
+          selectedText = 'selected="selected"';
+        }
+        $('select#node-input-lang')
+          .append('<option value='
+                        + '"' + l + '"'
+                        + selectedText
+                        + '>'
+                        + (sttv1qbb.LANGUAGES[l] ? sttv1qbb.LANGUAGES[l] : l)
+                        + '</option>');
+      });
+    }
+  }
+
+  // Called to work through the models, completing the dyanmic selection fields.
+  sttv1qbb.processModels = function () {
+    if (sttv1qbb.models) {
+      sttv1qbb.processsttv1qbbLanguages();
+      sttv1qbb.populateBands();
+    }
+  }
+
+  // The dynamic nature of the selection fields in this node has caused problems.
+  // Whenever there is a fetch for the models, on a page refresh or applicaiton
+  // restart, the settings for the dynamic fields are lost.
+  // So hidden (text) fields are being used to squirrel away the values, so that
+  // they can be restored.
+  sttv1qbb.restoreFromHidden = function () {
+    sttv1qbb.language_selected = $('#node-input-langhidden').val();
+    $('select#node-input-lang').val(sttv1qbb.language_selected);
+
+    sttv1qbb.band_selected = $('#node-input-bandhidden').val();
+    $('select#node-input-band').val(sttv1qbb.band_selected);
+  }
+
+  // This is the on edit prepare function, which will be invoked everytime the dialog
+  // is shown.
+  function sttv1qbboneditprepare() {
+    sttv1qbb.hideEverything();
+    sttv1qbb.restoreFromHidden();
+    sttv1qbb.handlersUI();
+
+    $.getJSON('watson-speech-to-text-v1-query-builder/vcap/')
+      // for some reason the getJSON resets the vars so need to restoreFromHidden again
+      // so again.
+      .done(function (service) {
+        sttv1qbb.restoreFromHidden();
+        $('.credentials').toggle(!service);
+        if (!sttv1qbb.models) {sttv1qbb.getModels(service);}
+        else {sttv1qbb.postModelCheck();}
+      })
+      .fail(function () {
+        $('.credentials').show();
+      }).always(function () {
+        $('#credentials-check').hide();
+     });
+  }
+
+  // Save the values in the dyanmic lists to the hidden fields.
+  function sttv1qbboneditsave(){
+    $('#node-input-langhidden').val(sttv1qbb.language_selected);
+    $('#node-input-bandhidden').val(sttv1qbb.band_selected);
+  }
+
+    (function() {
+        RED.nodes.registerType('watson-speech-to-text-v1-query-builder', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ''},
+                continuous: {value: true},
+                speakerlabels: {value: true},
+                lang: {value: ''},
+                langhidden: {value: ''},
+                band: {value: ''},
+                bandhidden: {value: ''},
+                password: {value: ''}
+            },
+            credentials: {
+              username: {type:'text'} //,
+              // password: {type: 'password'}   - // Taken out because, was not being restored on dialog open.
+            },
+            color: 'rgb(140, 198, 63)',
+            inputs: 1,
+            outputs: 1,
+            icon: 'speech_to_text.png',
+            paletteLabel: 'speech to text query builder',
+            label: function() {
+                return this.name || 'speech to text query builder';
+            },
+            labelStyle: function() {
+                return this.name ? 'node_label_italic' : '';
+            },
+            oneditprepare: sttv1qbboneditprepare,
+            oneditsave: sttv1qbboneditsave
+        });
+    })();
+
+</script>

@@ -55,6 +55,7 @@
       "watson-relationship-extraction-v1": "services/relationship_extraction/v1.js",
       "watson-retrieve-and-rank-v1": "services/retrieve_and_rank/v1.js",
       "watson-speech-to-text-v1": "services/speech_to_text/v1.js",
+      "watson-speech-to-text-corpus-builder-v1": "services/speech_to_text/v1-corpus-builder.js",
       "watson-text-to-speech-v1": "services/text_to_speech/v1.js",
       "watson-tone-analyzer-v3": "services/tone_analyzer/v3.js",
       "watson-tradeoff-analytics-v1": "services/tradeoff_analytics/v1.js",
