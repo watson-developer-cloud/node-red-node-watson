@@ -102,6 +102,18 @@ module.exports = function (RED) {
     });
   }
 
+  function executeGetCorpora(node, stt, params, msg) {
+    stt.getCorpora(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err);
+      } else {
+        msg['corpora'] = response.corpora ? response.corpora : response ;
+      }
+      node.send(msg);
+    });
+  }
+
   function executeMethod(node, method, params, msg) {
     var stt = new sttV1({
       username: username,
@@ -122,6 +134,9 @@ module.exports = function (RED) {
       break;
     case 'addCorpus':
       executeAddCorpus(node, stt, params, msg);
+      break;
+    case 'getCorpora':
+      executeGetCorpora(node, stt, params, msg);
       break;
     }
   }

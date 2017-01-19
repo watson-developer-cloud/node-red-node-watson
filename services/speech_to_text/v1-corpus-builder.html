@@ -46,6 +46,7 @@
             <option value="listCustomisations">List Customizations</option>
             <option value="getCustomisation">Get Customization</option>
             <option value="addCorpus">Add Corpus</option>
+            <option value="getCorpora">Get Corpora</option>
         </select>
     </div>
 
@@ -165,6 +166,7 @@
                         + ', #node-input-stt-custom-model-description');
         break;
       case 'getCustomisation':
+      case 'getCorpora':
         fields.push('#node-input-stt-custom-id');
         break;
       case 'addCorpus':
