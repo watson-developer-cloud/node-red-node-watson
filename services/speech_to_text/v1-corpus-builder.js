@@ -25,22 +25,67 @@ module.exports = function (RED) {
     sttV1 = require('watson-developer-cloud/speech-to-text/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
-  // Require the Cloud Foundry Module to pull credentials from bound service
-  // If they are found then the username and password will be stored in
-  // the variables sUsername and sPassword.
-  //
-  // This separation between sUsername and username is to allow
-  // the end user to modify the credentials when the service is not bound.
-  // Otherwise, once set credentials are never reset, resulting in a frustrated
-  // user who, when he errenously enters bad credentials, can't figure out why
-  // the edited ones are not being taken.
+    // Require the Cloud Foundry Module to pull credentials from bound service
+    // If they are found then the username and password will be stored in
+    // the variables sUsername and sPassword.
+    //
+    // This separation between sUsername and username is to allow
+    // the end user to modify the credentials when the service is not bound.
+    // Otherwise, once set credentials are never reset, resulting in a frustrated
+    // user who, when he errenously enters bad credentials, can't figure out why
+    // the edited ones are not being taken.
 
-  var username, password, sUsername, sPassword;
+    var username, password, sUsername, sPassword;
 
-  if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
-  }
+    if (service) {
+      sUsername = service.username;
+      sPassword = service.password;
+    }
+
+    function reportError (node, msg, message) {
+      var messageTxt = message.error ? message.error : message;
+      node.status({fill:'red', shape:'dot', text: messageTxt});
+      node.error(message, msg);
+    }
+
+    function executeCreateCustomisation(node, stt, params, msg) {
+      stt.createCustomization(params, function (err, response) {
+        node.status({});
+        if (err) {
+          reportError(node, msg, err);
+        } else {
+          msg['sttcustomid'] = response;
+        }
+        node.send(msg);
+      });
+    }
+
+    function executeMethod(node, method, params, msg) {
+      var stt = new sttV1({
+        username: username,
+        password: password,
+      });
+
+      switch (method) {
+      case 'createCustomisation':
+        executeCreateCustomisation(node, stt, params, msg);
+        break;
+      }
+    }
+
+    function buildParams(msg, config) {
+      var params = {};
+      if (config['stt-base-model']) {
+        params['base_model_name'] = config['stt-base-model'];
+      }
+      if (config['stt-custom-model-name']) {
+        params['name'] = config['stt-custom-model-name'];
+      }
+      if (config['stt-custom-model-description']) {
+        params['description'] = config['stt-custom-model-description'];
+      }
+      return params;
+    }
 
 
   // These are APIs that the node has created to allow it to dynamically fetch Bluemix
@@ -76,9 +121,34 @@ module.exports = function (RED) {
     var node = this;
 
     this.on('input', function (msg) {
+      var method = config['stt-custom-mode'],
+        message = '',
+        params = {};
+
+      console.log('Mode is ');
+      console.log(method);
+
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password || config.password;
+
+      if (!username || !password) {
+        message = 'Missing Watson Speech to Text service credentials';
+      } else if (!method || '' === method) {
+        message = 'Required mode has not been specified';
+      } else {
+        params = buildParams(msg,config);
+      }
+
+      if (message) {
+        reportError(node, msg, message);
+      }
+
+      node.status({fill:'blue', shape:'dot', text:'executing'});
+      executeMethod(node, method, params, msg);
+
       // Simply return params for query on msg object
-      msg.payload = 'OK So far';
-      node.send(msg);
+      //msg.payload = 'OK So far';
+      //node.send(msg);
     });
   }
 
@@ -88,5 +158,5 @@ module.exports = function (RED) {
       password: {type:'password'}
     }
   });
-  
+
 };
