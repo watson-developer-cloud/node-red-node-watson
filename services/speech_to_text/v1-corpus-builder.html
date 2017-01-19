@@ -43,6 +43,7 @@
         <label for="node-input-stt-custom-mode"><i class="fa fa-book"></i> Detect: </label>
         <select type="text" id="node-input-stt-custom-mode" style="display: inline-block; width: 70%;">
             <option value="createCustomisation">Create a custom language model</option>
+            <option value="listCustomisations">List Customizations</option>
         </select>
     </div>
 
@@ -72,8 +73,11 @@
 <script type="text/x-red" data-help-name="watson-speech-to-text-v1-query-builder">
     <p>The Speech To Text Query Builder ... </p>
     <p>For mode Create Customization</p>
-    <p>output is on sttcustomid</p>
-    
+    <p>output is on msg.customization_id</p>
+
+    <p>For mode List Customizations</p>
+    <p>output is on msg.customizations</p>
+
     <p>For more information about Speech To Text customisation,
     read the <a href="https://www.ibm.com/watson/developercloud/doc/speech-to-text/custom.shtml#custom">
     documentation</a>.</p>
@@ -132,11 +136,6 @@
     $('select#node-input-stt-base-model').val(stt.model_selected);
   }
 
-
-  //if ('createCustomisation' == sttv1qbb.mode_selected) {
-  //  $('input#node-input-stt-custom-model-name').parent().show();
-  //  $('input#node-input-stt-custom-model-description').parent().show();
-  //}
 
 
   sttv1qbb.processSelectedMethod = function(method) {

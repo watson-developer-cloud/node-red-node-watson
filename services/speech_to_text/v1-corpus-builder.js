@@ -54,11 +54,25 @@ module.exports = function (RED) {
         if (err) {
           reportError(node, msg, err);
         } else {
-          msg['sttcustomid'] = response;
+          msg['customization_id'] = response;
         }
         node.send(msg);
       });
     }
+
+    function executeListCustomisations(node, stt, params, msg) {
+      stt.getCustomizations(params, function (err, response) {
+        node.status({});
+        if (err) {
+          reportError(node, msg, err);
+        } else {
+          msg['customizations'] = response.customizations ?
+                                      response.customizations: response;
+        }
+        node.send(msg);
+      });
+    }
+
 
     function executeMethod(node, method, params, msg) {
       var stt = new sttV1({
@@ -70,6 +84,9 @@ module.exports = function (RED) {
       case 'createCustomisation':
         executeCreateCustomisation(node, stt, params, msg);
         break;
+        case 'listCustomisations':
+          executeListCustomisations(node, stt, params, msg);
+          break;
       }
     }
 
@@ -141,6 +158,7 @@ module.exports = function (RED) {
 
       if (message) {
         reportError(node, msg, message);
+        return;
       }
 
       node.status({fill:'blue', shape:'dot', text:'executing'});
