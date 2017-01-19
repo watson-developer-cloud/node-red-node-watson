@@ -73,6 +73,18 @@ module.exports = function (RED) {
       });
     }
 
+    function executeGetCustomisation(node, stt, params, msg) {
+      stt.getCustomization(params, function (err, response) {
+        node.status({});
+        if (err) {
+          reportError(node, msg, err);
+        } else {
+          msg['customization'] = response ;
+        }
+        node.send(msg);
+      });
+    }
+
 
     function executeMethod(node, method, params, msg) {
       var stt = new sttV1({
@@ -84,9 +96,12 @@ module.exports = function (RED) {
       case 'createCustomisation':
         executeCreateCustomisation(node, stt, params, msg);
         break;
-        case 'listCustomisations':
-          executeListCustomisations(node, stt, params, msg);
-          break;
+      case 'listCustomisations':
+        executeListCustomisations(node, stt, params, msg);
+        break;
+      case 'getCustomisation':
+        executeGetCustomisation(node, stt, params, msg);
+        break;
       }
     }
 
@@ -100,6 +115,9 @@ module.exports = function (RED) {
       }
       if (config['stt-custom-model-description']) {
         params['description'] = config['stt-custom-model-description'];
+      }
+      if (config['stt-custom-id']) {
+        params['customization_id'] = config['stt-custom-id'];
       }
       return params;
     }

@@ -44,6 +44,7 @@
         <select type="text" id="node-input-stt-custom-mode" style="display: inline-block; width: 70%;">
             <option value="createCustomisation">Create a custom language model</option>
             <option value="listCustomisations">List Customizations</option>
+            <option value="getCustomisation">Get Customization</option>
         </select>
     </div>
 
@@ -61,10 +62,14 @@
         <input type="hidden" id="node-input-base-model-hidden"/>
     </div>
 
-
     <div class="form-row">
         <label for="node-input-stt-custom-model-description"><i class="fa fa-book"></i> Custom Model Name</label>
         <input type="text" id="node-input-stt-custom-model-description" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stt-custom-id"><i class="fa fa-book"></i> Customization ID</label>
+        <input type="text" id="node-input-stt-custom-id" placeholder="">
     </div>
 
 
@@ -77,6 +82,10 @@
 
     <p>For mode List Customizations</p>
     <p>output is on msg.customizations</p>
+
+    <p>For mode Get Customization</p>
+    <p>output is on msg.customization</p>
+
 
     <p>For more information about Speech To Text customisation,
     read the <a href="https://www.ibm.com/watson/developercloud/doc/speech-to-text/custom.shtml#custom">
@@ -118,6 +127,7 @@
     $('input#node-input-stt-custom-model-name').parent().hide();
     $('select#node-input-stt-base-model').parent().hide();
     $('input#node-input-stt-custom-model-description').parent().hide();
+    $('input#node-input-stt-custom-id').parent().hide();
   }
 
   sttv1qbb.showSelectedFields = function(fields) {
@@ -146,6 +156,9 @@
         fields.push('#node-input-stt-custom-model-name'
                         + ', #node-input-stt-base-model'
                         + ', #node-input-stt-custom-model-description');
+        break;
+      case 'getCustomisation':
+        fields.push('#node-input-stt-custom-id');
         break;
     }
     sttv1qbb.showSelectedFields(fields);
@@ -309,7 +322,8 @@
                 'stt-custom-model-name' : {value: ''},
                 'stt-base-model' : {value: ''},
                 'base-model-hidden' : {value: ''},
-                'stt-custom-model-description' : {value: ''}
+                'stt-custom-model-description' : {value: ''},
+                'stt-custom-id' : {value: ''}
             },
             credentials: {
               username: {type:'text'} //,
