@@ -52,6 +52,16 @@
     </div>
 
     <div class="form-row">
+        <label for="node-input-stt-base-model"><i class="fa fa-language"></i> Base Model</label>
+        <select type="text" id="node-input-stt-base-model" style="display: inline-block; width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-base-model-hidden"/>
+    </div>
+
+
+    <div class="form-row">
         <label for="node-input-stt-custom-model-description"><i class="fa fa-book"></i> Custom Model Name</label>
         <input type="text" id="node-input-stt-custom-model-description" placeholder="">
     </div>
@@ -78,6 +88,8 @@
   var sttv1qbb = new STTV1QBB();
   sttv1qbb.models = null;
   sttv1qbb.mode_selected = null;
+  sttv1qbb.model_selected = '';
+
 
   sttv1qbb.LANGUAGES = { 'en-US': 'US English',
                     'pt-BR': 'Portuguese Braziilian',
@@ -97,6 +109,7 @@
       $('label#node-label-message').parent().hide();
     }
     $('input#node-input-stt-custom-model-name').parent().hide();
+    $('select#node-input-stt-base-model').parent().hide();
     $('input#node-input-stt-custom-model-description').parent().hide();
   }
 
@@ -105,6 +118,17 @@
       $(fields[i]).parent().show();
     }
   }
+
+  // The dynamic nature of the selection fields in this node has caused problems.
+  // Whenever there is a fetch for the models, on a page refresh or applicaiton
+  // restart, the settings for the dynamic fields are lost.
+  // So hidden (text) fields are being used to squirrel away the values, so that
+  // they can be restored.
+  sttv1qbb.restoreFromHidden = function () {
+    sttv1qbb.model_selected = $('#node-input-base-model-hidden').val();
+    $('select#node-input-stt-base-model').val(stt.model_selected);
+  }
+
 
   //if ('createCustomisation' == sttv1qbb.mode_selected) {
   //  $('input#node-input-stt-custom-model-name').parent().show();
@@ -118,6 +142,7 @@
     switch (method) {
       case 'createCustomisation':
         fields.push('#node-input-stt-custom-model-name'
+                        + ', #node-input-stt-base-model'
                         + ', #node-input-stt-custom-model-description');
         break;
     }
@@ -169,11 +194,45 @@
       //}
     });
 
+    $('#node-input-stt-base-model').change(function (val) {
+      sttv1qbb.model_selected = $('#node-input-stt-base-model').val();
+    });
+
+
   }
+
+  // Called to complete the models table
+  sttv1qbb.populateModels = function () {
+
+    // node-input-stt-base-model
+    if (sttv1qbb.models) {
+      $('select#node-input-stt-base-model').empty();
+      //var unique_langs = stt.languages.filter(stt.onlyUnique);
+
+      sttv1qbb.models.forEach(function(m) {
+        var selectedText = '';
+
+        if (sttv1qbb.model_selected === m.name) {
+          selectedText = ' selected="selected" ';
+        }
+
+        $('select#node-input-stt-base-model')
+          .append('<option value='
+                        + m.name
+                        + selectedText
+                        + '>'
+                        + m.description
+                        + '</option>');
+      });
+    }
+
+  }
+
 
   // Called to work through the models, completing the dyanmic selection fields.
   sttv1qbb.processModels = function () {
     if (sttv1qbb.models) {
+      sttv1qbb.populateModels();
     }
   }
 
@@ -210,14 +269,6 @@
   }
 
 
-  // The dynamic nature of the selection fields in this node has caused problems.
-  // Whenever there is a fetch for the models, on a page refresh or applicaiton
-  // restart, the settings for the dynamic fields are lost.
-  // So hidden (text) fields are being used to squirrel away the values, so that
-  // they can be restored.
-  sttv1qbb.restoreFromHidden = function () {
-  }
-
   // This is the on edit prepare function, which will be invoked everytime the dialog
   // is shown.
   function sttv1qbboneditprepare() {
@@ -243,6 +294,7 @@
 
   // Save the values in the dyanmic lists to the hidden fields.
   function sttv1qbboneditsave(){
+    $('#node-input-base-model-hidden').val(sttv1qbb.model_selected);
   }
 
     (function() {
@@ -252,8 +304,10 @@
                 name: {value: ''},
                 password: {value: ''},
                 'stt-custom-mode': {value:"createCustomisation"},
-                'custom-model-name' : {value: ''},
-                'custom-model-description' : {value: ''}
+                'stt-custom-model-name' : {value: ''},
+                'stt-base-model' : {value: ''},
+                'base-model-hidden' : {value: ''},
+                'stt-custom-model-description' : {value: ''}
             },
             credentials: {
               username: {type:'text'} //,
