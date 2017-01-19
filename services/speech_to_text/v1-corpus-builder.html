@@ -46,6 +46,16 @@
         </select>
     </div>
 
+    <div class="form-row">
+        <label for="node-input-stt-custom-model-name"><i class="fa fa-book"></i> Custom Model Name</label>
+        <input type="text" id="node-input-stt-custom-model-name" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stt-custom-model-description"><i class="fa fa-book"></i> Custom Model Name</label>
+        <input type="text" id="node-input-stt-custom-model-description" placeholder="">
+    </div>
+
 
 </script>
 
@@ -86,7 +96,35 @@
       $('#credentials-not-found').show();
       $('label#node-label-message').parent().hide();
     }
+    $('input#node-input-stt-custom-model-name').parent().hide();
+    $('input#node-input-stt-custom-model-description').parent().hide();
   }
+
+  sttv1qbb.showSelectedFields = function(fields) {
+    for (i = 0; i < fields.length; i++) {
+      $(fields[i]).parent().show();
+    }
+  }
+
+  //if ('createCustomisation' == sttv1qbb.mode_selected) {
+  //  $('input#node-input-stt-custom-model-name').parent().show();
+  //  $('input#node-input-stt-custom-model-description').parent().show();
+  //}
+
+
+  sttv1qbb.processSelectedMethod = function(method) {
+    sttv1qbb.hideEverything();
+    fields = [];
+    switch (method) {
+      case 'createCustomisation':
+        fields.push('#node-input-stt-custom-model-name'
+                        + ', #node-input-stt-custom-model-description');
+        break;
+    }
+    sttv1qbb.showSelectedFields(fields);
+  }
+
+
 
   // Check if there is a model then can show the fields.
   // available. The models can only be fetched if the credentials are available.
@@ -124,8 +162,12 @@
 
     $('#node-input-stt-custom-mode').change(function() {
       sttv1qbb.mode_selected = $('#node-input-stt-custom-mode').val();
+      sttv1qbb.processSelectedMethod(sttv1qbb.mode_selected);
+      //if ('createCustomisation' == sttv1qbb.mode_selected) {
+      //  $('input#node-input-stt-custom-model-name').parent().show();
+      //  $('input#node-input-stt-custom-model-description').parent().show();
+      //}
     });
-
 
   }
 
@@ -209,7 +251,9 @@
             defaults: {
                 name: {value: ''},
                 password: {value: ''},
-                "stt-custom-mode": {value:"createCustomisation"},
+                'stt-custom-mode': {value:"createCustomisation"},
+                'custom-model-name' : {value: ''},
+                'custom-model-description' : {value: ''}
             },
             credentials: {
               username: {type:'text'} //,
