@@ -39,6 +39,14 @@
         <input type="password" id="node-input-password" placeholder="Password"></input>
     </div>
 
+    <div class="form-row">
+        <label for="node-input-stt-custom-mode"><i class="fa fa-book"></i> Detect: </label>
+        <select type="text" id="node-input-stt-custom-mode" style="display: inline-block; width: 70%;">
+            <option value="createCustomisation">Create a custom language model</option>
+        </select>
+    </div>
+
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-speech-to-text-v1-query-builder">
@@ -59,6 +67,7 @@
   // moved in if there is a clash with other nodes.
   var sttv1qbb = new STTV1QBB();
   sttv1qbb.models = null;
+  sttv1qbb.mode_selected = null;
 
   sttv1qbb.LANGUAGES = { 'en-US': 'US English',
                     'pt-BR': 'Portuguese Braziilian',
@@ -112,6 +121,12 @@
     $('#node-input-password').change(function(val){
       sttv1qbb.checkCredentials();
     });
+
+    $('#node-input-stt-custom-mode').change(function() {
+      sttv1qbb.mode_selected = $('#node-input-stt-custom-mode').val();
+    });
+
+
   }
 
   // Called to work through the models, completing the dyanmic selection fields.
@@ -193,7 +208,8 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ''},
-                password: {value: ''}
+                password: {value: ''},
+                "stt-custom-mode": {value:"createCustomisation"},
             },
             credentials: {
               username: {type:'text'} //,
