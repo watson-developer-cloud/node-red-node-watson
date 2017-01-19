@@ -19,108 +19,176 @@ module.exports = function (RED) {
   var request = require('request'),
     cfenv = require('cfenv'),
     url = require('url'),
+    temp = require('temp'),
     fs = require('fs'),
     fileType = require('file-type'),
     serviceutils = require('../../utilities/service-utils'),
     sttV1 = require('watson-developer-cloud/speech-to-text/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
-    // Require the Cloud Foundry Module to pull credentials from bound service
-    // If they are found then the username and password will be stored in
-    // the variables sUsername and sPassword.
-    //
-    // This separation between sUsername and username is to allow
-    // the end user to modify the credentials when the service is not bound.
-    // Otherwise, once set credentials are never reset, resulting in a frustrated
-    // user who, when he errenously enters bad credentials, can't figure out why
-    // the edited ones are not being taken.
+  temp.track();
 
-    var username, password, sUsername, sPassword;
+  // Require the Cloud Foundry Module to pull credentials from bound service
+  // If they are found then the username and password will be stored in
+  // the variables sUsername and sPassword.
+  //
+  // This separation between sUsername and username is to allow
+  // the end user to modify the credentials when the service is not bound.
+  // Otherwise, once set credentials are never reset, resulting in a frustrated
+  // user who, when he errenously enters bad credentials, can't figure out why
+  // the edited ones are not being taken.
 
-    if (service) {
-      sUsername = service.username;
-      sPassword = service.password;
-    }
+  var username, password, sUsername, sPassword;
 
-    function reportError (node, msg, message) {
-      var messageTxt = message.error ? message.error : message;
-      node.status({fill:'red', shape:'dot', text: messageTxt});
-      node.error(message, msg);
-    }
+  if (service) {
+    sUsername = service.username;
+    sPassword = service.password;
+  }
 
-    function executeCreateCustomisation(node, stt, params, msg) {
-      stt.createCustomization(params, function (err, response) {
-        node.status({});
-        if (err) {
-          reportError(node, msg, err);
-        } else {
-          msg['customization_id'] = response;
-        }
-        node.send(msg);
-      });
-    }
+  function reportError (node, msg, message) {
+    var messageTxt = message.error ? message.error : message;
+    msg.stterror = messageTxt;
 
-    function executeListCustomisations(node, stt, params, msg) {
-      stt.getCustomizations(params, function (err, response) {
-        node.status({});
-        if (err) {
-          reportError(node, msg, err);
-        } else {
-          msg['customizations'] = response.customizations ?
+    node.status({fill:'red', shape:'dot', text: messageTxt});
+    node.error(messageTxt, msg);
+  }
+
+  function executeCreateCustomisation(node, stt, params, msg) {
+    stt.createCustomization(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err);
+      } else {
+        msg['customization_id'] = response;
+      }
+      node.send(msg);
+    });
+  }
+
+  function executeListCustomisations(node, stt, params, msg) {
+    stt.getCustomizations(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err);
+      } else {
+        msg['customizations'] = response.customizations ?
                                       response.customizations: response;
-        }
-        node.send(msg);
-      });
+      }
+      node.send(msg);
+    });
+  }
+
+  function executeGetCustomisation(node, stt, params, msg) {
+    stt.getCustomization(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err);
+      } else {
+        msg['customization'] = response ;
+      }
+      node.send(msg);
+    });
+  }
+
+  function executeAddCorpus(node, stt, params, msg) {
+    stt.addCorpus(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err);
+      } else {
+        msg['addcorpusresponse'] = response ;
+      }
+      node.send(msg);
+    });
+  }
+
+  function executeMethod(node, method, params, msg) {
+    var stt = new sttV1({
+      username: username,
+      password: password,
+    });
+
+    node.status({fill:'blue', shape:'dot', text:'executing'});
+
+    switch (method) {
+    case 'createCustomisation':
+      executeCreateCustomisation(node, stt, params, msg);
+      break;
+    case 'listCustomisations':
+      executeListCustomisations(node, stt, params, msg);
+      break;
+    case 'getCustomisation':
+      executeGetCustomisation(node, stt, params, msg);
+      break;
+    case 'addCorpus':
+      executeAddCorpus(node, stt, params, msg);
+      break;
+    }
+  }
+
+  function buildParams(msg, config) {
+    var params = {};
+    if (config['stt-base-model']) {
+      params['base_model_name'] = config['stt-base-model'];
     }
 
-    function executeGetCustomisation(node, stt, params, msg) {
-      stt.getCustomization(params, function (err, response) {
-        node.status({});
+    if (config['stt-custom-model-name']) {
+      params['name'] = config['stt-custom-model-name'];
+    } else if (config['stt-corpus-name']) {
+      params['name'] = config['stt-corpus-name'];
+    }
+
+    if (config['stt-custom-model-description']) {
+      params['description'] = config['stt-custom-model-description'];
+    }
+    if (config['stt-custom-id']) {
+      params['customization_id'] = config['stt-custom-id'];
+    }
+
+    return params;
+  }
+
+
+  function loadCorpusFile(node, method, params, msg) {
+    console.log('Need to Load File');
+    temp.open({
+      suffix: '.txt'
+    }, function(err, info) {
+      if (err) {
+        node.status({
+          fill: 'red',
+          shape: 'dot',
+          text: 'Error receiving the data buffer for training'
+        });
+        throw err;
+      }
+
+      // Syncing up the asynchronous nature of the stream
+      // so that the full file can be sent to the API.
+      fs.writeFile(info.path, msg.payload, function(err) {
         if (err) {
-          reportError(node, msg, err);
-        } else {
-          msg['customization'] = response ;
+          node.status({
+            fill: 'red',
+            shape: 'dot',
+            text: 'Error processing data buffer for training'
+          });
+          throw err;
         }
-        node.send(msg);
+
+        params.corpus = fs.createReadStream(info.path);
+        executeMethod(node, method, params, msg);
       });
+    });
+  }
+
+  function checkForFile(method) {
+    switch (method) {
+    case 'addCorpus':
+      return true;
+      break;
     }
-
-
-    function executeMethod(node, method, params, msg) {
-      var stt = new sttV1({
-        username: username,
-        password: password,
-      });
-
-      switch (method) {
-      case 'createCustomisation':
-        executeCreateCustomisation(node, stt, params, msg);
-        break;
-      case 'listCustomisations':
-        executeListCustomisations(node, stt, params, msg);
-        break;
-      case 'getCustomisation':
-        executeGetCustomisation(node, stt, params, msg);
-        break;
-      }
-    }
-
-    function buildParams(msg, config) {
-      var params = {};
-      if (config['stt-base-model']) {
-        params['base_model_name'] = config['stt-base-model'];
-      }
-      if (config['stt-custom-model-name']) {
-        params['name'] = config['stt-custom-model-name'];
-      }
-      if (config['stt-custom-model-description']) {
-        params['description'] = config['stt-custom-model-description'];
-      }
-      if (config['stt-custom-id']) {
-        params['customization_id'] = config['stt-custom-id'];
-      }
-      return params;
-    }
+    return false;
+  }
 
 
   // These are APIs that the node has created to allow it to dynamically fetch Bluemix
@@ -179,8 +247,11 @@ module.exports = function (RED) {
         return;
       }
 
-      node.status({fill:'blue', shape:'dot', text:'executing'});
-      executeMethod(node, method, params, msg);
+      if (checkForFile(method)) {
+        loadCorpusFile(node, method, params, msg)
+      } else {
+        executeMethod(node, method, params, msg);
+      }
 
       // Simply return params for query on msg object
       //msg.payload = 'OK So far';

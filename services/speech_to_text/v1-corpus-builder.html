@@ -45,6 +45,7 @@
             <option value="createCustomisation">Create a custom language model</option>
             <option value="listCustomisations">List Customizations</option>
             <option value="getCustomisation">Get Customization</option>
+            <option value="addCorpus">Add Corpus</option>
         </select>
     </div>
 
@@ -70,6 +71,11 @@
     <div class="form-row">
         <label for="node-input-stt-custom-id"><i class="fa fa-book"></i> Customization ID</label>
         <input type="text" id="node-input-stt-custom-id" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stt-corpus-name"><i class="fa fa-book"></i> Corpus Name</label>
+        <input type="text" id="node-input-stt-corpus-name" placeholder="">
     </div>
 
 
@@ -128,6 +134,7 @@
     $('select#node-input-stt-base-model').parent().hide();
     $('input#node-input-stt-custom-model-description').parent().hide();
     $('input#node-input-stt-custom-id').parent().hide();
+    $('input#node-input-stt-corpus-name').parent().hide();
   }
 
   sttv1qbb.showSelectedFields = function(fields) {
@@ -160,6 +167,10 @@
       case 'getCustomisation':
         fields.push('#node-input-stt-custom-id');
         break;
+      case 'addCorpus':
+          fields.push('#node-input-stt-custom-id'
+                         + ', #node-input-stt-corpus-name');
+          break;
     }
     sttv1qbb.showSelectedFields(fields);
   }
@@ -323,7 +334,8 @@
                 'stt-base-model' : {value: ''},
                 'base-model-hidden' : {value: ''},
                 'stt-custom-model-description' : {value: ''},
-                'stt-custom-id' : {value: ''}
+                'stt-custom-id' : {value: ''},
+                'stt-corpus-name' : {value: ''}
             },
             credentials: {
               username: {type:'text'} //,
