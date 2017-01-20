@@ -58,7 +58,7 @@ module.exports = function (RED) {
   });
 
 
-   // API used by widget to fetch available models
+  // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-speech-to-text/models', function (req, res) {
     var stt = new sttV1({
       username: sUsername ? sUsername : req.query.un,
@@ -73,6 +73,23 @@ module.exports = function (RED) {
       }
     });
   });
+
+  // API used by widget to fetch available customisations
+  RED.httpAdmin.get('/watson-speech-to-text/customs', function (req, res) {
+    var stt = new sttV1({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd
+    });
+
+    stt.getCustomizations({}, function(err, customs){
+      if (err) {
+        res.json(err);
+      } else {
+        res.json(customs);
+      }
+    });
+  });
+
 
   // Utility function to perform a URL validation check
   function urlCheck(str) {

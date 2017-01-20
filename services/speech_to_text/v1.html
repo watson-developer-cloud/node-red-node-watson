@@ -49,6 +49,15 @@
     </div>
 
     <div class="form-row">
+        <label for="node-input-langcustom"><i class="fa fa-language"></i> Language Customization</label>
+        <select type="text" id="node-input-langcustom" style="display: inline-block; width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-langcustomhidden"/>
+    </div>
+
+    <div class="form-row">
         <label for="node-input-band"><i class="fa fa-audio-o"></i> Quality</label>
         <select type="text" id="node-input-band" style="display: inline-block; width: 70%;">
         </select>
@@ -108,8 +117,10 @@
   var stt = new STT();
   stt.models = null;
   stt.languages = null;
+  stt.customisations = null;
   stt.bands = null;
   stt.language_selected = '';
+  stt.custom_selected = '';
   stt.band_selected = '';
 
   stt.LANGUAGES = { 'en-US': 'US English',
@@ -148,12 +159,14 @@
       $('input#node-input-continuous').parent().show();
       $('input#node-input-speakerlabels').parent().show();
       $('select#node-input-lang').parent().show();
+      $('select#node-input-langcustom').parent().show();
       $('select#node-input-band').parent().show();
     } else {
       $('label#node-label-message').parent().hide();
       $('input#node-input-continuous').parent().hide();
       $('input#node-input-speakerlabels').parent().hide();
       $('select#node-input-lang').parent().hide();
+      $('select#node-input-langcustom').parent().hide();
       $('select#node-input-band').parent().hide();
     }
   }
@@ -201,6 +214,11 @@
     }
   }
 
+  stt.populateCustoms = function() {
+    console.log('Need to Populate the custom list');
+    var showit = false;
+  }
+
   // Register the handlers for the fields
   stt.handlersUI = function () {
     $('#node-input-username').change(function(val){
@@ -213,11 +231,53 @@
     $('#node-input-lang').change(function (val) {
       stt.language_selected = $('#node-input-lang').val();
       stt.populateBands();
+      stt.populateCustoms();
+    });
+
+    $('#node-input-langcustom').change(function (val) {
+      stt.custom_selected = $('#node-input-langcustom').val();
     });
 
     $('#node-input-band').change(function (val) {
       stt.band_selected = $('#node-input-band').val();
+      stt.populateCustoms();
     });
+  }
+
+  // Function to fetch the customisations, should only be done once
+  stt.fetchCustomisations = function() {
+    console.log('Will be Fetching customisations');
+    if (!stt.customisations) {
+      console.log('Dont have any customisations');
+
+
+      var u = $('#node-input-username').val();
+      var p = $('#node-input-password').val();
+
+      $.getJSON('watson-speech-to-text/customs',
+                 {un: u, pwd: p}
+      ).done(function (data) {
+        $('label#node-label-message').parent().hide();
+        if (data.error) {
+          $('label#node-label-message').parent().show();
+          $('label#node-label-message').text(data.error);        }
+        else {
+          stt.customisations = data;
+          console.log('We have the customisations');
+          console.log(stt.customisations);
+        }
+      }).fail(function (err) {
+        var txt = 'Got server error ';
+        if (err.status) {
+          txt += '(' + err.status + ') '
+        }
+        txt += 'when trying to retrieve available customisations';
+        $('label#node-label-message').parent().show();
+        $('label#node-label-message').text(txt);
+      }).always(function () {
+      });
+
+    }
   }
 
   // Function called when either when the models have been retrieved, or
@@ -225,6 +285,7 @@
   stt.postModelCheck = function () {
     stt.processModels();
     stt.VisibilityCheck();
+    stt.fetchCustomisations();
   }
 
   // Retrieve the available models from the server, if data is returned, then
@@ -297,6 +358,9 @@
 
     stt.band_selected = $('#node-input-bandhidden').val();
     $('select#node-input-band').val(stt.band_selected);
+
+    stt.custom_selected = $('#node-input-langcustomhidden').val();
+    $('select#node-input-langcustom').val(stt.custom_selected);
   }
 
   // This is the on edit prepare function, which will be invoked everytime the dialog
@@ -326,6 +390,7 @@
   function sttoneditsave(){
     $('#node-input-langhidden').val(stt.language_selected);
     $('#node-input-bandhidden').val(stt.band_selected);
+    $('#node-input-langcustomhidden').val(stt.custom_selected);
   }
 
     (function() {
@@ -337,6 +402,7 @@
                 speakerlabels: {value: true},
                 lang: {value: ''},
                 langhidden: {value: ''},
+                langcustomhidden: {value: ''},
                 band: {value: ''},
                 bandhidden: {value: ''},
                 password: {value: ''}
