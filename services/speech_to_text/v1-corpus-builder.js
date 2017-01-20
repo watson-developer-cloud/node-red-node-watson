@@ -23,8 +23,9 @@ module.exports = function (RED) {
     fs = require('fs'),
     fileType = require('file-type'),
     serviceutils = require('../../utilities/service-utils'),
-    sttV1 = require('watson-developer-cloud/speech-to-text/v1'),
-    service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
+    STTV1 = require('watson-developer-cloud/speech-to-text/v1'),
+    service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
+    username, password, sUsername, sPassword;
 
   temp.track();
 
@@ -37,8 +38,6 @@ module.exports = function (RED) {
   // Otherwise, once set credentials are never reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
-
-  var username, password, sUsername, sPassword;
 
   if (service) {
     sUsername = service.username;
@@ -139,7 +138,7 @@ module.exports = function (RED) {
   }
 
   function executeMethod(node, method, params, msg) {
-    var stt = new sttV1({
+    var stt = new STTV1({
       username: username,
       password: password,
     });
@@ -228,7 +227,6 @@ module.exports = function (RED) {
     switch (method) {
     case 'addCorpus':
       return true;
-      break;
     }
     return false;
   }
@@ -246,7 +244,7 @@ module.exports = function (RED) {
 
    // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-speech-to-text-v1-query-builder/models', function (req, res) {
-    var stt = new sttV1({
+    var stt = new STTV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd
     });
@@ -288,7 +286,7 @@ module.exports = function (RED) {
       }
 
       if (checkForFile(method)) {
-        loadCorpusFile(node, method, params, msg)
+        loadCorpusFile(node, method, params, msg);
       } else {
         executeMethod(node, method, params, msg);
       }
