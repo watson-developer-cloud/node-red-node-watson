@@ -11,7 +11,7 @@
     "temp": "^0.8.3",
     "qs": "6.x",
 	  "image-type": "^2.0.2",
-    "watson-developer-cloud": "^2.14.3",
+    "watson-developer-cloud": "^2.15.2",
     "kuromoji": "^0.0.5",
     "is-docx": "^0.0.3"
   },

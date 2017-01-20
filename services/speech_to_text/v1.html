@@ -219,40 +219,35 @@
   // Need to check if we have customisations and if the
   // selected language and model have an entry.
   stt.populateCustoms = function() {
-    console.log('Need to Populate the custom list');
+    console.log('In populateCustoms');
     var showit = false;
 
     $('select#node-input-langcustom').empty();
 
     if (stt.customisations) {
-      console.log('sanity check');
-      console.log(stt.customisations);
-      //for (c in stt.customisations) {
-      //  console.log('checking ');
-      //  console.log(c);
-      //}
-
-      stt.language_selected = $('#node-input-lang').val();
-      stt.band_selected = $('#node-input-band').val();
+      console.log('We have Customisations');
+      stt.language_selected = stt.language_selected ?
+                                  stt.language_selected :
+                                  $('#node-input-langhidden').val();
+      stt.band_selected = stt.band_selected ?
+                                 stt.band_selected :
+                                 $('#node-input-band').val();
 
       var compareValue = stt.language_selected + '_' + stt.band_selected;
+      console.log('compare Value is ');
+      console.log(compareValue);
+      console.log($('#node-input-lang').val());
 
       stt.customisations.forEach(function(c) {
         // Should really be checking against the cached values
         // stt.language_selected and stt.band_selected
         // but for some reason they are not always set.
 
-        console.log('checking ');
-        console.log(c['base_model_name']);
-        console.log('against');
-        console.log(compareValue);
-
         if (compareValue === c['base_model_name']) {
-          console.log('we have a match')
           showit = true;
           var selectedText = '';
           if (stt.custom_selected === c['customization_id']) {
-            selectedText = 'selected="selected"';
+            selectedText = ' selected="selected" ';
           }
           $('select#node-input-langcustom')
             .append('<option value='
@@ -265,13 +260,23 @@
       });
     }
 
+    console.log('Adding None value');
+    // Add an option to not select
+    $('select#node-input-langcustom')
+      .append('<option value='
+                    + 'NoCustomisationSetting'
+                    + '' //showit ? '' : ' selected="selected" '
+                    + '>'
+                    + 'None'
+                    + '</option>');
+
+
     if (showit) {
-      console.log('need to show the custom field');
       $('select#node-input-langcustom').parent().show();
     } else {
-      console.log('need to hide the custom field');
       $('select#node-input-langcustom').parent().hide();
     }
+
   }
 
   // Register the handlers for the fields
@@ -301,10 +306,7 @@
 
   // Function to fetch the customisations, should only be done once
   stt.fetchCustomisations = function() {
-    console.log('Will be Fetching customisations');
     if (!stt.customisations) {
-      console.log('Dont have any customisations');
-
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
 
@@ -317,8 +319,6 @@
           $('label#node-label-message').text(data.error);        }
         else {
           stt.customisations = data.customizations;
-          console.log('We have the customisations');
-          console.log(stt.customisations);
           stt.populateCustoms();
         }
       }).fail(function (err) {
@@ -416,6 +416,11 @@
 
     stt.custom_selected = $('#node-input-langcustomhidden').val();
     $('select#node-input-langcustom').val(stt.custom_selected);
+
+    console.log('restored values from hidden');
+    console.log(stt.language_selected);
+    console.log(stt.band_selected);
+
   }
 
   // This is the on edit prepare function, which will be invoked everytime the dialog
@@ -457,6 +462,7 @@
                 speakerlabels: {value: true},
                 lang: {value: ''},
                 langhidden: {value: ''},
+                langcustom: {value: ''},
                 langcustomhidden: {value: ''},
                 band: {value: ''},
                 bandhidden: {value: ''},
