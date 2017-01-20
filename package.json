@@ -1,6 +1,6 @@
 {
   "name": "node-red-node-watson",
-  "version": "0.4.35",
+  "version": "0.4.36",
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
     "alchemy-api": "^1.3.0",
@@ -11,7 +11,7 @@
     "temp": "^0.8.3",
     "qs": "6.x",
 	  "image-type": "^2.0.2",
-    "watson-developer-cloud": "^2.14.3",
+    "watson-developer-cloud": "^2.15.2",
     "kuromoji": "^0.0.5",
     "is-docx": "^0.0.3"
   },
@@ -55,6 +55,7 @@
       "watson-relationship-extraction-v1": "services/relationship_extraction/v1.js",
       "watson-retrieve-and-rank-v1": "services/retrieve_and_rank/v1.js",
       "watson-speech-to-text-v1": "services/speech_to_text/v1.js",
+      "watson-speech-to-text-corpus-builder-v1": "services/speech_to_text/v1-corpus-builder.js",
       "watson-text-to-speech-v1": "services/text_to_speech/v1.js",
       "watson-tone-analyzer-v3": "services/tone_analyzer/v3.js",
       "watson-tradeoff-analytics-v1": "services/tradeoff_analytics/v1.js",
