@@ -114,6 +114,18 @@ module.exports = function (RED) {
     });
   }
 
+  function executeTrain(node, stt, params, msg) {
+    stt.trainCustomization(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err);
+      } else {
+        msg['train'] = response ;
+      }
+      node.send(msg);
+    });
+  }
+
   function executeDeleteCorpus(node, stt, params, msg) {
     stt.deleteCorpus(params, function (err, response) {
       node.status({});
@@ -150,6 +162,9 @@ module.exports = function (RED) {
     case 'getCorpora':
       executeGetCorpora(node, stt, params, msg);
       break;
+    case 'train':
+        executeTrain(node, stt, params, msg);
+        break;
     case 'deleteCorpus':
       executeDeleteCorpus(node, stt, params, msg);
       break;

@@ -190,7 +190,7 @@ module.exports = function (RED) {
         var params = {
           audio: audio,
           content_type: 'audio/' + format,
-          //model: model,
+          model: model,
           continuous: config.continuous ? config.continuous : false,
           speaker_labels: config.speakerlabels ? config.speakerlabels : false,
           //customization_id: config.langcustom ? config.langcustom :  ''
@@ -203,7 +203,7 @@ module.exports = function (RED) {
           params.customization_id = config.langcustom;
           //delete params.model;
         } else {
-          params.model = model;
+          //params.model = model;
         }
 
         console.log(params);

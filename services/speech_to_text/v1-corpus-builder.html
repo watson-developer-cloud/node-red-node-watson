@@ -47,6 +47,7 @@
             <option value="getCustomisation">Get Customization</option>
             <option value="addCorpus">Add Corpus</option>
             <option value="getCorpora">Get Corpora</option>
+            <option value="train">Train</option>
             <option value="deleteCorpus">Delete Corpus</option>
         </select>
     </div>
@@ -117,6 +118,11 @@
         the specified customization
         is returned on
         <code>msg.corpora</code>
+      </p>
+    </li>
+    <li>Train
+      <p>In this mode, the custom model is prepared for use
+        by the speech to text service.
       </p>
     </li>
     <li>Delete Corpus
@@ -196,6 +202,7 @@
         break;
       case 'getCustomisation':
       case 'getCorpora':
+      case 'train':
         fields.push('#node-input-stt-custom-id');
         break;
       case 'addCorpus':
