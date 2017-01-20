@@ -25,7 +25,7 @@ module.exports = function (RED) {
     serviceutils = require('../../utilities/service-utils'),
     STTV1 = require('watson-developer-cloud/speech-to-text/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username, password, sUsername, sPassword;
+    username = '', password = '', sUsername = '', sPassword = '';
 
   temp.track();
 
@@ -162,8 +162,8 @@ module.exports = function (RED) {
       executeGetCorpora(node, stt, params, msg);
       break;
     case 'train':
-        executeTrain(node, stt, params, msg);
-        break;
+      executeTrain(node, stt, params, msg);
+      break;
     case 'deleteCorpus':
       executeDeleteCorpus(node, stt, params, msg);
       break;
