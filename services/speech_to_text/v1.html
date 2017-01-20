@@ -219,13 +219,11 @@
   // Need to check if we have customisations and if the
   // selected language and model have an entry.
   stt.populateCustoms = function() {
-    console.log('In populateCustoms');
     var showit = false;
 
     $('select#node-input-langcustom').empty();
 
     if (stt.customisations) {
-      console.log('We have Customisations');
       stt.language_selected = stt.language_selected ?
                                   stt.language_selected :
                                   $('#node-input-langhidden').val();
@@ -234,9 +232,6 @@
                                  $('#node-input-band').val();
 
       var compareValue = stt.language_selected + '_' + stt.band_selected;
-      console.log('compare Value is ');
-      console.log(compareValue);
-      console.log($('#node-input-lang').val());
 
       stt.customisations.forEach(function(c) {
         // Should really be checking against the cached values
@@ -260,7 +255,6 @@
       });
     }
 
-    console.log('Adding None value');
     // Add an option to not select
     $('select#node-input-langcustom')
       .append('<option value='
@@ -416,11 +410,6 @@
 
     stt.custom_selected = $('#node-input-langcustomhidden').val();
     $('select#node-input-langcustom').val(stt.custom_selected);
-
-    console.log('restored values from hidden');
-    console.log(stt.language_selected);
-    console.log(stt.band_selected);
-
   }
 
   // This is the on edit prepare function, which will be invoked everytime the dialog

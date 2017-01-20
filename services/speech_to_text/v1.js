@@ -193,20 +193,12 @@ module.exports = function (RED) {
           model: model,
           continuous: config.continuous ? config.continuous : false,
           speaker_labels: config.speakerlabels ? config.speakerlabels : false,
-          //customization_id: config.langcustom ? config.langcustom :  ''
         };
 
         // Check the params for customisation options
         if (config.langcustom && 'NoCustomisationSetting' !== config.langcustom) {
-          console.log('Custom Language Detected');
-          console.log(config.langcustom);
           params.customization_id = config.langcustom;
-          //delete params.model;
-        } else {
-          //params.model = model;
         }
-
-        console.log(params);
 
         node.status({fill:'blue', shape:'dot', text:'requesting'});
 

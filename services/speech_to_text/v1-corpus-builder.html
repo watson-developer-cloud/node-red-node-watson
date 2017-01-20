@@ -253,17 +253,11 @@
     $('#node-input-stt-custom-mode').change(function() {
       sttv1qbb.mode_selected = $('#node-input-stt-custom-mode').val();
       sttv1qbb.processSelectedMethod(sttv1qbb.mode_selected);
-      //if ('createCustomisation' == sttv1qbb.mode_selected) {
-      //  $('input#node-input-stt-custom-model-name').parent().show();
-      //  $('input#node-input-stt-custom-model-description').parent().show();
-      //}
     });
 
     $('#node-input-stt-base-model').change(function (val) {
       sttv1qbb.model_selected = $('#node-input-stt-base-model').val();
     });
-
-
   }
 
   // Called to complete the models table
@@ -320,8 +314,6 @@
         $('label#node-label-message').parent().show();
         $('label#node-label-message').text(data.error);
       } else if (data.models) {
-        console.log('models found');
-        console.log(data.models);
         sttv1qbb.models = data.models;
         //have_credentials = true;
         sttv1qbb.postModelCheck();

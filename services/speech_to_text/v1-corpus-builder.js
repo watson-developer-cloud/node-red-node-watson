@@ -193,9 +193,7 @@ module.exports = function (RED) {
     return params;
   }
 
-
   function loadCorpusFile(node, method, params, msg) {
-    console.log('Need to Load File');
     temp.open({
       suffix: '.txt'
     }, function(err, info) {
@@ -273,9 +271,6 @@ module.exports = function (RED) {
         message = '',
         params = {};
 
-      console.log('Mode is ');
-      console.log(method);
-
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
 
@@ -298,9 +293,6 @@ module.exports = function (RED) {
         executeMethod(node, method, params, msg);
       }
 
-      // Simply return params for query on msg object
-      //msg.payload = 'OK So far';
-      //node.send(msg);
     });
   }
 
