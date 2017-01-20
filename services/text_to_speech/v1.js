@@ -79,14 +79,14 @@ module.exports = function(RED) {
       password = sPassword || this.credentials.password || config.password;
 
       if (!username || !password) {
-        var message = 'Missing Speech To Text service credentials';
+        var message = 'Missing Text To Speech service credentials';
         node.error(message, msg);
         return;
       }
 
       var text_to_speech = new TextToSpeechV1({
         username: username,
-        password: password 
+        password: password
       });
 
       var params = {
