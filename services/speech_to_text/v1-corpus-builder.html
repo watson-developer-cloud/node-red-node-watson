@@ -84,16 +84,46 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-speech-to-text-v1-query-builder">
-    <p>The Speech To Text Query Builder ... </p>
-    <p>For mode Create Customization</p>
-    <p>output is on msg.customization_id</p>
-
-    <p>For mode List Customizations</p>
-    <p>output is on msg.customizations</p>
-
-    <p>For mode Get Customization</p>
-    <p>output is on msg.customization</p>
-
+    <p>The Speech To Text Custom Builder is used to create customisations
+    for Speech to Text. It supports the following modes </p>
+    <ul>
+    <li>Create Custom Language Model
+      <p>In this mode, a new empty custom model is created. The
+        new customization id is returned on
+        <code>msg.customization_id</code>
+      </p>
+    </li>
+    <li>List Customizations
+      <p>In this mode, a list of all customizations that you have
+        created in returned on
+        <code>msg.customizations</code>
+      </p>
+    </li>
+    <li>Get Customization
+      <p>In this mode, details for the specified customization
+        is returned on
+        <code>msg.customization</code>
+      </p>
+    </li>
+    <li>Add Corpus
+      <p>In this mode, the specified customization content is
+        created. The input corpus content should be provided as buffer
+        on
+        <code>msg.payload</code>
+      </p>
+    </li>
+    <li>Get Corpora
+      <p>In this mode, a list of all the corpora created for
+        the specified customization
+        is returned on
+        <code>msg.corpora</code>
+      </p>
+    </li>
+    <li>Delete Corpus
+      <p>In this mode, the specified corpus is deleted.
+      </p>
+    </li>
+    </ul>
 
     <p>For more information about Speech To Text customisation,
     read the <a href="https://www.ibm.com/watson/developercloud/doc/speech-to-text/custom.shtml#custom">
@@ -347,9 +377,9 @@
             inputs: 1,
             outputs: 1,
             icon: 'speech_to_text.png',
-            paletteLabel: 'speech to text query builder',
+            paletteLabel: 'speech to text custom builder',
             label: function() {
-                return this.name || 'speech to text query builder';
+                return this.name || 'speech to text custom builder';
             },
             labelStyle: function() {
                 return this.name ? 'node_label_italic' : '';
