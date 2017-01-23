@@ -7,6 +7,10 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.4.36
+- New Node for Speech to Text Customizations - Initial support for corpus (sentances) training.
+- Added option to select Customization in Speech to Text Node.
+
 ### New in version 0.4.35
 - Fixed bug in Conversation node, when no msg.params defined.
 
