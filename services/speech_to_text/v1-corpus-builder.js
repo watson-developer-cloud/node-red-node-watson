@@ -266,6 +266,7 @@ module.exports = function (RED) {
         switch (method) {
         case 'addCorpus':
           params.corpus = fs.createReadStream(info.path);
+          break;
         case 'addWords':
           try {
             params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
