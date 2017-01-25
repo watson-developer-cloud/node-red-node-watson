@@ -125,6 +125,21 @@ module.exports = function (RED) {
     });
   }
 
+  function executeGetCustomWords(node, stt, params, msg) {
+    stt.getWords(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err);
+      } else {
+        console.log('Custom Words Found');
+        console.log(response);
+        msg['words'] =  response.words ? response.words : response ;
+      }
+      node.send(msg);
+    });
+  }
+
+
   function executeDeleteCorpus(node, stt, params, msg) {
     stt.deleteCorpus(params, function (err, response) {
       node.status({});
@@ -163,6 +178,9 @@ module.exports = function (RED) {
       break;
     case 'train':
       executeTrain(node, stt, params, msg);
+      break;
+    case 'listCustomWords':
+      executeGetCustomWords(node, stt, params, msg);
       break;
     case 'deleteCorpus':
       executeDeleteCorpus(node, stt, params, msg);

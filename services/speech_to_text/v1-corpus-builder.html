@@ -48,6 +48,7 @@
             <option value="addCorpus">Add Corpus</option>
             <option value="getCorpora">Get Corpora</option>
             <option value="train">Train</option>
+            <option value="listCustomWords">List Custom Words</option>
             <option value="deleteCorpus">Delete Corpus</option>
         </select>
     </div>
@@ -130,6 +131,11 @@
         by the speech to text service.
       </p>
     </li>
+    <li>List Custom Words
+      <p>In this mode, a list of all the words from a custom model are
+        retrieved.
+      </p>
+    </li>
     <li>Delete Corpus
       <p>In this mode, the specified corpus is deleted.
       </p>
@@ -198,6 +204,7 @@
       case 'getCustomisation':
       case 'getCorpora':
       case 'train':
+      case 'listCustomWords':
         fields.push('#node-input-stt-custom-id');
         break;
       case 'addCorpus':
