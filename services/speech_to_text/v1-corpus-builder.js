@@ -189,6 +189,11 @@ module.exports = function (RED) {
       params['customization_id'] = config['stt-custom-id'];
     }
 
+    if ('addCorpus' === config['stt-custom-mode'] )
+    {
+      params['allow_overwrite'] = config['stt-allow-overwrite'];
+    }
+
     return params;
   }
 
