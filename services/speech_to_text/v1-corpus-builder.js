@@ -269,8 +269,7 @@ module.exports = function (RED) {
         case 'addWords':
           try {
             params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
-          }
-          catch (err) {
+          } catch (err) {
             params.words = fs.createReadStream(info.path);
           }
         }
@@ -348,9 +347,8 @@ module.exports = function (RED) {
         if (msg.payload instanceof Buffer) {
           loadFile(node, method, params, msg);
           return;
-        } else {
-          setFileParams(method, params, msg);
         }
+        setFileParams(method, params, msg);
       }
 
       executeMethod(node, method, params, msg);
