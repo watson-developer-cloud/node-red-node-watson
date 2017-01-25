@@ -131,7 +131,7 @@ module.exports = function (RED) {
       if (err) {
         reportError(node, msg, err);
       } else {
-        msg['words'] =  response.words ? response.words : response ;
+        msg['words'] = response.words ? response.words : response ;
       }
       node.send(msg);
     });
@@ -220,8 +220,7 @@ module.exports = function (RED) {
       params['customization_id'] = config['stt-custom-id'];
     }
 
-    if ('addCorpus' === config['stt-custom-mode'] )
-    {
+    if ('addCorpus' === config['stt-custom-mode']) {
       params['allow_overwrite'] = config['stt-allow-overwrite'];
     }
 
@@ -232,8 +231,10 @@ module.exports = function (RED) {
     switch (method) {
     case 'addCorpus':
       params.corpus = msg.payload;
+      break;
     case 'addWords':
       params.words = msg.payload;
+      break;
     }
   }
 
@@ -347,13 +348,12 @@ module.exports = function (RED) {
         if (msg.payload instanceof Buffer) {
           loadFile(node, method, params, msg);
           return;
-        }
-        else {
+        } else {
           setFileParams(method, params, msg);
         }
       }
-      executeMethod(node, method, params, msg);
 
+      executeMethod(node, method, params, msg);
     });
   }
 
