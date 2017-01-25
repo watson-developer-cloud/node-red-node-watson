@@ -131,9 +131,19 @@ module.exports = function (RED) {
       if (err) {
         reportError(node, msg, err);
       } else {
-        console.log('Custom Words Found');
-        console.log(response);
         msg['words'] =  response.words ? response.words : response ;
+      }
+      node.send(msg);
+    });
+  }
+
+  function executeAddWords(node, stt, params, msg) {
+    stt.addWords(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err);
+      } else {
+        msg['addwordsresponse'] = response ;
       }
       node.send(msg);
     });
@@ -182,6 +192,9 @@ module.exports = function (RED) {
     case 'listCustomWords':
       executeGetCustomWords(node, stt, params, msg);
       break;
+    case 'addWords':
+      executeAddWords(node, stt, params, msg);
+      break;
     case 'deleteCorpus':
       executeDeleteCorpus(node, stt, params, msg);
       break;
@@ -215,7 +228,16 @@ module.exports = function (RED) {
     return params;
   }
 
-  function loadCorpusFile(node, method, params, msg) {
+  function setFileParams(method, params, msg) {
+    switch (method) {
+    case 'addCorpus':
+      params.corpus = msg.payload;
+    case 'addWords':
+      params.words = msg.payload;
+    }
+  }
+
+  function loadFile(node, method, params, msg) {
     temp.open({
       suffix: '.txt'
     }, function(err, info) {
@@ -240,8 +262,20 @@ module.exports = function (RED) {
           throw err;
         }
 
-        params.corpus = fs.createReadStream(info.path);
+        switch (method) {
+        case 'addCorpus':
+          params.corpus = fs.createReadStream(info.path);
+        case 'addWords':
+          try {
+            params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
+          }
+          catch (err) {
+            params.words = fs.createReadStream(info.path);
+          }
+        }
+
         executeMethod(node, method, params, msg);
+        temp.cleanup();
       });
     });
   }
@@ -249,6 +283,7 @@ module.exports = function (RED) {
   function checkForFile(method) {
     switch (method) {
     case 'addCorpus':
+    case 'addWords':
       return true;
     }
     return false;
@@ -309,10 +344,15 @@ module.exports = function (RED) {
       }
 
       if (checkForFile(method)) {
-        loadCorpusFile(node, method, params, msg);
-      } else {
-        executeMethod(node, method, params, msg);
+        if (msg.payload instanceof Buffer) {
+          loadFile(node, method, params, msg);
+          return;
+        }
+        else {
+          setFileParams(method, params, msg);
+        }
       }
+      executeMethod(node, method, params, msg);
 
     });
   }

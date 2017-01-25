@@ -49,6 +49,7 @@
             <option value="getCorpora">Get Corpora</option>
             <option value="train">Train</option>
             <option value="listCustomWords">List Custom Words</option>
+            <option value="addWords">Add Words</option>
             <option value="deleteCorpus">Delete Corpus</option>
         </select>
     </div>
@@ -136,6 +137,20 @@
         retrieved.
       </p>
     </li>
+    <li>Add Words
+      <p>In this mode, the specified custom words are added to the
+        customization. The input array of words should be passed in
+        as <code>msg.payload</code> in form of
+        <code>[{word: String, sounds_like: [String, ...], display_as: String}, ...]</code>
+        <br/>EG.
+        <code>
+          [ {"word": "HHonors", "sounds_like": ["hilton honors", "h honors"],
+                                "display_as": "HHonors"},
+            {"word": "IEEE", "sounds_like": ["i triple e"]}
+          ]
+        </code>
+      </p>
+    </li>
     <li>Delete Corpus
       <p>In this mode, the specified corpus is deleted.
       </p>
@@ -205,6 +220,7 @@
       case 'getCorpora':
       case 'train':
       case 'listCustomWords':
+      case 'addWords':
         fields.push('#node-input-stt-custom-id');
         break;
       case 'addCorpus':
