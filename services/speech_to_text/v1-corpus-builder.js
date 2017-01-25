@@ -125,6 +125,31 @@ module.exports = function (RED) {
     });
   }
 
+  function executeGetCustomWords(node, stt, params, msg) {
+    stt.getWords(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err);
+      } else {
+        msg['words'] = response.words ? response.words : response ;
+      }
+      node.send(msg);
+    });
+  }
+
+  function executeAddWords(node, stt, params, msg) {
+    stt.addWords(params, function (err, response) {
+      node.status({});
+      if (err) {
+        reportError(node, msg, err);
+      } else {
+        msg['addwordsresponse'] = response ;
+      }
+      node.send(msg);
+    });
+  }
+
+
   function executeDeleteCorpus(node, stt, params, msg) {
     stt.deleteCorpus(params, function (err, response) {
       node.status({});
@@ -164,6 +189,12 @@ module.exports = function (RED) {
     case 'train':
       executeTrain(node, stt, params, msg);
       break;
+    case 'listCustomWords':
+      executeGetCustomWords(node, stt, params, msg);
+      break;
+    case 'addWords':
+      executeAddWords(node, stt, params, msg);
+      break;
     case 'deleteCorpus':
       executeDeleteCorpus(node, stt, params, msg);
       break;
@@ -189,10 +220,25 @@ module.exports = function (RED) {
       params['customization_id'] = config['stt-custom-id'];
     }
 
+    if ('addCorpus' === config['stt-custom-mode']) {
+      params['allow_overwrite'] = config['stt-allow-overwrite'];
+    }
+
     return params;
   }
 
-  function loadCorpusFile(node, method, params, msg) {
+  function setFileParams(method, params, msg) {
+    switch (method) {
+    case 'addCorpus':
+      params.corpus = msg.payload;
+      break;
+    case 'addWords':
+      params.words = msg.payload;
+      break;
+    }
+  }
+
+  function loadFile(node, method, params, msg) {
     temp.open({
       suffix: '.txt'
     }, function(err, info) {
@@ -217,8 +263,20 @@ module.exports = function (RED) {
           throw err;
         }
 
-        params.corpus = fs.createReadStream(info.path);
+        switch (method) {
+        case 'addCorpus':
+          params.corpus = fs.createReadStream(info.path);
+          break;
+        case 'addWords':
+          try {
+            params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
+          } catch (err) {
+            params.words = fs.createReadStream(info.path);
+          }
+        }
+
         executeMethod(node, method, params, msg);
+        temp.cleanup();
       });
     });
   }
@@ -226,6 +284,7 @@ module.exports = function (RED) {
   function checkForFile(method) {
     switch (method) {
     case 'addCorpus':
+    case 'addWords':
       return true;
     }
     return false;
@@ -286,11 +345,14 @@ module.exports = function (RED) {
       }
 
       if (checkForFile(method)) {
-        loadCorpusFile(node, method, params, msg);
-      } else {
-        executeMethod(node, method, params, msg);
+        if (msg.payload instanceof Buffer) {
+          loadFile(node, method, params, msg);
+          return;
+        }
+        setFileParams(method, params, msg);
       }
 
+      executeMethod(node, method, params, msg);
     });
   }
 

@@ -48,6 +48,8 @@
             <option value="addCorpus">Add Corpus</option>
             <option value="getCorpora">Get Corpora</option>
             <option value="train">Train</option>
+            <option value="listCustomWords">List Custom Words</option>
+            <option value="addWords">Add Words</option>
             <option value="deleteCorpus">Delete Corpus</option>
         </select>
     </div>
@@ -79,6 +81,11 @@
     <div class="form-row">
         <label for="node-input-stt-corpus-name"><i class="fa fa-book"></i> Corpus Name</label>
         <input type="text" id="node-input-stt-corpus-name" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stt-allow-overwrite"><i class="fa fa-book"></i> Allow Overwrite</label>
+        <input type="checkbox" id="node-input-stt-allow-overwrite" placeholder="">
     </div>
 
 
@@ -125,6 +132,25 @@
         by the speech to text service.
       </p>
     </li>
+    <li>List Custom Words
+      <p>In this mode, a list of all the words from a custom model are
+        retrieved.
+      </p>
+    </li>
+    <li>Add Words
+      <p>In this mode, the specified custom words are added to the
+        customization. The input array of words should be passed in
+        as <code>msg.payload</code> in form of
+        <code>[{word: String, sounds_like: [String, ...], display_as: String}, ...]</code>
+        <br/>EG.
+        <code>
+          [ {"word": "HHonors", "sounds_like": ["hilton honors", "h honors"],
+                                "display_as": "HHonors"},
+            {"word": "IEEE", "sounds_like": ["i triple e"]}
+          ]
+        </code>
+      </p>
+    </li>
     <li>Delete Corpus
       <p>In this mode, the specified corpus is deleted.
       </p>
@@ -150,17 +176,6 @@
   sttv1qbb.mode_selected = null;
   sttv1qbb.model_selected = '';
 
-
-  sttv1qbb.LANGUAGES = { 'en-US': 'US English',
-                    'pt-BR': 'Portuguese Braziilian',
-                    'en-UK': 'UK English' ,
-                    'fr-FR': 'French',
-                    'zh-CN': 'Mandarin',
-                    'es-ES': 'Spanish',
-                    'ar-AR': 'Arablic',
-                    'ja-JP': 'Japanese'
-                  };
-
   // Function to be used at the start, as don't want to expose any fields, unless the models are
   // available. The models can only be fetched if the credentials are available.
   sttv1qbb.hideEverything = function () {
@@ -173,6 +188,7 @@
     $('input#node-input-stt-custom-model-description').parent().hide();
     $('input#node-input-stt-custom-id').parent().hide();
     $('input#node-input-stt-corpus-name').parent().hide();
+    $('input#node-input-stt-allow-overwrite').parent().hide();
   }
 
   sttv1qbb.showSelectedFields = function(fields) {
@@ -203,12 +219,15 @@
       case 'getCustomisation':
       case 'getCorpora':
       case 'train':
+      case 'listCustomWords':
+      case 'addWords':
         fields.push('#node-input-stt-custom-id');
         break;
       case 'addCorpus':
       case 'deleteCorpus':
           fields.push('#node-input-stt-custom-id'
-                         + ', #node-input-stt-corpus-name');
+                         + ', #node-input-stt-corpus-name'
+                         + ', #node-input-stt-allow-overwrite');
           break;
     }
     sttv1qbb.showSelectedFields(fields);
@@ -366,7 +385,8 @@
                 'base-model-hidden' : {value: ''},
                 'stt-custom-model-description' : {value: ''},
                 'stt-custom-id' : {value: ''},
-                'stt-corpus-name' : {value: ''}
+                'stt-corpus-name' : {value: ''},
+                'stt-allow-overwrite' : {value: false}
             },
             credentials: {
               username: {type:'text'} //,
