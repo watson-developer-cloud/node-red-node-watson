@@ -1,0 +1,123 @@
+<!--
+  Copyright 2017 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-text-to-speech-v1-query-builder">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+
+    <div>
+        <label id="node-label-message"><i class="fa fa-exclamation-triangle"></i></label>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name"></input>
+    </div>
+
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username"></input>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password"></input>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tts-custom-mode"><i class="fa fa-book"></i> Detect: </label>
+        <select type="text" id="node-input-tts-custom-mode" style="display: inline-block; width: 70%;">
+            <option value="createCustomisation">Create a custom language model</option>
+        </select>
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="watson-text-to-speech-v1-query-builder">
+    <p>The Speech To Text Custom Builder is used to create customisations
+    for Speech to Text. It supports the following modes </p>
+    <ul>
+    <li>Create Custom Language Model
+      <p>In this mode, a new empty custom model is created. The
+        new customization id is returned on
+        <code>msg.customization_id</code>
+      </p>
+    </li>
+    </ul>
+
+    <p>For more information about Speech To Text customisation,
+    read the <a href="https://www.ibm.com/watson/developercloud/doc/text-to-speech/custom-using.shtml#customUsing">
+    documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+
+  // Need to simulate a namespace, as some of the variables had started to leak across nodes
+  function TTSV1QBB () {
+  }
+
+
+  // This is the namespace for ttsv1qbb. Currently only contains models, but more vars and functions may need to be
+  // moved in if there is a clash with other nodes.
+  var ttsv1qbb = new TTSV1QBB();
+
+  // This is the on edit prepare function, which will be invoked everytime the dialog
+  // is shown.
+  function ttsv1qbboneditprepare() {
+  }
+
+  // Save the values in the dyanmic lists to the hidden fields.
+  function ttsv1qbboneditsave(){
+  }
+
+    (function() {
+        RED.nodes.registerType('watson-text-to-speech-v1-query-builder', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ''},
+                password: {value: ''},
+                'tts-custom-mode': {value:"createCustomisation"},
+                'tts-custom-model-name' : {value: ''},
+                'tts-base-model' : {value: ''},
+                'base-model-hidden' : {value: ''},
+                'tts-custom-model-description' : {value: ''},
+                'tts-custom-id' : {value: ''},
+                'tts-corpus-name' : {value: ''},
+                'tts-allow-overwrite' : {value: false}
+            },
+            credentials: {
+              username: {type:'text'} //,
+              // password: {type: 'password'}   - // Taken out because, was not being restored on dialog open.
+            },
+            color: 'rgb(100, 120, 50)',
+            inputs: 1,
+            outputs: 1,
+            icon: 'text_to_speech.png',
+            paletteLabel: 'text to speech custom builder',
+            label: function() {
+                return this.name || 'text to speech custom builder';
+            },
+            labelStyle: function() {
+                return this.name ? 'node_label_italic' : '';
+            },
+            oneditprepare: ttsv1qbboneditprepare,
+            oneditsave: ttsv1qbboneditsave
+        });
+    })();
+
+</script>
