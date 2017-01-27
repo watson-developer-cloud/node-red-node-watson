@@ -85,8 +85,19 @@ module.exports = function (RED) {
     });
   }
 
-
-
+  function executeListCustomisations(node, tts, params, msg) {
+    console.log('About to List the Customisations');
+    tts.getCustomizations(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['customizations'] = response.customizations ?
+                                      response.customizations: response;
+      }
+      node.send(msg);
+    });
+  }
 
   function executeMethod(node, method, params, msg) {
     var tts = new TextToSpeechV1({
@@ -100,6 +111,10 @@ module.exports = function (RED) {
     case 'createCustomisation':
       executeCreateCustomisation(node, tts, params, msg);
       break;
+    case 'listCustomisations':
+      executeListCustomisations(node, tts, params, msg);
+      break;
+
     }
   }
 
