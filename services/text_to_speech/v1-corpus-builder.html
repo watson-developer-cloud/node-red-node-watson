@@ -76,9 +76,64 @@
   // moved in if there is a clash with other nodes.
   var ttsv1qbb = new TTSV1QBB();
 
+
+  // Simple check that is only invoked if the service is not bound into bluemix. In this case the
+  // user has to provide credentials. Once there are credentials, then the
+  // ttsv1qbb.??? are retrieved.
+  ttsv1qbb.checkCredentials = function () {
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+
+    if (u && u.length && p) {
+      //if (!sttv1qbb.models) {
+      //  sttv1qbb.getModels();
+      //}
+    }
+  }
+
+
+  // Register the handlers for the fields
+  ttsv1qbb.handlersUI = function () {
+    $('#node-input-username').change(function(val){
+      ttsv1qbb.checkCredentials();
+    });
+    $('#node-input-password').change(function(val){
+      ttsv1qbb.checkCredentials();
+    });
+  }
+
+  // The dynamic nature of the selection fields in this node has caused problems.
+  // Whenever there is a fetch for the models, on a page refresh or applicaiton
+  // restart, the settings for the dynamic fields are lost.
+  // So hidden (text) fields are being used to squirrel away the values, so that
+  // they can be restored.
+  ttsv1qbb.restoreFromHidden = function () {
+    //ttsv1qbb.model_selected = $('#node-input-base-model-hidden').val();
+    //$('select#node-input-tts-base-model').val(tts.model_selected);
+  }
+
+
   // This is the on edit prepare function, which will be invoked everytime the dialog
   // is shown.
   function ttsv1qbboneditprepare() {
+    ttsv1qbb.handlersUI();
+
+    $.getJSON('watson-text-to-speech-v1-query-builder/vcap/')
+      // for some reason the getJSON resets the vars so need to restoreFromHidden again
+      // so again.
+      .done(function (service) {
+        ttsv1qbb.restoreFromHidden();
+        $('.credentials').toggle(!service);
+        //if (!sttv1qbb.models) {sttv1qbb.getModels(service);}
+        //else {sttv1qbb.postModelCheck();}
+      })
+      .fail(function () {
+        $('.credentials').show();
+      }).always(function () {
+        $('#credentials-check').hide();
+     });
+
+
   }
 
   // Save the values in the dyanmic lists to the hidden fields.
