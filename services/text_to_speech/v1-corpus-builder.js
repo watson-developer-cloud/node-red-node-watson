@@ -55,6 +55,63 @@ module.exports = function (RED) {
   }
 */
 
+  function setFileParams(method, params, msg) {
+    switch (method) {
+    case 'addWords':
+      params.words = msg.payload;
+      break;
+    }
+  }
+
+  function loadFile(node, method, params, msg) {
+    temp.open({
+      suffix: '.txt'
+    }, function(err, info) {
+      if (err) {
+        node.status({
+          fill: 'red',
+          shape: 'dot',
+          text: 'Error receiving the data buffer for training'
+        });
+        throw err;
+      }
+
+      // Syncing up the asynchronous nature of the stream
+      // so that the full file can be sent to the API.
+      fs.writeFile(info.path, msg.payload, function(err) {
+        if (err) {
+          node.status({
+            fill: 'red',
+            shape: 'dot',
+            text: 'Error processing data buffer for training'
+          });
+          throw err;
+        }
+
+        switch (method) {
+        case 'addWords':
+          try {
+            params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
+          } catch (err) {
+            params.words = fs.createReadStream(info.path);
+          }
+        }
+
+        executeMethod(node, method, params, msg);
+        temp.cleanup();
+      });
+    });
+  }
+
+  function checkForFile(method) {
+    switch (method) {
+    case 'addWords':
+      return true;
+    }
+    return false;
+  }
+
+
   function buildParams(msg, config) {
     console.log('Building the Params');
     var params = {};
@@ -115,6 +172,19 @@ module.exports = function (RED) {
     });
   }
 
+  function executeAddWords(node, tts, params, msg) {
+    tts.addWords(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['addwordsresponse'] = response ;
+      }
+      node.send(msg);
+    });
+  }
+
+
   function executeMethod(node, method, params, msg) {
     var tts = new TextToSpeechV1({
       username: username,
@@ -132,6 +202,9 @@ module.exports = function (RED) {
       break;
     case 'getCustomisation':
       executeGetCustomisation(node, tts, params, msg);
+      break;
+    case 'addWords':
+      executeAddWords(node, tts, params, msg);
       break;
     }
   }
@@ -196,7 +269,6 @@ module.exports = function (RED) {
         return;
       }
 
-      /*
       if (checkForFile(method)) {
         if (msg.payload instanceof Buffer) {
           loadFile(node, method, params, msg);
@@ -204,7 +276,6 @@ module.exports = function (RED) {
         }
         setFileParams(method, params, msg);
       }
-      */
 
       executeMethod(node, method, params, msg);
     });

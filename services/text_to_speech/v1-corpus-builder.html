@@ -45,6 +45,7 @@
             <option value="createCustomisation">Create a custom language model</option>
             <option value="listCustomisations">List Customizations</option>
             <option value="getCustomisation">Get Customization</option>
+            <option value="addWords">Add Words</option>
         </select>
     </div>
 
@@ -156,6 +157,7 @@
                         + ', #node-input-tts-custom-model-description');
         break;
         case 'getCustomisation':
+        case 'addWords':
           fields.push('#node-input-tts-custom-id');
           break;
     }
@@ -205,8 +207,8 @@
     if (!ttsv1qbb.voices) {
       $('#credentials-not-found').show();
       $('label#node-label-message').parent().hide();
-      $('select#node-input-tts-lang').parent().hide();
     }
+    $('select#node-input-tts-lang').parent().hide();
     $('input#node-input-tts-custom-model-name').parent().hide();
     $('input#node-input-tts-custom-model-description').parent().hide();
     $('input#node-input-tts-custom-id').parent().hide();
@@ -251,7 +253,7 @@
   {
     if (ttsv1qbb.voices) {
       $('label#node-label-message').parent().hide();
-      $('select#node-input-tts-lang').parent().show();
+      //$('select#node-input-tts-lang').parent().show();
     } else {
       $('label#node-label-message').parent().hide();
       $('select#node-input-tts-lang').parent().hide();
