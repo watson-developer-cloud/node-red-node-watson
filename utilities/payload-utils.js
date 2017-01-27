@@ -81,12 +81,21 @@ PayloadUtils.prototype = {
         }
         if (fileType(buf)) {
           fmt = fileType(buf).ext;
-        } 
+        }
         cb(fmt);
       });
     });
     request(url).pipe(wstream);
   },
+
+  reportError: function (node, msg, message) {
+    var messageTxt = message.error ? message.error : message;
+    msg.watsonerror = messageTxt;
+
+    node.status({fill:'red', shape:'dot', text: messageTxt});
+    node.error(messageTxt, msg);
+  },
+
 
   // Function that is returns a function to count
   // the characters in each language.

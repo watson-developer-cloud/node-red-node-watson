@@ -23,6 +23,7 @@ module.exports = function (RED) {
     fs = require('fs'),
     fileType = require('file-type'),
     serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
     TextToSpeechV1 = require('watson-developer-cloud/text-to-speech/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = '', password = '', sUsername = '', sPassword = '';
@@ -44,14 +45,33 @@ module.exports = function (RED) {
     sPassword = service.password;
   }
 
+/*
   function reportError (node, msg, message) {
     var messageTxt = message.error ? message.error : message;
-    msg.ttserror = messageTxt;
+    msg.watsonerror = messageTxt;
 
     node.status({fill:'red', shape:'dot', text: messageTxt});
     node.error(messageTxt, msg);
   }
+*/
 
+  function buildParams(msg, config) {
+    console.log('Building the Params');
+    var params = {};
+    if (config['tts-lang']) {
+      params['language'] = config['tts-lang'];
+    }
+
+    if (config['tts-custom-model-name']) {
+      params['name'] = config['tts-custom-model-name'];
+    }
+
+    if (config['tts-custom-model-description']) {
+      params['description'] = config['tts-custom-model-description'];
+    }
+
+    return params;
+  }
 
   // These are APIs that the node has created to allow it to dynamically fetch Bluemix
   // credentials, and also translation models. This allows the node to keep up to
@@ -103,10 +123,12 @@ module.exports = function (RED) {
         message = 'Missing Watson Text to Speech service credentials';
       } else if (!method || '' === method) {
         message = 'Required mode has not been specified';
+      } else {
+        params = buildParams(msg, config);
       }
 
       if (message) {
-        reportError(node, msg, message);
+        payloadutils.reportError(node, msg, message);
         return;
       }
 

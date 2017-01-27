@@ -23,6 +23,7 @@ module.exports = function (RED) {
     fs = require('fs'),
     fileType = require('file-type'),
     serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
     STTV1 = require('watson-developer-cloud/speech-to-text/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = '', password = '', sUsername = '', sPassword = '';
@@ -44,6 +45,7 @@ module.exports = function (RED) {
     sPassword = service.password;
   }
 
+/*
   function reportError (node, msg, message) {
     var messageTxt = message.error ? message.error : message;
     msg.stterror = messageTxt;
@@ -51,12 +53,13 @@ module.exports = function (RED) {
     node.status({fill:'red', shape:'dot', text: messageTxt});
     node.error(messageTxt, msg);
   }
+*/
 
   function executeCreateCustomisation(node, stt, params, msg) {
     stt.createCustomization(params, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err);
+        payloadutils.reportError(node, msg, err);
       } else {
         msg['customization_id'] = response;
       }
@@ -68,7 +71,7 @@ module.exports = function (RED) {
     stt.getCustomizations(params, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err);
+        payloadutils.reportError(node, msg, err);
       } else {
         msg['customizations'] = response.customizations ?
                                       response.customizations: response;
@@ -81,7 +84,7 @@ module.exports = function (RED) {
     stt.getCustomization(params, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err);
+        payloadutils.reportError(node, msg, err);
       } else {
         msg['customization'] = response ;
       }
@@ -93,7 +96,7 @@ module.exports = function (RED) {
     stt.addCorpus(params, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err);
+        payloadutils.reportError(node, msg, err);
       } else {
         msg['addcorpusresponse'] = response ;
       }
@@ -105,7 +108,7 @@ module.exports = function (RED) {
     stt.getCorpora(params, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err);
+        payloadutils.reportError(node, msg, err);
       } else {
         msg['corpora'] = response.corpora ? response.corpora : response ;
       }
@@ -117,7 +120,7 @@ module.exports = function (RED) {
     stt.trainCustomization(params, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err);
+        payloadutils.reportError(node, msg, err);
       } else {
         msg['train'] = response ;
       }
@@ -129,7 +132,7 @@ module.exports = function (RED) {
     stt.getWords(params, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err);
+        payloadutils.reportError(node, msg, err);
       } else {
         msg['words'] = response.words ? response.words : response ;
       }
@@ -141,7 +144,7 @@ module.exports = function (RED) {
     stt.addWords(params, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err);
+        payloadutils.reportError(node, msg, err);
       } else {
         msg['addwordsresponse'] = response ;
       }
@@ -154,7 +157,7 @@ module.exports = function (RED) {
     stt.deleteCorpus(params, function (err, response) {
       node.status({});
       if (err) {
-        reportError(node, msg, err);
+        payloadutils.reportError(node, msg, err);
       } else {
         msg['delcorpusresponse'] = response ;
       }
@@ -340,7 +343,7 @@ module.exports = function (RED) {
       }
 
       if (message) {
-        reportError(node, msg, message);
+        payloadutils.reportError(node, msg, message);
         return;
       }
 
