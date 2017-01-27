@@ -40,12 +40,21 @@
     <div class="form-row">
         <label for="node-input-lang"><i class="fa fa-language"></i> Language</label>
         <select type="text" id="node-input-lang" style="display: inline-block; width: 70%;" >
-
         </select>
     </div>
     <div class="form-row">
         <input type="hidden" id="node-input-langhidden"/>
     </div>
+
+    <div class="form-row">
+        <label for="node-input-langcustom"><i class="fa fa-language"></i> Customization</label>
+        <select type="text" id="node-input-langcustom" style="display: inline-block; width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-langcustomhidden"/>
+    </div>
+
     <div class="form-row">
         <label for="node-input-voice"><i class="fa fa-comment"></i> Voice</label>
         <select type="text" id="node-input-voice" style="display: inline-block; width: 70%;">
@@ -62,6 +71,7 @@
             <option value="audio/ogg; codecs=opus">OGG</option>
         </select>
     </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-text-to-speech">
@@ -83,6 +93,9 @@
 
   // This is the namespace for tts.
   var tts = new TTS();
+  tts.custom_selected = '';
+  tts.customisations = null;
+
   //tts.language_selected = '';
   //tts.voice_selected = '';
   tts.LANGUAGES = { 'en-US': 'US English',
@@ -194,15 +207,48 @@
       $('label#node-label-message').parent().hide();
       $('select#node-input-lang').parent().hide();
       $('select#node-input-voice').parent().hide();
+      $('select#node-input-langcustom').parent().hide();
     }
-
   }
+
+  // Function to fetch the customisations, should only be done once
+  tts.fetchCustomisations = function() {
+    if (!tts.customisations) {
+      var u = $('#node-input-username').val();
+      var p = $('#node-input-password').val();
+
+      $.getJSON('watson-text-to-speech/customs',
+                 {un: u, pwd: p}
+      ).done(function (data) {
+        $('label#node-label-message').parent().hide();
+        if (data.error) {
+          $('label#node-label-message').parent().show();
+          $('label#node-label-message').text(data.error);        }
+        else {
+          tts.customisations = data.customizations;
+          tts.populateCustoms();
+        }
+      }).fail(function (err) {
+        var txt = 'Got server error ';
+        if (err.status) {
+          txt += '(' + err.status + ') '
+        }
+        txt += 'when trying to retrieve available customisations';
+        $('label#node-label-message').parent().show();
+        $('label#node-label-message').text(txt);
+      }).always(function () {
+      });
+
+    }
+  }
+
 
   // Function called when either when the voices have been retrieved, or
   // on dialog load, if the voices has already been retrieved
   tts.postVoiceCheck = function (){
     tts.processVoices();
     tts.visibilityCheck();
+    tts.fetchCustomisations();
   }
 
   // Retrieve the available voices from the server, if data is returned, then
@@ -238,6 +284,10 @@
 
     tts.voice_selected = $('#node-input-voicehidden').val();
     $('select#node-input-voice').val(tts.voice_selected);
+
+    tts.custom_selected = $('#node-input-langcustomhidden').val();
+    $('select#node-input-langcustom').val(tts.custom_selected);
+
   }
 
   // Simple check that is only invoked if the service is not bound into bluemix. In this case the
@@ -269,6 +319,56 @@
     tts.voice_selected = $('#node-input-voice').val();
   }
 
+  // Populate the customisations selection field
+  // Need to check if we have customisations and if the
+  // selected language and model have an entry.
+  tts.populateCustoms = function() {
+    var showit = false;
+
+    $('select#node-input-langcustom').empty();
+    if (tts.customisations) {
+      tts.language_selected = tts.language_selected ?
+                                  tts.language_selected :
+                                  $('#node-input-langhidden').val();
+
+      tts.customisations.forEach(function(c) {
+        // Should really be checking against the cached values
+        // stt.language_selected and stt.band_selected
+        // but for some reason they are not always set.
+
+        if (tts.language_selected === c['language']) {
+          showit = true;
+          var selectedText = '';
+          if (tts.custom_selected === c['customization_id']) {
+            selectedText = ' selected="selected" ';
+          }
+          $('select#node-input-langcustom')
+            .append('<option value='
+                          + '"' + c['customization_id'] + '"'
+                          + selectedText
+                          + '>'
+                          + c['name']
+                          + '</option>');
+        }
+      });
+    }
+
+    // Add an option to not select
+    $('select#node-input-langcustom')
+      .append('<option value='
+                    + 'NoCustomisationSetting'
+                    + '' //showit ? '' : ' selected="selected" '
+                    + '>'
+                    + 'None'
+                    + '</option>');
+
+
+    if (showit) {
+      $('select#node-input-langcustom').parent().show();
+    } else {
+      $('select#node-input-langcustom').parent().hide();
+    }
+  }
 
   // Register the onchange handlers
   tts.registerHandlers = function () {
@@ -281,11 +381,14 @@
     $('#node-input-lang').change(function () {
       tts.checkLanguage();
       tts.populateVoices();
+      tts.populateCustoms();
     });
     $('#node-input-voice').change(function () {
       tts.checkVoice();
     });
-
+    $('#node-input-langcustom').change(function (val) {
+      tts.custom_selected = $('#node-input-langcustom').val();
+    });
   }
 
   // Function to be used at the start, as don't want to expose any fields, unless the models are
@@ -295,6 +398,7 @@
       $('label#node-label-message').parent().hide();
       $('select#node-input-lang').parent().hide();
       $('select#node-input-voice').parent().hide();
+      $('select#node-input-langcustom').parent().hide();
     }
   }
 
@@ -324,6 +428,7 @@
   function ttsoneditsave(){
     $('#node-input-langhidden').val(tts.language_selected);
     $('#node-input-voicehidden').val(tts.voice_selected);
+    $('#node-input-langcustomhidden').val(tts.custom_selected);
   }
 
     (function() {
@@ -333,6 +438,8 @@
                 name: {value: ""},
                 lang: {value: ""},
                 langhidden: {value: ""},
+                langcustom: {value: ''},
+                langcustomhidden: {value: ''},
                 voice: {value: ""},
                 voicehidden: {value: ""},
                 format: {value: "audio/wav"},

@@ -143,8 +143,8 @@
     var p = $('#node-input-password').val();
 
     if (u && u.length && p) {
-      if (!tts.voices) {
-        tts.getVoices();
+      if (!ttsv1qbb.voices) {
+        ttsv1qbb.getVoices();
       }
     }
   }
@@ -294,6 +294,7 @@
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
+    console.log('invoking get for tts qb voices');
     $.getJSON('watson-text-to-speech-v1-query-builder/voices/',
     {un: u, pwd: p}).done(function (data) {
       if (data.error) {
@@ -301,6 +302,7 @@
         $('label#node-label-message').text(data.error);
       } else if (data.voices) {
         ttsv1qbb.voices = data.voices;
+        console.log('Invoking Post Voice Check');
         ttsv1qbb.postVoiceCheck();
       }
     }).fail(function (err) {

@@ -112,27 +112,35 @@ module.exports = function (RED) {
   }
 
 
-  function buildParams(msg, config) {
+  function buildParams(msg, method, config) {
     console.log('Building the Params');
     var params = {};
-    if (config['tts-lang']) {
-      params['language'] = config['tts-lang'];
-    }
 
-    if (config['tts-custom-model-name']) {
-      params['name'] = config['tts-custom-model-name'];
-    }
-
-    if (config['tts-custom-model-description']) {
-      params['description'] = config['tts-custom-model-description'];
-    }
-
-    if (config['tts-custom-id']) {
-      params['customization_id'] = config['tts-custom-id'];
-    }
-
+    switch (method) {
+    case 'createCustomisation':
+      if (config['tts-lang']) {
+        params['language'] = config['tts-lang'];
+      }
+      if (config['tts-custom-model-name']) {
+        params['name'] = config['tts-custom-model-name'];
+      }
+      if (config['tts-custom-model-description']) {
+        params['description'] = config['tts-custom-model-description'];
+      }
+      break;
+    case 'deleteWord':
     if (config['tts-custom-word']) {
       params['word'] = config['tts-custom-word'];
+    }
+    // No break here as want the custom id also
+    case 'listCustomisations':
+    case 'getCustomisation':
+    case 'addWords':
+    case 'getWords':
+      if (config['tts-custom-id']) {
+        params['customization_id'] = config['tts-custom-id'];
+      }
+      break;
     }
 
     return params;
@@ -152,11 +160,13 @@ module.exports = function (RED) {
 
   function executeListCustomisations(node, tts, params, msg) {
     console.log('About to List the Customisations');
+    console.log(params);
     tts.getCustomizations(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
+        console.log(response);
         msg['customizations'] = response.customizations ?
                                       response.customizations: response;
       }
@@ -295,7 +305,7 @@ module.exports = function (RED) {
       } else if (!method || '' === method) {
         message = 'Required mode has not been specified';
       } else {
-        params = buildParams(msg, config);
+        params = buildParams(msg, method, config);
       }
 
       if (message) {
