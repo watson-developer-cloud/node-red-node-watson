@@ -46,6 +46,26 @@
         </select>
     </div>
 
+    <div class="form-row">
+        <label for="node-input-tts-lang"><i class="fa fa-language"></i> Language</label>
+        <select type="text" id="node-input-tts-lang" style="display: inline-block; width: 70%;" >
+
+        </select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-tts-langhidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tts-custom-model-name"><i class="fa fa-book"></i> Custom Model Name</label>
+        <input type="text" id="node-input-tts-custom-model-name" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tts-custom-model-description"><i class="fa fa-book"></i> Custom Model Description</label>
+        <input type="text" id="node-input-tts-custom-model-description" placeholder="">
+    </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-text-to-speech-v1-query-builder">
@@ -90,6 +110,14 @@
                   };
 
   ttsv1qbb.voices = null;
+  ttsv1qbb.languages = null;
+  ttsv1qbb.language_selected = '';
+  ttsv1qbb.mode_selected = null;
+
+  // sorting functions
+  ttsv1qbb.onlyUnique = function (value, index, self) {
+    return self.indexOf(value) === index;
+  }
 
   // Simple check that is only invoked if the service is not bound into bluemix. In this case the
   // user has to provide credentials. Once there are credentials, then the
@@ -105,6 +133,25 @@
     }
   }
 
+  ttsv1qbb.showSelectedFields = function(fields) {
+    for (i = 0; i < fields.length; i++) {
+      $(fields[i]).parent().show();
+    }
+  }
+
+  ttsv1qbb.processSelectedMethod = function(method) {
+    ttsv1qbb.hideEverything();
+    fields = [];
+    switch (method) {
+      case 'createCustomisation':
+        fields.push('#node-input-tts-custom-model-name'
+                        + ', #node-input-tts-lang'
+                        + ', #node-input-tts-custom-model-description');
+        break;
+    }
+    ttsv1qbb.showSelectedFields(fields);
+  }
+
 
   // Register the handlers for the fields
   ttsv1qbb.handlersUI = function () {
@@ -113,6 +160,16 @@
     });
     $('#node-input-password').change(function(val){
       ttsv1qbb.checkCredentials();
+    });
+
+    $('#node-input-tts-custom-mode').change(function() {
+      ttsv1qbb.mode_selected = $('#node-input-tts-custom-mode').val();
+      ttsv1qbb.processSelectedMethod(ttsv1qbb.mode_selected);
+    });
+
+    $('#node-input-tts-lang').change(function () {
+      //tts.checkLanguage();
+      //tts.populateVoices();
     });
   }
 
@@ -124,22 +181,81 @@
   ttsv1qbb.restoreFromHidden = function () {
     //ttsv1qbb.model_selected = $('#node-input-base-model-hidden').val();
     //$('select#node-input-tts-base-model').val(tts.model_selected);
+    ttsv1qbb.language_selected = $('#node-input-tts-langhidden').val();
+    $('select#node-input-tts-lang').val(ttsv1qbb.language_selected);
+
   }
+
   // Function to be used at the start, as don't want to expose any fields, unless the models are
   // available. The models can only be fetched if the credentials are available.
   ttsv1qbb.hideEverything = function () {
     if (!ttsv1qbb.voices) {
       $('#credentials-not-found').show();
       $('label#node-label-message').parent().hide();
+      $('select#node-input-tts-lang').parent().hide();
+    }
+    $('input#node-input-tts-custom-model-name').parent().hide();
+    $('input#node-input-tts-custom-model-description').parent().hide();
+  }
+
+  // Called to complete the languages selection table
+  ttsv1qbb.processLanguages = function () {
+    if (!ttsv1qbb.languages && ttsv1qbb.voices) {
+      ttsv1qbb.languages = ttsv1qbb.voices.map(function(m) {
+        return m.language;
+      });
+    }
+    if (ttsv1qbb.languages) {
+      $('select#node-input-tts-lang').empty();
+      var unique_langs = ttsv1qbb.languages.filter(ttsv1qbb.onlyUnique);
+
+      unique_langs.forEach(function(l) {
+        var selectedText = '';
+        if (ttsv1qbb.language_selected === l) {
+          selectedText = 'selected="selected"';
+        }
+        $('select#node-input-tts-lang')
+          .append('<option value='
+                        + '"' + l + '"'
+                        + selectedText
+                         + '>'
+                        + (ttsv1qbb.LANGUAGES[l] ? ttsv1qbb.LANGUAGES[l] : l)
+                        + '</option>');
+      });
+    }
+  }
+
+  // Called to work through the voices, completing the dyanmic selection fields.
+  ttsv1qbb.processVoices = function () {
+    if (ttsv1qbb.voices) {
+      ttsv1qbb.processLanguages();
+      //ttsv1qbb.populateVoices();
+    }
+  }
+
+  ttsv1qbb.visibilityCheck = function ()
+  {
+    if (ttsv1qbb.voices) {
+      $('label#node-label-message').parent().hide();
+      $('select#node-input-tts-lang').parent().show();
+    } else {
+      $('label#node-label-message').parent().hide();
+      $('select#node-input-tts-lang').parent().hide();
     }
   }
 
   // Function called when either when the voices have been retrieved, or
   // on dialog load, if the voices has already been retrieved
   ttsv1qbb.postVoiceCheck = function (){
-    //tts.processVoices();
-    //tts.visibilityCheck();
+    ttsv1qbb.processVoices();
+    ttsv1qbb.visibilityCheck();
   }
+
+  ttsv1qbb.restoreFromHidden = function () {
+    ttsv1qbb.language_selected = $('#node-input-tts-langhidden').val();
+    $('select#node-input-tts-lang').val(ttsv1qbb.language_selected);
+  }
+
 
   // Retrieve the available voices from the server, if data is returned, then
   // can enable the dynamic selection fields.
@@ -169,7 +285,9 @@
   // is shown.
   function ttsv1qbboneditprepare() {
     console.log('In On Edit Prepare');
+
     ttsv1qbb.hideEverything();
+    ttsv1qbb.restoreFromHidden();
     ttsv1qbb.handlersUI();
 
     console.log('About to request credentials');
@@ -192,12 +310,11 @@
       }).always(function () {
         $('#credentials-check').hide();
      });
-
-
   }
 
   // Save the values in the dyanmic lists to the hidden fields.
   function ttsv1qbboneditsave(){
+    $('#node-input-tts-langhidden').val(ttsv1qbb.language_selected);
   }
 
     (function() {
@@ -206,14 +323,11 @@
             defaults: {
                 name: {value: ''},
                 password: {value: ''},
+                'tts-lang': {value: ""},
+                'tts-langhidden': {value: ""},
                 'tts-custom-mode': {value:"createCustomisation"},
                 'tts-custom-model-name' : {value: ''},
-                'tts-base-model' : {value: ''},
-                'base-model-hidden' : {value: ''},
                 'tts-custom-model-description' : {value: ''},
-                'tts-custom-id' : {value: ''},
-                'tts-corpus-name' : {value: ''},
-                'tts-allow-overwrite' : {value: false}
             },
             credentials: {
               username: {type:'text'} //,
