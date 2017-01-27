@@ -73,6 +73,37 @@ module.exports = function (RED) {
     return params;
   }
 
+  function executeCreateCustomisation(node, tts, params, msg) {
+    tts.createCustomization(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['customization_id'] = response;
+      }
+      node.send(msg);
+    });
+  }
+
+
+
+
+  function executeMethod(node, method, params, msg) {
+    var tts = new TextToSpeechV1({
+      username: username,
+      password: password,
+    });
+
+    node.status({fill:'blue', shape:'dot', text:'executing'});
+
+    switch (method) {
+    case 'createCustomisation':
+      executeCreateCustomisation(node, tts, params, msg);
+      break;
+    }
+  }
+
+
   // These are APIs that the node has created to allow it to dynamically fetch Bluemix
   // credentials, and also translation models. This allows the node to keep up to
   // date with new tranlations, without the need for a code update of this node.
@@ -132,6 +163,17 @@ module.exports = function (RED) {
         return;
       }
 
+      /*
+      if (checkForFile(method)) {
+        if (msg.payload instanceof Buffer) {
+          loadFile(node, method, params, msg);
+          return;
+        }
+        setFileParams(method, params, msg);
+      }
+      */
+
+      executeMethod(node, method, params, msg);
     });
   }
 

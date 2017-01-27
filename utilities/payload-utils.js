@@ -96,7 +96,6 @@ PayloadUtils.prototype = {
     node.error(messageTxt, msg);
   },
 
-
   // Function that is returns a function to count
   // the characters in each language.
   word_count: function(ct) {
