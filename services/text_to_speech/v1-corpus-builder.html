@@ -46,7 +46,9 @@
             <option value="listCustomisations">List Customizations</option>
             <option value="getCustomisation">Get Customization</option>
             <option value="addWords">Add Words</option>
-        </select>
+            <option value="getWords">Get Words</option>
+            <option value="deleteWord">Delete Word</option>
+          </select>
     </div>
 
     <div class="form-row">
@@ -73,6 +75,12 @@
         <label for="node-input-tts-custom-id"><i class="fa fa-book"></i> Customization ID</label>
         <input type="text" id="node-input-tts-custom-id" placeholder="">
     </div>
+
+    <div class="form-row">
+        <label for="node-input-tts-custom-word"><i class="fa fa-book"></i> Word</label>
+        <input type="text" id="node-input-tts-custom-word" placeholder="">
+    </div>
+
 
 </script>
 
@@ -156,10 +164,15 @@
                         + ', #node-input-tts-lang'
                         + ', #node-input-tts-custom-model-description');
         break;
-        case 'getCustomisation':
-        case 'addWords':
-          fields.push('#node-input-tts-custom-id');
-          break;
+      case 'deleteWord':
+        fields.push('#node-input-tts-custom-word'
+                        + ', #node-input-tts-custom-id');
+        break;
+      case 'getCustomisation':
+      case 'addWords':
+      case 'getWords':
+        fields.push('#node-input-tts-custom-id');
+        break;
     }
     ttsv1qbb.showSelectedFields(fields);
   }
@@ -212,6 +225,7 @@
     $('input#node-input-tts-custom-model-name').parent().hide();
     $('input#node-input-tts-custom-model-description').parent().hide();
     $('input#node-input-tts-custom-id').parent().hide();
+    $('input#node-input-tts-custom-word').parent().hide();
   }
 
   // Called to complete the languages selection table
@@ -344,7 +358,8 @@
                 'tts-custom-mode': {value:"createCustomisation"},
                 'tts-custom-model-name' : {value: ''},
                 'tts-custom-model-description' : {value: ''},
-                'tts-custom-id' : {value: ''}
+                'tts-custom-id' : {value: ''},
+                'tts-custom-word' : {value: ''}
             },
             credentials: {
               username: {type:'text'} //,

@@ -131,6 +131,10 @@ module.exports = function (RED) {
       params['customization_id'] = config['tts-custom-id'];
     }
 
+    if (config['tts-custom-word']) {
+      params['word'] = config['tts-custom-word'];
+    }
+
     return params;
   }
 
@@ -184,6 +188,30 @@ module.exports = function (RED) {
     });
   }
 
+  function executeGetWords(node, tts, params, msg) {
+    tts.getWords(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['words'] = response.words ? response.words: response;
+      }
+      node.send(msg);
+    });
+  }
+
+  function executeDeleteWord(node, tts, params, msg) {
+    tts.deleteWord(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['deletewordsresponse'] = response;
+      }
+      node.send(msg);
+    });
+  }
+
 
   function executeMethod(node, method, params, msg) {
     var tts = new TextToSpeechV1({
@@ -205,6 +233,12 @@ module.exports = function (RED) {
       break;
     case 'addWords':
       executeAddWords(node, tts, params, msg);
+      break;
+    case 'getWords':
+      executeGetWords(node, tts, params, msg);
+      break;
+    case 'deleteWord':
+      executeDeleteWord(node, tts, params, msg);
       break;
     }
   }
