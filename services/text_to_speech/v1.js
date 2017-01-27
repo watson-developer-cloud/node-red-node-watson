@@ -114,10 +114,7 @@ module.exports = function(RED) {
       // Check the params for customisation options
       if (config.langcustom && 'NoCustomisationSetting' !== config.langcustom) {
         params.customization_id = config.langcustom;
-      }      
-
-      console.log('Will be using params');
-      console.log(params);
+      }
 
       node.status({fill:"blue", shape:"dot", text:"requesting"});
       text_to_speech.synthesize(params, function (err, body, response) {
