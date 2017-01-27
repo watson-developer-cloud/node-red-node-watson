@@ -62,6 +62,29 @@ module.exports = function (RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
+  // API used by widget to fetch available voices
+  RED.httpAdmin.get('/watson-text-to-speech-v1-query-builder/voices', function (req, res) {
+    console.log('Received request for voices');
+    var tts = new TextToSpeechV1({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd
+    });
+
+    console.log('Checking Voices');
+    tts.voices({}, function(err, voices){
+      if (err) {
+        if (!err.error) {
+          err.error = 'Error ' + err.code + ' in fetching voices';
+        }
+        res.json(err);
+      } else {
+        console.log('Voices Found');
+        console.log(voices);
+        res.json(voices);
+      }
+    });
+  });
+
 
   // This is the Speech to Text V1 Query Builder Node
   function Node (config) {
