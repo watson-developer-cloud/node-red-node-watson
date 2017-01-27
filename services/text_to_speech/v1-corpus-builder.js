@@ -70,6 +70,10 @@ module.exports = function (RED) {
       params['description'] = config['tts-custom-model-description'];
     }
 
+    if (config['tts-custom-id']) {
+      params['customization_id'] = config['tts-custom-id'];
+    }
+
     return params;
   }
 
@@ -99,6 +103,18 @@ module.exports = function (RED) {
     });
   }
 
+  function executeGetCustomisation(node, tts, params, msg) {
+    tts.getCustomization(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['customization'] = response ;
+      }
+      node.send(msg);
+    });
+  }
+
   function executeMethod(node, method, params, msg) {
     var tts = new TextToSpeechV1({
       username: username,
@@ -114,7 +130,9 @@ module.exports = function (RED) {
     case 'listCustomisations':
       executeListCustomisations(node, tts, params, msg);
       break;
-
+    case 'getCustomisation':
+      executeGetCustomisation(node, tts, params, msg);
+      break;
     }
   }
 

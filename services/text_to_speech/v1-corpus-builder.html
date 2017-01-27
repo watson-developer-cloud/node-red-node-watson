@@ -44,6 +44,7 @@
         <select type="text" id="node-input-tts-custom-mode" style="display: inline-block; width: 70%;">
             <option value="createCustomisation">Create a custom language model</option>
             <option value="listCustomisations">List Customizations</option>
+            <option value="getCustomisation">Get Customization</option>
         </select>
     </div>
 
@@ -65,6 +66,11 @@
     <div class="form-row">
         <label for="node-input-tts-custom-model-description"><i class="fa fa-book"></i> Custom Model Description</label>
         <input type="text" id="node-input-tts-custom-model-description" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tts-custom-id"><i class="fa fa-book"></i> Customization ID</label>
+        <input type="text" id="node-input-tts-custom-id" placeholder="">
     </div>
 
 </script>
@@ -149,6 +155,9 @@
                         + ', #node-input-tts-lang'
                         + ', #node-input-tts-custom-model-description');
         break;
+        case 'getCustomisation':
+          fields.push('#node-input-tts-custom-id');
+          break;
     }
     ttsv1qbb.showSelectedFields(fields);
   }
@@ -200,6 +209,7 @@
     }
     $('input#node-input-tts-custom-model-name').parent().hide();
     $('input#node-input-tts-custom-model-description').parent().hide();
+    $('input#node-input-tts-custom-id').parent().hide();
   }
 
   // Called to complete the languages selection table
@@ -332,6 +342,7 @@
                 'tts-custom-mode': {value:"createCustomisation"},
                 'tts-custom-model-name' : {value: ''},
                 'tts-custom-model-description' : {value: ''},
+                'tts-custom-id' : {value: ''}
             },
             credentials: {
               username: {type:'text'} //,
