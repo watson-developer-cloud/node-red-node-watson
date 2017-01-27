@@ -168,6 +168,9 @@
     });
 
     $('#node-input-tts-lang').change(function () {
+      $('#node-input-tts-langhidden').val(ttsv1qbb.language_selected);
+      ttsv1qbb.language_selected = $('#node-input-tts-lang').val();
+
       //tts.checkLanguage();
       //tts.populateVoices();
     });
