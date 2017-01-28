@@ -31,7 +31,7 @@ module.exports = function (RED) {
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
 
-  var service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
+  service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
     sUsername = service.username;
