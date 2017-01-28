@@ -168,7 +168,7 @@ module.exports = function (RED) {
   function executeMethod(node, method, params, msg) {
     var stt = new STTV1({
       username: username,
-      password: password,
+      password: password
     });
 
     node.status({fill:'blue', shape:'dot', text:'executing'});

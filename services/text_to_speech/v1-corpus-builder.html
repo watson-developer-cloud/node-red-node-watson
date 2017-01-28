@@ -290,11 +290,9 @@
   // Retrieve the available voices from the server, if data is returned, then
   // can enable the dynamic selection fields.
   ttsv1qbb.getVoices = function (){
-    console.log('Fetching Voices');
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
-    console.log('invoking get for tts qb voices');
     $.getJSON('watson-text-to-speech-v1-query-builder/voices/',
     {un: u, pwd: p}).done(function (data) {
       if (data.error) {
@@ -302,7 +300,6 @@
         $('label#node-label-message').text(data.error);
       } else if (data.voices) {
         ttsv1qbb.voices = data.voices;
-        console.log('Invoking Post Voice Check');
         ttsv1qbb.postVoiceCheck();
       }
     }).fail(function (err) {
@@ -316,28 +313,22 @@
   // This is the on edit prepare function, which will be invoked everytime the dialog
   // is shown.
   function ttsv1qbboneditprepare() {
-    console.log('In On Edit Prepare');
-
     ttsv1qbb.hideEverything();
     ttsv1qbb.restoreFromHidden();
     ttsv1qbb.handlersUI();
 
-    console.log('About to request credentials');
     $.getJSON('watson-text-to-speech-v1-query-builder/vcap/')
       // for some reason the getJSON resets the vars so need to restoreFromHidden again
       // so again.
       .done(function (service) {
-        console.log('In Done');
         ttsv1qbb.restoreFromHidden();
         $('.credentials').toggle(!service);
         //if (!sttv1qbb.models) {sttv1qbb.getModels(service);}
         //else {sttv1qbb.postModelCheck();}
-        console.log('About to invoke getVoices');
-        if (!ttsv1qbb.voices) {console.log('There are no voices'); ttsv1qbb.getVoices();}
-        else {console.log('There are voices'); ttsv1qbb.postVoiceCheck();}
+        if (!ttsv1qbb.voices) {ttsv1qbb.getVoices();}
+        else {ttsv1qbb.postVoiceCheck();}
       })
       .fail(function () {
-        console.log('In Fail');
         $('.credentials').show();
       }).always(function () {
         $('#credentials-check').hide();

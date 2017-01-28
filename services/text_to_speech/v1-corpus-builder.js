@@ -55,96 +55,6 @@ module.exports = function (RED) {
   }
 */
 
-  function setFileParams(method, params, msg) {
-    switch (method) {
-    case 'addWords':
-      params.words = msg.payload;
-      break;
-    }
-  }
-
-  function loadFile(node, method, params, msg) {
-    temp.open({
-      suffix: '.txt'
-    }, function(err, info) {
-      if (err) {
-        node.status({
-          fill: 'red',
-          shape: 'dot',
-          text: 'Error receiving the data buffer for training'
-        });
-        throw err;
-      }
-
-      // Syncing up the asynchronous nature of the stream
-      // so that the full file can be sent to the API.
-      fs.writeFile(info.path, msg.payload, function(err) {
-        if (err) {
-          node.status({
-            fill: 'red',
-            shape: 'dot',
-            text: 'Error processing data buffer for training'
-          });
-          throw err;
-        }
-
-        switch (method) {
-        case 'addWords':
-          try {
-            params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
-          } catch (err) {
-            params.words = fs.createReadStream(info.path);
-          }
-        }
-
-        executeMethod(node, method, params, msg);
-        temp.cleanup();
-      });
-    });
-  }
-
-  function checkForFile(method) {
-    switch (method) {
-    case 'addWords':
-      return true;
-    }
-    return false;
-  }
-
-
-  function buildParams(msg, method, config) {
-    var params = {};
-
-    switch (method) {
-    case 'createCustomisation':
-      if (config['tts-lang']) {
-        params['language'] = config['tts-lang'];
-      }
-      if (config['tts-custom-model-name']) {
-        params['name'] = config['tts-custom-model-name'];
-      }
-      if (config['tts-custom-model-description']) {
-        params['description'] = config['tts-custom-model-description'];
-      }
-      break;
-    case 'deleteWord':
-    if (config['tts-custom-word']) {
-      params['word'] = config['tts-custom-word'];
-    }
-    // No break here as want the custom id also
-    case 'listCustomisations':
-    case 'getCustomisation':
-    case 'addWords':
-    case 'getWords':
-      if (config['tts-custom-id']) {
-        params['customization_id'] = config['tts-custom-id'];
-      }
-      break;
-    }
-
-    return params;
-  }
-
   function executeCreateCustomisation(node, tts, params, msg) {
     tts.createCustomization(params, function (err, response) {
       node.status({});
@@ -222,7 +132,7 @@ module.exports = function (RED) {
   function executeMethod(node, method, params, msg) {
     var tts = new TextToSpeechV1({
       username: username,
-      password: password,
+      password: password
     });
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
@@ -249,6 +159,101 @@ module.exports = function (RED) {
     }
   }
 
+  function setFileParams(method, params, msg) {
+    switch (method) {
+    case 'addWords':
+      params.words = msg.payload;
+      break;
+    }
+  }
+
+  function loadFile(node, method, params, msg) {
+    temp.open({
+      suffix: '.txt'
+    }, function(err, info) {
+      if (err) {
+        node.status({
+          fill: 'red',
+          shape: 'dot',
+          text: 'Error receiving the data buffer for training'
+        });
+        throw err;
+      }
+
+      // Syncing up the asynchronous nature of the stream
+      // so that the full file can be sent to the API.
+      fs.writeFile(info.path, msg.payload, function(err) {
+        if (err) {
+          node.status({
+            fill: 'red',
+            shape: 'dot',
+            text: 'Error processing data buffer for training'
+          });
+          throw err;
+        }
+
+        switch (method) {
+        case 'addWords':
+          try {
+            params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
+          } catch (err) {
+            params.words = fs.createReadStream(info.path);
+          }
+        }
+
+        executeMethod(node, method, params, msg);
+        temp.cleanup();
+      });
+    });
+  }
+
+  function checkForFile(method) {
+    switch (method) {
+    case 'addWords':
+      return true;
+    }
+    return false;
+  }
+
+  function paramsForNewCustom(config) {
+    var params = {};
+    
+    if (config['tts-lang']) {
+      params['language'] = config['tts-lang'];
+    }
+    if (config['tts-custom-model-name']) {
+      params['name'] = config['tts-custom-model-name'];
+    }
+    if (config['tts-custom-model-description']) {
+      params['description'] = config['tts-custom-model-description'];
+    }
+    return params;
+  }
+
+  function buildParams(msg, method, config) {
+    var params = {};
+
+    switch (method) {
+    case 'createCustomisation':
+      params = paramsForNewCustom(config);
+      break;
+    case 'deleteWord':
+      if (config['tts-custom-word']) {
+        params['word'] = config['tts-custom-word'];
+      }
+    // No break here as want the custom id also
+    case 'listCustomisations':
+    case 'getCustomisation':
+    case 'addWords':
+    case 'getWords':
+      if (config['tts-custom-id']) {
+        params['customization_id'] = config['tts-custom-id'];
+      }
+      break;
+    }
+
+    return params;
+  }
 
   // These are APIs that the node has created to allow it to dynamically fetch Bluemix
   // credentials, and also translation models. This allows the node to keep up to
@@ -277,7 +282,6 @@ module.exports = function (RED) {
       }
     });
   });
-
 
   // This is the Speech to Text V1 Query Builder Node
   function Node (config) {

@@ -90,6 +90,7 @@ PayloadUtils.prototype = {
 
   reportError: function (node, msg, message) {
     var messageTxt = message.error ? message.error : message;
+    
     msg.watsonerror = messageTxt;
 
     node.status({fill:'red', shape:'dot', text: messageTxt});
