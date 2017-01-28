@@ -88,12 +88,49 @@
     <p>The Speech To Text Custom Builder is used to create customisations
     for Speech to Text. It supports the following modes </p>
     <ul>
+
     <li>Create Custom Language Model
       <p>In this mode, a new empty custom model is created. The
         new customization id is returned on
         <code>msg.customization_id</code>
       </p>
     </li>
+
+    <li>List Customizations
+      <p> Use this mode to list customizations such as the name and description
+        for all custom voice models that you own for all languages.
+        Data is returned on <code>msg.customizations</code>
+      </p>
+    </li>
+
+    <li>Get Customization
+      <p> Use this mode to list all information about a specifid
+        custom voice model. The response includes the words in the model
+        and their translations as defined in the model.
+        Data is returned on <code>msg.customization</code>
+      </p>
+    </li>
+
+    <li>Add Words
+      <p> Adds one or more words and their translations to the
+        specified custom voice model. The input corpus content should be
+        provided as buffer or JSoN Array of Words on
+        <code>msg.payload</code> 
+      </p>
+    </li>
+
+    <li>Get Words
+      <p> Lists all of the words and their translations for the specified
+      custom voice model.
+      Data is returned on <code>msg.words</code>
+      </p>
+    </li>
+
+    <li>Delete Word
+      <p> Deletes a single word from the specified custom voice model.
+      </p>
+    </li>
+
     </ul>
 
     <p>For more information about Speech To Text customisation,
