@@ -18,7 +18,6 @@ module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'tone-analyzer';
   var ToneAnalyzerV3 = require('watson-developer-cloud/tone-analyzer/v3'),
     serviceutils = require('../../utilities/service-utils'),
-    cfenv = require('cfenv'),
     toneutils = require('../../utilities/tone-utils'),
     username = '', password = '', sUsername = '', sPassword = '',
     service = null;
