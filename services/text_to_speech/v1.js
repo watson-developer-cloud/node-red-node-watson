@@ -64,6 +64,22 @@ module.exports = function(RED) {
     });
   });
 
+  // API used by widget to fetch available customisations
+  RED.httpAdmin.get('/watson-text-to-speech/customs', function (req, res) {
+    var tts = new TextToSpeechV1({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd
+    });
+
+    tts.getCustomizations({}, function(err, customs){
+      if (err) {
+        res.json(err);
+      } else {
+        res.json(customs);
+      }
+    });
+  });
+
   function Node(config) {
     RED.nodes.createNode(this, config);
     var node = this;
@@ -94,6 +110,11 @@ module.exports = function(RED) {
         voice: msg.voice || config.voice,
         accept: config.format
       };
+
+      // Check the params for customisation options
+      if (config.langcustom && 'NoCustomisationSetting' !== config.langcustom) {
+        params.customization_id = config.langcustom;
+      }
 
       node.status({fill:"blue", shape:"dot", text:"requesting"});
       text_to_speech.synthesize(params, function (err, body, response) {
