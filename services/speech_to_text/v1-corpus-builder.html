@@ -45,6 +45,7 @@
             <option value="createCustomisation">Create a custom language model</option>
             <option value="listCustomisations">List Customizations</option>
             <option value="getCustomisation">Get Customization</option>
+            <option value="deleteCustomisation">Delete Customization</option>
             <option value="addCorpus">Add Corpus</option>
             <option value="getCorpora">Get Corpora</option>
             <option value="train">Train</option>
@@ -111,6 +112,10 @@
       <p>In this mode, details for the specified customization
         is returned on
         <code>msg.customization</code>
+      </p>
+    </li>
+    <li>Delete Customization
+      <p>In this mode, the specified customization is deleted.
       </p>
     </li>
     <li>Add Corpus
@@ -217,6 +222,7 @@
                         + ', #node-input-stt-custom-model-description');
         break;
       case 'getCustomisation':
+      case 'deleteCustomisation':
       case 'getCorpora':
       case 'train':
       case 'listCustomWords':
@@ -224,10 +230,13 @@
         fields.push('#node-input-stt-custom-id');
         break;
       case 'addCorpus':
+        fields.push('#node-input-stt-custom-id'
+                     + ', #node-input-stt-corpus-name'
+                     + ', #node-input-stt-allow-overwrite');
+        break;
       case 'deleteCorpus':
           fields.push('#node-input-stt-custom-id'
-                         + ', #node-input-stt-corpus-name'
-                         + ', #node-input-stt-allow-overwrite');
+                         + ', #node-input-stt-corpus-name');
           break;
     }
     sttv1qbb.showSelectedFields(fields);
