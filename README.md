@@ -7,12 +7,15 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.4.40
+- Add delete customization to Speech to Text Customization Node.
+
 ### New in version 0.4.39
-- Add description to Info panel for Text to Speech Customizations Node
+- Add description to Info panel for Text to Speech Customizations Node.
 - Tone node updated to use url based services utility to detect bound service.
 
 ### New in version 0.4.38
-- New Node for Text to Speech Customizations
+- New Node for Text to Speech Customizations.
 - Added option to select Customization in Text To Speech Node.
 
 ### New in version 0.4.37
