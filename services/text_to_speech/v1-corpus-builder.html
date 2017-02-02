@@ -79,6 +79,16 @@
     </div>
 
     <div class="form-row">
+        <label for="node-input-voice"><i class="fa fa-comment"></i> Voice</label>
+        <select type="text" id="node-input-tts-voice" style="display: inline-block; width: 70%;">
+         </select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-tts-voicehidden"/>
+    </div>
+
+
+    <div class="form-row">
         <label for="node-input-tts-custom-model-name"><i class="fa fa-book"></i> Custom Model Name</label>
         <input type="text" id="node-input-tts-custom-model-name" placeholder="">
     </div>
@@ -181,7 +191,9 @@
   ttsv1qbb.voices = null;
   ttsv1qbb.languages = null;
   ttsv1qbb.language_selected = '';
+  ttsv1qbb.voice_selected = '';
   ttsv1qbb.mode_selected = null;
+  ttsv1qbb.voicenames = null;
 
   // sorting functions
   ttsv1qbb.onlyUnique = function (value, index, self) {
@@ -222,9 +234,10 @@
     if ('custom' == vorc) {
       showfields.push('#node-input-tts-custom-id');
       hidefields.push('#node-input-tts-lang');
-
+      hidefields.push('#node-input-tts-voice');
     } else {
       showfields.push('#node-input-tts-lang');
+      showfields.push('#node-input-tts-voice');
       hidefields.push('#node-input-tts-custom-id');
     }
     ttsv1qbb.showSelectedFields(showfields);
@@ -261,6 +274,50 @@
   }
 
 
+  // Populate the Voices selection field
+  ttsv1qbb.populateVoices = function () {
+    if (!ttsv1qbb.voicenames && ttsv1qbb.voices) {
+      ttsv1qbb.voicenames = ttsv1qbb.voices.map(function(m) {
+        //return m.name.split('_')[1];
+        return m.name;
+      });
+      var unique_voices = ttsv1qbb.voicenames.filter(ttsv1qbb.onlyUnique);
+      ttsv1qbb.voicenames = unique_voices;
+    }
+    if (!ttsv1qbb.voicedata && ttsv1qbb.voicenames){
+      ttsv1qbb.voicedata = [];
+      ttsv1qbb.voicenames.forEach(function(a){
+        var element = {};
+        var bits = a.split('_');
+        element.full = a;
+        element.language = bits[0];
+        element.person = bits[1].replace('Voice','');;
+        ttsv1qbb.voicedata.push(element);
+      });
+    }
+
+    if (ttsv1qbb.voicedata) {
+      $('select#node-input-tts-voice').empty();
+
+      ttsv1qbb.voicedata.forEach(function(b) {
+        var selectedText = '';
+        if (ttsv1qbb.voice_selected === b.full) {
+          selectedText = 'selected="selected"';
+        }
+        if (ttsv1qbb.language_selected === b.language) {
+          $('select#node-input-tts-voice')
+            .append('<option value='
+                          + '"' + b.full + '"'
+                          + selectedText
+                          + '>'
+                          + b.person
+                          + '</option>');
+        }
+      });
+    }
+  }
+
+
   // Register the handlers for the fields
   ttsv1qbb.handlersUI = function () {
     $('#node-input-username').change(function(val){
@@ -280,8 +337,14 @@
       ttsv1qbb.language_selected = $('#node-input-tts-lang').val();
 
       //tts.checkLanguage();
-      //tts.populateVoices();
+      ttsv1qbb.populateVoices();
     });
+
+    $('#node-input-tts-voice').change(function () {
+      $('#node-input-tts-voicehidden').val(ttsv1qbb.voice_selected);
+      ttsv1qbb.voice_selected = $('#node-input-tts-voice').val();
+    });
+
 
     $('#node-input-tts-voice-or-custom').change(function() {
       console.log('voice or custom option is set to ', $('#node-input-tts-voice-or-custom').val());
@@ -304,22 +367,29 @@
     ttsv1qbb.language_selected = $('#node-input-tts-langhidden').val();
     $('select#node-input-tts-lang').val(ttsv1qbb.language_selected);
 
+    ttsv1qbb.voice_selected = $('#node-input-tts-voicehidden').val();
+    $('select#node-input-tts-voice').val(ttsv1qbb.voice_selected);
   }
 
   // Function to be used at the start, as don't want to expose any fields, unless the models are
   // available. The models can only be fetched if the credentials are available.
   ttsv1qbb.hideEverything = function () {
+    var hidefields = [];
+
     if (!ttsv1qbb.voices) {
       $('#credentials-not-found').show();
-      $('label#node-label-message').parent().hide();
+      hidefields.push('#node-label-message');
     }
-    $('select#node-input-tts-lang').parent().hide();
-    $('input#node-input-tts-custom-model-name').parent().hide();
-    $('input#node-input-tts-custom-model-description').parent().hide();
-    $('input#node-input-tts-custom-id').parent().hide();
-    $('input#node-input-tts-custom-word').parent().hide();
-    $('select#node-input-tts-custom-format').parent().hide();
-    $('select#node-input-tts-voice-or-custom').parent().hide();
+    hidefields.push('#node-input-tts-lang');
+    hidefields.push('#node-input-tts-custom-model-name');
+    hidefields.push('#node-input-tts-custom-model-description');
+    hidefields.push('#node-input-tts-custom-id');
+    hidefields.push('#node-input-tts-custom-word');
+    hidefields.push('#node-input-tts-custom-format');
+    hidefields.push('#node-input-tts-voice-or-custom');
+    hidefields.push('#node-input-tts-voice');
+
+    ttsv1qbb.hideSelectedFields(hidefields);
   }
 
   // Called to complete the languages selection table
@@ -353,7 +423,7 @@
   ttsv1qbb.processVoices = function () {
     if (ttsv1qbb.voices) {
       ttsv1qbb.processLanguages();
-      //ttsv1qbb.populateVoices();
+      ttsv1qbb.populateVoices();
     }
   }
 
@@ -432,6 +502,7 @@
   // Save the values in the dyanmic lists to the hidden fields.
   function ttsv1qbboneditsave(){
     $('#node-input-tts-langhidden').val(ttsv1qbb.language_selected);
+    $('#node-input-tts-voicehidden').val(ttsv1qbb.voice_selected);
   }
 
     (function() {
@@ -448,7 +519,9 @@
                 'tts-custom-id' : {value: ''},
                 'tts-custom-word' : {value: ''},
                 'tts-custom-format' : {value: ''},
-                'tts-voice-or-custom' : {value: ''}
+                'tts-voice-or-custom' : {value: ''},
+                'tts-voice': {value: ""},
+                'tts-voicehidden': {value: ""}
             },
             credentials: {
               username: {type:'text'} //,
