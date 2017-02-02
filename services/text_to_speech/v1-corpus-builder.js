@@ -92,6 +92,20 @@ module.exports = function (RED) {
     });
   }
 
+  function executeGetPronounce(node, tts, params, msg) {
+    tts.pronunciation(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['pronunciation'] = response.pronunciation ?
+                                    response.pronunciation : response;
+      }
+      node.send(msg);
+    });
+  }
+
+
   function executeAddWords(node, tts, params, msg) {
     tts.addWords(params, function (err, response) {
       node.status({});
@@ -128,6 +142,11 @@ module.exports = function (RED) {
     });
   }
 
+  function executeUnknownMethod(node, tts, params, msg) {
+    payloadutils.reportError(node, msg, 'Unknown Mode');
+    msg.error = 'Unable to process as unknown mode has been specified';
+    node.send(msg);
+  }
 
   function executeMethod(node, method, params, msg) {
     var tts = new TextToSpeechV1({
@@ -147,6 +166,9 @@ module.exports = function (RED) {
     case 'getCustomisation':
       executeGetCustomisation(node, tts, params, msg);
       break;
+    case 'getPronounce':
+      executeGetPronounce(node, tts, params, msg);
+      break;
     case 'addWords':
       executeAddWords(node, tts, params, msg);
       break;
@@ -155,6 +177,9 @@ module.exports = function (RED) {
       break;
     case 'deleteWord':
       executeDeleteWord(node, tts, params, msg);
+      break;
+    default:
+      executeUnknownMethod(node, tts, params, msg);
       break;
     }
   }
@@ -217,7 +242,7 @@ module.exports = function (RED) {
 
   function paramsForNewCustom(config) {
     var params = {};
-    
+
     if (config['tts-lang']) {
       params['language'] = config['tts-lang'];
     }
@@ -230,12 +255,37 @@ module.exports = function (RED) {
     return params;
   }
 
+  function paramsForGetPronounce(config) {
+    var params = {};
+
+    if (config['tts-custom-word']) {
+      params['text'] = config['tts-custom-word'];
+    }
+    if (config['tts-custom-format']) {
+      params['format'] = config['tts-custom-format'];
+    }
+    if ('custom' === config['tts-voice-or-custom']) {
+      if (config['tts-custom-id']) {
+        params['customization_id'] = config['tts-custom-id'];
+      }
+    } else if ( config['tts-voice'] ) {
+      params['voice'] = config['tts-voice'];
+    }
+
+    console.log('Params will be :', params);
+    return params;
+  }
+
+
   function buildParams(msg, method, config) {
     var params = {};
 
     switch (method) {
     case 'createCustomisation':
       params = paramsForNewCustom(config);
+      break;
+    case 'getPronounce':
+      params = paramsForGetPronounce(config);
       break;
     case 'deleteWord':
       if (config['tts-custom-word']) {
