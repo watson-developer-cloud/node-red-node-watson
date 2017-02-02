@@ -269,7 +269,7 @@ module.exports = function (RED) {
         params['customization_id'] = config['tts-custom-id'];
       }
     } else if ( config['tts-voice'] ) {
-        params['voice'] = config['tts-voice'];
+      params['voice'] = config['tts-voice'];
     }
 
     console.log('Params will be :', params);
