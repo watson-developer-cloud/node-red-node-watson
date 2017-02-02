@@ -92,6 +92,19 @@ module.exports = function (RED) {
     });
   }
 
+  function executeDeleteCustomisation(node, stt, params, msg) {
+    stt.deleteCustomization(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['delcustomresponse'] = response ;
+      }
+      node.send(msg);
+    });
+  }
+
+
   function executeAddCorpus(node, stt, params, msg) {
     stt.addCorpus(params, function (err, response) {
       node.status({});
@@ -183,6 +196,9 @@ module.exports = function (RED) {
     case 'getCustomisation':
       executeGetCustomisation(node, stt, params, msg);
       break;
+    case 'deleteCustomisation':
+      executeDeleteCustomisation(node, stt, params, msg);
+      break;
     case 'addCorpus':
       executeAddCorpus(node, stt, params, msg);
       break;
@@ -204,27 +220,62 @@ module.exports = function (RED) {
     }
   }
 
-  function buildParams(msg, config) {
+  function paramsForNewCustom(config) {
     var params = {};
+
     if (config['stt-base-model']) {
       params['base_model_name'] = config['stt-base-model'];
     }
-
     if (config['stt-custom-model-name']) {
       params['name'] = config['stt-custom-model-name'];
-    } else if (config['stt-corpus-name']) {
-      params['name'] = config['stt-corpus-name'];
     }
-
     if (config['stt-custom-model-description']) {
       params['description'] = config['stt-custom-model-description'];
+    }
+
+    return params;
+  }
+
+  function paramsForCorpus(config, method) {
+    var params = {};
+
+    if (config['stt-corpus-name']) {
+      params['name'] = config['stt-corpus-name'];
     }
     if (config['stt-custom-id']) {
       params['customization_id'] = config['stt-custom-id'];
     }
-
-    if ('addCorpus' === config['stt-custom-mode']) {
+    if ('addCorpus' === method) {
       params['allow_overwrite'] = config['stt-allow-overwrite'];
+    }
+
+    return params;
+  }
+
+
+  function buildParams(msg, method, config) {
+    var params = {};
+
+    switch (method) {
+    case 'createCustomisation':
+      params = paramsForNewCustom(config);
+      break;
+    case 'listCustomisations':
+      break;
+    case 'getCustomisation':
+    case 'getCorpora':
+    case 'train':
+    case 'listCustomWords':
+    case 'addWords':
+    case 'deleteCustomisation':
+      if (config['stt-custom-id']) {
+        params['customization_id'] = config['stt-custom-id'];
+      }
+      break;
+    case 'addCorpus':
+    case 'deleteCorpus':
+      params = paramsForCorpus(config, method);
+      break;
     }
 
     return params;
@@ -339,7 +390,7 @@ module.exports = function (RED) {
       } else if (!method || '' === method) {
         message = 'Required mode has not been specified';
       } else {
-        params = buildParams(msg,config);
+        params = buildParams(msg, method, config);
       }
 
       if (message) {
