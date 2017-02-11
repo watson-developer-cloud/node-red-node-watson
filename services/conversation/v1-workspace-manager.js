@@ -60,6 +60,18 @@ module.exports = function (RED) {
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
+        msg['workspaceresponse'] = response;
+      }
+      node.send(msg);
+    });
+  }
+
+  function executeCreateWorkspace(node, conv, params, msg) {
+    conv.createWorkspace(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
         msg['workspace'] = response;
       }
       node.send(msg);
@@ -89,6 +101,9 @@ module.exports = function (RED) {
     case 'getWorkspace':
       executeGetWorkspace(node, conv, params, msg);
       break;
+    case 'createWorkspace':
+      executeCreateWorkspace(node, conv, params, msg);
+      break;
     default:
       executeUnknownMethod(node, conv, params, msg);
       break;
@@ -110,15 +125,20 @@ module.exports = function (RED) {
     return params;
   }
 
-  function setFileParams(method, params, msg) {
-    switch (method) {
-    case 'addCorpus':
-      params.corpus = msg.payload;
-      break;
-    case 'addWords':
-      params.words = msg.payload;
-      break;
+  // No need to have complicated processing here Looking
+  // for individual fields in the json object, like name,
+  // language, entities etc. as these are the parameters
+  // required for this method are in the json object, at
+  // the top level of the json object. So it is safe
+  // to overwrite params.
+  //  'name', 'language', 'entities', 'intents',
+  // 'dialog_nodes', 'metadata', 'description',
+  // 'counterexamples'
+  function setWorkspaceParams(params, workspaceObject) {
+    if (workspaceObject) {
+      params = workspaceObject;
     }
+    return params;
   }
 
   function loadFile(node, method, params, msg) {
@@ -146,18 +166,18 @@ module.exports = function (RED) {
           throw err;
         }
 
+        var workspaceObject = null;
+
         switch (method) {
-        case 'addCorpus':
-          params.corpus = fs.createReadStream(info.path);
-          break;
-        case 'addWords':
+        case 'createWorkspace':
           try {
-            params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
+            workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
           } catch (err) {
-            params.words = fs.createReadStream(info.path);
+            workspaceObject = fs.createReadStream(info.path);
           }
         }
 
+        params = setWorkspaceParams(params, workspaceObject);
         executeMethod(node, method, params, msg);
         temp.cleanup();
       });
@@ -166,8 +186,7 @@ module.exports = function (RED) {
 
   function checkForFile(method) {
     switch (method) {
-    case 'addCorpus':
-    case 'addWords':
+    case 'createWorkspace':
       return true;
     }
     return false;
@@ -215,7 +234,9 @@ module.exports = function (RED) {
           loadFile(node, method, params, msg);
           return;
         }
-        setFileParams(method, params, msg);
+        // If the data is a json object then it will not
+        // have been detected as a buffer.
+        params = setWorkspaceParams(params, msg.payload);
       }
 
       executeMethod(node, method, params, msg);

@@ -44,6 +44,7 @@
         <select type="text" id="node-input-cwm-custom-mode" style="display: inline-block; width: 70%;">
             <option value="listWorkspaces">List Workspaces</option>
             <option value="getWorkspace">Get Workspace Details</option>
+            <option value="createWorkspace">Create Workspace</option>
         </select>
     </div>
 
@@ -62,19 +63,27 @@
 <script type="text/x-red" data-help-name="watson-conversation-v1-workspace-manager">
     <p>The Conversation Workspace Manager is used to ... </p>
     <ul>
-    <li>listWorkspaces
+    <li>list Workspaces
       <p>In this mode a list of all workspaces a that you have
         created in the conversation services are returned on
         <code>msg.workspaces</code>
       </p>
     </li>
-    <li>getWorkspace
+    <li>Get Workspace
       <p>In this mode all information about a workspace,
         optionally including all workspace content, is retrieved.
         The information is returned on
         <code>msg.workspace</code>
       </p>
     </li>
+    <li>Create Workspace
+      <p>In this mode, a new worskpace is created. The input json structure
+        defining the content of the new workspace.
+        should be passed in
+        as <code>msg.payload</code>
+      </p>
+    </li>
+
     </ul>
 
     <p>For more information about the conversation service,
@@ -127,6 +136,7 @@
                        + ', #node-input-cwm-export-content');
         break;
       case 'listWorkspaces':
+      case 'createWorkspace':
         break;
     }
     cv1wm.showSelectedFields(fields);
@@ -170,7 +180,7 @@
                 name: {value: ''},
                 'cwm-custom-mode': {value:"listWorkspaces"},
                 'cwm-workspace-id': {value:""},
-                'cwm-export-content': {value:false}            
+                'cwm-export-content': {value:false}
             },
             credentials: {
               username: {type:'text'},
