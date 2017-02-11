@@ -42,7 +42,7 @@
     <div class="form-row">
         <label for="node-input-cwm-custom-mode"><i class="fa fa-book"></i> Detect: </label>
         <select type="text" id="node-input-cwm-custom-mode" style="display: inline-block; width: 70%;">
-            <option value="blahBlah">Do Blah Blah</option>
+            <option value="listWorkspaces">List Workspaces</option>
         </select>
     </div>
 
@@ -51,8 +51,11 @@
 <script type="text/x-red" data-help-name="watson-conversation-v1-workspace-manager">
     <p>The Conversation Workspace Manager is used to ... </p>
     <ul>
-    <li>Blah Blah
-      <p>In this mode ...       </p>
+    <li>listWorkspaces
+      <p>In this mode aa list of all workspaces a that you have
+        created in the conversation services are returned on
+        <code>msg.workspaces</code>
+      </p>
     </li>
     </ul>
 
@@ -93,7 +96,7 @@
     cv1wm.hideEverything();
     fields = [];
     switch (method) {
-      case 'createCustomisation':
+      case 'listWorkspaces':
         break;
     }
     cv1wm.showSelectedFields(fields);
@@ -135,8 +138,7 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ''},
-                //password: {value: ''},
-                'cwm-custom-mode': {value:"createCustomisation"}
+                'cwm-custom-mode': {value:"listWorkspaces"}
             },
             credentials: {
               username: {type:'text'},

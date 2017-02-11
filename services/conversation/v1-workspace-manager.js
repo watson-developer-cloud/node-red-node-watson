@@ -41,6 +41,19 @@ module.exports = function (RED) {
     sPassword = service.password;
   }
 
+  function executeListWorkspaces(node, conv, params, msg) {
+    conv.listWorkspaces(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['workspaces'] = response.workspaces ?
+                                      response.workspaces: response;
+      }
+      node.send(msg);
+    });
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     payloadutils.reportError(node, msg, 'Unknown Mode');
     msg.error = 'Unable to process as unknown mode has been specified';
@@ -57,8 +70,8 @@ module.exports = function (RED) {
     node.status({fill:'blue', shape:'dot', text:'executing'});
 
     switch (method) {
-    case 'xyz':
-      //executeCreateCustomisation(node, conv, params, msg);
+    case 'listWorkspaces':
+      executeListWorkspaces(node, conv, params, msg);
       break;
     default:
       executeUnknownMethod(node, conv, params, msg);
