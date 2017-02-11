@@ -9,6 +9,7 @@ Node-RED Watson Nodes for IBM Bluemix
 
 ### New in version 0.4.43
 - Bump version of Conversation interface to '2017-02-03'
+- New node for Conversation Workspace Management
 
 ### New in version 0.4.42
 - Clean up fix in Speech to Text Node, which caused problems with long audio tracks.
