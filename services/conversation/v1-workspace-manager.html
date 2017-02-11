@@ -1,0 +1,226 @@
+<!--
+  Copyright 2017 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-conversation-v1-workspace-manager">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+
+    <div>
+        <label id="node-label-message"><i class="fa fa-exclamation-triangle"></i></label>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name"></input>
+    </div>
+
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username"></input>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password"></input>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-custom-mode"><i class="fa fa-book"></i> Detect: </label>
+        <select type="text" id="node-input-cwm-custom-mode" style="display: inline-block; width: 70%;">
+            <option value="listWorkspaces">List Workspaces</option>
+            <option value="getWorkspace">Get Workspace Details</option>
+            <option value="createWorkspace">Create Workspace</option>
+            <option value="updateWorkspace">Update Workspace</option>
+            <option value="deleteWorkspace">Delete Workspace</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-workspace-id"><i class="fa fa-book"></i> Workspace ID</label>
+        <input type="text" id="node-input-cwm-workspace-id" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-export-content"><i class="fa fa-book"></i> Export All Content</label>
+        <input type="checkbox" id="node-input-cwm-export-content" placeholder="">
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="watson-conversation-v1-workspace-manager">
+    <p>The Conversation Workspace Manager is used to ... </p>
+    <ul>
+    <li>list Workspaces
+      <p>In this mode a list of all workspaces a that you have
+        created in the conversation services are returned on
+        <code>msg.workspaces</code>
+      </p>
+    </li>
+    <li>Get Workspace
+      <p>In this mode all information about a workspace,
+        optionally including all workspace content, is retrieved.
+        The information is returned on
+        <code>msg.workspace</code>
+      </p>
+    </li>
+    <li>Create Workspace
+      <p>In this mode, a new worskpace is created. The input json structure
+        defining the content of the new workspace
+        should be passed in
+        as <code>msg.payload</code>
+      </p>
+    </li>
+    <li>Update Workspace
+      <p>In this mode, the specified worskpace is updated. The input json structure
+        defining the content of the updates
+        should be passed in
+        as <code>msg.payload</code>. Only the elements need to be included
+        in the json. Any included element will override the existing setting
+        for the element. ie. If only updating entities, then only entities need
+        to be included in the json. Any existing entities in the workspace will
+        be overridden. ie. If any entity is not mentioned in the json, then it
+        will be deleted from the workspace.
+      </p>
+    </li>
+    <li>Delete Workspace
+      <p>In this mode the selected workspace is deleted.
+      </p>
+    </li>
+    </ul>
+
+    <p>For more information about the conversation service,
+    read the <a href="https://www.ibm.com/watson/developercloud/doc/conversation/index.html">
+    documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+
+  // Need to simulate a namespace, as some of the variables had started to leak across nodes
+  function CV1WM () {
+  }
+
+  // This is the namespace for cv1wm. Currently only contains models, but more vars and functions may need to be
+  // moved in if there is a clash with other nodes.
+  var cv1wm = new CV1WM();
+  cv1wm.mode_selected = null;
+
+  cv1wm.showSelectedFields = function(fields) {
+    for (i = 0; i < fields.length; i++) {
+      $(fields[i]).parent().show();
+    }
+  }
+
+  cv1wm.hideSelectedFields = function(fields) {
+    for (i = 0; i < fields.length; i++) {
+      $(fields[i]).parent().hide();
+    }
+  }
+
+  // Function to be used at the start, as don't want to expose any fields, unless the models are
+  // available. The models can only be fetched if the credentials are available.
+  cv1wm.hideEverything = function () {
+    var fields = [];
+
+    fields.push('#node-input-cwm-workspace-id'
+                     + ', #node-input-cwm-export-content');
+
+    cv1wm.hideSelectedFields(fields);
+  }
+
+  cv1wm.processSelectedMethod = function(method) {
+    var fields = [];
+
+    cv1wm.hideEverything();
+
+    switch (method) {
+      case 'getWorkspace':
+        fields.push('#node-input-cwm-workspace-id'
+                       + ', #node-input-cwm-export-content');
+        break;
+      case 'deleteWorkspace':
+      case 'updateWorkspace':
+        fields.push('#node-input-cwm-workspace-id');
+        break;
+      case 'listWorkspaces':
+      case 'createWorkspace':
+        break;
+    }
+    cv1wm.showSelectedFields(fields);
+  }
+
+  // Register the handlers for the fields
+  cv1wm.handlersUI = function () {
+    $('#node-input-cwm-custom-mode').change(function() {
+      cv1wm.mode_selected = $('#node-input-cwm-custom-mode').val();
+      cv1wm.processSelectedMethod(cv1wm.mode_selected);
+    });
+  }
+
+  // This is the on edit prepare function, which will be invoked everytime the dialog
+  // is shown.
+  function cv1wmoneditprepare() {
+    cv1wm.hideEverything();
+    cv1wm.handlersUI();
+
+    $.getJSON('watson-conversation-v1-workspace-manager/vcap/')
+      // for some reason the getJSON resets the vars so need to restoreFromHidden again
+      // so again.
+      .done(function (service) {
+        $('.credentials').toggle(!service);
+      })
+      .fail(function () {
+        $('.credentials').show();
+      }).always(function () {
+        $('#credentials-check').hide();
+     });
+  }
+
+  // Save the values in the dyanmic lists to the hidden fields.
+  function cv1wmoneditsave(){
+  }
+
+    (function() {
+        RED.nodes.registerType('watson-conversation-v1-workspace-manager', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ''},
+                'cwm-custom-mode': {value:"listWorkspaces"},
+                'cwm-workspace-id': {value:""},
+                'cwm-export-content': {value:false}
+            },
+            credentials: {
+              username: {type:'text'},
+              password: {type: 'password'}
+            },
+            color: 'rgb(84,149,180)',
+            inputs: 1,
+            outputs: 1,
+            icon: 'conversation-v1-25x25.png',
+            paletteLabel: 'conversation workspace manager',
+            label: function() {
+                return this.name || 'conversation workspace manager';
+            },
+            labelStyle: function() {
+                return this.name ? 'node_label_italic' : '';
+            },
+            oneditprepare: cv1wmoneditprepare,
+            oneditsave: cv1wmoneditsave
+        });
+    })();
+
+</script>
