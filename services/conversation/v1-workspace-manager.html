@@ -45,6 +45,7 @@
             <option value="listWorkspaces">List Workspaces</option>
             <option value="getWorkspace">Get Workspace Details</option>
             <option value="createWorkspace">Create Workspace</option>
+            <option value="deleteWorkspace">Delete Workspace</option>
         </select>
     </div>
 
@@ -83,7 +84,10 @@
         as <code>msg.payload</code>
       </p>
     </li>
-
+    <li>Delete Workspace
+      <p>In this mode the selected workspace is deleted.
+      </p>
+    </li>
     </ul>
 
     <p>For more information about the conversation service,
@@ -134,6 +138,9 @@
       case 'getWorkspace':
         fields.push('#node-input-cwm-workspace-id'
                        + ', #node-input-cwm-export-content');
+        break;
+      case 'deleteWorkspace':
+        fields.push('#node-input-cwm-workspace-id');
         break;
       case 'listWorkspaces':
       case 'createWorkspace':

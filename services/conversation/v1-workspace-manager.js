@@ -60,7 +60,7 @@ module.exports = function (RED) {
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['workspaceresponse'] = response;
+        msg['workspace'] = response;
       }
       node.send(msg);
     });
@@ -78,6 +78,17 @@ module.exports = function (RED) {
     });
   }
 
+  function executeDeleteWorkspace(node, conv, params, msg) {
+    conv.deleteWorkspace(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['workspace'] = response;
+      }
+      node.send(msg);
+    });
+  }
 
   function executeUnknownMethod(node, conv, params, msg) {
     payloadutils.reportError(node, msg, 'Unknown Mode');
@@ -104,6 +115,9 @@ module.exports = function (RED) {
     case 'createWorkspace':
       executeCreateWorkspace(node, conv, params, msg);
       break;
+    case 'deleteWorkspace':
+      executeDeleteWorkspace(node, conv, params, msg);
+      break;
     default:
       executeUnknownMethod(node, conv, params, msg);
       break;
@@ -115,10 +129,12 @@ module.exports = function (RED) {
 
     switch (method) {
     case 'getWorkspace':
+      params['export'] = config['cwm-export-content'];
+      // Deliberate no break as want workspace ID also;
+    case 'deleteWorkspace':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       }
-      params['export'] = config['cwm-export-content'];
       break;
     }
 
