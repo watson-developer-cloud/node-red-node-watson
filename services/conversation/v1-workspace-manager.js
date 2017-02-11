@@ -78,6 +78,18 @@ module.exports = function (RED) {
     });
   }
 
+  function executeUpdateWorkspace(node, conv, params, msg) {
+    conv.updateWorkspace(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['workspace'] = response;
+      }
+      node.send(msg);
+    });
+  }
+
   function executeDeleteWorkspace(node, conv, params, msg) {
     conv.deleteWorkspace(params, function (err, response) {
       node.status({});
@@ -115,6 +127,9 @@ module.exports = function (RED) {
     case 'createWorkspace':
       executeCreateWorkspace(node, conv, params, msg);
       break;
+    case 'updateWorkspace':
+      executeUpdateWorkspace(node, conv, params, msg);
+      break;
     case 'deleteWorkspace':
       executeDeleteWorkspace(node, conv, params, msg);
       break;
@@ -131,6 +146,7 @@ module.exports = function (RED) {
     case 'getWorkspace':
       params['export'] = config['cwm-export-content'];
       // Deliberate no break as want workspace ID also;
+    case 'updateWorkspace':
     case 'deleteWorkspace':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
@@ -150,9 +166,17 @@ module.exports = function (RED) {
   //  'name', 'language', 'entities', 'intents',
   // 'dialog_nodes', 'metadata', 'description',
   // 'counterexamples'
-  function setWorkspaceParams(params, workspaceObject) {
+  function setWorkspaceParams(method, params, workspaceObject) {
+    var workspace_id = null;
+    if ('updateWorkspace' == method && params['workspace_id'])
+    {
+      workspace_id = params['workspace_id'];
+    }
     if (workspaceObject) {
       params = workspaceObject;
+    }
+    if (workspace_id) {
+      params['workspace_id'] = workspace_id;
     }
     return params;
   }
@@ -186,6 +210,7 @@ module.exports = function (RED) {
 
         switch (method) {
         case 'createWorkspace':
+        case 'updateWorkspace':
           try {
             workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
           } catch (err) {
@@ -193,7 +218,7 @@ module.exports = function (RED) {
           }
         }
 
-        params = setWorkspaceParams(params, workspaceObject);
+        params = setWorkspaceParams(method, params, workspaceObject);
         executeMethod(node, method, params, msg);
         temp.cleanup();
       });
@@ -203,6 +228,7 @@ module.exports = function (RED) {
   function checkForFile(method) {
     switch (method) {
     case 'createWorkspace':
+    case 'updateWorkspace':
       return true;
     }
     return false;
@@ -252,7 +278,7 @@ module.exports = function (RED) {
         }
         // If the data is a json object then it will not
         // have been detected as a buffer.
-        params = setWorkspaceParams(params, msg.payload);
+        params = setWorkspaceParams(method, params, msg.payload);
       }
 
       executeMethod(node, method, params, msg);
