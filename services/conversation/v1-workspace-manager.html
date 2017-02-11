@@ -43,7 +43,18 @@
         <label for="node-input-cwm-custom-mode"><i class="fa fa-book"></i> Detect: </label>
         <select type="text" id="node-input-cwm-custom-mode" style="display: inline-block; width: 70%;">
             <option value="listWorkspaces">List Workspaces</option>
+            <option value="getWorkspace">Get Workspace Details</option>
         </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-workspace-id"><i class="fa fa-book"></i> Workspace ID</label>
+        <input type="text" id="node-input-cwm-workspace-id" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-export-content"><i class="fa fa-book"></i> Export All Content</label>
+        <input type="checkbox" id="node-input-cwm-export-content" placeholder="">
     </div>
 
 </script>
@@ -52,9 +63,16 @@
     <p>The Conversation Workspace Manager is used to ... </p>
     <ul>
     <li>listWorkspaces
-      <p>In this mode aa list of all workspaces a that you have
+      <p>In this mode a list of all workspaces a that you have
         created in the conversation services are returned on
         <code>msg.workspaces</code>
+      </p>
+    </li>
+    <li>getWorkspace
+      <p>In this mode all information about a workspace,
+        optionally including all workspace content, is retrieved.
+        The information is returned on
+        <code>msg.workspace</code>
       </p>
     </li>
     </ul>
@@ -75,11 +93,6 @@
   var cv1wm = new CV1WM();
   cv1wm.mode_selected = null;
 
-  // Function to be used at the start, as don't want to expose any fields, unless the models are
-  // available. The models can only be fetched if the credentials are available.
-  cv1wm.hideEverything = function () {
-  }
-
   cv1wm.showSelectedFields = function(fields) {
     for (i = 0; i < fields.length; i++) {
       $(fields[i]).parent().show();
@@ -92,10 +105,27 @@
     }
   }
 
+  // Function to be used at the start, as don't want to expose any fields, unless the models are
+  // available. The models can only be fetched if the credentials are available.
+  cv1wm.hideEverything = function () {
+    var fields = [];
+
+    fields.push('#node-input-cwm-workspace-id'
+                     + ', #node-input-cwm-export-content');
+
+    cv1wm.hideSelectedFields(fields);
+  }
+
   cv1wm.processSelectedMethod = function(method) {
+    var fields = [];
+
     cv1wm.hideEverything();
-    fields = [];
+
     switch (method) {
+      case 'getWorkspace':
+        fields.push('#node-input-cwm-workspace-id'
+                       + ', #node-input-cwm-export-content');
+        break;
       case 'listWorkspaces':
         break;
     }
@@ -138,7 +168,9 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ''},
-                'cwm-custom-mode': {value:"listWorkspaces"}
+                'cwm-custom-mode': {value:"listWorkspaces"},
+                'cwm-workspace-id': {value:""},
+                'cwm-export-content': {value:false}            
             },
             credentials: {
               username: {type:'text'},

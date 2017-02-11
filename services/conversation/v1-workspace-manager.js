@@ -54,6 +54,19 @@ module.exports = function (RED) {
     });
   }
 
+  function executeGetWorkspace(node, conv, params, msg) {
+    conv.getWorkspace(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['workspace'] = response;
+      }
+      node.send(msg);
+    });
+  }
+
+
   function executeUnknownMethod(node, conv, params, msg) {
     payloadutils.reportError(node, msg, 'Unknown Mode');
     msg.error = 'Unable to process as unknown mode has been specified';
@@ -73,18 +86,24 @@ module.exports = function (RED) {
     case 'listWorkspaces':
       executeListWorkspaces(node, conv, params, msg);
       break;
+    case 'getWorkspace':
+      executeGetWorkspace(node, conv, params, msg);
+      break;
     default:
       executeUnknownMethod(node, conv, params, msg);
       break;
     }
   }
 
-
   function buildParams(msg, method, config) {
     var params = {};
 
     switch (method) {
-    case 'xyz':
+    case 'getWorkspace':
+      if (config['cwm-workspace-id']) {
+        params['workspace_id'] = config['cwm-workspace-id'];
+      }
+      params['export'] = config['cwm-export-content'];
       break;
     }
 
