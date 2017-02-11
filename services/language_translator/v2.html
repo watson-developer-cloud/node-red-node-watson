@@ -114,14 +114,17 @@
   <div class="form-row">
        <label for="node-input-lgparams2"><i class="fa fa-cog"></i> Parameters Scope</label>
        <input type="checkbox" id="node-input-lgparams2" style="display: inline-block; width: auto; vertical-align: top;">
-       <label for="node-input-lgparams2" style="width: 70%;"> Use Local Parameters</label>
+       <label for="node-input-lgparams2" style="width: 70%;"> Not using translation utility</label>
     </div>
     <div>
        <input type="hidden" id="node-input-ldparamshidden2"/>
     </div>
 
     <div class="form-tips" id="languagetranslation-form-tips">
-      <strong>Note:</strong> When using with the language translation utility, 'Use Local Parameters' must be unchecked.<br>
+      <strong>Note:</strong> When <strong>not</strong> using the languge translation
+      utility to set credentials then
+      'Not using translation utility' must be checked, else credentials
+      will not be found.<br>
     </div>
 
 </script>
@@ -133,9 +136,15 @@
     <p>The text to translate should be passed in on <code>msg.payload</code>.</p>
     <p>The translated text will be returned on <code>msg.payload</code>.</p>
     <p>The full response from the service will be returned on <code>msg.translation</code></p>
-    <p>Source and destination language parameters can be configured through the editor panel or set dynamically using
-    the language codes in the following properties, <code>msg.srclang</code> and <code>msg.destlang</code>. Please see
-    the documentation linked below for the currently supported source and destination language codes.</p>
+    <p>Source and destination language parameters can be configured through the editor panel or set
+    dynamically using
+    the language codes in the following properties, <code>msg.srclang</code>
+    and <code>msg.destlang</code>. Set the values to either two or five character
+    IETF language Codes,
+    eg. <code>en</code> for English or <code>pt-BR</code> for Brazilian Portuguese
+    Please see
+    the documentation linked below for the currently supported source and destination
+    languages translation permutations.</p>
     <p></p>
     <p><b>Customised Translation Mode</b>.</p>
     <p>In this mode you can select a translation model that you have customised through

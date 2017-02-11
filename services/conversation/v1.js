@@ -145,7 +145,7 @@ module.exports = function (RED) {
     node.service = new ConversationV1({
       username: userName,
       password: passWord,
-      version_date: '2016-09-20'
+      version_date: '2017-02-03'
     });
     return true;
   }
