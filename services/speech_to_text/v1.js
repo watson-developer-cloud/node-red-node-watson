@@ -211,9 +211,6 @@ module.exports = function (RED) {
           }
         });
 
-        if (cbcleanup) {
-          cbcleanup();
-        }
       }
 
 
