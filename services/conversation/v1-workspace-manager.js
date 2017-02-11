@@ -168,8 +168,7 @@ module.exports = function (RED) {
   // 'counterexamples'
   function setWorkspaceParams(method, params, workspaceObject) {
     var workspace_id = null;
-    if ('updateWorkspace' == method && params['workspace_id'])
-    {
+    if ('updateWorkspace' === method && params['workspace_id']) {
       workspace_id = params['workspace_id'];
     }
     if (workspaceObject) {
