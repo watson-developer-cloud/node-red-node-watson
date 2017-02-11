@@ -190,6 +190,7 @@ module.exports = function (RED) {
       params.words = msg.payload;
       break;
     }
+    return params;
   }
 
   function loadFile(node, method, params, msg) {
@@ -364,7 +365,7 @@ module.exports = function (RED) {
           loadFile(node, method, params, msg);
           return;
         }
-        setFileParams(method, params, msg);
+        params = setFileParams(method, params, msg);
       }
 
       executeMethod(node, method, params, msg);
