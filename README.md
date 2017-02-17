@@ -210,7 +210,7 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
       content present in the image.
 - Language Identification
     - Detects the language used in text
-- Language Translator
+- Language Translation
     - Translates text from one language to another    
 - Natural Language Classifier
     - Uses machine learning algorithms to return the top matching predefined classes for short text inputs.
