@@ -19,6 +19,9 @@
     "type": "git",
     "url": "https://github.com/watson-developer-cloud/node-red-node-watson"
   },
+  "scripts": {
+    "lint": "prettier --single-quote=true --trailing-comma=none --write 'services/**/*.js' 'utilities/*.js'"
+  },
   "license": "Apache-2.0",
   "keywords": [
     "node-red",
