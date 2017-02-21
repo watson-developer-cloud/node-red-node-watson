@@ -42,17 +42,17 @@ module.exports = function(RED) {
 
   // Node RED Admin - fetch and set vcap services
   RED.httpAdmin.get('/watson-text-to-speech/vcap', function(req, res) {
-    res.json(service ? {bound_service: true} : null);
+    res.json(service ? { bound_service: true } : null);
   });
 
   // API used by widget to fetch available models
-  RED.httpAdmin.get('/watson-text-to-speech/voices', function (req, res) {
+  RED.httpAdmin.get('/watson-text-to-speech/voices', function(req, res) {
     var tts = new TextToSpeechV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd
+      password: sPassword ? sPassword : req.query.pwd,
     });
 
-    tts.voices({}, function(err, voices){
+    tts.voices({}, function(err, voices) {
       if (err) {
         if (!err.error) {
           err.error = 'Error ' + err.code + ' in fetching voices';
@@ -65,13 +65,13 @@ module.exports = function(RED) {
   });
 
   // API used by widget to fetch available customisations
-  RED.httpAdmin.get('/watson-text-to-speech/customs', function (req, res) {
+  RED.httpAdmin.get('/watson-text-to-speech/customs', function(req, res) {
     var tts = new TextToSpeechV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd
+      password: sPassword ? sPassword : req.query.pwd,
     });
 
-    tts.getCustomizations({}, function(err, customs){
+    tts.getCustomizations({}, function(err, customs) {
       if (err) {
         res.json(err);
       } else {
@@ -102,13 +102,13 @@ module.exports = function(RED) {
 
       var text_to_speech = new TextToSpeechV1({
         username: username,
-        password: password
+        password: password,
       });
 
       var params = {
         text: msg.payload,
         voice: msg.voice || config.voice,
-        accept: config.format
+        accept: config.format,
       };
 
       // Check the params for customisation options
@@ -116,22 +116,22 @@ module.exports = function(RED) {
         params.customization_id = config.langcustom;
       }
 
-      node.status({fill:"blue", shape:"dot", text:"requesting"});
-      text_to_speech.synthesize(params, function (err, body, response) {
-        node.status({})
+      node.status({ fill: 'blue', shape: 'dot', text: 'requesting' });
+      text_to_speech.synthesize(params, function(err, body, response) {
+        node.status({});
         if (err) {
           node.error(err, msg);
         } else {
           msg.speech = body;
         }
         node.send(msg);
-      })
-    })
+      });
+    });
   }
-  RED.nodes.registerType("watson-text-to-speech", Node, {
+  RED.nodes.registerType('watson-text-to-speech', Node, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
-    }
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
 };
