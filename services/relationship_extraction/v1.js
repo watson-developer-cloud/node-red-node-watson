@@ -14,30 +14,29 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   var cfenv = require('cfenv');
 
-  var services = cfenv.getAppEnv().services,
-    service;
+  var services = cfenv.getAppEnv().services, service;
 
   var username, password;
 
-  var service = cfenv.getAppEnv().getServiceCreds(/relationship extraction/i)
+  var service = cfenv.getAppEnv().getServiceCreds(/relationship extraction/i);
 
   if (service) {
     username = service.username;
     password = service.password;
   }
 
-  RED.httpAdmin.get('/watson-relationship-extraction/vcap', function (req, res) {
+  RED.httpAdmin.get('/watson-relationship-extraction/vcap', function(req, res) {
     res.json(service ? service.sids : null);
   });
 
   function Node(config) {
-    RED.nodes.createNode(this,config);
+    RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg) {
       if (!msg.payload) {
         var message = 'Missing property: msg.payload';
         node.error(message, msg);
@@ -58,27 +57,30 @@ module.exports = function (RED) {
       var relationship_extraction = watson.relationship_extraction({
         username: username,
         password: password,
-        version: 'v1-beta'
+        version: 'v1-beta',
       });
 
-      node.status({fill:"blue", shape:"dot", text:"requesting"});
-      relationship_extraction.extract({text: msg.payload, dataset: config.dataset }, function (err, response) {
-        node.status({})
-        if (err) {
-          node.error(err, msg);
+      node.status({ fill: 'blue', shape: 'dot', text: 'requesting' });
+      relationship_extraction.extract(
+        { text: msg.payload, dataset: config.dataset },
+        function(err, response) {
+          node.status({});
+          if (err) {
+            node.error(err, msg);
+            node.send(msg);
+            return;
+          }
+
+          msg.relationships = response;
           node.send(msg);
-          return;
-        }
-
-        msg.relationships = response;    
-        node.send(msg);
-      });
+        },
+      );
     });
   }
-  RED.nodes.registerType("watson-relationship-extraction",Node, {
+  RED.nodes.registerType('watson-relationship-extraction', Node, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
-    }
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
 };
