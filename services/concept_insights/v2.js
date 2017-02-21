@@ -426,7 +426,7 @@ module.exports = function(RED) {
                     return node.error(message, msg);
                   } else {
                     //get status
-                    if (res.status == 'ready') {
+                    if (res.status === 'ready') {
                       node.status({
                         fill: 'green',
                         shape: 'ring',

@@ -79,14 +79,14 @@ module.exports = function(RED) {
   }
 
   function processResponse(err, body, node, msg) {
-    if (err != null && body == null) {
+    if (err != null && body === null) {
       node.status({
         fill: 'red',
         shape: 'ring',
         text: 'call to watson conversation service failed',
       });
       msg.result = {};
-      if (err.code == null) {
+      if (err.code === null) {
         msg.result['error'] = err;
       } else {
         msg.result['error_code'] = err.code;

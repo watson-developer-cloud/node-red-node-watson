@@ -63,12 +63,12 @@ module.exports = function(RED) {
 
       var hasJSONmethod = typeof msg.payload.toJSON === 'function';
       var isBuffer = false;
-      if (hasJSONmethod == true) {
-        if (msg.payload.toJSON().type == 'Buffer') isBuffer = true;
+      if (hasJSONmethod === true) {
+        if (msg.payload.toJSON().type === 'Buffer') isBuffer = true;
       }
 
       // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-      if (typeof msg.payload == 'string' || isBuffer == true) {
+      if (typeof msg.payload === 'string' || isBuffer === true) {
         var options = {
           text: msg.payload,
           sentences: config.sentences,

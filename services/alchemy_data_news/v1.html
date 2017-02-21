@@ -49,7 +49,7 @@
 				if (opts.length === 0) {
 					node.service = "_ext_";
 					$('#node-input-service').find("option").filter(function() {
-						return $(this).val() == node.service;
+						return $(this).val() === node.service;
 					}).attr('selected', true);
 				} else {
 					last.before(opts.join(""));

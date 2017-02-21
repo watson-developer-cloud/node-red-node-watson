@@ -289,7 +289,7 @@
 
                     $('#node-input-corpusapicall').change(function () {
                         var mode = $('#node-input-corpusapicall').val();
-                        if (mode == 'documentlabel') {
+                        if (mode === 'documentlabel') {
                           $('.form-row.mode.corpus.query').show();
                         } else {
                           $('.form-row.mode.corpus.query').hide();

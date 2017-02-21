@@ -111,14 +111,14 @@ module.exports = function(RED) {
   }
 
   function processResponse(err, body, feature, node, msg) {
-    if (err != null && body == null) {
+    if (err != null && body === null) {
       node.status({
         fill: 'red',
         shape: 'ring',
         text: 'call to watson visual recognition v3 service failed',
       });
       msg.result = {};
-      if (err.code == null) {
+      if (err.code === null) {
         msg.result['error'] = err;
       } else {
         msg.result['error_code'] = err.code;
@@ -129,7 +129,7 @@ module.exports = function(RED) {
       node.error(err);
       return;
     } else if (
-      err == null && body != null && body.images != null && body.images[0].error
+      err === null && body != null && body.images != null && body.images[0].error
     ) {
       node.status({
         fill: 'red',

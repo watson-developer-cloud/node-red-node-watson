@@ -81,13 +81,13 @@ module.exports = function(RED) {
   function performAction(params, feature, cbdone, cbcleanup) {
     var alchemy_vision = watson.alchemy_vision({ api_key: apikey });
 
-    if (feature == 'imageFaces') {
+    if (feature === 'imageFaces') {
       alchemy_vision.recognizeFaces(params, cbdone);
-    } else if (feature == 'imageLink') {
+    } else if (feature === 'imageLink') {
       alchemy_vision.getImageLinks(params, cbdone);
-    } else if (feature == 'imageKeywords') {
+    } else if (feature === 'imageKeywords') {
       alchemy_vision.getImageKeywords(params, cbdone);
-    } else if (feature == 'imageText') {
+    } else if (feature === 'imageText') {
       alchemy_vision.getImageSceneText(params, cbdone);
     }
 

@@ -109,20 +109,20 @@ module.exports = function(RED) {
         var clientid = config.clientid;
         var converseid = config.converse;
 
-        if (!dialogid || '' == dialogid) {
+        if (!dialogid || '' === dialogid) {
           if (msg.dialog_params && 'dialog_id' in msg.dialog_params) {
             dialogid = msg.dialog_params['dialog_id'];
           }
         }
 
-        if (!dialogid || '' == dialogid) {
+        if (!dialogid || '' === dialogid) {
           message = 'Missing Dialog ID';
           node.status({ fill: 'red', shape: 'dot', text: message });
           node.error(message, msg);
         }
 
         if (config.mode === 'converse' || config.mode === 'getprofile') {
-          if (!clientid || '' == clientid) {
+          if (!clientid || '' === clientid) {
             if (msg.dialog_params && 'client_id' in msg.dialog_params) {
               clientid = msg.dialog_params['client_id'];
             }
@@ -271,7 +271,7 @@ module.exports = function(RED) {
           msg.dialog = dialog_data;
           msg.payload = message;
           node.send(msg);
-        } else if (err && err.code == 404) {
+        } else if (err && err.code === 404) {
           message = 'Dialog already deleted or not existing (404)';
           node.status({ fill: 'green', shape: 'dot', text: message });
           msg.payload = message;
@@ -370,7 +370,7 @@ module.exports = function(RED) {
         console.log(
           'Deleted ' + nbdeleted + ' dialog objects on ' + nb_todelete,
         );
-        if (nbdeleted == nb_todelete)
+        if (nbdeleted === nb_todelete)
           msg.payload = 'All Dialogs have been deleted';
         else
           msg.payload = 'Some Dialogs could have not been deleted; See node-RED log for errors.';

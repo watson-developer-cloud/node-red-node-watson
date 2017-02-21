@@ -468,7 +468,7 @@ module.exports = function(RED) {
             });
             break;
           case 'index':
-            if (msg.payload && typeof msg.payload == 'string') {
+            if (msg.payload && typeof msg.payload === 'string') {
               var solrClient = retrieve_and_rank.createSolrClient(params);
               node.status({
                 fill: 'blue',
@@ -503,7 +503,7 @@ module.exports = function(RED) {
             break;
 
           case 'search':
-            if (msg.payload && typeof msg.payload == 'string') {
+            if (msg.payload && typeof msg.payload === 'string') {
               var solrClient = retrieve_and_rank.createSolrClient(params);
               var query = qs.stringify({ q: msg.payload });
               node.status({ fill: 'blue', shape: 'ring', text: 'Searching' });
@@ -642,7 +642,7 @@ module.exports = function(RED) {
       node.status({});
       return node.error(message, msg);
     } else {
-      mode == 'delete' && Object.keys(res).length == 0
+      mode === 'delete' && Object.keys(res).length === 0
         ? msg.payload = 'Ranker deleted'
         : msg.payload = res;
       if (mode != 'index') {
