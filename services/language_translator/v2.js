@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then they are stored in sUsername and sPassword, as the
   // service credentials. This separation from sUsername and username to allow
@@ -23,7 +23,9 @@ module.exports = function (RED) {
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
   const SERVICE_IDENTIFIER = 'language-translator';
-  var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
+  var LanguageTranslatorV2 = require(
+    'watson-developer-cloud/language-translator/v2',
+  ),
     //cfenv = require('cfenv'),
     serviceutils = require('../../utilities/service-utils'),
     fs = require('fs'),
@@ -38,7 +40,6 @@ module.exports = function (RED) {
 
   temp.track();
 
-
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
@@ -49,29 +50,27 @@ module.exports = function (RED) {
   // date with new tranlations, without the need for a code update of this node.
 
   // Node RED Admin - fetch and set vcap services
-  RED.httpAdmin.get('/watson-translator/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/watson-translator/vcap', function(req, res) {
+    res.json(service ? { bound_service: true } : null);
   });
 
   // API used by widget to fetch available models
-  RED.httpAdmin.get('/watson-translator/models', function (req, res) {
+  RED.httpAdmin.get('/watson-translator/models', function(req, res) {
     var lt = new LanguageTranslatorV2({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
       version: 'v2',
-      url: endpointUrl
+      url: endpointUrl,
     });
 
-    lt.getModels({}, function (err, models) {
+    lt.getModels({}, function(err, models) {
       if (err) {
         res.json(err);
-      }
-      else {
+      } else {
         res.json(models);
       }
     });
   });
-
 
   // This is the Language Translation Node.
   // The node supports four modes
@@ -83,7 +82,7 @@ module.exports = function (RED) {
   // 3. status, to determine whethere a trained corpus is available
   // 4. delete, to remove a trained corpus extension.
 
-  function SMTNode (config) {
+  function SMTNode(config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
@@ -98,7 +97,7 @@ module.exports = function (RED) {
     // The node has received an input as part of a flow, need to determine
     // what the request is for, and based on that if the required fields
     // have been provided.
-    this.on('input', function (msg) {
+    this.on('input', function(msg) {
       var message = '',
         action = msg.action || config.action,
         globalContext = this.context().global,
@@ -108,7 +107,7 @@ module.exports = function (RED) {
           username: username,
           password: password,
           version: 'v2',
-          url: endpointUrl
+          url: endpointUrl,
         });
 
       if (!username || !password) {
@@ -141,33 +140,35 @@ module.exports = function (RED) {
 
       // If a translation is requested, then the model id will have been
       // built by the calling function based on source, target and domain.
-      var doTranslate = function(msg, model_id){
+      var doTranslate = function(msg, model_id) {
         node.status({
           fill: 'blue',
           shape: 'dot',
-          text: 'requesting'
+          text: 'requesting',
         });
 
         // Please be careful when reading the below. The first parameter is
         // a structure, and the tabbing enforced by codeacy imho obfuscates
         // the code, rather than making it clearer. I would have liked an
         // extra couple of spaces.
-        language_translator.translate({
-          text: msg.payload,
-          model_id: model_id
-        },
-        function (err, response) {
-          node.status({});
-          if (err) {
-            node.error(err, msg);
-            console.log('err:', err);
-          } else {
-            msg.translation = {};
-            msg.translation.response = response;
-            msg.payload = response.translations[0].translation;
-          }
-          node.send(msg);
-        });
+        language_translator.translate(
+          {
+            text: msg.payload,
+            model_id: model_id,
+          },
+          function(err, response) {
+            node.status({});
+            if (err) {
+              node.error(err, msg);
+              console.log('err:', err);
+            } else {
+              msg.translation = {};
+              msg.translation.response = response;
+              msg.payload = response.translations[0].translation;
+            }
+            node.send(msg);
+          },
+        );
       };
 
       // If training is requested then the glossary will be a file input. We are using temp
@@ -175,89 +176,92 @@ module.exports = function (RED) {
       // If the file comes from a file-inject then the file will not have a filename assoicated
       // with it. In this case a temporary filename is given to the file. The file name submitted
       // to the service cannot have a '.' else it will throw a 400 error.
-      var doTrain = function(msg, model_id, filetype){
+      var doTrain = function(msg, model_id, filetype) {
         node.status({
           fill: 'blue',
           shape: 'dot',
-          text: 'processing data buffer for training request'
+          text: 'processing data buffer for training request',
         });
 
-        temp.open({
-          suffix: '.xml'
-        }, function(err, info) {
-          if (err) {
-            node.status({
-              fill: 'red',
-              shape: 'dot',
-              text: 'Error receiving the data buffer for training'
-            });
-            throw err;
-          }
-
-          // Syncing up the asynchronous nature of the stream
-          // so that the full file can be sent to the API.
-          fs.writeFile(info.path, msg.payload, function(err) {
+        temp.open(
+          {
+            suffix: '.xml',
+          },
+          function(err, info) {
             if (err) {
               node.status({
                 fill: 'red',
                 shape: 'dot',
-                text: 'Error processing data buffer for training'
+                text: 'Error receiving the data buffer for training',
               });
               throw err;
             }
 
-            var params = {};
+            // Syncing up the asynchronous nature of the stream
+            // so that the full file can be sent to the API.
+            fs.writeFile(info.path, msg.payload, function(err) {
+              if (err) {
+                node.status({
+                  fill: 'red',
+                  shape: 'dot',
+                  text: 'Error processing data buffer for training',
+                });
+                throw err;
+              }
 
-            // only letters and numbers allowed in the submitted file name
-            // Default the name to a string representing now
-            params.name = (new Date()).toString().replace(/[^0-9a-z]/gi, '');
-            if (msg.filename) {
-              params.name = msg.filename.replace(/[^0-9a-z]/gi, '');
-            }
-            params.base_model_id = model_id;
-            switch (filetype) {
-            case 'forcedglossary':
-              params.forced_glossary = fs.createReadStream(info.path);
-              break;
-            case 'parallelcorpus':
-              params.parallel_corpus = fs.createReadStream(info.path);
-              break;
-            case 'monolingualcorpus':
-              params.monolingual_corpus = fs.createReadStream(info.path);
-              break;
-            }
+              var params = {};
 
-            language_translator.createModel(params,
-              function (err, model) {
+              // only letters and numbers allowed in the submitted file name
+              // Default the name to a string representing now
+              params.name = new Date().toString().replace(/[^0-9a-z]/gi, '');
+              if (msg.filename) {
+                params.name = msg.filename.replace(/[^0-9a-z]/gi, '');
+              }
+              params.base_model_id = model_id;
+              switch (filetype) {
+                case 'forcedglossary':
+                  params.forced_glossary = fs.createReadStream(info.path);
+                  break;
+                case 'parallelcorpus':
+                  params.parallel_corpus = fs.createReadStream(info.path);
+                  break;
+                case 'monolingualcorpus':
+                  params.monolingual_corpus = fs.createReadStream(info.path);
+                  break;
+              }
+
+              language_translator.createModel(params, function(err, model) {
                 node.status({});
                 if (err) {
                   node.status({
                     fill: 'red',
                     shape: 'ring',
-                    text: 'call to translation service failed'
+                    text: 'call to translation service failed',
                   });
                   node.error(err, msg);
                 } else {
                   node.status({
                     fill: 'green',
                     shape: 'dot',
-                    text: 'model submitted for training'
+                    text: 'model submitted for training',
                   });
-                  msg.payload = 'Model ' + model.name + ' successfully sent for training with id: ' + model.model_id;
+                  msg.payload = 'Model ' +
+                    model.name +
+                    ' successfully sent for training with id: ' +
+                    model.model_id;
                   msg.trained_model_id = model.model_id;
                   node.send(msg);
                   node.status({});
                 }
-              }
-            );
-          });
-        });
+              });
+            });
+          },
+        );
       };
-
 
       // Fetch the status of the trained model. It can only be used if the model is available. This
       // will also return any training errors. The full error reason is returned in msg.translation
-      var doGetStatus = function (msg, trainid) {
+      var doGetStatus = function(msg, trainid) {
         node.status({
           fill: 'blue',
           shape: 'dot',
@@ -268,12 +272,12 @@ module.exports = function (RED) {
           {
             model_id: trainid,
           },
-          function (err, model) {
+          function(err, model) {
             if (err) {
               node.status({
                 fill: 'red',
                 shape: 'ring',
-                text: 'call to translation service failed'
+                text: 'call to translation service failed',
               });
               node.error(err, msg);
             } else {
@@ -282,13 +286,13 @@ module.exports = function (RED) {
               node.send(msg);
               node.status({});
             }
-          }
+          },
         );
         node.status({});
       };
 
       // This removes the trained corpus
-      var doDelete = function (msg, trainid) {
+      var doDelete = function(msg, trainid) {
         node.status({
           fill: 'blue',
           shape: 'dot',
@@ -299,12 +303,12 @@ module.exports = function (RED) {
           {
             model_id: trainid,
           },
-          function (err) {
+          function(err) {
             if (err) {
               node.status({
                 fill: 'red',
                 shape: 'ring',
-                text: 'delete failed'
+                text: 'delete failed',
               });
               node.error(err, msg);
             } else {
@@ -312,7 +316,7 @@ module.exports = function (RED) {
               node.send(msg);
               node.status({});
             }
-          }
+          },
         );
         node.status({});
       };
@@ -330,98 +334,97 @@ module.exports = function (RED) {
       // are specific to the requested action.
       // The required fields are checked, before the relevant function is invoked.
       switch (action) {
-      case 'translate':
+        case 'translate':
+          var domain = msg.domain || config.domain;
 
-        var domain = msg.domain || config.domain;
+          if (!domain) {
+            node.warn('Missing translation domain, message not translated');
+            node.send(msg);
+            return;
+          }
 
-        if (!domain) {
-          node.warn('Missing translation domain, message not translated');
-          node.send(msg);
-          return;
-        }
+          var srclang = msg.srclang || config.srclang;
 
-        var srclang = msg.srclang || config.srclang;
+          if (!srclang) {
+            node.warn('Missing source language, message not translated');
+            node.send(msg);
+            return;
+          }
 
-        if (!srclang) {
-          node.warn('Missing source language, message not translated');
-          node.send(msg);
-          return;
-        }
+          var destlang = msg.destlang || config.destlang;
 
-        var destlang = msg.destlang || config.destlang;
+          if (!destlang) {
+            node.warn('Missing target language, message not translated');
+            node.send(msg);
+            return;
+          }
 
-        if (!destlang) {
-          node.warn('Missing target language, message not translated');
-          node.send(msg);
-          return;
-        }
+          var model_id = '';
 
-        var model_id = '';
+          model_id = srclang + '-' + destlang;
+          if (domain !== 'news') {
+            model_id += '-' + domain;
+          }
+          doTranslate(msg, model_id);
+          break;
 
-        model_id = srclang + '-' + destlang;
-        if (domain !== 'news') {
-          model_id += ('-' + domain);
-        }
-        doTranslate(msg, model_id);
-        break;
+        case 'custom':
+          var custom = msg.custom || config.custom;
 
-      case 'custom':
-        var custom = msg.custom || config.custom;
+          if (!custom) {
+            node.warn('Missing customised model, message not translated');
+            node.send(msg);
+            return;
+          }
+          doTranslate(msg, custom);
+          break;
 
-        if (!custom) {
-          node.warn('Missing customised model, message not translated');
-          node.send(msg);
-          return;
-        }
-        doTranslate(msg, custom);
-        break;
+        case 'train':
+          var basemodel = msg.basemodel || config.basemodel;
 
-      case 'train':
-        var basemodel = msg.basemodel || config.basemodel;
+          if (!basemodel) {
+            node.warn('Base Model needs must be set for train mode');
+            node.send(msg);
+          }
 
-        if (!basemodel) {
-          node.warn('Base Model needs must be set for train mode');
-          node.send(msg);
-        }
+          var filetype = msg.filetype || config.filetype;
 
-        var filetype = msg.filetype || config.filetype;
+          if (!filetype) {
+            node.warn('Filetype needs must be set for train mode');
+            node.send(msg);
+          }
+          doTrain(msg, basemodel, filetype);
 
-        if (!filetype) {
-          node.warn('Filetype needs must be set for train mode');
-          node.send(msg);
-        }
-        doTrain(msg, basemodel, filetype);
+          break;
 
-        break;
+        case 'getstatus':
+          var trainid = msg.trainid || config.trainid;
 
-      case 'getstatus':
-        var trainid = msg.trainid || config.trainid;
+          doGetStatus(msg, trainid);
+          break;
 
-        doGetStatus(msg, trainid);
-        break;
+        case 'delete':
+          var d_trainid = msg.trainid || config.trainid;
 
-      case 'delete':
-        var d_trainid = msg.trainid || config.trainid;
+          doDelete(msg, d_trainid);
+          break;
 
-        doDelete(msg, d_trainid);
-        break;
-
-      default:
-        message = 'Unexpected Mode';
-        node.status({
-          fill: 'blue',
-          shape: 'dot',
-          text: message
-        });
-        node.error(message, msg);
+        default:
+          message = 'Unexpected Mode';
+          node.status({
+            fill: 'blue',
+            shape: 'dot',
+            text: message,
+          });
+          node.error(message, msg);
       }
     });
   }
 
   RED.nodes.registerType('watson-translator', SMTNode, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'}
-    }
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
 };
