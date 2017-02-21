@@ -14,12 +14,13 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'gateway-a.watsonplatform.net';
   var watson = require('watson-developer-cloud'),
     payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
-    apikey, s_apikey,
+    apikey,
+    s_apikey,
     service = serviceutils.getServiceCredsAlchemy(SERVICE_IDENTIFIER);
 
   // Require the Cloud Foundry Module to pull credentials from bound service
@@ -35,19 +36,18 @@ module.exports = function (RED) {
     s_apikey = service.apikey;
   }
 
-  RED.httpAdmin.get('/alchemy-date-extraction/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/alchemy-date-extraction/vcap', function(req, res) {
+    res.json(service ? { bound_service: true } : null);
   });
 
-
   // This is the Alchemy Date Extract Node
-  function AlchemyDateExtractionNode (config) {
+  function AlchemyDateExtractionNode(config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg) {
       if (!msg.payload) {
-        this.status({fill:'red', shape:'ring', text:'missing payload'});
+        this.status({ fill: 'red', shape: 'ring', text: 'missing payload' });
         var message = 'Missing property: msg.payload';
         node.error(message, msg);
         return;
@@ -58,15 +58,19 @@ module.exports = function (RED) {
       this.status({});
 
       if (!apikey) {
-        this.status({fill:'red', shape:'ring', text:'missing credentials'});
+        this.status({
+          fill: 'red',
+          shape: 'ring',
+          text: 'missing credentials',
+        });
         var message = 'Missing Alchemy API service credentials';
         node.error(message, msg);
         return;
       }
 
-      var alchemy_language = watson.alchemy_language( { api_key: apikey } );
-      var date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
-      var params = { anchorDate: date};
+      var alchemy_language = watson.alchemy_language({ api_key: apikey });
+      var date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+      var params = { anchorDate: date };
 
       if (payloadutils.urlCheck(msg.payload)) {
         params['url'] = msg.payload;
@@ -74,29 +78,31 @@ module.exports = function (RED) {
         params['text'] = msg.payload;
       }
 
+      for (var key in msg.alchemy_options) {
+        params[key] = msg.alchemy_options[key];
+      }
 
-      for (var key in msg.alchemy_options) { params[key] = msg.alchemy_options[key]; }
-
-      alchemy_language.dates(params, function (err, response) {
+      alchemy_language.dates(params, function(err, response) {
         if (err || response.status === 'ERROR') {
-          node.status({fill:'red', shape:'ring', text:'call to alchmeyapi language service failed'});
+          node.status({
+            fill: 'red',
+            shape: 'ring',
+            text: 'call to alchmeyapi language service failed',
+          });
           console.log('Error:', msg, err);
           node.error(err, msg);
-        }
-        else {
+        } else {
           msg.features = response;
           node.send(msg);
         }
       });
-
     });
   }
-
 
   //Register the node as alchemy-feature-extract to nodeRED
   RED.nodes.registerType('alchemy-date-extraction', AlchemyDateExtractionNode, {
     credentials: {
-      apikey: {type:"password"}
-    }
+      apikey: { type: 'password' },
+    },
   });
 };
