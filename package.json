@@ -10,7 +10,7 @@
     "request": "~2.53.0",
     "temp": "^0.8.3",
     "qs": "6.x",
-	  "image-type": "^2.0.2",
+    "image-type": "^2.0.2",
     "watson-developer-cloud": "^2.18.0",
     "kuromoji": "^0.0.5",
     "is-docx": "^0.0.3"
@@ -25,19 +25,20 @@
     "bluemix",
     "watson"
   ],
-  "contributors": [ {
+  "contributors": [
+    {
       "name": "Soheel Chughtai",
       "email": "soheel_chughtai@uk.ibm.com"
     }
   ],
   "node-red": {
     "nodes": {
-      "watson-conversation-v1":"services/conversation/v1.js",
-      "watson-conversation-workspace-manager-v1":"services/conversation/v1-workspace-manager.js",
-      "watson-conversation-v1-experimental":"services/conversation/v1-exp.js",
-      "watson-discovery-v1":"services/discovery/v1.js",
-      "watson-discovery-v1-query-builder":"services/discovery/v1-query-builder.js",
-      "watson-discovery-v1-experimental":"services/discovery/v1-exp.js",
+      "watson-conversation-v1": "services/conversation/v1.js",
+      "watson-conversation-workspace-manager-v1": "services/conversation/v1-workspace-manager.js",
+      "watson-conversation-v1-experimental": "services/conversation/v1-exp.js",
+      "watson-discovery-v1": "services/discovery/v1.js",
+      "watson-discovery-v1-query-builder": "services/discovery/v1-query-builder.js",
+      "watson-discovery-v1-experimental": "services/discovery/v1-exp.js",
       "watson-document-conversion-v1": "services/document_conversion/v1.js",
       "watson-concept-insights-v2": "services/concept_insights/v2.js",
       "alchemy-date-extraction": "services/alchemy_date_extraction/v1.js",
@@ -67,5 +68,8 @@
       "watson-similarity-search-v3": "services/similarity_search/v3.js",
       "alchemy-vision-v1": "services/alchemy_vision/v1.js"
     }
+  },
+  "devDependencies": {
+    "prettier": "^0.18.0"
   }
 }
