@@ -14,30 +14,29 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   var cfenv = require('cfenv');
-  
-  var services = cfenv.getAppEnv().services,
-    service;
+
+  var services = cfenv.getAppEnv().services, service;
 
   var username, password;
 
-  var service = cfenv.getAppEnv().getServiceCreds(/tone analyzer/i)
+  var service = cfenv.getAppEnv().getServiceCreds(/tone analyzer/i);
 
   if (service) {
     username = service.username;
     password = service.password;
   }
 
-  RED.httpAdmin.get('/watson-tone-analyzer/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/watson-tone-analyzer/vcap', function(req, res) {
+    res.json(service ? { bound_service: true } : null);
   });
 
-  function Node (config) {
+  function Node(config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg) {
       if (!msg.payload) {
         var message = 'Missing property: msg.payload';
         node.error(message, msg);
@@ -59,32 +58,29 @@ module.exports = function (RED) {
         username: username,
         password: password,
         version: 'v3-beta',
-        version_date: '2016-02-11'
+        version_date: '2016-02-11',
       });
 
-      var hasJSONmethod = (typeof msg.payload.toJSON === 'function') ;
+      var hasJSONmethod = typeof msg.payload.toJSON === 'function';
       var isBuffer = false;
-      if (hasJSONmethod==true)
-      {
-        if (msg.payload.toJSON().type == 'Buffer')
-            isBuffer=true;
+      if (hasJSONmethod === true) {
+        if (msg.payload.toJSON().type === 'Buffer') isBuffer = true;
       }
 
       // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-      if (typeof msg.payload == 'string' ||  isBuffer == true )
-      {
-         var options = {
-        text: msg.payload,
-        sentences: config.sentences
+      if (typeof msg.payload === 'string' || isBuffer === true) {
+        var options = {
+          text: msg.payload,
+          sentences: config.sentences,
         };
 
         if (config.tones !== 'all') {
           options.tones = config.tones;
         }
 
-        node.status({fill:'blue', shape:'dot', text:'requesting'});
-        tone_analyzer.tone(options, function (err, response) {
-          node.status({})
+        node.status({ fill: 'blue', shape: 'dot', text: 'requesting' });
+        tone_analyzer.tone(options, function(err, response) {
+          node.status({});
           if (err) {
             node.error(err, msg);
           } else {
@@ -93,18 +89,17 @@ module.exports = function (RED) {
 
           node.send(msg);
         });
-      }
-      else {
+      } else {
         var message = 'The payload must be either a string or a Buffer';
-        node.status({fill:'red', shape:'dot', text:message}); 
-        node.error(message, msg);         
+        node.status({ fill: 'red', shape: 'dot', text: message });
+        node.error(message, msg);
       }
     });
   }
   RED.nodes.registerType('watson-tone-analyzer', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'}
-    }
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
 };

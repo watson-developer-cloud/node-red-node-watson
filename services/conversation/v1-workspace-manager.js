@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'conversation';
   var temp = require('temp'),
     fs = require('fs'),
@@ -22,7 +22,10 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     ConversationV1 = require('watson-developer-cloud/conversation/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = '', password = '', sUsername = '', sPassword = '';
+    username = '',
+    password = '',
+    sUsername = '',
+    sPassword = '';
 
   temp.track();
 
@@ -42,20 +45,21 @@ module.exports = function (RED) {
   }
 
   function executeListWorkspaces(node, conv, params, msg) {
-    conv.listWorkspaces(params, function (err, response) {
+    conv.listWorkspaces(params, function(err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['workspaces'] = response.workspaces ?
-                                      response.workspaces: response;
+        msg['workspaces'] = response.workspaces
+          ? response.workspaces
+          : response;
       }
       node.send(msg);
     });
   }
 
   function executeGetWorkspace(node, conv, params, msg) {
-    conv.getWorkspace(params, function (err, response) {
+    conv.getWorkspace(params, function(err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -67,7 +71,7 @@ module.exports = function (RED) {
   }
 
   function executeCreateWorkspace(node, conv, params, msg) {
-    conv.createWorkspace(params, function (err, response) {
+    conv.createWorkspace(params, function(err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -79,7 +83,7 @@ module.exports = function (RED) {
   }
 
   function executeUpdateWorkspace(node, conv, params, msg) {
-    conv.updateWorkspace(params, function (err, response) {
+    conv.updateWorkspace(params, function(err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -91,7 +95,7 @@ module.exports = function (RED) {
   }
 
   function executeDeleteWorkspace(node, conv, params, msg) {
-    conv.deleteWorkspace(params, function (err, response) {
+    conv.deleteWorkspace(params, function(err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -112,30 +116,30 @@ module.exports = function (RED) {
     var conv = new ConversationV1({
       username: username,
       password: password,
-      version_date: '2017-02-03'
+      version_date: '2017-02-03',
     });
 
-    node.status({fill:'blue', shape:'dot', text:'executing'});
+    node.status({ fill: 'blue', shape: 'dot', text: 'executing' });
 
     switch (method) {
-    case 'listWorkspaces':
-      executeListWorkspaces(node, conv, params, msg);
-      break;
-    case 'getWorkspace':
-      executeGetWorkspace(node, conv, params, msg);
-      break;
-    case 'createWorkspace':
-      executeCreateWorkspace(node, conv, params, msg);
-      break;
-    case 'updateWorkspace':
-      executeUpdateWorkspace(node, conv, params, msg);
-      break;
-    case 'deleteWorkspace':
-      executeDeleteWorkspace(node, conv, params, msg);
-      break;
-    default:
-      executeUnknownMethod(node, conv, params, msg);
-      break;
+      case 'listWorkspaces':
+        executeListWorkspaces(node, conv, params, msg);
+        break;
+      case 'getWorkspace':
+        executeGetWorkspace(node, conv, params, msg);
+        break;
+      case 'createWorkspace':
+        executeCreateWorkspace(node, conv, params, msg);
+        break;
+      case 'updateWorkspace':
+        executeUpdateWorkspace(node, conv, params, msg);
+        break;
+      case 'deleteWorkspace':
+        executeDeleteWorkspace(node, conv, params, msg);
+        break;
+      default:
+        executeUnknownMethod(node, conv, params, msg);
+        break;
     }
   }
 
@@ -143,15 +147,15 @@ module.exports = function (RED) {
     var params = {};
 
     switch (method) {
-    case 'getWorkspace':
-      params['export'] = config['cwm-export-content'];
+      case 'getWorkspace':
+        params['export'] = config['cwm-export-content'];
       // Deliberate no break as want workspace ID also;
-    case 'updateWorkspace':
-    case 'deleteWorkspace':
-      if (config['cwm-workspace-id']) {
-        params['workspace_id'] = config['cwm-workspace-id'];
-      }
-      break;
+      case 'updateWorkspace':
+      case 'deleteWorkspace':
+        if (config['cwm-workspace-id']) {
+          params['workspace_id'] = config['cwm-workspace-id'];
+        }
+        break;
     }
 
     return params;
@@ -181,78 +185,82 @@ module.exports = function (RED) {
   }
 
   function loadFile(node, method, params, msg) {
-    temp.open({
-      suffix: '.txt'
-    }, function(err, info) {
-      if (err) {
-        node.status({
-          fill: 'red',
-          shape: 'dot',
-          text: 'Error receiving the data buffer'
-        });
-        throw err;
-      }
-
-      // Syncing up the asynchronous nature of the stream
-      // so that the full file can be sent to the API.
-      fs.writeFile(info.path, msg.payload, function(err) {
+    temp.open(
+      {
+        suffix: '.txt',
+      },
+      function(err, info) {
         if (err) {
           node.status({
             fill: 'red',
             shape: 'dot',
-            text: 'Error processing data buffer'
+            text: 'Error receiving the data buffer',
           });
           throw err;
         }
 
-        var workspaceObject = null;
-
-        switch (method) {
-        case 'createWorkspace':
-        case 'updateWorkspace':
-          try {
-            workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
-          } catch (err) {
-            workspaceObject = fs.createReadStream(info.path);
+        // Syncing up the asynchronous nature of the stream
+        // so that the full file can be sent to the API.
+        fs.writeFile(info.path, msg.payload, function(err) {
+          if (err) {
+            node.status({
+              fill: 'red',
+              shape: 'dot',
+              text: 'Error processing data buffer',
+            });
+            throw err;
           }
-        }
 
-        params = setWorkspaceParams(method, params, workspaceObject);
-        executeMethod(node, method, params, msg);
-        temp.cleanup();
-      });
-    });
+          var workspaceObject = null;
+
+          switch (method) {
+            case 'createWorkspace':
+            case 'updateWorkspace':
+              try {
+                workspaceObject = JSON.parse(
+                  fs.readFileSync(info.path, 'utf8'),
+                );
+              } catch (err) {
+                workspaceObject = fs.createReadStream(info.path);
+              }
+          }
+
+          params = setWorkspaceParams(method, params, workspaceObject);
+          executeMethod(node, method, params, msg);
+          temp.cleanup();
+        });
+      },
+    );
   }
 
   function checkForFile(method) {
     switch (method) {
-    case 'createWorkspace':
-    case 'updateWorkspace':
-      return true;
+      case 'createWorkspace':
+      case 'updateWorkspace':
+        return true;
     }
     return false;
   }
-
 
   // These are APIs that the node has created to allow it to dynamically fetch Bluemix
   // credentials, and also translation models. This allows the node to keep up to
   // date with new tranlations, without the need for a code update of this node.
 
   // Node RED Admin - fetch and set vcap services
-  RED.httpAdmin.get('/watson-conversation-v1-workspace-manager/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/watson-conversation-v1-workspace-manager/vcap', function(
+    req,
+    res,
+  ) {
+    res.json(service ? { bound_service: true } : null);
   });
 
-
   // This is the Speech to Text V1 Query Builder Node
-  function Node (config) {
+  function Node(config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg) {
-      var method = config['cwm-custom-mode'],
-        message = '',
-        params = {};
+    this.on('input', function(msg) {
+      var method = config['cwm-custom-mode'], message = '', params = {};
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
@@ -286,9 +294,8 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-conversation-v1-workspace-manager', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'}
-    }
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
-
 };

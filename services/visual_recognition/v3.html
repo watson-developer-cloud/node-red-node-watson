@@ -186,7 +186,7 @@
               // doesn't appear.
               $('#node-input-image-feature').change(function() {
                 var selectedFeature = $('#node-input-image-feature');
-                if (selectedFeature.val() == 'classifyImage') {
+                if (selectedFeature.val() === 'classifyImage') {
                     var currvalue = $('#node-input-lang').val();
                     if (!currvalue) {
                       if (!visualrecognitionv3.language_selected) {

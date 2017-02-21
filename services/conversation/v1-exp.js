@@ -14,9 +14,12 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
-  var cfenv = require('cfenv'), watson = require('watson-developer-cloud'), service = null,
-    sUsername = null, sPassword = null;
+module.exports = function(RED) {
+  var cfenv = require('cfenv'),
+    watson = require('watson-developer-cloud'),
+    service = null,
+    sUsername = null,
+    sPassword = null;
 
   service = cfenv.getAppEnv().getServiceCreds(/conversation/i);
 
@@ -25,14 +28,13 @@ module.exports = function (RED) {
     sPassword = service.password;
   }
 
-  RED.httpAdmin.get('/watson-conversation/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/watson-conversation/vcap', function(req, res) {
+    res.json(service ? { bound_service: true } : null);
   });
-
 
   function verifyPayload(node, msg) {
     if (!msg.payload) {
-      this.status({fill:'red', shape:'ring', text:'missing payload'});
+      this.status({ fill: 'red', shape: 'ring', text: 'missing payload' });
       node.error('Missing property: msg.payload', msg);
       return false;
     }
@@ -52,7 +54,7 @@ module.exports = function (RED) {
       console.log('node.workspaceid', node.workspaceid);
       return true;
     }
-    node.error('Missing workspace_id. check node documentation.',msg);
+    node.error('Missing workspace_id. check node documentation.', msg);
     return false;
   }
 
@@ -63,7 +65,7 @@ module.exports = function (RED) {
       passWord = sPassword || node.credentials.password;
 
     if (!userName || !passWord) {
-      node.status({fill:'red', shape:'ring', text:'missing credentials'});
+      node.status({ fill: 'red', shape: 'ring', text: 'missing credentials' });
       node.error('Missing Watson Conversation API service credentials', msg);
       return false;
     }
@@ -71,17 +73,20 @@ module.exports = function (RED) {
       username: userName,
       password: passWord,
       version_date: '2016-05-19',
-      version: 'v1-experimental'
+      version: 'v1-experimental',
     });
     return true;
   }
 
   function processResponse(err, body, node, msg) {
-    if (err != null && body == null) {
-      node.status({fill:'red', shape:'ring',
-        text:'call to watson conversation service failed'});
+    if (err != null && body === null) {
+      node.status({
+        fill: 'red',
+        shape: 'ring',
+        text: 'call to watson conversation service failed',
+      });
       msg.result = {};
-      if (err.code == null) {
+      if (err.code === null) {
         msg.result['error'] = err;
       } else {
         msg.result['error_code'] = err.code;
@@ -99,22 +104,26 @@ module.exports = function (RED) {
   }
 
   function execute(params, node, msg) {
-    node.status({fill:'blue', shape:'dot' , text:'Calling Conversation service ...'});
+    node.status({
+      fill: 'blue',
+      shape: 'dot',
+      text: 'Calling Conversation service ...',
+    });
     params.workspace_id = node.workspaceid;
-    params.input = {text:msg.payload};
+    params.input = { text: msg.payload };
     // call POST /message through SDK
     node.service.message(params, function(err, body) {
-      processResponse(err,body,node,msg);
+      processResponse(err, body, node, msg);
     });
   }
 
   // This is the Watson Visual Recognition V3 Node
-  function WatsonConversationV1ExpNode (config) {
+  function WatsonConversationV1ExpNode(config) {
     var node = this, b = false;
 
     RED.nodes.createNode(this, config);
 
-    node.on('input', function (msg) {
+    node.on('input', function(msg) {
       var params = {};
 
       node.status({});
@@ -131,16 +140,18 @@ module.exports = function (RED) {
       if (!b) {
         return;
       }
-      execute(params,node,msg);
+      execute(params, node, msg);
     });
   }
 
-  RED.nodes.registerType('watson-conversation-v1-experimental', WatsonConversationV1ExpNode, {
-    credentials: {
-      username: {type:'text'},
-      password: {type:'password'}
-    }
-  });
-
-
+  RED.nodes.registerType(
+    'watson-conversation-v1-experimental',
+    WatsonConversationV1ExpNode,
+    {
+      credentials: {
+        username: { type: 'text' },
+        password: { type: 'password' },
+      },
+    },
+  );
 };

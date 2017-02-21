@@ -23,16 +23,16 @@ ServiceUtils.prototype = {
   // that the url associated with the service, contains the matched
   // input value, hence reducing the chances of a false match.
   checkCFForService: function(serviceName, returnBoolean, alchemyRegex) {
-    var regex = alchemyRegex ?
-                RegExp('(http|https)(://)('+serviceName+').*') :
-                RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
+    var regex = alchemyRegex
+      ? RegExp('(http|https)(://)(' + serviceName + ').*')
+      : RegExp('(http|https)(://)([^\/]+)(/)(' + serviceName + ').*');
 
     var services = appEnv.getServices();
 
     for (var service in services) {
       if (services[service].hasOwnProperty('credentials')) {
-        if(services[service].credentials.hasOwnProperty('url')){
-          if(services[service].credentials.url.search(regex) === 0){
+        if (services[service].credentials.hasOwnProperty('url')) {
+          if (services[service].credentials.url.search(regex) === 0) {
             return returnBoolean ? true : services[service].credentials;
           }
         }
@@ -54,7 +54,6 @@ ServiceUtils.prototype = {
   getServiceCredsAlchemy: function(serviceName) {
     return ServiceUtils.prototype.checkCFForService(serviceName, false, true);
   },
-
 };
 
 var serviceutils = new ServiceUtils();

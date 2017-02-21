@@ -14,40 +14,38 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   var cfenv = require('cfenv'),
     payloadutils = require('../../utilities/payload-utils');
 
-  var services = cfenv.getAppEnv().services,
-    service;
+  var services = cfenv.getAppEnv().services, service;
 
   var username, password;
 
-  var service = cfenv.getAppEnv().getServiceCreds(/personality insights/i)
+  var service = cfenv.getAppEnv().getServiceCreds(/personality insights/i);
 
   if (service) {
     username = service.username;
     password = service.password;
   }
 
-  RED.httpAdmin.get('/watson-personality-insights/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/watson-personality-insights/vcap', function(req, res) {
+    res.json(service ? { bound_service: true } : null);
   });
 
   function Node(config) {
-    RED.nodes.createNode(this,config);
-    var node = this,
-      wc = payloadutils.word_count(config.lang);
+    RED.nodes.createNode(this, config);
+    var node = this, wc = payloadutils.word_count(config.lang);
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg) {
       var self = this;
 
       if (!msg.payload) {
         var message = 'Missing property: msg.payload';
-        node.error(message, msg)
+        node.error(message, msg);
         return;
       }
-      wc(msg.payload, function (length) {
+      wc(msg.payload, function(length) {
         if (length < 100) {
           var message = 'Personality insights requires a minimum of one hundred words.';
           node.error(message, msg);
@@ -63,32 +61,36 @@ module.exports = function (RED) {
           return;
         }
 
-        var PersonalityInsightsV2 = require('watson-developer-cloud/personality-insights/v2');
+        var PersonalityInsightsV2 = require(
+          'watson-developer-cloud/personality-insights/v2',
+        );
 
         var personality_insights = new PersonalityInsightsV2({
           username: username,
-          password: password
+          password: password,
         });
 
-        node.status({fill:"blue", shape:"dot", text:"requesting"});
-        personality_insights.profile({text: msg.payload, language: config.lang}, function (err, response) {
-          node.status({})
-          if (err) {
-            node.error(err, msg);
-          } else{
-            msg.insights = response.tree;
-          }
+        node.status({ fill: 'blue', shape: 'dot', text: 'requesting' });
+        personality_insights.profile(
+          { text: msg.payload, language: config.lang },
+          function(err, response) {
+            node.status({});
+            if (err) {
+              node.error(err, msg);
+            } else {
+              msg.insights = response.tree;
+            }
 
-          node.send(msg);
-        });
-
+            node.send(msg);
+          },
+        );
       });
     });
   }
-  RED.nodes.registerType("watson-personality-insights",Node,{
-     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
-    }
+  RED.nodes.registerType('watson-personality-insights', Node, {
+    credentials: {
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
 };

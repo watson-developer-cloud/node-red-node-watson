@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'text-to-speech';
   var request = require('request'),
     cfenv = require('cfenv'),
@@ -26,7 +26,10 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     TextToSpeechV1 = require('watson-developer-cloud/text-to-speech/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = '', password = '', sUsername = '', sPassword = '';
+    username = '',
+    password = '',
+    sUsername = '',
+    sPassword = '';
 
   temp.track();
 
@@ -45,7 +48,7 @@ module.exports = function (RED) {
     sPassword = service.password;
   }
 
-/*
+  /*
   function reportError (node, msg, message) {
     var messageTxt = message.error ? message.error : message;
     msg.watsonerror = messageTxt;
@@ -56,7 +59,7 @@ module.exports = function (RED) {
 */
 
   function executeCreateCustomisation(node, tts, params, msg) {
-    tts.createCustomization(params, function (err, response) {
+    tts.createCustomization(params, function(err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -68,70 +71,71 @@ module.exports = function (RED) {
   }
 
   function executeListCustomisations(node, tts, params, msg) {
-    tts.getCustomizations(params, function (err, response) {
+    tts.getCustomizations(params, function(err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['customizations'] = response.customizations ?
-                                      response.customizations: response;
+        msg['customizations'] = response.customizations
+          ? response.customizations
+          : response;
       }
       node.send(msg);
     });
   }
 
   function executeGetCustomisation(node, tts, params, msg) {
-    tts.getCustomization(params, function (err, response) {
+    tts.getCustomization(params, function(err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['customization'] = response ;
+        msg['customization'] = response;
       }
       node.send(msg);
     });
   }
 
   function executeGetPronounce(node, tts, params, msg) {
-    tts.pronunciation(params, function (err, response) {
+    tts.pronunciation(params, function(err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['pronunciation'] = response.pronunciation ?
-                                    response.pronunciation : response;
+        msg['pronunciation'] = response.pronunciation
+          ? response.pronunciation
+          : response;
       }
       node.send(msg);
     });
   }
 
-
   function executeAddWords(node, tts, params, msg) {
-    tts.addWords(params, function (err, response) {
+    tts.addWords(params, function(err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['addwordsresponse'] = response ;
+        msg['addwordsresponse'] = response;
       }
       node.send(msg);
     });
   }
 
   function executeGetWords(node, tts, params, msg) {
-    tts.getWords(params, function (err, response) {
+    tts.getWords(params, function(err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['words'] = response.words ? response.words: response;
+        msg['words'] = response.words ? response.words : response;
       }
       node.send(msg);
     });
   }
 
   function executeDeleteWord(node, tts, params, msg) {
-    tts.deleteWord(params, function (err, response) {
+    tts.deleteWord(params, function(err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -151,92 +155,95 @@ module.exports = function (RED) {
   function executeMethod(node, method, params, msg) {
     var tts = new TextToSpeechV1({
       username: username,
-      password: password
+      password: password,
     });
 
-    node.status({fill:'blue', shape:'dot', text:'executing'});
+    node.status({ fill: 'blue', shape: 'dot', text: 'executing' });
 
     switch (method) {
-    case 'createCustomisation':
-      executeCreateCustomisation(node, tts, params, msg);
-      break;
-    case 'listCustomisations':
-      executeListCustomisations(node, tts, params, msg);
-      break;
-    case 'getCustomisation':
-      executeGetCustomisation(node, tts, params, msg);
-      break;
-    case 'getPronounce':
-      executeGetPronounce(node, tts, params, msg);
-      break;
-    case 'addWords':
-      executeAddWords(node, tts, params, msg);
-      break;
-    case 'getWords':
-      executeGetWords(node, tts, params, msg);
-      break;
-    case 'deleteWord':
-      executeDeleteWord(node, tts, params, msg);
-      break;
-    default:
-      executeUnknownMethod(node, tts, params, msg);
-      break;
+      case 'createCustomisation':
+        executeCreateCustomisation(node, tts, params, msg);
+        break;
+      case 'listCustomisations':
+        executeListCustomisations(node, tts, params, msg);
+        break;
+      case 'getCustomisation':
+        executeGetCustomisation(node, tts, params, msg);
+        break;
+      case 'getPronounce':
+        executeGetPronounce(node, tts, params, msg);
+        break;
+      case 'addWords':
+        executeAddWords(node, tts, params, msg);
+        break;
+      case 'getWords':
+        executeGetWords(node, tts, params, msg);
+        break;
+      case 'deleteWord':
+        executeDeleteWord(node, tts, params, msg);
+        break;
+      default:
+        executeUnknownMethod(node, tts, params, msg);
+        break;
     }
   }
 
   function setFileParams(method, params, msg) {
     switch (method) {
-    case 'addWords':
-      params.words = msg.payload;
-      break;
+      case 'addWords':
+        params.words = msg.payload;
+        break;
     }
     return params;
   }
 
   function loadFile(node, method, params, msg) {
-    temp.open({
-      suffix: '.txt'
-    }, function(err, info) {
-      if (err) {
-        node.status({
-          fill: 'red',
-          shape: 'dot',
-          text: 'Error receiving the data buffer for training'
-        });
-        throw err;
-      }
-
-      // Syncing up the asynchronous nature of the stream
-      // so that the full file can be sent to the API.
-      fs.writeFile(info.path, msg.payload, function(err) {
+    temp.open(
+      {
+        suffix: '.txt',
+      },
+      function(err, info) {
         if (err) {
           node.status({
             fill: 'red',
             shape: 'dot',
-            text: 'Error processing data buffer for training'
+            text: 'Error receiving the data buffer for training',
           });
           throw err;
         }
 
-        switch (method) {
-        case 'addWords':
-          try {
-            params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
-          } catch (err) {
-            params.words = fs.createReadStream(info.path);
+        // Syncing up the asynchronous nature of the stream
+        // so that the full file can be sent to the API.
+        fs.writeFile(info.path, msg.payload, function(err) {
+          if (err) {
+            node.status({
+              fill: 'red',
+              shape: 'dot',
+              text: 'Error processing data buffer for training',
+            });
+            throw err;
           }
-        }
 
-        executeMethod(node, method, params, msg);
-        temp.cleanup();
-      });
-    });
+          switch (method) {
+            case 'addWords':
+              try {
+                params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
+              } catch (err) {
+                params.words = fs.createReadStream(info.path);
+              }
+          }
+
+          executeMethod(node, method, params, msg);
+          temp.cleanup();
+        });
+      },
+    );
   }
 
   function checkForFile(method) {
     switch (method) {
-    case 'addWords':
-      return true;
+      case 'addWords':
+        return true;
     }
     return false;
   }
@@ -269,7 +276,7 @@ module.exports = function (RED) {
       if (config['tts-custom-id']) {
         params['customization_id'] = config['tts-custom-id'];
       }
-    } else if ( config['tts-voice'] ) {
+    } else if (config['tts-voice']) {
       params['voice'] = config['tts-voice'];
     }
 
@@ -277,30 +284,29 @@ module.exports = function (RED) {
     return params;
   }
 
-
   function buildParams(msg, method, config) {
     var params = {};
 
     switch (method) {
-    case 'createCustomisation':
-      params = paramsForNewCustom(config);
-      break;
-    case 'getPronounce':
-      params = paramsForGetPronounce(config);
-      break;
-    case 'deleteWord':
-      if (config['tts-custom-word']) {
-        params['word'] = config['tts-custom-word'];
-      }
-    // No break here as want the custom id also
-    case 'listCustomisations':
-    case 'getCustomisation':
-    case 'addWords':
-    case 'getWords':
-      if (config['tts-custom-id']) {
-        params['customization_id'] = config['tts-custom-id'];
-      }
-      break;
+      case 'createCustomisation':
+        params = paramsForNewCustom(config);
+        break;
+      case 'getPronounce':
+        params = paramsForGetPronounce(config);
+        break;
+      case 'deleteWord':
+        if (config['tts-custom-word']) {
+          params['word'] = config['tts-custom-word'];
+        }
+      // No break here as want the custom id also
+      case 'listCustomisations':
+      case 'getCustomisation':
+      case 'addWords':
+      case 'getWords':
+        if (config['tts-custom-id']) {
+          params['customization_id'] = config['tts-custom-id'];
+        }
+        break;
     }
 
     return params;
@@ -311,18 +317,24 @@ module.exports = function (RED) {
   // date with new tranlations, without the need for a code update of this node.
 
   // Node RED Admin - fetch and set vcap services
-  RED.httpAdmin.get('/watson-text-to-speech-v1-query-builder/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/watson-text-to-speech-v1-query-builder/vcap', function(
+    req,
+    res,
+  ) {
+    res.json(service ? { bound_service: true } : null);
   });
 
   // API used by widget to fetch available voices
-  RED.httpAdmin.get('/watson-text-to-speech-v1-query-builder/voices', function (req, res) {
+  RED.httpAdmin.get('/watson-text-to-speech-v1-query-builder/voices', function(
+    req,
+    res,
+  ) {
     var tts = new TextToSpeechV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd
+      password: sPassword ? sPassword : req.query.pwd,
     });
 
-    tts.voices({}, function(err, voices){
+    tts.voices({}, function(err, voices) {
       if (err) {
         if (!err.error) {
           err.error = 'Error ' + err.code + ' in fetching voices';
@@ -335,14 +347,12 @@ module.exports = function (RED) {
   });
 
   // This is the Speech to Text V1 Query Builder Node
-  function Node (config) {
+  function Node(config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg) {
-      var method = config['tts-custom-mode'],
-        message = '',
-        params = {};
+    this.on('input', function(msg) {
+      var method = config['tts-custom-mode'], message = '', params = {};
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
@@ -374,9 +384,8 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-text-to-speech-v1-query-builder', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'}
-    }
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
-
 };

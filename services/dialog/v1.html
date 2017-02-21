@@ -40,15 +40,15 @@
             oneditprepare: function() {
 				$('#node-input-mode').change(function () {
 					var mode = $('#node-input-mode').val();
-					if (mode == "list" || mode == "create") {
+					if (mode === "list" || mode === "create") {
 						$('.form-row.mode.dialog').hide();
-                    } else if (mode == "delete") {
+                    } else if (mode === "delete") {
                         $('.form-row.mode.dialog').show();
                         $('.form-row.mode.converse').hide();
-                    } else if (mode == "deleteall") {
+                    } else if (mode === "deleteall") {
                         $('.form-row.mode.dialog').hide();
                         $('.form-row.mode.converse').hide();
-					} else if (mode == "startconverse") {
+					} else if (mode === "startconverse") {
 						$('.form-row.mode.dialog').show();
 						$('.form-row.mode.converse').hide();
 					} else {

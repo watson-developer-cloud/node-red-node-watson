@@ -238,7 +238,7 @@
     var vorc = $('#node-input-tts-voice-or-custom').val();
     var showfields = [];
     var hidefields = [];
-    if ('custom' == vorc) {
+    if ('custom' === vorc) {
       showfields.push('#node-input-tts-custom-id');
       hidefields.push('#node-input-tts-lang');
       hidefields.push('#node-input-tts-voice');
@@ -355,7 +355,7 @@
 
     $('#node-input-tts-voice-or-custom').change(function() {
       console.log('voice or custom option is set to ', $('#node-input-tts-voice-or-custom').val());
-      if ('getPronounce' == ttsv1qbb.mode_selected) {
+      if ('getPronounce' === ttsv1qbb.mode_selected) {
         ttsv1qbb.processPronounceSetting();
       }
     });

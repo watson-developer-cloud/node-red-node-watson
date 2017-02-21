@@ -29,15 +29,17 @@ module.exports = function(RED) {
   for (var i in appEnv.services) {
     // filter the services to include only the Convert ones
     if (i.match(/^(document_conversion)/i)) {
-      converts = converts.concat(appEnv.services[i].map(function(v) {
-        return {
-          name: v.name,
-          label: v.label,
-          url: v.credentials.url,
-          username: v.credentials.username,
-          password: v.credentials.password
-        };
-      }));
+      converts = converts.concat(
+        appEnv.services[i].map(function(v) {
+          return {
+            name: v.name,
+            label: v.label,
+            url: v.credentials.url,
+            username: v.credentials.username,
+            password: v.credentials.password,
+          };
+        }),
+      );
     }
   }
 
@@ -55,88 +57,104 @@ module.exports = function(RED) {
     this.target = config.target;
     var node = this;
 
-    this.performConversion = function(msg,filename) {
+    this.performConversion = function(msg, filename) {
       var document_conversion = watson.document_conversion({
         username: node.username,
         password: node.password,
         version: 'v1',
-        version_date: '2015-12-01'
+        version_date: '2015-12-01',
       });
 
       node.status({
         fill: 'blue',
         shape: 'dot',
-        text: 'converting'
+        text: 'converting',
       });
 
-      document_conversion.convert({
-        file: fs.createReadStream(filename),
-        conversion_target: msg.target || node.target,
-        word: msg.word,
-        pdf: msg.pdf,
-        normalized_html: msg.normalized_html
-      }, function(err, response) {
-        node.status({});
-        if (err) {
-          node.error(err);
-        } else {
-          msg.payload = response;
-          node.send(msg);
-        }
-      });
+      document_conversion.convert(
+        {
+          file: fs.createReadStream(filename),
+          conversion_target: msg.target || node.target,
+          word: msg.word,
+          pdf: msg.pdf,
+          normalized_html: msg.normalized_html,
+        },
+        function(err, response) {
+          node.status({});
+          if (err) {
+            node.error(err);
+          } else {
+            msg.payload = response;
+            node.send(msg);
+          }
+        },
+      );
     };
 
     this.verifyCredentials = function(msg) {
       if (node && node.username && node.password) {
         return true;
       }
-      node.status({fill:'red', shape:'ring', text:'missing credentials'});
-      node.error('Missing Watson Document Conversion API service credentials', msg);
+      node.status({ fill: 'red', shape: 'ring', text: 'missing credentials' });
+      node.error(
+        'Missing Watson Document Conversion API service credentials',
+        msg,
+      );
       return false;
     };
 
     this.doCall = function(msg) {
-      temp.open({
-        //suffix: '.docx'
-      }, function(err, info) {
-        if (err) {
-          throw err;
-        }
-        var stream_payload = (typeof msg.payload === 'string') ? payloadutils.stream_url_format : payloadutils.stream_buffer;
-        if(typeof msg.payload === 'string' && !payloadutils.urlCheck(msg.payload)) {
-        	node.warn('Invalid URI, make sure to include the "http(s)" at the beginning.');
-        	node.status({
-	            fill: 'red',
-	            shape: 'dot',
-	            text: 'Invalid URI'
-	          });
-        } else {
-          stream_payload(info.path, msg.payload, function(format) {
-            if ('zip' === format) {
-              var f = fs.readFileSync(info.path);
-              if (isDocx(f)) {
-                var newfilename = info.path + '.docx';
-                fs.rename(info.path, newfilename, function(err){
-                  if (err) {
-                    node.warn('Unable to handle docx file.');
-                    node.status({
-          	            fill: 'red',
-          	            shape: 'dot',
-          	            text: 'Error handling docx file'
-          	          });
-                  } else {
-                    node.performConversion(msg,newfilename);
-                  }
-                });
+      temp.open(
+        {
+          //suffix: '.docx'
+        },
+        function(err, info) {
+          if (err) {
+            throw err;
+          }
+          var stream_payload = typeof msg.payload === 'string'
+            ? payloadutils.stream_url_format
+            : payloadutils.stream_buffer;
+          if (
+            typeof msg.payload === 'string' &&
+            !payloadutils.urlCheck(msg.payload)
+          ) {
+            node.warn(
+              'Invalid URI, make sure to include the "http(s)" at the beginning.',
+            );
+            node.status({
+              fill: 'red',
+              shape: 'dot',
+              text: 'Invalid URI',
+            });
+          } else {
+            stream_payload(info.path, msg.payload, function(format) {
+              if ('zip' === format) {
+                var f = fs.readFileSync(info.path);
+                if (isDocx(f)) {
+                  var newfilename = info.path + '.docx';
+                  fs.rename(info.path, newfilename, function(err) {
+                    if (err) {
+                      node.warn('Unable to handle docx file.');
+                      node.status({
+                        fill: 'red',
+                        shape: 'dot',
+                        text: 'Error handling docx file',
+                      });
+                    } else {
+                      node.performConversion(msg, newfilename);
+                    }
+                  });
+                } else {
+                  node.performConversion(msg, info.path);
+                }
               } else {
-                node.performConversion(msg,info.path);
+                node.performConversion(msg, info.path);
               }
-            } else {
-              node.performConversion(msg,info.path);
-            }
-          });
-        }
-      });
+            });
+          }
+        },
+      );
     };
 
     this.on('input', function(msg) {
