@@ -20,10 +20,16 @@
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
         </div>
     </div>
+
     <div class="form-row credentials" style="display: none;">
-        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
-        <input type="password" id="node-input-apikey" placeholder="API Key">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
     </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+
     <div class="form-row">
         <label for="node-input-features" style="width: 100%"><i class="fa fa-book"></i> Extract the following features: </label>
           <div style="float: left;">
@@ -182,7 +188,8 @@
               "entity-emotion": {value: ""}
             },
             credentials: {
-              apikey: {type:"password"}
+              username: {type:"text"},
+              password: {type:"password"}
             },
             color: '#00A2FF',
             inputs: 1,
