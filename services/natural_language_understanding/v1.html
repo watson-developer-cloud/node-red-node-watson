@@ -33,6 +33,15 @@
     <div class="form-row">
         <label for="node-input-features" style="width: 100%"><i class="fa fa-book"></i> Extract the following features: </label>
           <div style="float: left;">
+
+          <div>
+            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                   type="checkbox" id="node-input-categories" />
+            <label style="width: auto;" for="node-input-categories">Categories</label>
+          </div>
+
+
+
             <div>
               <input style="width: 30px; margin-left: 20px; margin-top: 0;"
                      type="checkbox" id="node-input-page-image" />
@@ -136,9 +145,13 @@
 </script>
 
 <script type="text/x-red" data-help-name="natural-language-understanding">
-    <p>Using the Feature Extract node, you can use the Alchemy APIs to analyse external URLs, HTML files or text content.</p>
+    <p>Using the Watson Natural Language Understanding node, you can
+    extract meta-data from content.
+    You can analyse external URLs, HTML files or text content.</p>
     <p>The following features are available for analysis:</p>
     <ul>
+        <li><b>Categories</b>, Categorize your content into a taxonomy.</li>
+
         <li><b>Page Images</b>, extract available page images.</li>
         <li><b>Image Keywords</b>, discover image content keywords.</li>
         <li><b>Feed</b>, extract RSS/ATOM feed links.</li>
@@ -155,14 +168,21 @@
         <li><b>Entity Sentiment</b>, generate entity sentiment scores.</li>
         <li><b>Entity Emotion</b>, generate entity emotion scores.</li>
     </ul>
-    <p>For full details on the feature details, please see the <a href="https://www.ibm.com/watson/developercloud/dashboard/en/alchemyapi-dashboard.html">Alchemy API documentation</a></p>
+    <p>For full details on the feature details,
+      please see the
+      <a href="https://www.ibm.com/watson/developercloud/natural-language-understanding.html">
+        service API documentation</a></p>
     <p>The content to be analysed should be passed in on <code>msg.payload</code>.</p>
     <p>Valid <code>msg.payload</code> types: URL, HTML or Text Content.</p>
-    <p>If you need to send custom parameters along with each feature, set those parameters as children of the <code>msg.alchemy_options</code> object. eg. to limit the output to 3 values per feature set
-      <code>msg.alchemy_options = {maxRetrieve: 3};</code>
+    <p>If you need to send custom parameters along with each feature, set those parameters
+      as children of the <code>msg.nlu_options</code>
+      object. eg. to limit the output to 3 values per feature set
+      <code>msg.nlu_options = {maxRetrieve: 3};</code>
     </p>
     <br>
-    <p>Results from the Alchemy API service will made available at <code>msg.features</code>. Each feature result will be a separate child property.</p>
+    <p>Results from the API service will made available
+      at <code>msg.features</code>. Each feature result will be a separate
+      child property.</p>
 </script>
 
 <script type="text/javascript">
@@ -170,7 +190,9 @@
         RED.nodes.registerType('natural-language-understanding', {
             category: 'IBM Watson',
             defaults: {
-              name: {value: ""},
+              'name': {value: ''},
+              'categories': {value: ''},
+
               "page-image": {value: ""},
               "image-kw": {value: ""},
               feed: {value: ""},
