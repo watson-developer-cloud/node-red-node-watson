@@ -40,6 +40,16 @@
             <label style="width: auto;" for="node-input-categories">Categories</label>
           </div>
 
+          <div>
+            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                   type="checkbox" id="node-input-concepts" />
+            <label style="width: auto;" for="node-input-concepts">Concepts</label>
+          </div>
+          <div>
+            <label style="width: auto;" for="node-input-maxconcepts">Maximum Concepts</label>
+            <input type="number" min="1" max="8"
+                   id="node-input-maxconcepts" />
+          </div>
 
 
             <div>
@@ -106,11 +116,6 @@
               <label style="width: auto;" for="node-input-taxonomy">Taxonomy</label>
             </div>
 
-            <div>
-              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                     type="checkbox" id="node-input-concept" />
-              <label style="width: auto;" for="node-input-concept">Concepts</label>
-            </div>
 
             <div>
               <input style="width: 30px; margin-left: 20px; margin-top: 0;"
@@ -150,7 +155,8 @@
     You can analyse external URLs, HTML files or text content.</p>
     <p>The following features are available for analysis:</p>
     <ul>
-        <li><b>Categories</b>, Categorize your content into a taxonomy.</li>
+        <li><b>Categories</b>, categorize content into a taxonomy.</li>
+        <li><b>Concepts</b>, recognize high-level concepts.</li>
 
         <li><b>Page Images</b>, extract available page images.</li>
         <li><b>Image Keywords</b>, discover image content keywords.</li>
@@ -160,7 +166,6 @@
         <li><b>Authors</b>, extract content authors.</li>
         <li><b>Keywords</b>, discover topic keywords for content.</li>
         <li><b>Taxonomy</b>, categorize content against known taxonomies.</li>
-        <li><b>Concepts</b>, tag content with related concepts.</li>
         <li><b>Relations</b>, identify Subject-Action-Object relations.</li>
         <li><b>Publication Date</b>, extract available publication date.</li>
         <li><b>Document Sentiment</b>, generate sentiment scores.</li>
@@ -185,13 +190,68 @@
       child property.</p>
 </script>
 
+
+
+
 <script type="text/javascript">
+  // Need to simulate a namespace, so that some of the variables don't leak across nodes
+  function NaturalLanguageUnderstandingV1 () {}
+
+  // This is the namespace for this version of this Node.
+  var nluV1 = new NaturalLanguageUnderstandingV1();
+
+  nluV1.hideAll = function() {
+    $('#node-input-maxconcepts').parent().hide();
+  };
+
+  nluV1.setVisibility = function(field, visible) {
+    if (visible) {
+      field.parent().show();
+    } else {
+      field.parent().hide();
+    }
+  };
+
+  nluV1.UIListeners = function () {
+    console.log('Creating Listeners');
+    $('#node-input-concepts').change(function(val){
+      var isSet = $('#node-input-concepts').prop('checked');
+      console.log('Concepts is set: ', isSet);
+      //disV1.processSelectedMethod(method);
+      nluV1.setVisibility($('#node-input-maxconcepts'),
+                          $('#node-input-concepts').prop('checked'));
+
+    });
+  }
+
+  nluV1.checkForPrepare = function () {
+    nluV1.hideAll();
+    nluV1.UIListeners();
+  };
+
+  // This is the on edit prepare function, which will be
+  //invoked everytime the dialog is shown.
+  function nluoneditprepare() {
+    nluV1.checkForPrepare();
+    $.getJSON('watson-discovery/vcap/')
+      .done(function (service) {
+        $('.credentials').toggle(!service);
+      })
+      .fail(function () {
+        $('.credentials').show();
+      }).always(function () {
+        $('#credentials-check').hide();
+      })
+  }
+
     (function() {
         RED.nodes.registerType('natural-language-understanding', {
             category: 'IBM Watson',
             defaults: {
               'name': {value: ''},
               'categories': {value: ''},
+              'concepts': {value: ""},
+              'maxconcepts': {value: "4"},
 
               "page-image": {value: ""},
               "image-kw": {value: ""},
@@ -201,7 +261,6 @@
               title: {value: ""},
               author: {value: ""},
               taxonomy: {value: ""},
-              concept: {value: ""},
               relation: {value: ""},
               "pub-date": {value: ""},
               "doc-sentiment": {value: ""},
@@ -223,19 +282,8 @@
             },
             labelStyle: function() {
                 return this.name ? "node_label_italic" : "";
-            },
-            oneditprepare: function() {
-              $.getJSON('natural-language-understanding/vcap/')
-                  .done(function (service) {
-                    $('.credentials').toggle(!service);
-                  })
-                  .fail(function () {
-                    $('.credentials').show();
-                  })
-                  .always(function () {
-                    $('#credentials-check').hide();
-                  })
-            }
+            } ,
+            oneditprepare: nluoneditprepare
         });
     })();
 </script>
