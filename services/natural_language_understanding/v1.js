@@ -32,6 +32,14 @@ module.exports = function (RED) {
     node.error(message, msg);
   }
 
+  function checkPayload(msg) {
+    var message = '';
+    if (!msg.payload) {
+      message = 'Missing property: msg.payload';
+    }
+    return message;
+  }
+
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
@@ -50,12 +58,15 @@ module.exports = function (RED) {
 
     this.on('input', function (msg) {
       message = '',
+      node.status({});
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
 
       if (!username || !password) {
         message = 'Missing Watson Natural Language Understanding service credentials';
+      } else {
+        message = checkPayload(msg);
       }
 
       if (message) {
