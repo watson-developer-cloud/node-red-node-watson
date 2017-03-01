@@ -47,7 +47,7 @@
             </div>
             <div>
               <label style="width: auto;" for="node-input-maxconcepts">Maximum Concepts</label>
-              <input type="number" min="1" max="8"
+              <input type="number" min="1"
                      id="node-input-maxconcepts" />
             </div>
 
@@ -71,59 +71,80 @@
               <input type="text" id="node-input-doc-sentiment-target" />
             </div>
 
-
-
-            <div>
-              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                     type="checkbox" id="node-input-page-image" />
-              <label style="width: auto;" for="node-input-page-image">Page Images</label>
-            </div>
-
-            <div>
-              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                     type="checkbox" id="node-input-image-kw" />
-              <label style="width: auto;" for="node-input-image-kw">Image Keywords</label>
-            </div>
-
-            <div>
-              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                     type="checkbox" id="node-input-feed" />
-              <label style="width: auto;" for="node-input-feed">Feed</label>
-            </div>
-
             <div>
               <input style="width: 30px; margin-left: 20px; margin-top: 0;"
                      type="checkbox" id="node-input-entity" />
               <label style="width: auto;" for="node-input-entity">Entities</label>
             </div>
-
-            <div>
-              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                     type="checkbox" id="node-input-keyword" />
-              <label style="width: auto;" for="node-input-keyword">Keywords</label>
-            </div>
-
-            <div>
-              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                     type="checkbox" id="node-input-entity-sentiment" />
-              <label style="width: auto;" for="node-input-entity-sentiment">Entity and Keyword Sentiment</label>
-            </div>
-
             <div>
               <input style="width: 30px; margin-left: 20px; margin-top: 0;"
                      type="checkbox" id="node-input-entity-emotion" />
-              <label style="width: auto;" for="node-input-entity-emotion">Entity and Keyword Emotion</label>
+              <label style="width: auto;" for="node-input-entity-emotion">Entity Emotion</label>
             </div>
-
             <div>
               <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                     type="checkbox" id="node-input-title" />
-              <label style="width: auto;" for="node-input-title">Title</label>
+                     type="checkbox" id="node-input-entity-sentiment" />
+              <label style="width: auto;" for="node-input-entity-sentiment">Entity Sentiment</label>
             </div>
+            <div>
+              <label style="width: auto;" for="node-input-maxentities">Maximum Entities</label>
+              <input type="number" min="1"
+                     id="node-input-maxentities" />
+            </div>
+
 
           </div>
 
           <div style="margin-left: -200px; float: right;">
+
+
+
+
+
+
+
+          <div>
+            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                   type="checkbox" id="node-input-page-image" />
+            <label style="width: auto;" for="node-input-page-image">Page Images</label>
+          </div>
+
+          <div>
+            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                   type="checkbox" id="node-input-image-kw" />
+            <label style="width: auto;" for="node-input-image-kw">Image Keywords</label>
+          </div>
+
+          <div>
+            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                   type="checkbox" id="node-input-feed" />
+            <label style="width: auto;" for="node-input-feed">Feed</label>
+          </div>
+
+
+          <div>
+            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                   type="checkbox" id="node-input-keyword" />
+            <label style="width: auto;" for="node-input-keyword">Keywords</label>
+          </div>
+
+          <div>
+            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                   type="checkbox" id="node-input-entity-sentiment" />
+            <label style="width: auto;" for="node-input-entity-sentiment">Entity and Keyword Sentiment</label>
+          </div>
+
+          <div>
+            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                   type="checkbox" id="node-input-entity-emotion" />
+            <label style="width: auto;" for="node-input-entity-emotion">Entity and Keyword Emotion</label>
+          </div>
+
+          <div>
+            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                   type="checkbox" id="node-input-title" />
+            <label style="width: auto;" for="node-input-title">Title</label>
+          </div>
 
             <div>
               <input style="width: 30px; margin-left: 20px; margin-top: 0;"
@@ -176,12 +197,14 @@
         <li><b>Sentiment Targets</b>, optionally target the sentiment scores to a
                                     comma seperated list eg.
                                     <code>dolphins,sharks</code>.</li>
+        <li><b>Entities</b>, identify people, companies, organizations,
+                            cities, geographic features, and other typed
+                            entities.</li>
 
 
         <li><b>Page Images</b>, extract available page images.</li>
         <li><b>Image Keywords</b>, discover image content keywords.</li>
         <li><b>Feed</b>, extract RSS/ATOM feed links.</li>
-        <li><b>Entities</b>, identify people, companies, organizations, cities, geographic features, and other typed entities.</li>
         <li><b>Title</b>, find content title.</li>
         <li><b>Authors</b>, extract content authors.</li>
         <li><b>Keywords</b>, discover topic keywords for content.</li>
@@ -223,6 +246,10 @@
     $('#node-input-maxconcepts').parent().hide();
     $('#node-input-doc-emotion-target').parent().hide();
     $('#node-input-doc-sentiment-target').parent().hide();
+    $('#node-input-entity-emotion').parent().hide();
+    $('#node-input-entity-sentiment').parent().hide();
+    $('#node-input-maxentities').parent().hide();
+
   };
 
   nluV1.setVisibility = function(field, visible) {
@@ -256,6 +283,11 @@
     nluV1.CreateIListener($('#node-input-doc-sentiment'),
                                 $('#node-input-doc-sentiment-target'));
 
+    nluV1.CreateIListener($('#node-input-entity'),
+                                $('#node-input-entity-emotion'
+                                    + ', #node-input-entity-sentiment'
+                                    + ', #node-input-maxentities'));
+
   }
 
   nluV1.checkForPrepare = function () {
@@ -285,11 +317,17 @@
               'name': {value: false},
               'categories': {value: false},
               'concepts': {value: false},
-              'maxconcepts': {value: ''},
+              'maxconcepts': {value: '8'},
               'doc-emotion': {value: false},
               'doc-emotion-target': {value: ''},
               'doc-sentiment': {value: false},
               'doc-sentiment-target': {value: ''},
+              'entity': {value: false},
+              'entity-emotion': {value: false},
+              'entity-sentiment': {value: false},
+              'maxentities' :{value: '50'},
+
+
 
               "page-image": {value: ""},
               "image-kw": {value: ""},
