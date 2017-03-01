@@ -92,7 +92,6 @@
                      id="node-input-maxentities" />
             </div>
 
-
           </div>
 
           <div style="margin-left: -200px; float: right;">
@@ -151,70 +150,8 @@
                      id="node-input-maxsemantics" />
             </div>
 
-
-
-
-
-          <div>
-            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                   type="checkbox" id="node-input-page-image" />
-            <label style="width: auto;" for="node-input-page-image">Page Images</label>
           </div>
 
-          <div>
-            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                   type="checkbox" id="node-input-image-kw" />
-            <label style="width: auto;" for="node-input-image-kw">Image Keywords</label>
-          </div>
-
-          <div>
-            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                   type="checkbox" id="node-input-feed" />
-            <label style="width: auto;" for="node-input-feed">Feed</label>
-          </div>
-
-
-
-          <div>
-            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                   type="checkbox" id="node-input-entity-sentiment" />
-            <label style="width: auto;" for="node-input-entity-sentiment">Entity and Keyword Sentiment</label>
-          </div>
-
-          <div>
-            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                   type="checkbox" id="node-input-entity-emotion" />
-            <label style="width: auto;" for="node-input-entity-emotion">Entity and Keyword Emotion</label>
-          </div>
-
-          <div>
-            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                   type="checkbox" id="node-input-title" />
-            <label style="width: auto;" for="node-input-title">Title</label>
-          </div>
-
-            <div>
-              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                     type="checkbox" id="node-input-author" />
-              <label style="width: auto;" for="node-input-author">Authors</label>
-            </div>
-
-            <div>
-              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                     type="checkbox" id="node-input-taxonomy" />
-              <label style="width: auto;" for="node-input-taxonomy">Taxonomy</label>
-            </div>
-
-
-            <div>
-              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                     type="checkbox" id="node-input-pub-date" />
-              <label style="width: auto;" for="node-input-pub-date">Publication Date</label>
-            </div>
-
-
-
-          </div>
         </div>
     <div class="form-row" style="padding-top: 10px;">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -248,17 +185,6 @@
         <li><b>Semantic Roles</b>, parse out sentences into subject,
                                 action, and object form.</li>
 
-
-        <li><b>Page Images</b>, extract available page images.</li>
-        <li><b>Image Keywords</b>, discover image content keywords.</li>
-        <li><b>Feed</b>, extract RSS/ATOM feed links.</li>
-        <li><b>Title</b>, find content title.</li>
-        <li><b>Authors</b>, extract content authors.</li>
-        <li><b>Taxonomy</b>, categorize content against known taxonomies.</li>
-        <li><b>Publication Date</b>, extract available publication date.</li>
-        <li><b>Document Sentiment</b>, generate sentiment scores.</li>
-        <li><b>Entity Sentiment</b>, generate entity sentiment scores.</li>
-        <li><b>Entity Emotion</b>, generate entity emotion scores.</li>
     </ul>
     <p>For full details on the feature details,
       please see the
@@ -266,18 +192,11 @@
         service API documentation</a></p>
     <p>The content to be analysed should be passed in on <code>msg.payload</code>.</p>
     <p>Valid <code>msg.payload</code> types: URL, HTML or Text Content.</p>
-    <p>If you need to send custom parameters along with each feature, set those parameters
-      as children of the <code>msg.nlu_options</code>
-      object. eg. to limit the output to 3 values per feature set
-      <code>msg.nlu_options = {maxRetrieve: 3};</code>
-    </p>
     <br>
     <p>Results from the API service will made available
       at <code>msg.features</code>. Each feature result will be a separate
       child property.</p>
 </script>
-
-
 
 
 <script type="text/javascript">
@@ -311,7 +230,6 @@
     }
   };
 
-
   nluV1.CreateIListener = function(listen, action) {
     listen.change(function(val){
       var isSet = listen.prop('checked');
@@ -320,7 +238,6 @@
       nluV1.setVisibility(action, listen.prop('checked'));
     });
   }
-
 
   nluV1.UIListeners = function () {
     console.log('Creating Listeners');
@@ -396,20 +313,7 @@
               'semantic': {value: false},
               'semantic-entities': {value: false},
               'semantic-keywords': {value: false},
-              'maxsemantics' :{value: '50'},
-
-
-              "page-image": {value: ""},
-              "image-kw": {value: ""},
-              feed: {value: ""},
-              entity: {value: ""},
-              keyword: {value: ""},
-              title: {value: ""},
-              author: {value: ""},
-              taxonomy: {value: ""},
-              "pub-date": {value: ""},
-              "entity-sentiment": {value: ""},
-              "entity-emotion": {value: ""}
+              'maxsemantics' :{value: '50'}
             },
             credentials: {
               username: {type:"text"},
