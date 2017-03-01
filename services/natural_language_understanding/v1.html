@@ -130,6 +130,26 @@
               <label style="width: auto;" for="node-input-relation">Relations</label>
             </div>
 
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-semantic" />
+              <label style="width: auto;" for="node-input-semantic">Semantic Roles</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-semantic-entities" />
+              <label style="width: auto;" for="node-input-semantic-entities-">Semantic Entities</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-semantic-keywords" />
+              <label style="width: auto;" for="node-input-semantic-keywords">Semantic Keywords</label>
+            </div>
+            <div>
+              <label style="width: auto;" for="node-input-maxsemantics">Maximum Semantic Roles</label>
+              <input type="number" min="1"
+                     id="node-input-maxsemantics" />
+            </div>
 
 
 
@@ -225,6 +245,8 @@
         <li><b>Metadata</b>, identify author name, title, RSS/ATOM feeds,
                                 publication date, etc.</li>
         <li><b>Relations</b>, identify Subject-Action-Object relations.</li>
+        <li><b>Semantic Roles</b>, parse out sentences into subject,
+                                action, and object form.</li>
 
 
         <li><b>Page Images</b>, extract available page images.</li>
@@ -275,6 +297,9 @@
     $('#node-input-keyword-emotion').parent().hide();
     $('#node-input-keyword-sentiment').parent().hide();
     $('#node-input-maxkeywords').parent().hide();
+    $('#node-input-semantic-entities').parent().hide();
+    $('#node-input-semantic-keywords').parent().hide();
+    $('#node-input-maxsemantics').parent().hide();
 
   };
 
@@ -318,6 +343,11 @@
                                 $('#node-input-keyword-emotion'
                                     + ', #node-input-keyword-sentiment'
                                     + ', #node-input-maxkeywords'));
+
+    nluV1.CreateIListener($('#node-input-semantic'),
+                                $('#node-input-semantic-entities'
+                                    + ', #node-input-semantic-keywords'
+                                    + ', #node-input-maxsemantics'));
 
   }
 
@@ -363,6 +393,10 @@
               'maxkeywords' :{value: '50'},
               'metadata': {value: false},
               'relation': {value: false},
+              'semantic': {value: false},
+              'semantic-entities': {value: false},
+              'semantic-keywords': {value: false},
+              'maxsemantics' :{value: '50'},
 
 
               "page-image": {value: ""},
