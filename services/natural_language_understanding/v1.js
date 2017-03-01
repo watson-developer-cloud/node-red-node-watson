@@ -86,8 +86,12 @@ module.exports = function (RED) {
   function processEmotionOptions(config, features) {
     if (features.emotion && config['doc-emotion-target']) {
       features.emotion.targets = config['doc-emotion-target'].split(',');
-      console.log(config['doc-emotion-target'].split(','));
-      console.log(features.emotion.targets);
+    }
+  }
+
+  function processSentimentOptions(config, features) {
+    if (features.sentiment && config['doc-sentiment-target']) {
+      features.sentiment.targets = config['doc-sentiment-target'].split(',');
     }
   }
 
@@ -95,6 +99,7 @@ module.exports = function (RED) {
     if (options && options.features) {
       processConceptsOptions(config, options.features);
       processEmotionOptions(config, options.features);
+      processSentimentOptions(config, options.features);
     }
   }
 
