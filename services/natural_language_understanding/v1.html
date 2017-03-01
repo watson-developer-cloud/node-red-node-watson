@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013,2015,2016 IBM Corp.
+  Copyright 2017 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -118,6 +118,11 @@
                      id="node-input-maxkeywords" />
             </div>
 
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-metadata" />
+              <label style="width: auto;" for="node-input-metadata">Metadata</label>
+            </div>
 
 
 
@@ -215,6 +220,8 @@
                             cities, geographic features, and other typed
                             entities.</li>
         <li><b>Keywords</b>, discover topic keywords for content.</li>
+        <li><b>Metadata</b>, identify author name, title, RSS/ATOM feeds,
+                                publication date, etc.</li>
 
 
         <li><b>Page Images</b>, extract available page images.</li>
@@ -352,7 +359,7 @@
               'keyword-emotion': {value: false},
               'keyword-sentiment': {value: false},
               'maxkeywords' :{value: '50'},
-
+              'metadata': {value: false},
 
 
               "page-image": {value: ""},
