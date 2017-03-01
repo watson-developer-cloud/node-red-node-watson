@@ -18,7 +18,7 @@ module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'natural-language-understanding';
   const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1');
 
-  const FEATURES = {
+  const NLU_FEATURES = {
     'categories': 'categories',
     'concepts': 'concepts',
     'doc-emotion': 'emotion',
@@ -60,7 +60,7 @@ module.exports = function (RED) {
 
   function checkFeatureRequest(config, options) {
     var message = '',
-      enabled_features = Object.keys(FEATURES).filter(function (feature) {
+      enabled_features = Object.keys(NLU_FEATURES).filter(function (feature) {
       return config[feature]
     });
 
@@ -69,22 +69,33 @@ module.exports = function (RED) {
     } else {
       options.features = {};
       for (f in enabled_features) {
-        options.features[enabled_features[f]] = {};
+        options.features[NLU_FEATURES[enabled_features[f]]] = {};
       }
     }
     //feature.enabled_features = enabled_features;
     return message;
   }
 
-  function processConceptsOptions(config, options) {
-    if (options && options.features && options.features.concepts) {
-      options.features.concepts.limit
+  function processConceptsOptions(config, features) {
+    if (features.concepts) {
+      features.concepts.limit
          = config['maxconcepts'] ? config['maxconcepts'] : 8;
     }
   }
 
+  function processEmotionOptions(config, features) {
+    if (features.emotion && config['doc-emotion-target']) {
+      features.emotion.targets = config['doc-emotion-target'].split(',');
+      console.log(config['doc-emotion-target'].split(','));
+      console.log(features.emotion.targets);
+    }
+  }
+
   function checkFeatureOptions(config, options) {
-    processConceptsOptions(config, options);
+    if (options && options.features) {
+      processConceptsOptions(config, options.features);
+      processEmotionOptions(config, options.features);
+    }
   }
 
 
