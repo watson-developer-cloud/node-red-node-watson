@@ -49,17 +49,17 @@ module.exports = function (RED) {
     if (!msg.payload) {
       message = 'Missing property: msg.payload';
     } else if (payloadutils.urlCheck(msg.payload)) {
-        options['url'] = msg.payload;
+      options['url'] = msg.payload;
     } else {
-        options['text'] = msg.payload;
+      options['text'] = msg.payload;
     }
     return message;
   }
 
   function checkFeatureRequest(config, options) {
     var message = '',
-      enabled_features;
-      
+      enabled_features = null;
+
     enabled_features = Object.keys(NLU_FEATURES).filter(function (feature) {
       return config[feature];
     });
