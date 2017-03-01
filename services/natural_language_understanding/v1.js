@@ -44,19 +44,35 @@ module.exports = function (RED) {
     node.error(message, msg);
   }
 
-  function checkPayload(msg) {
+  function checkPayload(msg, options) {
     var message = '';
     if (!msg.payload) {
       message = 'Missing property: msg.payload';
+    } else {
+      if (payloadutils.urlCheck(msg.payload)) {
+        options['url'] = msg.payload;
+      } else {
+        options['text'] = msg.payload;
+      }
     }
     return message;
   }
 
-  function checkFeatureRequest(config, enabled_features) {
-    var message = '';
+  function checkFeatureRequest(config, options) {
+    var message = '',
+      enabled_features = Object.keys(FEATURES).filter(function (feature) {
+      return config[feature]
+    });
+
     if (!enabled_features.length) {
       message = 'Node must have at least one selected feature.';
+    } else {
+      options.features = {};
+      for (f in enabled_features) {
+        options.features[enabled_features[f]] = {};
+      }
     }
+    //feature.enabled_features = enabled_features;
     return message;
   }
 
@@ -78,7 +94,10 @@ module.exports = function (RED) {
 
     this.on('input', function (msg) {
       var message = '',
-      enabled_features = '';
+      //enabled_features = [];
+      //feature = {},
+      options = {};
+
       node.status({});
 
       username = sUsername || this.credentials.username;
@@ -87,16 +106,14 @@ module.exports = function (RED) {
       if (!username || !password) {
         message = 'Missing Watson Natural Language Understanding service credentials';
       } else {
-        message = checkPayload(msg);
+        message = checkPayload(msg, options);
       }
 
       if (!message) {
-        enabled_features = Object.keys(FEATURES).filter(function (feature) {
-          return config[feature]
-        });
-        message = checkFeatureRequest(config, enabled_features);
-        console.log('Enabled Features : ', enabled_features);
+        message = checkFeatureRequest(config, options);
       }
+
+      console.log('Options look like : ', options)
 
       if (message) {
         reportError(node,msg,message);
