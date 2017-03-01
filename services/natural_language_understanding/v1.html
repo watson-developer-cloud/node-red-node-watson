@@ -97,7 +97,26 @@
 
           <div style="margin-left: -200px; float: right;">
 
-
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-keyword" />
+              <label style="width: auto;" for="node-input-keyword">Keywords</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-keyword-emotion" />
+              <label style="width: auto;" for="node-input-keyword-emotion">Keyword Emotion</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-keyword-sentiment" />
+              <label style="width: auto;" for="node-input-keyword-sentiment">Keyword Sentiment</label>
+            </div>
+            <div>
+              <label style="width: auto;" for="node-input-maxkeywords">Maximum Keywords</label>
+              <input type="number" min="1"
+                     id="node-input-maxkeywords" />
+            </div>
 
 
 
@@ -122,11 +141,6 @@
           </div>
 
 
-          <div>
-            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                   type="checkbox" id="node-input-keyword" />
-            <label style="width: auto;" for="node-input-keyword">Keywords</label>
-          </div>
 
           <div>
             <input style="width: 30px; margin-left: 20px; margin-top: 0;"
@@ -200,6 +214,7 @@
         <li><b>Entities</b>, identify people, companies, organizations,
                             cities, geographic features, and other typed
                             entities.</li>
+        <li><b>Keywords</b>, discover topic keywords for content.</li>
 
 
         <li><b>Page Images</b>, extract available page images.</li>
@@ -207,7 +222,6 @@
         <li><b>Feed</b>, extract RSS/ATOM feed links.</li>
         <li><b>Title</b>, find content title.</li>
         <li><b>Authors</b>, extract content authors.</li>
-        <li><b>Keywords</b>, discover topic keywords for content.</li>
         <li><b>Taxonomy</b>, categorize content against known taxonomies.</li>
         <li><b>Relations</b>, identify Subject-Action-Object relations.</li>
         <li><b>Publication Date</b>, extract available publication date.</li>
@@ -249,6 +263,9 @@
     $('#node-input-entity-emotion').parent().hide();
     $('#node-input-entity-sentiment').parent().hide();
     $('#node-input-maxentities').parent().hide();
+    $('#node-input-keyword-emotion').parent().hide();
+    $('#node-input-keyword-sentiment').parent().hide();
+    $('#node-input-maxkeywords').parent().hide();
 
   };
 
@@ -288,6 +305,11 @@
                                     + ', #node-input-entity-sentiment'
                                     + ', #node-input-maxentities'));
 
+    nluV1.CreateIListener($('#node-input-keyword'),
+                                $('#node-input-keyword-emotion'
+                                    + ', #node-input-keyword-sentiment'
+                                    + ', #node-input-maxkeywords'));
+
   }
 
   nluV1.checkForPrepare = function () {
@@ -326,6 +348,10 @@
               'entity-emotion': {value: false},
               'entity-sentiment': {value: false},
               'maxentities' :{value: '50'},
+              'keyword': {value: false},
+              'keyword-emotion': {value: false},
+              'keyword-sentiment': {value: false},
+              'maxkeywords' :{value: '50'},
 
 
 
