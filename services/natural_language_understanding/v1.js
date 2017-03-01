@@ -95,11 +95,41 @@ module.exports = function (RED) {
     }
   }
 
+  function processEntitiesOptions(config, features) {
+    if (features.entities) {
+      features.entities.emotion = config['entity-emotion']
+                                     ? config['entity-emotion']
+                                     : false;
+      features.entities.sentiment = config['entity-sentiment']
+                                      ? config['entity-sentiment']
+                                      : false;
+      if (config['maxentities']) {
+        features.entities.limit = config['maxentities'];
+      }
+    }
+  }
+
+  function processKeywordsOptions(config, features) {
+    if (features.keywords) {
+      features.keywords.emotion = config['keyword-emotion']
+                                     ? config['keyword-emotion']
+                                     : false;
+      features.keywords.sentiment = config['keyword-sentiment']
+                                      ? config['keyword-sentiment']
+                                      : false;
+      if (config['maxkeywords']) {
+        features.keywords.limit = config['maxkeywords'];
+      }
+    }
+  }
+
   function checkFeatureOptions(config, options) {
     if (options && options.features) {
       processConceptsOptions(config, options.features);
       processEmotionOptions(config, options.features);
       processSentimentOptions(config, options.features);
+      processEntitiesOptions(config, options.features);
+      processKeywordsOptions(config, options.features);
     }
   }
 
