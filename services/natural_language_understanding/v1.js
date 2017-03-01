@@ -18,6 +18,18 @@ module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'natural-language-understanding';
   const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1');
 
+  const FEATURES = {
+    'categories': 'categories',
+    'concepts': 'concepts',
+    'doc-emotion': 'emotion',
+    'doc-sentiment': 'sentiment',
+    'entity': 'entities',
+    'keyword': 'keywords',
+    'metadata': 'metadata',
+    'relation': 'relations',
+    'semantic': 'semantic_roles'
+  };
+
   var payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
@@ -40,6 +52,14 @@ module.exports = function (RED) {
     return message;
   }
 
+  function checkFeatureRequest(config, enabled_features) {
+    var message = '';
+    if (!enabled_features.length) {
+      message = 'Node must have at least one selected feature.';
+    }
+    return message;
+  }
+
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
@@ -57,7 +77,8 @@ module.exports = function (RED) {
     var node = this;
 
     this.on('input', function (msg) {
-      message = '',
+      var message = '',
+      enabled_features = '';
       node.status({});
 
       username = sUsername || this.credentials.username;
@@ -67,6 +88,14 @@ module.exports = function (RED) {
         message = 'Missing Watson Natural Language Understanding service credentials';
       } else {
         message = checkPayload(msg);
+      }
+
+      if (!message) {
+        enabled_features = Object.keys(FEATURES).filter(function (feature) {
+          return config[feature]
+        });
+        message = checkFeatureRequest(config, enabled_features);
+        console.log('Enabled Features : ', enabled_features);
       }
 
       if (message) {
