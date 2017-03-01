@@ -72,14 +72,13 @@ module.exports = function (RED) {
         options.features[NLU_FEATURES[enabled_features[f]]] = {};
       }
     }
-    //feature.enabled_features = enabled_features;
     return message;
   }
 
   function processConceptsOptions(config, features) {
     if (features.concepts) {
       features.concepts.limit
-         = config['maxconcepts'] ? config['maxconcepts'] : 8;
+         = config['maxconcepts'] ? parseInt(config['maxconcepts']) : 8;
     }
   }
 
@@ -104,7 +103,7 @@ module.exports = function (RED) {
                                       ? config['entity-sentiment']
                                       : false;
       if (config['maxentities']) {
-        features.entities.limit = config['maxentities'];
+        features.entities.limit = parseInt(config['maxentities']);
       }
     }
   }
@@ -118,7 +117,21 @@ module.exports = function (RED) {
                                       ? config['keyword-sentiment']
                                       : false;
       if (config['maxkeywords']) {
-        features.keywords.limit = config['maxkeywords'];
+        features.keywords.limit = parseInt(config['maxkeywords']);
+      }
+    }
+  }
+
+  function processSemanticRolesOptions(config, features) {
+    if (features.semantic_roles) {
+      features.semantic_roles.entities = config['semantic-entities']
+                                     ? config['semantic-entities']
+                                     : false;
+      features.semantic_roles.keywords = config['semantic-keywords']
+                                      ? config['semantic-keywords']
+                                      : false;
+      if (config['maxsemantics']) {
+        features.semantic_roles.limit = parseInt(config['maxsemantics']);
       }
     }
   }
@@ -130,9 +143,28 @@ module.exports = function (RED) {
       processSentimentOptions(config, options.features);
       processEntitiesOptions(config, options.features);
       processKeywordsOptions(config, options.features);
+      processSemanticRolesOptions(config, options.features);
     }
   }
 
+  function invokeService(options) {
+    const nlu = new NaturalLanguageUnderstandingV1({
+      username: username,
+      password: password,
+      version_date: NaturalLanguageUnderstandingV1.VERSION_DATE_2016_01_23
+    });
+
+    var p = new Promise(function resolver(resolve, reject){
+      nlu.analyze(options, function(err, data) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+    return p;
+  }
 
   if (service) {
     sUsername = service.username;
@@ -152,9 +184,7 @@ module.exports = function (RED) {
 
     this.on('input', function (msg) {
       var message = '',
-      //enabled_features = [];
-      //feature = {},
-      options = {};
+        options = {};
 
       node.status({});
 
@@ -173,16 +203,20 @@ module.exports = function (RED) {
 
       if (!message) {
         checkFeatureOptions(config, options);
+        node.status({fill:'blue', shape:'dot', text:'requesting'});
+        invokeService(options)
+          .then(function(data){
+             msg.features = data;
+             node.send(msg);
+             node.status({});
+          })
+          .catch(function(err){
+             reportError(node,msg,err);
+          });
       }
-
-      console.log('Options look like : ', options)
 
       if (message) {
         reportError(node,msg,message);
-        // return;
-      } else {
-        msg.features = 'To be implemented';
-        node.send(msg);
       }
 
     });

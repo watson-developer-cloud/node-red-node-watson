@@ -219,7 +219,6 @@
     $('#node-input-semantic-entities').parent().hide();
     $('#node-input-semantic-keywords').parent().hide();
     $('#node-input-maxsemantics').parent().hide();
-
   };
 
   nluV1.setVisibility = function(field, visible) {
@@ -233,15 +232,11 @@
   nluV1.CreateIListener = function(listen, action) {
     listen.change(function(val){
       var isSet = listen.prop('checked');
-      console.log('Field is set: ', isSet);
-      //disV1.processSelectedMethod(method);
       nluV1.setVisibility(action, listen.prop('checked'));
     });
   }
 
   nluV1.UIListeners = function () {
-    console.log('Creating Listeners');
-
     nluV1.CreateIListener($('#node-input-concepts'),
                                $('#node-input-maxconcepts'));
 

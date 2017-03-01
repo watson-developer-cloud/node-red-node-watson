@@ -11,7 +11,7 @@
     "temp": "^0.8.3",
     "qs": "6.x",
 	  "image-type": "^2.0.2",
-    "watson-developer-cloud": "^2.21.1",
+    "watson-developer-cloud": "^2.22.1",
     "kuromoji": "^0.0.5",
     "is-docx": "^0.0.3"
   },
@@ -68,5 +68,8 @@
       "watson-similarity-search-v3": "services/similarity_search/v3.js",
       "alchemy-vision-v1": "services/alchemy_vision/v1.js"
     }
+  },
+  "engines": {
+    "node": ">=4.5.0"
   }
 }
