@@ -61,6 +61,16 @@
               <input type="text" id="node-input-doc-emotion-target" />
             </div>
 
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-doc-sentiment" />
+              <label style="width: auto;" for="node-input-doc-sentiment">Document Sentiment</label>
+            </div>
+            <div>
+              <label style="width: auto;" for="node-input-doc-sentiment-target">Sentiment Targets</label>
+              <input type="text" id="node-input-doc-sentiment-target" />
+            </div>
+
 
 
             <div>
@@ -140,11 +150,6 @@
               <label style="width: auto;" for="node-input-pub-date">Publication Date</label>
             </div>
 
-            <div>
-              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                     type="checkbox" id="node-input-doc-sentiment" />
-              <label style="width: auto;" for="node-input-doc-sentiment">Document Sentiment</label>
-            </div>
 
 
           </div>
@@ -167,6 +172,11 @@
         <li><b>Emotion Targets</b>, optionally target the emotions scores to a
                                     comma seperated list eg.
                                     <code>apples,pears</code>.</li>
+        <li><b>Document Sentiment</b>, generate sentiment scores.</li>
+        <li><b>Sentiment Targets</b>, optionally target the sentiment scores to a
+                                    comma seperated list eg.
+                                    <code>dolphins,sharks</code>.</li>
+
 
         <li><b>Page Images</b>, extract available page images.</li>
         <li><b>Image Keywords</b>, discover image content keywords.</li>
@@ -212,6 +222,7 @@
   nluV1.hideAll = function() {
     $('#node-input-maxconcepts').parent().hide();
     $('#node-input-doc-emotion-target').parent().hide();
+    $('#node-input-doc-sentiment-target').parent().hide();
   };
 
   nluV1.setVisibility = function(field, visible) {
@@ -242,16 +253,8 @@
     nluV1.CreateIListener($('#node-input-doc-emotion'),
                                 $('#node-input-doc-emotion-target'));
 
-    /*
-    $('#node-input-concepts').change(function(val){
-      var isSet = $('#node-input-concepts').prop('checked');
-      console.log('Concepts is set: ', isSet);
-      //disV1.processSelectedMethod(method);
-      nluV1.setVisibility($('#node-input-maxconcepts'),
-                          $('#node-input-concepts').prop('checked'));
-
-    });
-    */
+    nluV1.CreateIListener($('#node-input-doc-sentiment'),
+                                $('#node-input-doc-sentiment-target'));
 
   }
 
@@ -279,12 +282,14 @@
         RED.nodes.registerType('natural-language-understanding', {
             category: 'IBM Watson',
             defaults: {
-              'name': {value: ''},
-              'categories': {value: ''},
-              'concepts': {value: ''},
+              'name': {value: false},
+              'categories': {value: false},
+              'concepts': {value: false},
               'maxconcepts': {value: ''},
-              'doc-emotion': {value: ''},
+              'doc-emotion': {value: false},
               'doc-emotion-target': {value: ''},
+              'doc-sentiment': {value: false},
+              'doc-sentiment-target': {value: ''},
 
               "page-image": {value: ""},
               "image-kw": {value: ""},
@@ -296,7 +301,6 @@
               taxonomy: {value: ""},
               relation: {value: ""},
               "pub-date": {value: ""},
-              "doc-sentiment": {value: ""},
               "entity-sentiment": {value: ""},
               "entity-emotion": {value: ""}
             },
