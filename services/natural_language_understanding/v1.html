@@ -34,22 +34,33 @@
         <label for="node-input-features" style="width: 100%"><i class="fa fa-book"></i> Extract the following features: </label>
           <div style="float: left;">
 
-          <div>
-            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                   type="checkbox" id="node-input-categories" />
-            <label style="width: auto;" for="node-input-categories">Categories</label>
-          </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-categories" />
+              <label style="width: auto;" for="node-input-categories">Categories</label>
+            </div>
 
-          <div>
-            <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                   type="checkbox" id="node-input-concepts" />
-            <label style="width: auto;" for="node-input-concepts">Concepts</label>
-          </div>
-          <div>
-            <label style="width: auto;" for="node-input-maxconcepts">Maximum Concepts</label>
-            <input type="number" min="1" max="8"
-                   id="node-input-maxconcepts" />
-          </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-concepts" />
+              <label style="width: auto;" for="node-input-concepts">Concepts</label>
+            </div>
+            <div>
+              <label style="width: auto;" for="node-input-maxconcepts">Maximum Concepts</label>
+              <input type="number" min="1" max="8"
+                     id="node-input-maxconcepts" />
+            </div>
+
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-doc-emotion" />
+              <label style="width: auto;" for="node-input-doc-emotion">Document Emotion</label>
+            </div>
+            <div>
+              <label style="width: auto;" for="node-input-doc-emotion-target">Emotion Targets</label>
+              <input type="text" id="node-input-doc-emotion-target" />
+            </div>
+
 
 
             <div>
@@ -135,11 +146,6 @@
               <label style="width: auto;" for="node-input-doc-sentiment">Document Sentiment</label>
             </div>
 
-            <div>
-              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
-                     type="checkbox" id="node-input-doc-emotion" />
-              <label style="width: auto;" for="node-input-doc-emotion">Document Emotion</label>
-            </div>
 
           </div>
         </div>
@@ -157,6 +163,10 @@
     <ul>
         <li><b>Categories</b>, categorize content into a taxonomy.</li>
         <li><b>Concepts</b>, recognize high-level concepts.</li>
+        <li><b>Document Emotion</b>, generate emotion scores.</li>
+        <li><b>Emotion Targets</b>, optionally target the emotions scores to a
+                                    comma seperated list eg.
+                                    <code>apples,pears</code>.</li>
 
         <li><b>Page Images</b>, extract available page images.</li>
         <li><b>Image Keywords</b>, discover image content keywords.</li>
@@ -169,7 +179,6 @@
         <li><b>Relations</b>, identify Subject-Action-Object relations.</li>
         <li><b>Publication Date</b>, extract available publication date.</li>
         <li><b>Document Sentiment</b>, generate sentiment scores.</li>
-        <li><b>Document Emotion</b>, generate emotion scores.</li>
         <li><b>Entity Sentiment</b>, generate entity sentiment scores.</li>
         <li><b>Entity Emotion</b>, generate entity emotion scores.</li>
     </ul>
@@ -202,6 +211,7 @@
 
   nluV1.hideAll = function() {
     $('#node-input-maxconcepts').parent().hide();
+    $('#node-input-doc-emotion-target').parent().hide();
   };
 
   nluV1.setVisibility = function(field, visible) {
@@ -212,8 +222,27 @@
     }
   };
 
+
+  nluV1.CreateIListener = function(listen, action) {
+    listen.change(function(val){
+      var isSet = listen.prop('checked');
+      console.log('Field is set: ', isSet);
+      //disV1.processSelectedMethod(method);
+      nluV1.setVisibility(action, listen.prop('checked'));
+    });
+  }
+
+
   nluV1.UIListeners = function () {
     console.log('Creating Listeners');
+
+    nluV1.CreateIListener($('#node-input-concepts'),
+                               $('#node-input-maxconcepts'));
+
+    nluV1.CreateIListener($('#node-input-doc-emotion'),
+                                $('#node-input-doc-emotion-target'));
+
+    /*
     $('#node-input-concepts').change(function(val){
       var isSet = $('#node-input-concepts').prop('checked');
       console.log('Concepts is set: ', isSet);
@@ -222,6 +251,8 @@
                           $('#node-input-concepts').prop('checked'));
 
     });
+    */
+
   }
 
   nluV1.checkForPrepare = function () {
@@ -250,8 +281,10 @@
             defaults: {
               'name': {value: ''},
               'categories': {value: ''},
-              'concepts': {value: ""},
-              'maxconcepts': {value: "4"},
+              'concepts': {value: ''},
+              'maxconcepts': {value: ''},
+              'doc-emotion': {value: ''},
+              'doc-emotion-target': {value: ''},
 
               "page-image": {value: ""},
               "image-kw": {value: ""},
@@ -264,7 +297,6 @@
               relation: {value: ""},
               "pub-date": {value: ""},
               "doc-sentiment": {value: ""},
-              "doc-emotion": {value: ""},
               "entity-sentiment": {value: ""},
               "entity-emotion": {value: ""}
             },
