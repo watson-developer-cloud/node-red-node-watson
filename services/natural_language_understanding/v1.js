@@ -48,27 +48,27 @@ module.exports = function (RED) {
     var message = '';
     if (!msg.payload) {
       message = 'Missing property: msg.payload';
-    } else {
-      if (payloadutils.urlCheck(msg.payload)) {
+    } else if (payloadutils.urlCheck(msg.payload)) {
         options['url'] = msg.payload;
-      } else {
+    } else {
         options['text'] = msg.payload;
-      }
     }
     return message;
   }
 
   function checkFeatureRequest(config, options) {
     var message = '',
-      enabled_features = Object.keys(NLU_FEATURES).filter(function (feature) {
-      return config[feature]
+      enabled_features;
+      
+    enabled_features = Object.keys(NLU_FEATURES).filter(function (feature) {
+      return config[feature];
     });
 
     if (!enabled_features.length) {
       message = 'Node must have at least one selected feature.';
     } else {
       options.features = {};
-      for (f in enabled_features) {
+      for (var f in enabled_features) {
         options.features[NLU_FEATURES[enabled_features[f]]] = {};
       }
     }
@@ -77,8 +77,8 @@ module.exports = function (RED) {
 
   function processConceptsOptions(config, features) {
     if (features.concepts) {
-      features.concepts.limit
-         = config['maxconcepts'] ? parseInt(config['maxconcepts']) : 8;
+      features.concepts.limit =
+         config['maxconcepts'] ? parseInt(config['maxconcepts']) : 8;
     }
   }
 
@@ -96,12 +96,10 @@ module.exports = function (RED) {
 
   function processEntitiesOptions(config, features) {
     if (features.entities) {
-      features.entities.emotion = config['entity-emotion']
-                                     ? config['entity-emotion']
-                                     : false;
-      features.entities.sentiment = config['entity-sentiment']
-                                      ? config['entity-sentiment']
-                                      : false;
+      features.entities.emotion =
+          config['entity-emotion'] ? config['entity-emotion'] : false;
+      features.entities.sentiment =
+         config['entity-sentiment'] ? config['entity-sentiment'] : false;
       if (config['maxentities']) {
         features.entities.limit = parseInt(config['maxentities']);
       }
@@ -110,12 +108,10 @@ module.exports = function (RED) {
 
   function processKeywordsOptions(config, features) {
     if (features.keywords) {
-      features.keywords.emotion = config['keyword-emotion']
-                                     ? config['keyword-emotion']
-                                     : false;
-      features.keywords.sentiment = config['keyword-sentiment']
-                                      ? config['keyword-sentiment']
-                                      : false;
+      features.keywords.emotion =
+          config['keyword-emotion'] ? config['keyword-emotion'] : false;
+      features.keywords.sentiment =
+         config['keyword-sentiment'] ? config['keyword-sentiment'] : false;
       if (config['maxkeywords']) {
         features.keywords.limit = parseInt(config['maxkeywords']);
       }
@@ -124,12 +120,10 @@ module.exports = function (RED) {
 
   function processSemanticRolesOptions(config, features) {
     if (features.semantic_roles) {
-      features.semantic_roles.entities = config['semantic-entities']
-                                     ? config['semantic-entities']
-                                     : false;
-      features.semantic_roles.keywords = config['semantic-keywords']
-                                      ? config['semantic-keywords']
-                                      : false;
+      features.semantic_roles.entities =
+        config['semantic-entities'] ? config['semantic-entities'] : false;
+      features.semantic_roles.keywords =
+        config['semantic-keywords'] ? config['semantic-keywords'] : false;
       if (config['maxsemantics']) {
         features.semantic_roles.limit = parseInt(config['maxsemantics']);
       }
@@ -206,12 +200,12 @@ module.exports = function (RED) {
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         invokeService(options)
           .then(function(data){
-             msg.features = data;
-             node.send(msg);
-             node.status({});
+            msg.features = data;
+            node.send(msg);
+            node.status({});
           })
           .catch(function(err){
-             reportError(node,msg,err);
+            reportError(node,msg,err);
           });
       }
 
