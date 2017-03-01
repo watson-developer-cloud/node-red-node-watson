@@ -76,6 +76,18 @@ module.exports = function (RED) {
     return message;
   }
 
+  function processConceptsOptions(config, options) {
+    if (options && options.features && options.features.concepts) {
+      options.features.concepts.limit
+         = config['maxconcepts'] ? config['maxconcepts'] : 8;
+    }
+  }
+
+  function checkFeatureOptions(config, options) {
+    processConceptsOptions(config, options);
+  }
+
+
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
@@ -111,6 +123,10 @@ module.exports = function (RED) {
 
       if (!message) {
         message = checkFeatureRequest(config, options);
+      }
+
+      if (!message) {
+        checkFeatureOptions(config, options);
       }
 
       console.log('Options look like : ', options)
