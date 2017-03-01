@@ -1,0 +1,331 @@
+<!--
+  Copyright 2017 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="natural-language-understanding">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-features" style="width: 100%"><i class="fa fa-book"></i> Extract the following features: </label>
+          <div style="float: left;">
+
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-categories" />
+              <label style="width: auto;" for="node-input-categories">Categories</label>
+            </div>
+
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-concepts" />
+              <label style="width: auto;" for="node-input-concepts">Concepts</label>
+            </div>
+            <div>
+              <label style="width: auto;" for="node-input-maxconcepts">Maximum Concepts</label>
+              <input type="number" min="1"
+                     id="node-input-maxconcepts" />
+            </div>
+
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-doc-emotion" />
+              <label style="width: auto;" for="node-input-doc-emotion">Document Emotion</label>
+            </div>
+            <div>
+              <label style="width: auto;" for="node-input-doc-emotion-target">Emotion Targets</label>
+              <input type="text" id="node-input-doc-emotion-target" />
+            </div>
+
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-doc-sentiment" />
+              <label style="width: auto;" for="node-input-doc-sentiment">Document Sentiment</label>
+            </div>
+            <div>
+              <label style="width: auto;" for="node-input-doc-sentiment-target">Sentiment Targets</label>
+              <input type="text" id="node-input-doc-sentiment-target" />
+            </div>
+
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-entity" />
+              <label style="width: auto;" for="node-input-entity">Entities</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-entity-emotion" />
+              <label style="width: auto;" for="node-input-entity-emotion">Entity Emotion</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-entity-sentiment" />
+              <label style="width: auto;" for="node-input-entity-sentiment">Entity Sentiment</label>
+            </div>
+            <div>
+              <label style="width: auto;" for="node-input-maxentities">Maximum Entities</label>
+              <input type="number" min="1"
+                     id="node-input-maxentities" />
+            </div>
+
+          </div>
+
+          <div style="margin-left: -200px; float: right;">
+
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-keyword" />
+              <label style="width: auto;" for="node-input-keyword">Keywords</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-keyword-emotion" />
+              <label style="width: auto;" for="node-input-keyword-emotion">Keyword Emotion</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-keyword-sentiment" />
+              <label style="width: auto;" for="node-input-keyword-sentiment">Keyword Sentiment</label>
+            </div>
+            <div>
+              <label style="width: auto;" for="node-input-maxkeywords">Maximum Keywords</label>
+              <input type="number" min="1"
+                     id="node-input-maxkeywords" />
+            </div>
+
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-metadata" />
+              <label style="width: auto;" for="node-input-metadata">Metadata</label>
+            </div>
+
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-relation" />
+              <label style="width: auto;" for="node-input-relation">Relations</label>
+            </div>
+
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-semantic" />
+              <label style="width: auto;" for="node-input-semantic">Semantic Roles</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-semantic-entities" />
+              <label style="width: auto;" for="node-input-semantic-entities-">Semantic Entities</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-semantic-keywords" />
+              <label style="width: auto;" for="node-input-semantic-keywords">Semantic Keywords</label>
+            </div>
+            <div>
+              <label style="width: auto;" for="node-input-maxsemantics">Maximum Semantic Roles</label>
+              <input type="number" min="1"
+                     id="node-input-maxsemantics" />
+            </div>
+
+          </div>
+
+        </div>
+    <div class="form-row" style="padding-top: 10px;">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="natural-language-understanding">
+    <p>Using the Watson Natural Language Understanding node, you can
+    extract meta-data from content.
+    You can analyse external URLs, HTML files or text content.</p>
+    <p>The following features are available for analysis:</p>
+    <ul>
+        <li><b>Categories</b>, categorize content into a taxonomy.</li>
+        <li><b>Concepts</b>, recognize high-level concepts.</li>
+        <li><b>Document Emotion</b>, generate emotion scores.</li>
+        <li><b>Emotion Targets</b>, optionally target the emotions scores to a
+                                    comma seperated list eg.
+                                    <code>apples,pears</code>.</li>
+        <li><b>Document Sentiment</b>, generate sentiment scores.</li>
+        <li><b>Sentiment Targets</b>, optionally target the sentiment scores to a
+                                    comma seperated list eg.
+                                    <code>dolphins,sharks</code>.</li>
+        <li><b>Entities</b>, identify people, companies, organizations,
+                            cities, geographic features, and other typed
+                            entities.</li>
+        <li><b>Keywords</b>, discover topic keywords for content.</li>
+        <li><b>Metadata</b>, identify author name, title, RSS/ATOM feeds,
+                                publication date, etc.</li>
+        <li><b>Relations</b>, identify Subject-Action-Object relations.</li>
+        <li><b>Semantic Roles</b>, parse out sentences into subject,
+                                action, and object form.</li>
+
+    </ul>
+    <p>For full details on the feature details,
+      please see the
+      <a href="https://www.ibm.com/watson/developercloud/natural-language-understanding.html">
+        service API documentation</a></p>
+    <p>The content to be analysed should be passed in on <code>msg.payload</code>.</p>
+    <p>Valid <code>msg.payload</code> types: URL, HTML or Text Content.</p>
+    <br>
+    <p>Results from the API service will made available
+      at <code>msg.features</code>. Each feature result will be a separate
+      child property.</p>
+</script>
+
+
+<script type="text/javascript">
+  // Need to simulate a namespace, so that some of the variables don't leak across nodes
+  function NaturalLanguageUnderstandingV1 () {}
+
+  // This is the namespace for this version of this Node.
+  var nluV1 = new NaturalLanguageUnderstandingV1();
+
+  nluV1.hideAll = function() {
+    $('#node-input-maxconcepts').parent().hide();
+    $('#node-input-doc-emotion-target').parent().hide();
+    $('#node-input-doc-sentiment-target').parent().hide();
+    $('#node-input-entity-emotion').parent().hide();
+    $('#node-input-entity-sentiment').parent().hide();
+    $('#node-input-maxentities').parent().hide();
+    $('#node-input-keyword-emotion').parent().hide();
+    $('#node-input-keyword-sentiment').parent().hide();
+    $('#node-input-maxkeywords').parent().hide();
+    $('#node-input-semantic-entities').parent().hide();
+    $('#node-input-semantic-keywords').parent().hide();
+    $('#node-input-maxsemantics').parent().hide();
+  };
+
+  nluV1.setVisibility = function(field, visible) {
+    if (visible) {
+      field.parent().show();
+    } else {
+      field.parent().hide();
+    }
+  };
+
+  nluV1.CreateIListener = function(listen, action) {
+    listen.change(function(val){
+      var isSet = listen.prop('checked');
+      nluV1.setVisibility(action, listen.prop('checked'));
+    });
+  }
+
+  nluV1.UIListeners = function () {
+    nluV1.CreateIListener($('#node-input-concepts'),
+                               $('#node-input-maxconcepts'));
+
+    nluV1.CreateIListener($('#node-input-doc-emotion'),
+                                $('#node-input-doc-emotion-target'));
+
+    nluV1.CreateIListener($('#node-input-doc-sentiment'),
+                                $('#node-input-doc-sentiment-target'));
+
+    nluV1.CreateIListener($('#node-input-entity'),
+                                $('#node-input-entity-emotion'
+                                    + ', #node-input-entity-sentiment'
+                                    + ', #node-input-maxentities'));
+
+    nluV1.CreateIListener($('#node-input-keyword'),
+                                $('#node-input-keyword-emotion'
+                                    + ', #node-input-keyword-sentiment'
+                                    + ', #node-input-maxkeywords'));
+
+    nluV1.CreateIListener($('#node-input-semantic'),
+                                $('#node-input-semantic-entities'
+                                    + ', #node-input-semantic-keywords'
+                                    + ', #node-input-maxsemantics'));
+
+  }
+
+  nluV1.checkForPrepare = function () {
+    nluV1.hideAll();
+    nluV1.UIListeners();
+  };
+
+  // This is the on edit prepare function, which will be
+  //invoked everytime the dialog is shown.
+  function nluoneditprepare() {
+    nluV1.checkForPrepare();
+    $.getJSON('watson-discovery/vcap/')
+      .done(function (service) {
+        $('.credentials').toggle(!service);
+      })
+      .fail(function () {
+        $('.credentials').show();
+      }).always(function () {
+        $('#credentials-check').hide();
+      })
+  }
+
+    (function() {
+        RED.nodes.registerType('natural-language-understanding', {
+            category: 'IBM Watson',
+            defaults: {
+              'name': {value: false},
+              'categories': {value: false},
+              'concepts': {value: false},
+              'maxconcepts': {value: '8'},
+              'doc-emotion': {value: false},
+              'doc-emotion-target': {value: ''},
+              'doc-sentiment': {value: false},
+              'doc-sentiment-target': {value: ''},
+              'entity': {value: false},
+              'entity-emotion': {value: false},
+              'entity-sentiment': {value: false},
+              'maxentities' :{value: '50'},
+              'keyword': {value: false},
+              'keyword-emotion': {value: false},
+              'keyword-sentiment': {value: false},
+              'maxkeywords' :{value: '50'},
+              'metadata': {value: false},
+              'relation': {value: false},
+              'semantic': {value: false},
+              'semantic-entities': {value: false},
+              'semantic-keywords': {value: false},
+              'maxsemantics' :{value: '50'}
+            },
+            credentials: {
+              username: {type:"text"},
+              password: {type:"password"}
+            },
+            color: '#00A2FF',
+            inputs: 1,
+            outputs: 1,
+            icon: "NaturalLanguageUnderstanding.png",
+            paletteLabel: "Natural Language Understanding",
+            label: function() {
+                return this.name || "Natural Language Understanding";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            } ,
+            oneditprepare: nluoneditprepare
+        });
+    })();
+</script>
