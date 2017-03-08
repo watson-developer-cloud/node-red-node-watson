@@ -7,6 +7,11 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.0
+- New node for Natural Language Understanding
+- watson-developer-cloud dependency forces node engine >= 4.5
+- Nodes deprecated in 0.4.x will be removed in 0.5.x releases
+
 ### New in version 0.4.43
 - Bump version of Conversation interface to '2017-02-03'
 - New node for Conversation Workspace Management

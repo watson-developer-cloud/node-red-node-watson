@@ -1,6 +1,6 @@
 {
   "name": "node-red-node-watson",
-  "version": "0.4.43",
+  "version": "0.5.0",
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
     "alchemy-api": "^1.3.0",
@@ -11,7 +11,7 @@
     "temp": "^0.8.3",
     "qs": "6.x",
 	  "image-type": "^2.0.2",
-    "watson-developer-cloud": "^2.18.0",
+    "watson-developer-cloud": "^2.22.1",
     "kuromoji": "^0.0.5",
     "is-docx": "^0.0.3"
   },
@@ -50,6 +50,7 @@
       "watson-language-translate-v1": "services/language_translation/v2.js",
       "watson-language-translate-util-v1": "services/language_translation_util/v2.js",
       "watson-natural-language-classifier-v1": "services/natural_language_classifier/v1.js",
+      "watson-natural-language-understanding-v1": "services/natural_language_understanding/v1.js",
       "alchemy-news-v1": "services/alchemy_data_news/v1.js",
       "watson-personality-insights-v1": "services/personality_insights/v1.js",
       "watson-personality-insights-v3": "services/personality_insights/v3.js",
@@ -67,5 +68,8 @@
       "watson-similarity-search-v3": "services/similarity_search/v3.js",
       "alchemy-vision-v1": "services/alchemy_vision/v1.js"
     }
+  },
+  "engines": {
+    "node": ">=4.5.0"
   }
 }
