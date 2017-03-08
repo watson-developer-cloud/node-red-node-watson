@@ -42,70 +42,78 @@ module.exports = function (RED) {
   }
 
   function executeListWorkspaces(node, conv, params, msg) {
-    conv.listWorkspaces(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['workspaces'] = response.workspaces ?
-                                      response.workspaces: response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      conv.listWorkspaces(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['workspaces'] = response.workspaces ?
+                                        response.workspaces: response;
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
   function executeGetWorkspace(node, conv, params, msg) {
-    conv.getWorkspace(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['workspace'] = response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getWorkspace(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['workspace'] = response;
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
   function executeCreateWorkspace(node, conv, params, msg) {
-    conv.createWorkspace(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['workspace'] = response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createWorkspace(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['workspace'] = response;
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
   function executeUpdateWorkspace(node, conv, params, msg) {
-    conv.updateWorkspace(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['workspace'] = response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      conv.updateWorkspace(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['workspace'] = response;
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
   function executeDeleteWorkspace(node, conv, params, msg) {
-    conv.deleteWorkspace(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['workspace'] = response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      conv.deleteWorkspace(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['workspace'] = response;
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
   function executeUnknownMethod(node, conv, params, msg) {
-    payloadutils.reportError(node, msg, 'Unknown Mode');
-    msg.error = 'Unable to process as unknown mode has been specified';
-    node.send(msg);
+    return Promise.reject('Unable to process as unknown mode has been specified');
   }
 
   function executeMethod(node, method, params, msg) {
@@ -117,31 +125,33 @@ module.exports = function (RED) {
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
 
+    var p = null;
+
     switch (method) {
     case 'listWorkspaces':
-      executeListWorkspaces(node, conv, params, msg);
+      p = executeListWorkspaces(node, conv, params, msg);
       break;
     case 'getWorkspace':
-      executeGetWorkspace(node, conv, params, msg);
+      p = executeGetWorkspace(node, conv, params, msg);
       break;
     case 'createWorkspace':
-      executeCreateWorkspace(node, conv, params, msg);
+      p = executeCreateWorkspace(node, conv, params, msg);
       break;
     case 'updateWorkspace':
-      executeUpdateWorkspace(node, conv, params, msg);
+      p = executeUpdateWorkspace(node, conv, params, msg);
       break;
     case 'deleteWorkspace':
-      executeDeleteWorkspace(node, conv, params, msg);
+      p = executeDeleteWorkspace(node, conv, params, msg);
       break;
     default:
-      executeUnknownMethod(node, conv, params, msg);
+      p = executeUnknownMethod(node, conv, params, msg);
       break;
     }
+
+    return p;
   }
 
-  function buildParams(msg, method, config) {
-    var params = {};
-
+  function buildParams(msg, method, config, params) {
     switch (method) {
     case 'getWorkspace':
       params['export'] = config['cwm-export-content'];
@@ -150,11 +160,12 @@ module.exports = function (RED) {
     case 'deleteWorkspace':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
+      } else {
+        return Promise.reject('Workspace ID is required');
       }
       break;
     }
-
-    return params;
+    return Promise.resolve();
   }
 
   // No need to have complicated processing here Looking
@@ -171,66 +182,99 @@ module.exports = function (RED) {
     if ('updateWorkspace' === method && params['workspace_id']) {
       workspace_id = params['workspace_id'];
     }
+    if ('object' !== typeof workspaceObject) {
+      return Promise.reject('json content expected as workspace');
+    }
     if (workspaceObject) {
       params = workspaceObject;
     }
     if (workspace_id) {
       params['workspace_id'] = workspace_id;
     }
-    return params;
+    return Promise.resolve(params);
+  }
+
+
+  function openTheFile() {
+    var p = new Promise(function resolver(resolve, reject){
+      temp.open({
+        suffix: '.txt'
+      }, function(err, info) {
+        if (err) {
+          reject('Error receiving the data buffer');
+        } else {
+          resolve(info);
+        }
+      });
+    });
+    return p;
+  }
+
+  function syncTheFile(info, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      fs.writeFile(info.path, msg.payload, function(err) {
+        if (err) {
+          reject('Error processing data buffer');
+        }
+        resolve();
+      });
+    });
+    return p;
+  }
+
+  function processFileForWorkspace(info, method) {
+    var workspaceObject = null;
+
+    switch (method) {
+    case 'createWorkspace':
+    case 'updateWorkspace':
+      try {
+        workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
+      } catch (err) {
+        workspaceObject = fs.createReadStream(info.path);
+      }
+    }
+
+    return Promise.resolve(workspaceObject);
   }
 
   function loadFile(node, method, params, msg) {
-    temp.open({
-      suffix: '.txt'
-    }, function(err, info) {
-      if (err) {
-        node.status({
-          fill: 'red',
-          shape: 'dot',
-          text: 'Error receiving the data buffer'
-        });
-        throw err;
-      }
-
-      // Syncing up the asynchronous nature of the stream
-      // so that the full file can be sent to the API.
-      fs.writeFile(info.path, msg.payload, function(err) {
-        if (err) {
-          node.status({
-            fill: 'red',
-            shape: 'dot',
-            text: 'Error processing data buffer'
-          });
-          throw err;
-        }
-
-        var workspaceObject = null;
-
-        switch (method) {
-        case 'createWorkspace':
-        case 'updateWorkspace':
-          try {
-            workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
-          } catch (err) {
-            workspaceObject = fs.createReadStream(info.path);
-          }
-        }
-
-        params = setWorkspaceParams(method, params, workspaceObject);
-        executeMethod(node, method, params, msg);
-        temp.cleanup();
+    var fileInfo = null;
+    var p = openTheFile()
+      .then(function(info){
+        fileInfo = info;
+        return syncTheFile(fileInfo, msg);
+      })
+      .then(function(){
+        return processFileForWorkspace(fileInfo, method);
+      })
+      .then(function(workspaceObject){
+        return setWorkspaceParams(method, params, workspaceObject);
       });
-    });
+
+    return p;
   }
 
   function checkForFile(method) {
     switch (method) {
     case 'createWorkspace':
     case 'updateWorkspace':
-      return true;
+      return Promise.resolve(true);
     }
-    return false;
+    return Promise.resolve(false);
+  }
+
+  function initialCheck(u, p, m) {
+    var message = '';
+    if (!u || !p) {
+      message = 'Missing Conversation service credentials';
+    } else if (!m || '' === m) {
+      message = 'Required mode has not been specified';
+    }
+    if (message){
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
   }
 
 
@@ -257,30 +301,38 @@ module.exports = function (RED) {
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
 
-      if (!username || !password) {
-        message = 'Missing Conversation service credentials';
-      } else if (!method || '' === method) {
-        message = 'Required mode has not been specified';
-      } else {
-        params = buildParams(msg, method, config);
-      }
+      node.status({});
+      initialCheck(username, password, method)
+        .then(function(){
+          return buildParams(msg, method, config, params);
+        })
+        .then(function(){
+          return checkForFile(method)
+        })
+        .then(function(fileNeeded){
+          if (fileNeeded) {
+            if (msg.payload instanceof Buffer) {
+              return loadFile(node, method, params, msg);
+            }
+            // If the data is a json object then it will not
+            // have been detected as a buffer.
+            return setWorkspaceParams(method, params, msg.payload);
+          }
+          return Promise.resolve(params);
+        })
+        .then(function(p){
+          params = p;
+          node.status({fill:'blue', shape:'dot', text:'executing'});
+          return executeMethod(node, method, params, msg);
+        })
+        .then(function(){
+          node.status({});
+          node.send(msg);
+        })
+        .catch(function(err){
+          payloadutils.reportError(node,msg,err);
+        });
 
-      if (message) {
-        payloadutils.reportError(node, msg, message);
-        return;
-      }
-
-      if (checkForFile(method)) {
-        if (msg.payload instanceof Buffer) {
-          loadFile(node, method, params, msg);
-          return;
-        }
-        // If the data is a json object then it will not
-        // have been detected as a buffer.
-        params = setWorkspaceParams(method, params, msg.payload);
-      }
-
-      executeMethod(node, method, params, msg);
     });
   }
 
