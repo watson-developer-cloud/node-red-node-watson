@@ -172,6 +172,37 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeDeleteIntent(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.deleteIntent(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['intent'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  // For now we are not doing anything with the pagination
+  // response
+  function executeListExamples(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getExamples(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['examples'] = response.examples ?
+                                        response.examples: response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -215,6 +246,12 @@ module.exports = function (RED) {
     case 'updateIntent':
       p = executeUpdateIntent(node, conv, params, msg);
       break;
+    case 'deleteIntent':
+      p = executeDeleteIntent(node, conv, params, msg);
+      break;
+    case 'listExamples':
+      p = executeListExamples(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -233,6 +270,8 @@ module.exports = function (RED) {
     case 'updateWorkspace':
     case 'deleteWorkspace':
     case 'createIntent':
+    case 'deleteIntent':
+    case 'listExamples':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -252,6 +291,8 @@ module.exports = function (RED) {
       field = 'old_intent';
       // deliberate no break
     case 'getIntent':
+    case 'deleteIntent':
+    case 'listExamples':
       if (config['cwm-intent']) {
         params[field] = config['cwm-intent'];
       }

@@ -52,6 +52,10 @@
             <option value="getIntent">Get Intent Details</option>
             <option value="createIntent">Create Intent</option>
             <option value="updateIntent">Update Intent</option>
+            <option value="deleteIntent">Delete Intent</option>
+            <option disabled>______________</option>
+            <option value="listExamples">List Examples</option>
+
         </select>
     </div>
 
@@ -141,8 +145,21 @@
         need be included in the json. Any existing examples will
         be overridden. ie. If any example is not mentioned in the json, then it
         will be deleted.
+        You can use this mode to rename an intent.
       </p>
     </li>
+    <li>Delete Intent
+      <p>In this mode the selected intent is removed from the worskpace.
+      </p>
+    </li>
+    <li>list examples
+      <p>In this mode a list of all user input examples for and intent in
+        the specified conversation
+        workspace are returned on
+        <code>msg.examples</code>
+      </p>
+    </li>
+
     </ul>
 
     <p>For more information about the conversation service,
@@ -202,6 +219,8 @@
                        + ', #node-input-cwm-export-content');
         break;
       case 'updateIntent':
+      case 'deleteIntent':
+      case 'listExamples':
         fields.push('#node-input-cwm-workspace-id'
                      + ', #node-input-cwm-intent');
         break;
