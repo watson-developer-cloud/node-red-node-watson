@@ -55,7 +55,7 @@
             <option value="deleteIntent">Delete Intent</option>
             <option disabled>______________</option>
             <option value="listExamples">List Examples</option>
-
+            <option value="createExample">Create Example</option>
         </select>
     </div>
 
@@ -67,6 +67,11 @@
     <div class="form-row">
         <label for="node-input-cwm-intent"><i class="fa fa-book"></i> Intent</label>
         <input type="text" id="node-input-cwm-intent" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-example"><i class="fa fa-book"></i> Example Input</label>
+        <input type="text" id="node-input-cwm-example" placeholder="">
     </div>
 
     <div class="form-row">
@@ -152,14 +157,18 @@
       <p>In this mode the selected intent is removed from the worskpace.
       </p>
     </li>
-    <li>list examples
+    <li>List Examples
       <p>In this mode a list of all user input examples for and intent in
         the specified conversation
         workspace are returned on
         <code>msg.examples</code>
       </p>
     </li>
-
+    <li>Create Example
+      <p>In this mode a new example is created for an intent in the
+        specified conversation workspace.
+      </p>
+    </li>
     </ul>
 
     <p>For more information about the conversation service,
@@ -197,6 +206,7 @@
 
     fields.push('#node-input-cwm-workspace-id'
                      + ', #node-input-cwm-intent'
+                     + ', #node-input-cwm-example'
                      + ', #node-input-cwm-export-content');
 
     cv1wm.hideSelectedFields(fields);
@@ -223,6 +233,11 @@
       case 'listExamples':
         fields.push('#node-input-cwm-workspace-id'
                      + ', #node-input-cwm-intent');
+        break;
+      case 'createExample':
+        fields.push('#node-input-cwm-workspace-id'
+                     + ', #node-input-cwm-intent'
+                     + ', #node-input-cwm-example');
         break;
       case 'deleteWorkspace':
       case 'updateWorkspace':
@@ -275,6 +290,7 @@
                 'cwm-custom-mode': {value:"listWorkspaces"},
                 'cwm-workspace-id': {value:""},
                 'cwm-intent': {value:""},
+                'cwm-example': {value:""},
                 'cwm-export-content': {value:false}
             },
             credentials: {

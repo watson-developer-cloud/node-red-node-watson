@@ -203,6 +203,20 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeCreateExample(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createExample(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['example'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -252,6 +266,9 @@ module.exports = function (RED) {
     case 'listExamples':
       p = executeListExamples(node, conv, params, msg);
       break;
+    case 'createExample':
+      p = executeCreateExample(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -272,6 +289,7 @@ module.exports = function (RED) {
     case 'createIntent':
     case 'deleteIntent':
     case 'listExamples':
+    case 'createExample':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -293,6 +311,7 @@ module.exports = function (RED) {
     case 'getIntent':
     case 'deleteIntent':
     case 'listExamples':
+    case 'createExample':
       if (config['cwm-intent']) {
         params[field] = config['cwm-intent'];
       }
@@ -304,6 +323,22 @@ module.exports = function (RED) {
 
     return message;
   }
+
+  function buildExampleParams(method, config, params) {
+    var message = '';
+
+    switch (method) {
+    case 'createExample':
+      if (config['cwm-example']) {
+        params['text'] = config['cwm-example'];
+      } else {
+        message = 'Example Input is required';
+      }
+      break;
+    }
+    return message;
+  }
+
 
   function buildExportParams(method, config, params) {
     switch (method) {
@@ -324,6 +359,9 @@ module.exports = function (RED) {
     message = buildWorkspaceParams(method, config, params);
     if (! message) {
       message = buildIntentParams(method, config, params);
+    }
+    if (! message) {
+      message = buildExampleParams(method, config, params);
     }
 
     if (message) {
