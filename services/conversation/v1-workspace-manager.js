@@ -320,7 +320,7 @@ module.exports = function (RED) {
 
   function buildIntentParams(method, config, params) {
     var message = '';
-    field = 'intent';
+    var field = 'intent';
 
     switch (method) {
     case 'updateIntent':
@@ -333,8 +333,7 @@ module.exports = function (RED) {
     case 'deleteExample':
       if (config['cwm-intent']) {
         params[field] = config['cwm-intent'];
-      }
-      else {
+      } else {
         message = 'a value for Intent is required';
       }
       break;
@@ -567,7 +566,7 @@ module.exports = function (RED) {
           return buildParams(msg, method, config, params);
         })
         .then(function(){
-          return checkForFile(method)
+          return checkForFile(method);
         })
         .then(function(fileNeeded){
           if (fileNeeded) {
