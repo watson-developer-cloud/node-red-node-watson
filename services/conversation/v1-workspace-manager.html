@@ -56,6 +56,7 @@
             <option disabled>______________</option>
             <option value="listExamples">List Examples</option>
             <option value="createExample">Create Example</option>
+            <option value="deleteExample">Delete Example</option>
         </select>
     </div>
 
@@ -169,6 +170,10 @@
         specified conversation workspace.
       </p>
     </li>
+    <li>Delete Example
+      <p>In this mode the selected example for an intent is removed.
+      </p>
+    </li>
     </ul>
 
     <p>For more information about the conversation service,
@@ -235,6 +240,7 @@
                      + ', #node-input-cwm-intent');
         break;
       case 'createExample':
+      case 'deleteExample':
         fields.push('#node-input-cwm-workspace-id'
                      + ', #node-input-cwm-intent'
                      + ', #node-input-cwm-example');

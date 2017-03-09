@@ -217,6 +217,20 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeDeleteExample(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.deleteExample(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['example'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -269,6 +283,9 @@ module.exports = function (RED) {
     case 'createExample':
       p = executeCreateExample(node, conv, params, msg);
       break;
+    case 'deleteExample':
+      p = executeDeleteExample(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -290,6 +307,7 @@ module.exports = function (RED) {
     case 'deleteIntent':
     case 'listExamples':
     case 'createExample':
+    case 'deleteExample':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -312,6 +330,7 @@ module.exports = function (RED) {
     case 'deleteIntent':
     case 'listExamples':
     case 'createExample':
+    case 'deleteExample':
       if (config['cwm-intent']) {
         params[field] = config['cwm-intent'];
       }
@@ -329,6 +348,7 @@ module.exports = function (RED) {
 
     switch (method) {
     case 'createExample':
+    case 'deleteExample':
       if (config['cwm-example']) {
         params['text'] = config['cwm-example'];
       } else {
