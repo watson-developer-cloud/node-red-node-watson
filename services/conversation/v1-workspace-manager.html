@@ -49,6 +49,7 @@
             <option value="deleteWorkspace">Delete Workspace</option>
             <option value="listIntents">List Intents</option>
             <option value="getIntent">Get Intent Details</option>
+            <option value="createIntent">Create Intent</option>
         </select>
     </div>
 
@@ -120,6 +121,14 @@
         <code>msg.intent</code>
       </p>
     </li>
+    <li>Create Intent
+      <p>In this mode, a new intent is created in the specified workspace.
+        The input json structure
+        defining the content of the new intent
+        should be passed in
+        as <code>msg.payload</code>
+      </p>
+    </li>
     </ul>
 
     <p>For more information about the conversation service,
@@ -180,6 +189,7 @@
         break;
       case 'deleteWorkspace':
       case 'updateWorkspace':
+      case 'createIntent':
         fields.push('#node-input-cwm-workspace-id');
         break;
       case 'listWorkspaces':

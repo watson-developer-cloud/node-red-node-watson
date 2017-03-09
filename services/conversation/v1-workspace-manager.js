@@ -133,9 +133,23 @@ module.exports = function (RED) {
         if (err) {
           reject(err);
         } else {
-          // returning the whole response as response.intent has
+          // returning the whole response even though response.intent has
           // the intent, but the details with export = true
           // are provided as response.examples
+          msg['intent'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeCreateIntent(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createIntent(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
           msg['intent'] = response;
           resolve();
         }
@@ -181,6 +195,9 @@ module.exports = function (RED) {
     case 'getIntent':
       p = executeGetIntent(node, conv, params, msg);
       break;
+    case 'createIntent':
+      p = executeCreateIntent(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -207,6 +224,7 @@ module.exports = function (RED) {
       // Deliberate no break as want workspace ID also;
     case 'updateWorkspace':
     case 'deleteWorkspace':
+    case 'createIntent':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -229,14 +247,17 @@ module.exports = function (RED) {
   //  'name', 'language', 'entities', 'intents',
   // 'dialog_nodes', 'metadata', 'description',
   // 'counterexamples'
+  // So will work for intent as is, for
+  // 'intent', 'description', 'examples'
   // Just need to add the workspace id back in
   function setWorkspaceParams(method, params, workspaceObject) {
     var workspace_id = null;
-    if ('updateWorkspace' === method && params['workspace_id']) {
+    if (('updateWorkspace' === method || 'createIntent' === method)
+          && params['workspace_id']) {
       workspace_id = params['workspace_id'];
     }
     if ('object' !== typeof workspaceObject) {
-      return Promise.reject('json content expected as workspace');
+      return Promise.reject('json content expected as input on payload');
     }
     if (workspaceObject) {
       params = workspaceObject;
@@ -275,12 +296,16 @@ module.exports = function (RED) {
     return p;
   }
 
+
+  // I know this says workspace, but its actually a json
+  // object that works both for workspace and intent.
   function processFileForWorkspace(info, method) {
     var workspaceObject = null;
 
     switch (method) {
     case 'createWorkspace':
     case 'updateWorkspace':
+    case 'createIntent':
       try {
         workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
       } catch (err) {
@@ -320,6 +345,7 @@ module.exports = function (RED) {
     switch (method) {
     case 'createWorkspace':
     case 'updateWorkspace':
+    case 'createIntent':
       return Promise.resolve(true);
     }
     return Promise.resolve(false);
