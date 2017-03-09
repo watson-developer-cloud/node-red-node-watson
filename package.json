@@ -34,10 +34,8 @@
     "nodes": {
       "watson-conversation-v1":"services/conversation/v1.js",
       "watson-conversation-workspace-manager-v1":"services/conversation/v1-workspace-manager.js",
-      "watson-conversation-v1-experimental":"services/conversation/v1-exp.js",
       "watson-discovery-v1":"services/discovery/v1.js",
       "watson-discovery-v1-query-builder":"services/discovery/v1-query-builder.js",
-      "watson-discovery-v1-experimental":"services/discovery/v1-exp.js",
       "watson-document-conversion-v1": "services/document_conversion/v1.js",
       "watson-concept-insights-v2": "services/concept_insights/v2.js",
       "alchemy-date-extraction": "services/alchemy_date_extraction/v1.js",
@@ -54,7 +52,6 @@
       "alchemy-news-v1": "services/alchemy_data_news/v1.js",
       "watson-personality-insights-v1": "services/personality_insights/v1.js",
       "watson-personality-insights-v3": "services/personality_insights/v3.js",
-      "watson-relationship-extraction-v1": "services/relationship_extraction/v1.js",
       "watson-retrieve-and-rank-v1": "services/retrieve_and_rank/v1.js",
       "watson-speech-to-text-v1": "services/speech_to_text/v1.js",
       "watson-speech-to-text-corpus-builder-v1": "services/speech_to_text/v1-corpus-builder.js",
@@ -62,8 +59,6 @@
       "watson-text-to-speech-corpus-builder-v1": "services/text_to_speech/v1-corpus-builder.js",
       "watson-tone-analyzer-v3": "services/tone_analyzer/v3.js",
       "watson-tradeoff-analytics-v1": "services/tradeoff_analytics/v1.js",
-      "watson-tone-analyzer-v3-beta": "services/tone_analyzer/v3-beta.js",
-      "watson-visual-recognition-v1": "services/visual_recognition/v1.js",
       "watson-visual-recognition-v3": "services/visual_recognition/v3.js",
       "watson-similarity-search-v3": "services/similarity_search/v3.js",
       "alchemy-vision-v1": "services/alchemy_vision/v1.js"
