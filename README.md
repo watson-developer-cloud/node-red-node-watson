@@ -7,6 +7,16 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.1
+- Implement methods to manage for Intent and Example Input for Intent, in
+Conversation workspace Manager node.
+- Deprecated Alchemy Nodes.
+- Removed Conversation experimental node.
+- Removed Discovery experimental node.
+- Removed Tone Analyzer beta node.
+- Removed Relationship Extraction node.
+- Removed the V1 Visual Recognition node.
+
 ### New in version 0.5.0
 - New node for Natural Language Understanding
 - watson-developer-cloud dependency forces node engine >= 4.5
