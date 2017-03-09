@@ -112,6 +112,21 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeListIntents(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getIntents(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['intents'] = response.intents ?
+                                        response.intents: response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -143,6 +158,9 @@ module.exports = function (RED) {
     case 'deleteWorkspace':
       p = executeDeleteWorkspace(node, conv, params, msg);
       break;
+    case 'listIntents':
+      p = executeListIntents(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -151,9 +169,12 @@ module.exports = function (RED) {
     return p;
   }
 
+  // Copy over the appropriate parameters for the required
+  // method from the node configuration
   function buildParams(msg, method, config, params) {
     switch (method) {
     case 'getWorkspace':
+    case 'listIntents':
       params['export'] = config['cwm-export-content'];
       // Deliberate no break as want workspace ID also;
     case 'updateWorkspace':
@@ -177,6 +198,7 @@ module.exports = function (RED) {
   //  'name', 'language', 'entities', 'intents',
   // 'dialog_nodes', 'metadata', 'description',
   // 'counterexamples'
+  // Just need to add the workspace id back in
   function setWorkspaceParams(method, params, workspaceObject) {
     var workspace_id = null;
     if ('updateWorkspace' === method && params['workspace_id']) {
@@ -238,6 +260,12 @@ module.exports = function (RED) {
     return Promise.resolve(workspaceObject);
   }
 
+
+  // We are expecting a file on payload.
+  // Some of the functions used here are async, so this
+  // function is returning a consolidated promise,
+  // compromising of all the promises from the async and
+  // sync functions.
   function loadFile(node, method, params, msg) {
     var fileInfo = null;
     var p = openTheFile()
@@ -255,6 +283,8 @@ module.exports = function (RED) {
     return p;
   }
 
+
+  // For certain methods a file input is expected on the payload
   function checkForFile(method) {
     switch (method) {
     case 'createWorkspace':

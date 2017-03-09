@@ -47,6 +47,7 @@
             <option value="createWorkspace">Create Workspace</option>
             <option value="updateWorkspace">Update Workspace</option>
             <option value="deleteWorkspace">Delete Workspace</option>
+            <option value="listIntents">List Intents</option>
         </select>
     </div>
 
@@ -101,6 +102,12 @@
       <p>In this mode the selected workspace is deleted.
       </p>
     </li>
+    <li>list Intents
+      <p>In this mode a list of all intents for the specified conversation
+        workspace are returned on
+        <code>msg.intents</code>
+      </p>
+    </li>
     </ul>
 
     <p>For more information about the conversation service,
@@ -149,6 +156,7 @@
 
     switch (method) {
       case 'getWorkspace':
+      case 'listIntents':
         fields.push('#node-input-cwm-workspace-id'
                        + ', #node-input-cwm-export-content');
         break;
