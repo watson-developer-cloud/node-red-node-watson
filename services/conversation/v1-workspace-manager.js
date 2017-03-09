@@ -158,6 +158,20 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeUpdateIntent(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.updateIntent(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['intent'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -198,6 +212,9 @@ module.exports = function (RED) {
     case 'createIntent':
       p = executeCreateIntent(node, conv, params, msg);
       break;
+    case 'updateIntent':
+      p = executeUpdateIntent(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -206,22 +223,13 @@ module.exports = function (RED) {
     return p;
   }
 
-  // Copy over the appropriate parameters for the required
-  // method from the node configuration
-  function buildParams(msg, method, config, params) {
+  function buildWorkspaceParams(method, config, params) {
     var message = '';
     switch (method) {
     case 'getIntent':
-      if (config['cwm-intent']) {
-        params['intent'] = config['cwm-intent'];
-      } else {
-        message = 'a value for Intent is required';
-      }
-      // Deliberate no break as also want workspace ID
-      // and export setting.
+    case 'updateIntent':
+    case 'getWorkspace':
     case 'listIntents':
-      params['export'] = config['cwm-export-content'];
-      // Deliberate no break as want workspace ID also;
     case 'updateWorkspace':
     case 'deleteWorkspace':
     case 'createIntent':
@@ -232,9 +240,55 @@ module.exports = function (RED) {
       }
       break;
     }
+    return message;
+  }
+
+  function buildIntentParams(method, config, params) {
+    var message = '';
+    field = 'intent';
+
+    switch (method) {
+    case 'updateIntent':
+      field = 'old_intent';
+      // deliberate no break
+    case 'getIntent':
+      if (config['cwm-intent']) {
+        params[field] = config['cwm-intent'];
+      }
+      else {
+        message = 'a value for Intent is required';
+      }
+      break;
+    }
+
+    return message;
+  }
+
+  function buildExportParams(method, config, params) {
+    switch (method) {
+    case 'getIntent':
+    case 'getWorkspace':
+    case 'listIntents':
+      params['export'] = config['cwm-export-content'];
+      break;
+    }
+  }
+
+
+  // Copy over the appropriate parameters for the required
+  // method from the node configuration
+  function buildParams(msg, method, config, params) {
+    var message = '';
+
+    message = buildWorkspaceParams(method, config, params);
+    if (! message) {
+      message = buildIntentParams(method, config, params);
+    }
+
     if (message) {
       return Promise.reject(message);
     }
+    buildExportParams(method, config, params);
     return Promise.resolve();
   }
 
@@ -249,22 +303,40 @@ module.exports = function (RED) {
   // 'counterexamples'
   // So will work for intent as is, for
   // 'intent', 'description', 'examples'
-  // Just need to add the workspace id back in
+  // Just need to add the workspace id back in. For intent
+  // updates the old_intent will have already been set.
   function setWorkspaceParams(method, params, workspaceObject) {
     var workspace_id = null;
-    if (('updateWorkspace' === method || 'createIntent' === method)
-          && params['workspace_id']) {
-      workspace_id = params['workspace_id'];
-    }
+    var stash = {};
+
     if ('object' !== typeof workspaceObject) {
       return Promise.reject('json content expected as input on payload');
     }
+
+    switch(method) {
+    case 'updateIntent':
+      if (params['old_intent']) {
+        stash['old_intent'] = params['old_intent'];
+      }
+    //deliberate no break
+    case 'updateWorkspace':
+    case 'createIntent':
+      if (params['workspace_id']) {
+        stash['workspace_id'] = params['workspace_id'];
+      }
+      break;
+    }
+
     if (workspaceObject) {
       params = workspaceObject;
     }
-    if (workspace_id) {
-      params['workspace_id'] = workspace_id;
+
+    if (stash) {
+      for (var k in stash) {
+        params[k] = stash[k];
+      }
     }
+
     return Promise.resolve(params);
   }
 
@@ -306,6 +378,7 @@ module.exports = function (RED) {
     case 'createWorkspace':
     case 'updateWorkspace':
     case 'createIntent':
+    case 'updateIntent':
       try {
         workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
       } catch (err) {
@@ -346,6 +419,7 @@ module.exports = function (RED) {
     case 'createWorkspace':
     case 'updateWorkspace':
     case 'createIntent':
+    case 'updateIntent':
       return Promise.resolve(true);
     }
     return Promise.resolve(false);

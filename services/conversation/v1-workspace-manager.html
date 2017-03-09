@@ -47,9 +47,11 @@
             <option value="createWorkspace">Create Workspace</option>
             <option value="updateWorkspace">Update Workspace</option>
             <option value="deleteWorkspace">Delete Workspace</option>
+            <option disabled>______________</option>
             <option value="listIntents">List Intents</option>
             <option value="getIntent">Get Intent Details</option>
             <option value="createIntent">Create Intent</option>
+            <option value="updateIntent">Update Intent</option>
         </select>
     </div>
 
@@ -129,6 +131,18 @@
         as <code>msg.payload</code>
       </p>
     </li>
+    <li>Update Intent
+      <p>In this mode, the specified intent is updated. The input json structure
+        defining the content of the updates
+        should be passed in
+        as <code>msg.payload</code>. Only the elements need to be included
+        in the json. Any included element will override the existing setting
+        for the element. ie. If only updating examples, then only the examples
+        need be included in the json. Any existing examples will
+        be overridden. ie. If any example is not mentioned in the json, then it
+        will be deleted.
+      </p>
+    </li>
     </ul>
 
     <p>For more information about the conversation service,
@@ -186,6 +200,10 @@
         fields.push('#node-input-cwm-workspace-id'
                        + ', #node-input-cwm-intent'
                        + ', #node-input-cwm-export-content');
+        break;
+      case 'updateIntent':
+        fields.push('#node-input-cwm-workspace-id'
+                     + ', #node-input-cwm-intent');
         break;
       case 'deleteWorkspace':
       case 'updateWorkspace':
