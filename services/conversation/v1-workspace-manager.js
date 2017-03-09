@@ -127,6 +127,23 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeGetIntent(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getIntent(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          // returning the whole response as response.intent has
+          // the intent, but the details with export = true
+          // are provided as response.examples
+          msg['intent'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -161,6 +178,9 @@ module.exports = function (RED) {
     case 'listIntents':
       p = executeListIntents(node, conv, params, msg);
       break;
+    case 'getIntent':
+      p = executeGetIntent(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -172,8 +192,16 @@ module.exports = function (RED) {
   // Copy over the appropriate parameters for the required
   // method from the node configuration
   function buildParams(msg, method, config, params) {
+    var message = '';
     switch (method) {
-    case 'getWorkspace':
+    case 'getIntent':
+      if (config['cwm-intent']) {
+        params['intent'] = config['cwm-intent'];
+      } else {
+        message = 'a value for Intent is required';
+      }
+      // Deliberate no break as also want workspace ID
+      // and export setting.
     case 'listIntents':
       params['export'] = config['cwm-export-content'];
       // Deliberate no break as want workspace ID also;
@@ -182,9 +210,12 @@ module.exports = function (RED) {
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
-        return Promise.reject('Workspace ID is required');
+        message = 'Workspace ID is required';
       }
       break;
+    }
+    if (message) {
+      return Promise.reject(message);
     }
     return Promise.resolve();
   }
