@@ -120,7 +120,6 @@ module.exports = function (RED) {
       msg.result = {};
       msg.result['error_id'] = body.images[0].error.error_id;
       msg.result['error'] = body.images[0].error.description;
-      msg.payload = 'see msg.result.error';
       node.send(msg);
     } else {
       if (feature === 'deleteClassifier') {
@@ -128,7 +127,6 @@ module.exports = function (RED) {
       } else {
         msg.result = body;
       }
-      msg.payload = 'see msg.result'; // to remove any Buffer that could remains
       node.send(msg);
       node.status({});
     }
@@ -257,10 +255,8 @@ module.exports = function (RED) {
         });
         async.parallel(asyncTasks, function(error, deletedList){
           if (deletedList.length === nbTodelete) {
-            msg.payload = 'see msg.result.error';
             msg.result = 'All custom classifiers have been deleted.';
           } else {
-            msg.payload = 'see msg.result.error';
             msg.result = 'Some Classifiers could have not been deleted;' +
             'See log for errors.';
           }
