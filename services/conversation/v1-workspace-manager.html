@@ -47,12 +47,32 @@
             <option value="createWorkspace">Create Workspace</option>
             <option value="updateWorkspace">Update Workspace</option>
             <option value="deleteWorkspace">Delete Workspace</option>
+            <option disabled>______________</option>
+            <option value="listIntents">List Intents</option>
+            <option value="getIntent">Get Intent Details</option>
+            <option value="createIntent">Create Intent</option>
+            <option value="updateIntent">Update Intent</option>
+            <option value="deleteIntent">Delete Intent</option>
+            <option disabled>______________</option>
+            <option value="listExamples">List Examples</option>
+            <option value="createExample">Create Example</option>
+            <option value="deleteExample">Delete Example</option>
         </select>
     </div>
 
     <div class="form-row">
         <label for="node-input-cwm-workspace-id"><i class="fa fa-book"></i> Workspace ID</label>
         <input type="text" id="node-input-cwm-workspace-id" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-intent"><i class="fa fa-book"></i> Intent</label>
+        <input type="text" id="node-input-cwm-intent" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-example"><i class="fa fa-book"></i> Example Input</label>
+        <input type="text" id="node-input-cwm-example" placeholder="">
     </div>
 
     <div class="form-row">
@@ -101,6 +121,59 @@
       <p>In this mode the selected workspace is deleted.
       </p>
     </li>
+    <li>list Intents
+      <p>In this mode a list of all intents for the specified conversation
+        workspace are returned on
+        <code>msg.intents</code>
+      </p>
+    </li>
+    <li>Get Intent
+      <p>In this mode all information about the specified intent
+        is retrieved. The information is returned on
+        <code>msg.intent</code>
+      </p>
+    </li>
+    <li>Create Intent
+      <p>In this mode, a new intent is created in the specified workspace.
+        The input json structure
+        defining the content of the new intent
+        should be passed in
+        as <code>msg.payload</code>
+      </p>
+    </li>
+    <li>Update Intent
+      <p>In this mode, the specified intent is updated. The input json structure
+        defining the content of the updates
+        should be passed in
+        as <code>msg.payload</code>. Only the elements need to be included
+        in the json. Any included element will override the existing setting
+        for the element. ie. If only updating examples, then only the examples
+        need be included in the json. Any existing examples will
+        be overridden. ie. If any example is not mentioned in the json, then it
+        will be deleted.
+        You can use this mode to rename an intent.
+      </p>
+    </li>
+    <li>Delete Intent
+      <p>In this mode the selected intent is removed from the worskpace.
+      </p>
+    </li>
+    <li>List Examples
+      <p>In this mode a list of all user input examples for and intent in
+        the specified conversation
+        workspace are returned on
+        <code>msg.examples</code>
+      </p>
+    </li>
+    <li>Create Example
+      <p>In this mode a new example is created for an intent in the
+        specified conversation workspace.
+      </p>
+    </li>
+    <li>Delete Example
+      <p>In this mode the selected example for an intent is removed.
+      </p>
+    </li>
     </ul>
 
     <p>For more information about the conversation service,
@@ -137,6 +210,8 @@
     var fields = [];
 
     fields.push('#node-input-cwm-workspace-id'
+                     + ', #node-input-cwm-intent'
+                     + ', #node-input-cwm-example'
                      + ', #node-input-cwm-export-content');
 
     cv1wm.hideSelectedFields(fields);
@@ -149,11 +224,30 @@
 
     switch (method) {
       case 'getWorkspace':
+      case 'listIntents':
         fields.push('#node-input-cwm-workspace-id'
                        + ', #node-input-cwm-export-content');
         break;
+      case 'getIntent':
+        fields.push('#node-input-cwm-workspace-id'
+                       + ', #node-input-cwm-intent'
+                       + ', #node-input-cwm-export-content');
+        break;
+      case 'updateIntent':
+      case 'deleteIntent':
+      case 'listExamples':
+        fields.push('#node-input-cwm-workspace-id'
+                     + ', #node-input-cwm-intent');
+        break;
+      case 'createExample':
+      case 'deleteExample':
+        fields.push('#node-input-cwm-workspace-id'
+                     + ', #node-input-cwm-intent'
+                     + ', #node-input-cwm-example');
+        break;
       case 'deleteWorkspace':
       case 'updateWorkspace':
+      case 'createIntent':
         fields.push('#node-input-cwm-workspace-id');
         break;
       case 'listWorkspaces':
@@ -201,6 +295,8 @@
                 name: {value: ''},
                 'cwm-custom-mode': {value:"listWorkspaces"},
                 'cwm-workspace-id': {value:""},
+                'cwm-intent': {value:""},
+                'cwm-example': {value:""},
                 'cwm-export-content': {value:false}
             },
             credentials: {

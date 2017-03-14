@@ -130,6 +130,14 @@
 </script>
 
 <script type="text/x-red" data-help-name="alchemy-feature-extract">
+    <p><b>NB:</b> The Alchemy Language service that this node
+      uses has been deprecated in favor of the
+      new Watson Natural Language Understanding service. Once the service
+      has been switched off this node will no longer work.
+      The node will be removed from the palette in a
+      future release.
+    </p>
+    <br/>
     <p>Using the Feature Extract node, you can use the Alchemy APIs to analyse external URLs, HTML files or text content.</p>
     <p>The following features are available for analysis:</p>
     <ul>
@@ -162,7 +170,7 @@
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('alchemy-feature-extract', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
               name: {value: ""},
               "page-image": {value: ""},

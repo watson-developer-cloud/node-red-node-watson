@@ -31,6 +31,14 @@
 </script>
 
 <script type="text/x-red" data-help-name="alchemy-date-extraction">
+    <p><b>NB:</b> The Alchemy Language service that this node
+      uses has been deprecated in favor of the
+      new Watson Natural Language Understanding service. Once the service
+      has been switched off this node will no longer work.
+      The node will be removed from the palette in a
+      future release.
+    </p>
+    <br/>
     <p>Using the Date Extract node, you can use the Alchemy APIs to analyse external URLs, HTML files or text content.</p>
     <p>For full details on the feature details, please see the <a href="http://www.ibm.com/watson/developercloud/alchemy-language/api/v1/#date_extraction">Alchemy API documentation</a></p>
     <p>The content to be analysed should be passed in on <code>msg.payload</code>.</p>
@@ -47,7 +55,7 @@
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('alchemy-date-extraction', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
               name: {value: ""},
             },
