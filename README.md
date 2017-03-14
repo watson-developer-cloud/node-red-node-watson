@@ -7,6 +7,11 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.2
+- Visual Recognition was overwriting msg.payload with 'look at msg.results'. Fixed
+so that msg.payload is left as is.
+
+
 ### New in version 0.5.1
 - Implement methods to manage for Intent and Example Input for Intent, in
 Conversation workspace Manager node.
