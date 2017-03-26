@@ -246,6 +246,20 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeCreateCounterExample(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createCounterExample(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['counterexample'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
 
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
@@ -305,6 +319,9 @@ module.exports = function (RED) {
     case 'listCounterExamples':
       p = executeListCounterExamples(node, conv, params, msg);
       break;
+    case 'createCounterExample':
+      p = executeCreateCounterExample(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -328,6 +345,7 @@ module.exports = function (RED) {
     case 'createExample':
     case 'deleteExample':
     case 'listCounterExamples':
+    case 'createCounterExample':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -368,6 +386,7 @@ module.exports = function (RED) {
     switch (method) {
     case 'createExample':
     case 'deleteExample':
+    case 'createCounterExample':
       if (config['cwm-example']) {
         params['text'] = config['cwm-example'];
       } else {

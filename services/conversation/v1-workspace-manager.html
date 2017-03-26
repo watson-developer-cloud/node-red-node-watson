@@ -59,6 +59,7 @@
             <option value="deleteExample">Delete Example</option>
             <option disabled>______________</option>
             <option value="listCounterExamples">List Counter Examples</option>
+            <option value="createCounterExample">Create Counter Example</option>
         </select>
     </div>
 
@@ -185,6 +186,12 @@
         irrelevant input.
       </p>
     </li>
+    <li>Create Counter Example
+      <p>In this mode a new counter example is created in the
+        specified conversation workspace.
+      </p>
+    </li>
+
     </ul>
 
     <p>For more information about the conversation service,
@@ -255,6 +262,10 @@
         fields.push('#node-input-cwm-workspace-id'
                      + ', #node-input-cwm-intent'
                      + ', #node-input-cwm-example');
+        break;
+      case 'createCounterExample':
+        fields.push('#node-input-cwm-workspace-id'
+                      + ', #node-input-cwm-example');
         break;
       case 'deleteWorkspace':
       case 'updateWorkspace':
