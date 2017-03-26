@@ -10,6 +10,10 @@ Node-RED Watson Nodes for IBM Bluemix
 ### New in version 0.5.3
 - Implement methods to manage Counter Examples in
 Conversation workspace Manager node.
+- Removed V1 Personality Insights node.
+- Removed V1 Language Indentification node.
+- Removed V1 Language Translation node.
+- Removed V1 Language Translation Utility node.
 
 ### New in version 0.5.2
 - Visual Recognition was overwriting msg.payload with 'look at msg.results'. Fixed
@@ -62,12 +66,12 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
     - Translates text from one language to another    
 - Natural Language Classifier
     - Uses machine learning algorithms to return the top matching predefined classes for short text inputs.
+- Natural Language Understanding
+    - Analyze text to extract meta-data from content such as concepts, entities, keywords ...
 - News
     - Searches news and blog content    
 - Personality Insights
     - Use linguistic analytics to infer cognitive and social characteristics from text
-- Relationship Extraction
-    - Extract entities and their relationships from unstructured text
 - Retrieve and Rank
     - Creates a trainable search engine for your data  
 - Similarity search
@@ -83,6 +87,8 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
 - Visual Recognition
     - Analyze visual appearance of images to understand their contents
 
+### Usage
+Example usage flows can be found here [node-red-labs](https://github.com/watson-developer-cloud/node-red-labs)
 
 ### Contributing
 
