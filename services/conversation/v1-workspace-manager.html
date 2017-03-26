@@ -57,6 +57,10 @@
             <option value="listExamples">List Examples</option>
             <option value="createExample">Create Example</option>
             <option value="deleteExample">Delete Example</option>
+            <option disabled>______________</option>
+            <option value="listCounterExamples">List Counter Examples</option>
+            <option value="createCounterExample">Create Counter Example</option>
+            <option value="deleteCounterExample">Delete Counter Example</option>
         </select>
     </div>
 
@@ -159,7 +163,7 @@
       </p>
     </li>
     <li>List Examples
-      <p>In this mode a list of all user input examples for and intent in
+      <p>In this mode a list of all user input examples for an intent in
         the specified conversation
         workspace are returned on
         <code>msg.examples</code>
@@ -174,6 +178,26 @@
       <p>In this mode the selected example for an intent is removed.
       </p>
     </li>
+    <li>List Counter Examples
+      <p>In this mode a list of all counter examples in
+        the specified conversation
+        workspace are returned on
+        <code>msg.counterexamples</code>.
+        Counterexamples are examples that have been marked as
+        irrelevant input.
+      </p>
+    </li>
+    <li>Create Counter Example
+      <p>In this mode a new counter example is created in the
+        specified conversation workspace.
+      </p>
+    </li>
+    <li>Delete Counter Example
+      <p>In this mode an existing counter example is deleted from the
+        specified conversation workspace.
+      </p>
+    </li>
+
     </ul>
 
     <p>For more information about the conversation service,
@@ -245,9 +269,15 @@
                      + ', #node-input-cwm-intent'
                      + ', #node-input-cwm-example');
         break;
+      case 'createCounterExample':
+      case 'deleteCounterExample':
+        fields.push('#node-input-cwm-workspace-id'
+                      + ', #node-input-cwm-example');
+        break;
       case 'deleteWorkspace':
       case 'updateWorkspace':
       case 'createIntent':
+      case 'listCounterExamples':
         fields.push('#node-input-cwm-workspace-id');
         break;
       case 'listWorkspaces':
