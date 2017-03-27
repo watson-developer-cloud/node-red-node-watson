@@ -231,6 +231,50 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeListCounterExamples(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getCounterExamples(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['counterexamples'] = response.counterexamples ?
+                                        response.counterexamples: response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeCreateCounterExample(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createCounterExample(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['counterexample'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeDeleteCounterExample(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.deleteCounterExample(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['counterexample'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -286,6 +330,15 @@ module.exports = function (RED) {
     case 'deleteExample':
       p = executeDeleteExample(node, conv, params, msg);
       break;
+    case 'listCounterExamples':
+      p = executeListCounterExamples(node, conv, params, msg);
+      break;
+    case 'createCounterExample':
+      p = executeCreateCounterExample(node, conv, params, msg);
+      break;
+    case 'deleteCounterExample':
+      p = executeDeleteCounterExample(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -308,6 +361,9 @@ module.exports = function (RED) {
     case 'listExamples':
     case 'createExample':
     case 'deleteExample':
+    case 'listCounterExamples':
+    case 'createCounterExample':
+    case 'deleteCounterExample':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -348,6 +404,8 @@ module.exports = function (RED) {
     switch (method) {
     case 'createExample':
     case 'deleteExample':
+    case 'createCounterExample':
+    case 'deleteCounterExample':
       if (config['cwm-example']) {
         params['text'] = config['cwm-example'];
       } else {
@@ -547,7 +605,7 @@ module.exports = function (RED) {
   });
 
 
-  // This is the Speech to Text V1 Query Builder Node
+  // This is the Conversation Workspace Manager Node
   function Node (config) {
     RED.nodes.createNode(this, config);
     var node = this;
