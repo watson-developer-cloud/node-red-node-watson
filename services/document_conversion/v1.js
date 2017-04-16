@@ -20,7 +20,7 @@ module.exports = function(RED) {
 
   const SERVICE_IDENTIFIER = 'document-conversion';
 
-  converts = serviceutils.getAllServiceDetails(SERVICE_IDENTIFIER);
+  //converts = serviceutils.getAllServiceDetails(SERVICE_IDENTIFIER);
   temp.track();
 
   // GNF: This method provides service credentials when prompted from the node editor
