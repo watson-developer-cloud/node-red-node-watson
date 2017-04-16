@@ -41,7 +41,7 @@ ServiceUtils.prototype = {
     return returnBoolean ? false : null;
   },
 
-  // Function to returl all the details of a service. Used by Document
+  // Function to return all the details of a service. Used by Document
   // Conversion Node to provide a list and a choice to the user.
   // Node: Like the original Document Conversion check, this
   // function will look for all bound instances of Document Conversion.
