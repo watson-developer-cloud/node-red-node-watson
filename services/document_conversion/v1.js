@@ -18,9 +18,10 @@ module.exports = function(RED) {
     serviceutils = require('../../utilities/service-utils'),
     converts = [];
 
-  temp.track();
+  const SERVICE_IDENTIFIER = 'document-conversion';
 
   converts = serviceutils.getAllServiceDetails(SERVICE_IDENTIFIER);
+  temp.track();
 
   // GNF: This method provides service credentials when prompted from the node editor
   RED.httpAdmin.get('/convert/vcap', function(req, res) {
