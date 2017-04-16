@@ -31,8 +31,8 @@ ServiceUtils.prototype = {
 
     for (var service in services) {
       if (services[service].hasOwnProperty('credentials')) {
-        if(services[service].credentials.hasOwnProperty('url')){
-          if(services[service].credentials.url.search(regex) === 0){
+        if (services[service].credentials.hasOwnProperty('url')){
+          if (services[service].credentials.url.search(regex) === 0){
             return returnBoolean ? true : services[service].credentials;
           }
         }
@@ -52,17 +52,19 @@ ServiceUtils.prototype = {
 
     for (var service in services) {
       if (services[service].hasOwnProperty('credentials')) {
-        if(services[service].credentials.hasOwnProperty('url')){
-          if(services[service].credentials.url.search(regex) === 0){
-            theList = theList.concat(services[service].map(function(v) {
-              return {
-                name: v.name,
-                label: v.label,
-                url: v.credentials.url,
-                username: v.credentials.username,
-                password: v.credentials.password
-              };
-            }));
+        if (services[service].credentials.hasOwnProperty('url')) {
+          if (services[service].credentials.url.search(regex) === 0) {
+            var newCandidate = {};
+            var v = services[service];
+            newCandidate.name = v.name ? v.name : '';
+            newCandidate.label = v.label ? v.label : '';
+            newCandidate.url = v.credentials.url ?
+                                    v.credentials.url : '';
+            newCandidate.username = v.credentials.username ?
+                                        v.credentials.username : '';
+            newCandidate.password = v.credentials.password ?
+                                        v.credentials.password : '';
+            theList = theList.concat(newCandidate);
           }
         }
       }

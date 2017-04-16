@@ -14,22 +14,18 @@
  * limitations under the License.
  **/
 module.exports = function(RED) {
-  var https = require('https'),
-    cfEnv = require('cfenv'),
-    //watson = require('watson-developer-cloud'),
+  var temp = require('temp'),
     fs = require('fs'),
-    payloadutils = require('../../utilities/payload-utils'),
-    //appEnv = cfEnv.getAppEnv(),
-    converts = [],
     isDocx = require('is-docx'),
-    temp = require('temp');
-  temp.track();
+    serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
+    converts = [];
 
   const DocumentConversionV1 = require('watson-developer-cloud/document-conversion/v1');
   const SERVICE_IDENTIFIER = 'document-conversion';
-  var serviceutils = require('../../utilities/service-utils');
 
   converts = serviceutils.getAllServiceDetails(SERVICE_IDENTIFIER);
+  temp.track();
 
   // GNF: This method provides service credentials when prompted from the node editor
   RED.httpAdmin.get('/convert/vcap', function(req, res) {
@@ -40,11 +36,10 @@ module.exports = function(RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    node.name = config.name;
-    node.username = config.username;
-    node.password = config.password;
-    node.service = config.service;
-    node.target = config.target;
+    const configFields = ['name', 'username', 'password', 'service', 'target'];
+    for (var i in configFields) {
+      node[configFields[i]] = config[configFields[i]];
+    }
 
     // Perform the Conversion, invoking the conver method
     // on the service.
@@ -74,24 +69,36 @@ module.exports = function(RED) {
       return p;
     };
 
-    node.verifyCredentials = function(msg) {
-      if (node && node.username && node.password) {
-        return Promise.resolve();
-      }
-      return Promise.reject('missing credentials');
+    // Docx files are seen as zips, and require special processing on
+    // the temp file extension so that they seen correctly by the
+    // Document Conversion service.
+    node.checkForZip = function(pd) {
+      var p = new Promise(function resolver(resolve, reject){
+        if ('zip' === pd.format) {
+          var f = fs.readFileSync(pd.info.path);
+          if (isDocx(f)) {
+            var newfilename = pd.info.path + '.docx';
+            fs.rename(pd.info.path, newfilename, function(err){
+              if (err) {
+                reject('Unable to handle docx file.');
+              } else {
+                resolve(newfilename);
+              }
+            });
+          }
+        } else {
+          resolve(null);
+        }
+      });
+      return p;
     };
 
-    // Standard temp file open
-    node.openTemp = function() {
+    // Open up the stream, done in a seperate process as makes use
+    // of callback
+    node.openStream = function(pd, msg) {
       var p = new Promise(function resolver(resolve, reject){
-        temp.open({
-          //suffix: '.docx'
-        }, function(err, info) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(info);
-          }
+        pd.stream_payload(pd.info.path, msg.payload, function(format) {
+          resolve(format);
         });
       });
       return p;
@@ -118,40 +125,30 @@ module.exports = function(RED) {
       }
     };
 
-    // Open up the stream, done in a seperate process as makes use
-    // of callback
-    node.openStream = function(pd, msg) {
+    // Standard temp file open
+    node.openTemp = function() {
       var p = new Promise(function resolver(resolve, reject){
-        pd.stream_payload(pd.info.path, msg.payload, function(format) {
-          //pd.format = format;
-          resolve(format);
+        temp.open({
+          //suffix: '.docx'
+        }, function(err, info) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(info);
+          }
         });
       });
       return p;
     };
 
-   // Docx files are seen as zips, and require special processing on
-   // the temp file extension so that they seen correctly by the
-   // Document Conversion service.
-    node.checkForZip = function(pd) {
-      var p = new Promise(function resolver(resolve, reject){
-        if ('zip' === pd.format) {
-          var f = fs.readFileSync(pd.info.path);
-          if (isDocx(f)) {
-            var newfilename = pd.info.path + '.docx';
-            fs.rename(pd.info.path, newfilename, function(err){
-              if (err) {
-                reject('Unable to handle docx file.');
-              } else {
-                resolve(newfilename);
-              }
-            });
-          }
-        } else {
-          resolve(null);
-        }
-      });
-      return p;
+    // Perform basic check to see that credentials
+    // are provided, altough they may still be
+    // invalid
+    node.verifyCredentials = function(msg) {
+      if (node && node.username && node.password) {
+        return Promise.resolve();
+      }
+      return Promise.reject('missing credentials');
     };
 
     // Invoked when required to act on msg as part of a flow.
@@ -193,6 +190,7 @@ module.exports = function(RED) {
           node.error(messageTxt, msg);
         });
     });
+
   }
   RED.nodes.registerType('convert', ConvertNode);
 };
