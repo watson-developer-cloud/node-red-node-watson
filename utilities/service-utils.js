@@ -31,8 +31,8 @@ ServiceUtils.prototype = {
 
     for (var service in services) {
       if (services[service].hasOwnProperty('credentials')) {
-        if(services[service].credentials.hasOwnProperty('url')){
-          if(services[service].credentials.url.search(regex) === 0){
+        if (services[service].credentials.hasOwnProperty('url')){
+          if (services[service].credentials.url.search(regex) === 0){
             return returnBoolean ? true : services[service].credentials;
           }
         }
@@ -56,8 +56,8 @@ ServiceUtils.prototype = {
 
       if (services[service].hasOwnProperty('credentials')) {
         console.log('checking : ', services[service] );
-              /*
-        if(services[service].credentials.hasOwnProperty('url')){
+        if (services[service].credentials.hasOwnProperty('url')) {
+          /*
           if(services[service].credentials.url.search(regex) === 0){
             theList = theList.concat(services[service].map(function(v) {
               return {
@@ -69,8 +69,8 @@ ServiceUtils.prototype = {
               };
             }));
           }
+          */
         }
-              */
       }
     }
 
