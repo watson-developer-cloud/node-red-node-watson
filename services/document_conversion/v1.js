@@ -14,8 +14,10 @@
  * limitations under the License.
  **/
 module.exports = function(RED) {
-  var converts = [];
+  var temp = require('temp');
+    converts = [];
 
+  temp.track();
 
 
   // GNF: This method provides service credentials when prompted from the node editor
@@ -27,6 +29,30 @@ module.exports = function(RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
+    const configFields = ['name', 'username', 'password', 'service', 'target'];
+    for (var i in configFields) {
+      node[configFields[i]] = config[configFields[i]];
+    }
+
+    // Standard temp file open
+    node.openTemp = function() {
+      var p = new Promise(function resolver(resolve, reject){
+        temp.open({
+          //suffix: '.docx'
+        }, function(err, info) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(info);
+          }
+        });
+      });
+      return p;
+    };
+
+    // Perform basic check to see that credentials
+    // are provided, altough they may still be
+    // invalid
     node.verifyCredentials = function(msg) {
       if (node && node.username && node.password) {
         return Promise.resolve();
@@ -38,6 +64,9 @@ module.exports = function(RED) {
     this.on('input', function(msg) {
       var processData = {};
       node.verifyCredentials(msg)
+        .then(function(){
+          return node.openTemp();
+        })
         .then(function(response){
           node.status({});
           msg.payload = 'ok so far';
