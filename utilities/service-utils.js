@@ -67,7 +67,7 @@ ServiceUtils.prototype = {
         }
       }
     }
-    return returnBoolean theList;
+    return theList;
   },
 
 
