@@ -14,22 +14,9 @@
  * limitations under the License.
  **/
 module.exports = function(RED) {
-  var https = require('https'),
-    cfEnv = require('cfenv'),
-    //watson = require('watson-developer-cloud'),
-    fs = require('fs'),
-    payloadutils = require('../../utilities/payload-utils'),
-    //appEnv = cfEnv.getAppEnv(),
-    converts = [],
-    isDocx = require('is-docx'),
-    temp = require('temp');
-  temp.track();
+  var converts = [];
 
-  const DocumentConversionV1 = require('watson-developer-cloud/document-conversion/v1');
-  const SERVICE_IDENTIFIER = 'document-conversion';
-  var serviceutils = require('../../utilities/service-utils');
 
-  converts = serviceutils.getAllServiceDetails(SERVICE_IDENTIFIER);
 
   // GNF: This method provides service credentials when prompted from the node editor
   RED.httpAdmin.get('/convert/vcap', function(req, res) {
@@ -40,158 +27,12 @@ module.exports = function(RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    node.name = config.name;
-    node.username = config.username;
-    node.password = config.password;
-    node.service = config.service;
-    node.target = config.target;
-
-    // Perform the Conversion, invoking the conver method
-    // on the service.
-    node.performConversion = function(msg, filename) {
-      var p = new Promise(function resolver(resolve, reject){
-        var document_conversion = new DocumentConversionV1({
-          username: node.username,
-          password: node.password,
-          version_date: '2015-12-01'
-        });
-
-        document_conversion.convert({
-          file: fs.createReadStream(filename),
-          conversion_target: msg.target || node.target,
-          word: msg.word,
-          pdf: msg.pdf,
-          normalized_html: msg.normalized_html
-        }, function(err, response) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        });
-
-      });
-      return p;
-    };
-
-    node.verifyCredentials = function(msg) {
-      if (node && node.username && node.password) {
-        return Promise.resolve();
-      }
-      return Promise.reject('missing credentials');
-    };
-
-    // Standard temp file open
-    node.openTemp = function() {
-      var p = new Promise(function resolver(resolve, reject){
-        temp.open({
-          //suffix: '.docx'
-        }, function(err, info) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(info);
-          }
-        });
-      });
-      return p;
-    };
-
-    // Sanity check on the payload, as subsequent process will fail
-    // if all is not ok
-    node.payloadCheck = function(pd, msg) {
-      if (!msg.payload) {
-        return Promise.reject('Payload is required');
-      }
-      var stream_payload = (typeof msg.payload === 'string') ?
-                              payloadutils.stream_url_format :
-                              payloadutils.stream_buffer;
-      if ('number' === typeof msg.payload) {
-        return Promise.reject('Invalid input - expecting a url or a stream buffer');
-      }
-      else if (typeof msg.payload === 'string' && !payloadutils.urlCheck(msg.payload)) {
-        return Promise.reject('Invalid URI, make sure to include the "http(s)" at the beginning.');
-      }
-      else {
-        pd.stream_payload = stream_payload;
-        return Promise.resolve();
-      }
-    };
-
-    // Open up the stream, done in a seperate process as makes use
-    // of callback
-    node.openStream = function(pd, msg) {
-      var p = new Promise(function resolver(resolve, reject){
-        pd.stream_payload(pd.info.path, msg.payload, function(format) {
-          //pd.format = format;
-          resolve(format);
-        });
-      });
-      return p;
-    };
-
-   // Docx files are seen as zips, and require special processing on
-   // the temp file extension so that they seen correctly by the
-   // Document Conversion service.
-    node.checkForZip = function(pd) {
-      var p = new Promise(function resolver(resolve, reject){
-        if ('zip' === pd.format) {
-          var f = fs.readFileSync(pd.info.path);
-          if (isDocx(f)) {
-            var newfilename = pd.info.path + '.docx';
-            fs.rename(pd.info.path, newfilename, function(err){
-              if (err) {
-                reject('Unable to handle docx file.');
-              } else {
-                resolve(newfilename);
-              }
-            });
-          }
-        } else {
-          resolve(null);
-        }
-      });
-      return p;
-    };
-
     // Invoked when required to act on msg as part of a flow.
     this.on('input', function(msg) {
-      var processData = {};
-      node.verifyCredentials(msg)
-        .then(function(){
-          return node.openTemp();
-        })
-        .then(function(info){
-          processData.info = info;
-          return node.payloadCheck(processData, msg);
-        })
-        .then(function(){
-          return node.openStream(processData, msg);
-        })
-        .then(function(format){
-          processData.format = format;
-          return node.checkForZip(processData);
-        })
-        .then(function(newfilename){
-          node.status({
-            fill: 'blue',
-            shape: 'dot',
-            text: 'converting, this might take some time'
-          });
-          return node.performConversion(msg, newfilename ?
-                                             newfilename :
-                                             processData.info.path);
-        })
-        .then(function(response){
-          node.status({});
-          msg.payload = response;
-          node.send(msg);
-        })
-        .catch(function(err){
-          var messageTxt = err.error ? err.error : err;
-          node.status({fill:'red', shape:'dot', text: messageTxt});
-          node.error(messageTxt, msg);
-        });
+      node.status({});
+      msg.payload = 'ok so far';
+      node.send(msg);
+
     });
   }
   RED.nodes.registerType('convert', ConvertNode);
