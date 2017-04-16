@@ -46,13 +46,13 @@ ServiceUtils.prototype = {
   // Node: Like the original Document Conversion check, this
   // function will look for all bound instances of Document Conversion.
   getAllServiceDetails: function(serviceName) {
-    var theList =[];
-    /*
     var regex = RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*'),
       services = appEnv.getServices(),
       theList = [];
 
     for (var service in services) {
+      console.log('Soheel - Bluemix Test - Interating through the VCAP services');
+      /*
       if (services[service].hasOwnProperty('credentials')) {
         if(services[service].credentials.hasOwnProperty('url')){
           if(services[service].credentials.url.search(regex) === 0){
@@ -68,8 +68,9 @@ ServiceUtils.prototype = {
           }
         }
       }
+      */
     }
-    */
+
     return theList;
   },
 
