@@ -51,14 +51,14 @@ ServiceUtils.prototype = {
       theList = [];
 
     for (var service in services) {
-      console.log('Soheel - Bluemix Test - Interating through the VCAP services');
+      console.log('Soheel01 - Bluemix Test - Interating through the VCAP services');
       console.log('Looking for : ', serviceName);
 
       if (services[service].hasOwnProperty('credentials')) {
         console.log('checking : ', services[service] );
         if (services[service].credentials.hasOwnProperty('url')) {
-          /*
-          if(services[service].credentials.url.search(regex) === 0){
+          if (services[service].credentials.url.search(regex) === 0) {
+            /*
             theList = theList.concat(services[service].map(function(v) {
               return {
                 name: v.name,
@@ -68,8 +68,8 @@ ServiceUtils.prototype = {
                 password: v.credentials.password
               };
             }));
+            */
           }
-          */
         }
       }
     }
