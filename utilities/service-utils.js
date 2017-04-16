@@ -46,6 +46,8 @@ ServiceUtils.prototype = {
   // Node: Like the original Document Conversion check, this
   // function will look for all bound instances of Document Conversion.
   getAllServiceDetails: function(serviceName) {
+    var theList =[];
+    /*
     var regex = RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*'),
       services = appEnv.getServices(),
       theList = [];
@@ -67,6 +69,7 @@ ServiceUtils.prototype = {
         }
       }
     }
+    */
     return theList;
   },
 
