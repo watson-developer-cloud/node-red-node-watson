@@ -54,7 +54,7 @@ ServiceUtils.prototype = {
       if (services[service].hasOwnProperty('credentials')) {
         if(services[service].credentials.hasOwnProperty('url')){
           if(services[service].credentials.url.search(regex) === 0){
-            theList = theList.concat(appEnv.services[i].map(function(v) {
+            theList = theList.concat(services[service].map(function(v) {
               return {
                 name: v.name,
                 label: v.label,

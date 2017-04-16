@@ -85,14 +85,24 @@ module.exports = function(RED) {
     };
 
     this.doCall = function(msg) {
+      console.log('Soheel Testing - In doCall');
       temp.open({
         //suffix: '.docx'
       }, function(err, info) {
         if (err) {
           throw err;
         }
+        console.log('Soheel Testing - Checking Payload', typeof msg.payload);
         var stream_payload = (typeof msg.payload === 'string') ? payloadutils.stream_url_format : payloadutils.stream_buffer;
-        if(typeof msg.payload === 'string' && !payloadutils.urlCheck(msg.payload)) {
+        if ('number' === typeof msg.payload) {
+          node.warn('Invalid input - expecting a url or a stream buffer');
+        	node.status({
+	            fill: 'red',
+	            shape: 'dot',
+	            text: 'Invalid Input'
+	          });
+        }
+        else if(typeof msg.payload === 'string' && !payloadutils.urlCheck(msg.payload)) {
         	node.warn('Invalid URI, make sure to include the "http(s)" at the beginning.');
         	node.status({
 	            fill: 'red',
@@ -100,6 +110,7 @@ module.exports = function(RED) {
 	            text: 'Invalid URI'
 	          });
         } else {
+          console.log('Soheel Testing - Streaming');
           stream_payload(info.path, msg.payload, function(format) {
             if ('zip' === format) {
               var f = fs.readFileSync(info.path);
