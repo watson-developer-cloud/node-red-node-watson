@@ -62,7 +62,7 @@ ServiceUtils.prototype = {
                                     v.credentials.url : '';
             newCandidate.username = v.credentials.username ?
                                         v.credentials.username : '';
-            newCandidate.password =  v.credentials.password ?
+            newCandidate.password = v.credentials.password ?
                                         v.credentials.password : '';
             theList = theList.concat(newCandidate);
           }

@@ -72,26 +72,26 @@ module.exports = function(RED) {
     // Docx files are seen as zips, and require special processing on
     // the temp file extension so that they seen correctly by the
     // Document Conversion service.
-     node.checkForZip = function(pd) {
-       var p = new Promise(function resolver(resolve, reject){
-         if ('zip' === pd.format) {
-           var f = fs.readFileSync(pd.info.path);
-           if (isDocx(f)) {
-             var newfilename = pd.info.path + '.docx';
-             fs.rename(pd.info.path, newfilename, function(err){
-               if (err) {
-                 reject('Unable to handle docx file.');
-               } else {
-                 resolve(newfilename);
-               }
-             });
-           }
-         } else {
-           resolve(null);
-         }
-       });
-       return p;
-     };
+    node.checkForZip = function(pd) {
+      var p = new Promise(function resolver(resolve, reject){
+        if ('zip' === pd.format) {
+          var f = fs.readFileSync(pd.info.path);
+          if (isDocx(f)) {
+            var newfilename = pd.info.path + '.docx';
+            fs.rename(pd.info.path, newfilename, function(err){
+              if (err) {
+                reject('Unable to handle docx file.');
+              } else {
+                resolve(newfilename);
+              }
+            });
+          }
+        } else {
+          resolve(null);
+        }
+      });
+      return p;
+    };
 
     // Open up the stream, done in a seperate process as makes use
     // of callback
@@ -189,10 +189,8 @@ module.exports = function(RED) {
           node.status({fill:'red', shape:'dot', text: messageTxt});
           node.error(messageTxt, msg);
         });
-
-
-
     });
+
   }
   RED.nodes.registerType('convert', ConvertNode);
 };
