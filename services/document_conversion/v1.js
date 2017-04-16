@@ -40,6 +40,7 @@ module.exports = function(RED) {
     // Standard temp file open
     node.openTemp = function() {
       var p = new Promise(function resolver(resolve, reject){
+        console.log('In openTemp');
         temp.open({
           //suffix: '.docx'
         }, function(err, info) {
