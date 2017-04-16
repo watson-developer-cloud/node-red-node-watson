@@ -51,13 +51,20 @@ ServiceUtils.prototype = {
       theList = [];
 
     for (var service in services) {
-      console.log('Soheel01 - Bluemix Test - Interating through the VCAP services');
+      console.log('Soheel02 - Bluemix Test - Interating through the VCAP services');
       console.log('Looking for : ', serviceName);
 
       if (services[service].hasOwnProperty('credentials')) {
-        console.log('checking : ', services[service] );
         if (services[service].credentials.hasOwnProperty('url')) {
           if (services[service].credentials.url.search(regex) === 0) {
+            console.log('Found a match in : ', services[service] );
+            var newCandidate = {};
+            newCandidate.name = '111';
+            newCandidate.label = '222';
+            newCandidate.url = '333';
+            newCandidate.username = '444';
+            newCandidate.password = '555';
+            theList = theList.concat(newCandidate);
             /*
             theList = theList.concat(services[service].map(function(v) {
               return {
