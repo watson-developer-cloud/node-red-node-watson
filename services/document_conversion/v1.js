@@ -14,11 +14,13 @@
  * limitations under the License.
  **/
 module.exports = function(RED) {
-  var temp = require('temp');
+  var temp = require('temp'),
+    serviceutils = require('../../utilities/service-utils'),
     converts = [];
 
   temp.track();
 
+  converts = serviceutils.getAllServiceDetails(SERVICE_IDENTIFIER);
 
   // GNF: This method provides service credentials when prompted from the node editor
   RED.httpAdmin.get('/convert/vcap', function(req, res) {
