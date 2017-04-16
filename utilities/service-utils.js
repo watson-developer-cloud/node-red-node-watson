@@ -51,13 +51,9 @@ ServiceUtils.prototype = {
       theList = [];
 
     for (var service in services) {
-      console.log('Soheel03 - Bluemix Test - Interating through the VCAP services');
-      console.log('Looking for : ', serviceName);
-
       if (services[service].hasOwnProperty('credentials')) {
         if (services[service].credentials.hasOwnProperty('url')) {
           if (services[service].credentials.url.search(regex) === 0) {
-            console.log('Found a match in : ', services[service] );
             var newCandidate = {};
             var v = services[service];
             newCandidate.name = v.name ? v.name : '';
@@ -73,7 +69,6 @@ ServiceUtils.prototype = {
         }
       }
     }
-
     return theList;
   },
 

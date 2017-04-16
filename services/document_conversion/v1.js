@@ -15,10 +15,13 @@
  **/
 module.exports = function(RED) {
   var temp = require('temp'),
+    fs = require('fs'),
+    isDocx = require('is-docx'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     converts = [];
 
+  const DocumentConversionV1 = require('watson-developer-cloud/document-conversion/v1');
   const SERVICE_IDENTIFIER = 'document-conversion';
 
   converts = serviceutils.getAllServiceDetails(SERVICE_IDENTIFIER);
@@ -38,6 +41,69 @@ module.exports = function(RED) {
       node[configFields[i]] = config[configFields[i]];
     }
 
+    // Perform the Conversion, invoking the conver method
+    // on the service.
+    node.performConversion = function(msg, filename) {
+      var p = new Promise(function resolver(resolve, reject){
+        var document_conversion = new DocumentConversionV1({
+          username: node.username,
+          password: node.password,
+          version_date: '2015-12-01'
+        });
+
+        document_conversion.convert({
+          file: fs.createReadStream(filename),
+          conversion_target: msg.target || node.target,
+          word: msg.word,
+          pdf: msg.pdf,
+          normalized_html: msg.normalized_html
+        }, function(err, response) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(response);
+          }
+        });
+
+      });
+      return p;
+    };
+
+    // Docx files are seen as zips, and require special processing on
+    // the temp file extension so that they seen correctly by the
+    // Document Conversion service.
+     node.checkForZip = function(pd) {
+       var p = new Promise(function resolver(resolve, reject){
+         console.log('chughts - In checkForZip');
+         if ('zip' === pd.format) {
+           var f = fs.readFileSync(pd.info.path);
+           if (isDocx(f)) {
+             var newfilename = pd.info.path + '.docx';
+             fs.rename(pd.info.path, newfilename, function(err){
+               if (err) {
+                 reject('Unable to handle docx file.');
+               } else {
+                 resolve(newfilename);
+               }
+             });
+           }
+         } else {
+           resolve(null);
+         }
+       });
+       return p;
+     };
+
+    // Open up the stream, done in a seperate process as makes use
+    // of callback
+    node.openStream = function(pd, msg) {
+      var p = new Promise(function resolver(resolve, reject){
+        pd.stream_payload(pd.info.path, msg.payload, function(format) {
+          resolve(format);
+        });
+      });
+      return p;
+    };
 
     // Sanity check on the payload, as subsequent process will fail
     // if all is not ok
@@ -63,7 +129,6 @@ module.exports = function(RED) {
     // Standard temp file open
     node.openTemp = function() {
       var p = new Promise(function resolver(resolve, reject){
-        console.log('chughts - In openTemp');
         temp.open({
           //suffix: '.docx'
         }, function(err, info) {
@@ -98,9 +163,26 @@ module.exports = function(RED) {
           processData.info = info;
           return node.payloadCheck(processData, msg);
         })
+        .then(function(){
+          return node.openStream(processData, msg);
+        })
+        .then(function(format){
+          processData.format = format;
+          return node.checkForZip(processData);
+        })
+        .then(function(newfilename){
+          node.status({
+            fill: 'blue',
+            shape: 'dot',
+            text: 'converting, this might take some time'
+          });
+          return node.performConversion(msg, newfilename ?
+                                             newfilename :
+                                             processData.info.path);
+        })
         .then(function(response){
           node.status({});
-          msg.payload = 'ok so far';
+          msg.payload = response;
           node.send(msg);
         })
         .catch(function(err){
