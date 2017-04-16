@@ -74,7 +74,6 @@ module.exports = function(RED) {
     // Document Conversion service.
      node.checkForZip = function(pd) {
        var p = new Promise(function resolver(resolve, reject){
-         console.log('chughts - In checkForZip');
          if ('zip' === pd.format) {
            var f = fs.readFileSync(pd.info.path);
            if (isDocx(f)) {
