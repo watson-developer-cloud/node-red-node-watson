@@ -25,21 +25,10 @@ module.exports = function(RED) {
     temp = require('temp');
   temp.track();
 
-  // GNF: Read credentials information from the VCAP environment variable
-  for (var i in appEnv.services) {
-    // filter the services to include only the Convert ones
-    if (i.match(/^(document_conversion)/i)) {
-      converts = converts.concat(appEnv.services[i].map(function(v) {
-        return {
-          name: v.name,
-          label: v.label,
-          url: v.credentials.url,
-          username: v.credentials.username,
-          password: v.credentials.password
-        };
-      }));
-    }
-  }
+  const SERVICE_IDENTIFIER = 'document-conversion';
+  var serviceutils = require('../../utilities/service-utils');
+
+  converts = serviceutils.getAllServiceDetails(SERVICE_IDENTIFIER);
 
   // GNF: This method provides service credentials when prompted from the node editor
   RED.httpAdmin.get('/convert/vcap', function(req, res) {

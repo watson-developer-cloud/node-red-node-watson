@@ -41,6 +41,37 @@ ServiceUtils.prototype = {
     return returnBoolean ? false : null;
   },
 
+  // Function to returl all the details of a service. Used by Document
+  // Conversion Node to provide a list and a choice to the user.
+  // Node: Like the original Document Conversion check, this
+  // function will look for all bound instances of Document Conversion.
+  getAllServiceDetails: function(serviceName) {
+    var regex = RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*'),
+      services = appEnv.getServices(),
+      theList = [];
+
+    for (var service in services) {
+      if (services[service].hasOwnProperty('credentials')) {
+        if(services[service].credentials.hasOwnProperty('url')){
+          if(services[service].credentials.url.search(regex) === 0){
+            theList = theList.concat(appEnv.services[i].map(function(v) {
+              return {
+                name: v.name,
+                label: v.label,
+                url: v.credentials.url,
+                username: v.credentials.username,
+                password: v.credentials.password
+              };
+            }));
+          }
+        }
+      }
+    }
+    return returnBoolean theList;
+  },
+
+
+
   // Check for service return a boolean to indicate if it is bound in
   checkServiceBound: function(serviceName) {
     return ServiceUtils.prototype.checkCFForService(serviceName, true, false);
