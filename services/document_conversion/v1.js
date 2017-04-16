@@ -27,11 +27,29 @@ module.exports = function(RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
+    node.verifyCredentials = function(msg) {
+      if (node && node.username && node.password) {
+        return Promise.resolve();
+      }
+      return Promise.reject('missing credentials');
+    };
+
     // Invoked when required to act on msg as part of a flow.
     this.on('input', function(msg) {
-      node.status({});
-      msg.payload = 'ok so far';
-      node.send(msg);
+      var processData = {};
+      node.verifyCredentials(msg)
+        .then(function(response){
+          node.status({});
+          msg.payload = 'ok so far';
+          node.send(msg);
+        })
+        .catch(function(err){
+          var messageTxt = err.error ? err.error : err;
+          node.status({fill:'red', shape:'dot', text: messageTxt});
+          node.error(messageTxt, msg);
+        });
+
+
 
     });
   }
