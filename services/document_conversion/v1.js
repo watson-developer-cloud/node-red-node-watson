@@ -16,6 +16,7 @@
 module.exports = function(RED) {
   var temp = require('temp'),
     serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
     converts = [];
 
   const SERVICE_IDENTIFIER = 'document-conversion';
@@ -36,6 +37,28 @@ module.exports = function(RED) {
     for (var i in configFields) {
       node[configFields[i]] = config[configFields[i]];
     }
+
+
+    // Sanity check on the payload, as subsequent process will fail
+    // if all is not ok
+    node.payloadCheck = function(pd, msg) {
+      if (!msg.payload) {
+        return Promise.reject('Payload is required');
+      }
+      var stream_payload = (typeof msg.payload === 'string') ?
+                              payloadutils.stream_url_format :
+                              payloadutils.stream_buffer;
+      if ('number' === typeof msg.payload) {
+        return Promise.reject('Invalid input - expecting a url or a stream buffer');
+      }
+      else if (typeof msg.payload === 'string' && !payloadutils.urlCheck(msg.payload)) {
+        return Promise.reject('Invalid URI, make sure to include the "http(s)" at the beginning.');
+      }
+      else {
+        pd.stream_payload = stream_payload;
+        return Promise.resolve();
+      }
+    };
 
     // Standard temp file open
     node.openTemp = function() {
@@ -70,6 +93,10 @@ module.exports = function(RED) {
       node.verifyCredentials(msg)
         .then(function(){
           return node.openTemp();
+        })
+        .then(function(info){
+          processData.info = info;
+          return node.payloadCheck(processData, msg);
         })
         .then(function(response){
           node.status({});

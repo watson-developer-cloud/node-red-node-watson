@@ -51,7 +51,7 @@ ServiceUtils.prototype = {
       theList = [];
 
     for (var service in services) {
-      console.log('Soheel02 - Bluemix Test - Interating through the VCAP services');
+      console.log('Soheel03 - Bluemix Test - Interating through the VCAP services');
       console.log('Looking for : ', serviceName);
 
       if (services[service].hasOwnProperty('credentials')) {
@@ -59,23 +59,16 @@ ServiceUtils.prototype = {
           if (services[service].credentials.url.search(regex) === 0) {
             console.log('Found a match in : ', services[service] );
             var newCandidate = {};
-            newCandidate.name = '111';
-            newCandidate.label = '222';
-            newCandidate.url = '333';
-            newCandidate.username = '444';
-            newCandidate.password = '555';
+            var v = services[service];
+            newCandidate.name = v.name ? v.name : '';
+            newCandidate.label = v.label ? v.label : '';
+            newCandidate.url = v.credentials.url ?
+                                    v.credentials.url : '';
+            newCandidate.username = v.credentials.username ?
+                                        v.credentials.username : '';
+            newCandidate.password =  v.credentials.password ?
+                                        v.credentials.password : '';
             theList = theList.concat(newCandidate);
-            /*
-            theList = theList.concat(services[service].map(function(v) {
-              return {
-                name: v.name,
-                label: v.label,
-                url: v.credentials.url,
-                username: v.credentials.username,
-                password: v.credentials.password
-              };
-            }));
-            */
           }
         }
       }
