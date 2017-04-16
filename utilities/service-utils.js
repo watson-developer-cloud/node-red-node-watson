@@ -70,8 +70,6 @@ ServiceUtils.prototype = {
     return theList;
   },
 
-
-
   // Check for service return a boolean to indicate if it is bound in
   checkServiceBound: function(serviceName) {
     return ServiceUtils.prototype.checkCFForService(serviceName, true, false);

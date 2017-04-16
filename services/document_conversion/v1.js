@@ -95,7 +95,7 @@ module.exports = function(RED) {
         });
       });
       return p;
-    }
+    };
 
     // Sanity check on the payload, as subsequent process will fail
     // if all is not ok
