@@ -14,11 +14,10 @@
  * limitations under the License.
  **/
 
-module.exports = function(RED) {
+module.exports = function (RED) {
   var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2');
   var cfenv = require('cfenv');
-  var endpointUrl =
-    'https://gateway.watsonplatform.net/language-translation/api';
+  var endpointUrl = 'https://gateway.watsonplatform.net/language-translation/api';
 
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then they are stored in sUsername and sPassword, as the
@@ -44,8 +43,8 @@ module.exports = function(RED) {
   // date with new tranlations, without the need for a code update of this node.
 
   // Node RED Admin - fetch and set vcap services
-  RED.httpAdmin.get('/watson-translate-util/vcap', function(req, res) {
-    res.json(service ? { bound_service: true } : null);
+  RED.httpAdmin.get('/watson-translate-util/vcap', function (req, res) {
+    res.json(service ? {bound_service: true} : null);
   });
 
   // This is the Language Translation Node.
@@ -58,7 +57,7 @@ module.exports = function(RED) {
   // 3. status, to determine whethere a trained corpus is available
   // 4. delete, to remove a trained corpus extension.
 
-  function SMTNode(config) {
+  function SMTNode (config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
@@ -73,7 +72,7 @@ module.exports = function(RED) {
     // The node has received an input as part of a flow, need to determine
     // what the request is for, and based on that if the required fields
     // have been provided.
-    this.on('input', function(msg) {
+    this.on('input', function (msg) {
       var message = '';
 
       if (!username || !password) {
@@ -86,46 +85,46 @@ module.exports = function(RED) {
         username: username,
         password: password,
         version: 'v2',
-        url: endpointUrl,
+        url: endpointUrl
       });
 
       // set global variable in order to make them accessible for the tranlsation node
       var globalContext = this.context().global;
 
-      globalContext.set('g_domain', '');
-      globalContext.set('g_src', '');
-      globalContext.set('g_dest', '');
-      globalContext.set('g_model_id', '');
+      globalContext.set('g_domain','');
+      globalContext.set('g_src','');
+      globalContext.set('g_dest','');
+      globalContext.set('g_model_id','');
 
       // ---- UTILITY FUNCTIONS ----
       // this functions creates a N dimensional array
       // it will be used in order to make an array of arrays from the wanted options to populate a dashboard dropdown list
       // the entries of the array to be created would be 'domains', 'model_id', 'source' & 'target
-      function capitalize(string) {
+      function capitalize (string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
       }
 
       function makeLanguageBeautifier(string) {
         var langs = {
-          es: 'Spanish',
-          ar: 'Arabic',
-          arz: 'Spoken Arabic',
-          en: 'English',
-          fr: 'French',
-          it: 'Italian',
-          zh: 'Chinese',
-          ko: 'Korean',
-          pt: 'Portuguese',
-          de: 'German',
+          'es': 'Spanish',
+          'ar': 'Arabic',
+          'arz': 'Spoken Arabic',
+          'en': 'English',
+          'fr': 'French',
+          'it': 'Italian',
+          'zh': 'Chinese',
+          'ko': 'Korean',
+          'pt': 'Portuguese',
+          'de': 'German'
         };
         return langs[string];
       }
       // ---- END OF UTILITY FUNCTIONS ----
 
       if (lt) {
-        lt.getModels({}, function(err, models) {
+        lt.getModels({},function (err, models ){
           if (err) {
-            node.error(err, msg);
+            node.error(err,msg);
           } else {
             msg.payload = models;
 
@@ -164,18 +163,11 @@ module.exports = function(RED) {
               src_lang_array[i] = msg.payload.models[i].source;
               src_lang_array[i] = makeLanguageBeautifier(src_lang_array[i]);
               target_lang_array[i] = msg.payload.models[i].target;
-              target_lang_array[i] = makeLanguageBeautifier(
-                target_lang_array[i]
-              );
+              target_lang_array[i] = makeLanguageBeautifier(target_lang_array[i]);
 
               sTmp3 = makeLanguageBeautifier(target_lang_array[i]);
 
-              domain_src_target =
-                ldom[i] +
-                ', ' +
-                src_lang_array[i] +
-                ', ' +
-                target_lang_array[i];
+              domain_src_target = ldom[i] + ', ' + src_lang_array[i] + ', ' + target_lang_array[i];
 
               var j = {};
               j[domain_src_target] = model_id_array[i];
@@ -218,15 +210,15 @@ module.exports = function(RED) {
           }
         });
       } else {
-        node.error('Error instantiating the language service', msg);
+        node.error('Error instantiating the language service',msg);
       }
     });
   }
 
   RED.nodes.registerType('watson-translate-util', SMTNode, {
     credentials: {
-      username: { type: 'text' },
-      password: { type: 'password' },
-    },
+      username: {type:'text'},
+      password: {type:'password'}
+    }
   });
 };

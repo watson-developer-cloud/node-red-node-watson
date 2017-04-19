@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 
-module.exports = function(RED) {
+module.exports = function (RED) {
+
   const SERVICE_IDENTIFIER = 'discovery';
   var discoveryutils = require('./discovery-utils'),
     DiscoveryV1Experimental = require('watson-developer-cloud/discovery/v1-experimental'),
@@ -25,24 +26,24 @@ module.exports = function(RED) {
     sUsername = null,
     sPassword = null;
 
-  function checkParams(method, params) {
+
+  function checkParams(method, params){
     var response = '';
     switch (method) {
-      case 'getEnvironmentDetails':
-      case 'listCollections':
-        response = discoveryutils.paramEnvCheck(params);
-        break;
-      case 'getCollectionDetails':
-        response =
-          discoveryutils.paramEnvCheck(params) +
-          discoveryutils.paramCollectionCheck(params);
-        break;
+    case 'getEnvironmentDetails':
+    case 'listCollections':
+      response = discoveryutils.paramEnvCheck(params);
+      break;
+    case 'getCollectionDetails':
+      response = discoveryutils.paramEnvCheck(params) +
+             discoveryutils.paramCollectionCheck(params);
+      break;
     }
     return response;
   }
 
   function executeListEnvrionments(node, discovery, params, msg) {
-    discovery.getEnvironments(params, function(err, response) {
+    discovery.getEnvironments(params, function (err, response) {
       node.status({});
       if (err) {
         discoveryutils.reportError(node, msg, err.error);
@@ -54,7 +55,7 @@ module.exports = function(RED) {
   }
 
   function executeEnvrionmentDetails(node, discovery, params, msg) {
-    discovery.getEnvironment(params, function(err, response) {
+    discovery.getEnvironment(params, function (err, response) {
       node.status({});
       if (err) {
         discoveryutils.reportError(node, msg, err.error);
@@ -66,7 +67,7 @@ module.exports = function(RED) {
   }
 
   function executeListCollections(node, discovery, params, msg) {
-    discovery.getCollections(params, function(err, response) {
+    discovery.getCollections(params, function (err, response) {
       node.status({});
       if (err) {
         discoveryutils.reportError(node, msg, err.error);
@@ -78,10 +79,7 @@ module.exports = function(RED) {
   }
 
   function executeGetCollectionDetails(node, discovery, params, msg) {
-    discovery.getCollection(params, params.collection_id, function(
-      err,
-      response
-    ) {
+    discovery.getCollection(params, params.collection_id, function (err, response) {
       node.status({});
       if (err) {
         discoveryutils.reportError(node, msg, err.error);
@@ -96,23 +94,24 @@ module.exports = function(RED) {
     var discovery = new DiscoveryV1Experimental({
       username: username,
       password: password,
-      version_date: '2016-11-07',
+      version_date: '2016-11-07'
     });
 
     switch (method) {
-      case 'listEnvrionments':
-        executeListEnvrionments(node, discovery, params, msg);
-        break;
-      case 'getEnvironmentDetails':
-        executeEnvrionmentDetails(node, discovery, params, msg);
-        break;
-      case 'listCollections':
-        executeListCollections(node, discovery, params, msg);
-        break;
-      case 'getCollectionDetails':
-        executeGetCollectionDetails(node, discovery, params, msg);
-        break;
+    case 'listEnvrionments':
+      executeListEnvrionments(node, discovery, params, msg);
+      break;
+    case 'getEnvironmentDetails':
+      executeEnvrionmentDetails(node, discovery, params, msg);
+      break;
+    case 'listCollections':
+      executeListCollections(node, discovery, params, msg);
+      break;
+    case 'getCollectionDetails':
+      executeGetCollectionDetails(node, discovery, params, msg);
+      break;
     }
+
   }
 
   if (dservice) {
@@ -120,16 +119,19 @@ module.exports = function(RED) {
     sPassword = dservice.password;
   }
 
-  RED.httpAdmin.get('/watson-discovery/vcap', function(req, res) {
+  RED.httpAdmin.get('/watson-discovery/vcap', function (req, res) {
     res.json(serviceutils.checkServiceBound(SERVICE_IDENTIFIER));
   });
 
-  function Node(config) {
+
+  function Node (config) {
     var node = this;
     RED.nodes.createNode(this, config);
 
-    this.on('input', function(msg) {
-      var method = config['discovery-method'], message = '', params = {};
+    this.on('input', function (msg) {
+      var method = config['discovery-method'],
+        message = '',
+        params = {};
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
@@ -139,24 +141,24 @@ module.exports = function(RED) {
       } else if (!method || '' === method) {
         message = 'Required Discovery method has not been specified';
       } else {
-        params = discoveryutils.buildParams(msg, config);
+        params = discoveryutils.buildParams(msg,config);
         message = checkParams(method, params);
       }
 
       if (message) {
-        discoveryutils.reportError(node, msg, message);
+        discoveryutils.reportError(node,msg,message);
         return;
       }
 
-      node.status({ fill: 'blue', shape: 'dot', text: 'requesting' });
+      node.status({fill:'blue', shape:'dot', text:'requesting'});
       executeMethod(node, method, params, msg);
     });
   }
 
   RED.nodes.registerType('watson-discovery', Node, {
     credentials: {
-      username: { type: 'text' },
-      password: { type: 'password' },
-    },
+      username: {type:'text'},
+      password: {type:'password'}
+    }
   });
 };

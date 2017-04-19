@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-module.exports = function(RED) {
+module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'speech-to-text';
   var request = require('request'),
     cfenv = require('cfenv'),
@@ -26,10 +26,7 @@ module.exports = function(RED) {
     payloadutils = require('../../utilities/payload-utils'),
     STTV1 = require('watson-developer-cloud/speech-to-text/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = '',
-    password = '',
-    sUsername = '',
-    sPassword = '';
+    username = '', password = '', sUsername = '', sPassword = '';
 
   temp.track();
 
@@ -48,7 +45,7 @@ module.exports = function(RED) {
     sPassword = service.password;
   }
 
-  /*
+/*
   function reportError (node, msg, message) {
     var messageTxt = message.error ? message.error : message;
     msg.stterror = messageTxt;
@@ -59,7 +56,7 @@ module.exports = function(RED) {
 */
 
   function executeCreateCustomisation(node, stt, params, msg) {
-    stt.createCustomization(params, function(err, response) {
+    stt.createCustomization(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -71,110 +68,111 @@ module.exports = function(RED) {
   }
 
   function executeListCustomisations(node, stt, params, msg) {
-    stt.getCustomizations(params, function(err, response) {
+    stt.getCustomizations(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['customizations'] = response.customizations
-          ? response.customizations
-          : response;
+        msg['customizations'] = response.customizations ?
+                                      response.customizations: response;
       }
       node.send(msg);
     });
   }
 
   function executeGetCustomisation(node, stt, params, msg) {
-    stt.getCustomization(params, function(err, response) {
+    stt.getCustomization(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['customization'] = response;
+        msg['customization'] = response ;
       }
       node.send(msg);
     });
   }
 
   function executeDeleteCustomisation(node, stt, params, msg) {
-    stt.deleteCustomization(params, function(err, response) {
+    stt.deleteCustomization(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['delcustomresponse'] = response;
+        msg['delcustomresponse'] = response ;
       }
       node.send(msg);
     });
   }
 
+
   function executeAddCorpus(node, stt, params, msg) {
-    stt.addCorpus(params, function(err, response) {
+    stt.addCorpus(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['addcorpusresponse'] = response;
+        msg['addcorpusresponse'] = response ;
       }
       node.send(msg);
     });
   }
 
   function executeGetCorpora(node, stt, params, msg) {
-    stt.getCorpora(params, function(err, response) {
+    stt.getCorpora(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['corpora'] = response.corpora ? response.corpora : response;
+        msg['corpora'] = response.corpora ? response.corpora : response ;
       }
       node.send(msg);
     });
   }
 
   function executeTrain(node, stt, params, msg) {
-    stt.trainCustomization(params, function(err, response) {
+    stt.trainCustomization(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['train'] = response;
+        msg['train'] = response ;
       }
       node.send(msg);
     });
   }
 
   function executeGetCustomWords(node, stt, params, msg) {
-    stt.getWords(params, function(err, response) {
+    stt.getWords(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['words'] = response.words ? response.words : response;
+        msg['words'] = response.words ? response.words : response ;
       }
       node.send(msg);
     });
   }
 
   function executeAddWords(node, stt, params, msg) {
-    stt.addWords(params, function(err, response) {
+    stt.addWords(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['addwordsresponse'] = response;
+        msg['addwordsresponse'] = response ;
       }
       node.send(msg);
     });
   }
 
+
   function executeDeleteCorpus(node, stt, params, msg) {
-    stt.deleteCorpus(params, function(err, response) {
+    stt.deleteCorpus(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
       } else {
-        msg['delcorpusresponse'] = response;
+        msg['delcorpusresponse'] = response ;
       }
       node.send(msg);
     });
@@ -183,42 +181,42 @@ module.exports = function(RED) {
   function executeMethod(node, method, params, msg) {
     var stt = new STTV1({
       username: username,
-      password: password,
+      password: password
     });
 
-    node.status({ fill: 'blue', shape: 'dot', text: 'executing' });
+    node.status({fill:'blue', shape:'dot', text:'executing'});
 
     switch (method) {
-      case 'createCustomisation':
-        executeCreateCustomisation(node, stt, params, msg);
-        break;
-      case 'listCustomisations':
-        executeListCustomisations(node, stt, params, msg);
-        break;
-      case 'getCustomisation':
-        executeGetCustomisation(node, stt, params, msg);
-        break;
-      case 'deleteCustomisation':
-        executeDeleteCustomisation(node, stt, params, msg);
-        break;
-      case 'addCorpus':
-        executeAddCorpus(node, stt, params, msg);
-        break;
-      case 'getCorpora':
-        executeGetCorpora(node, stt, params, msg);
-        break;
-      case 'train':
-        executeTrain(node, stt, params, msg);
-        break;
-      case 'listCustomWords':
-        executeGetCustomWords(node, stt, params, msg);
-        break;
-      case 'addWords':
-        executeAddWords(node, stt, params, msg);
-        break;
-      case 'deleteCorpus':
-        executeDeleteCorpus(node, stt, params, msg);
-        break;
+    case 'createCustomisation':
+      executeCreateCustomisation(node, stt, params, msg);
+      break;
+    case 'listCustomisations':
+      executeListCustomisations(node, stt, params, msg);
+      break;
+    case 'getCustomisation':
+      executeGetCustomisation(node, stt, params, msg);
+      break;
+    case 'deleteCustomisation':
+      executeDeleteCustomisation(node, stt, params, msg);
+      break;
+    case 'addCorpus':
+      executeAddCorpus(node, stt, params, msg);
+      break;
+    case 'getCorpora':
+      executeGetCorpora(node, stt, params, msg);
+      break;
+    case 'train':
+      executeTrain(node, stt, params, msg);
+      break;
+    case 'listCustomWords':
+      executeGetCustomWords(node, stt, params, msg);
+      break;
+    case 'addWords':
+      executeAddWords(node, stt, params, msg);
+      break;
+    case 'deleteCorpus':
+      executeDeleteCorpus(node, stt, params, msg);
+      break;
     }
   }
 
@@ -254,29 +252,30 @@ module.exports = function(RED) {
     return params;
   }
 
+
   function buildParams(msg, method, config) {
     var params = {};
 
     switch (method) {
-      case 'createCustomisation':
-        params = paramsForNewCustom(config);
-        break;
-      case 'listCustomisations':
-        break;
-      case 'getCustomisation':
-      case 'getCorpora':
-      case 'train':
-      case 'listCustomWords':
-      case 'addWords':
-      case 'deleteCustomisation':
-        if (config['stt-custom-id']) {
-          params['customization_id'] = config['stt-custom-id'];
-        }
-        break;
-      case 'addCorpus':
-      case 'deleteCorpus':
-        params = paramsForCorpus(config, method);
-        break;
+    case 'createCustomisation':
+      params = paramsForNewCustom(config);
+      break;
+    case 'listCustomisations':
+      break;
+    case 'getCustomisation':
+    case 'getCorpora':
+    case 'train':
+    case 'listCustomWords':
+    case 'addWords':
+    case 'deleteCustomisation':
+      if (config['stt-custom-id']) {
+        params['customization_id'] = config['stt-custom-id'];
+      }
+      break;
+    case 'addCorpus':
+    case 'deleteCorpus':
+      params = paramsForCorpus(config, method);
+      break;
     }
 
     return params;
@@ -284,94 +283,87 @@ module.exports = function(RED) {
 
   function setFileParams(method, params, msg) {
     switch (method) {
-      case 'addCorpus':
-        params.corpus = msg.payload;
-        break;
-      case 'addWords':
-        params.words = msg.payload;
-        break;
+    case 'addCorpus':
+      params.corpus = msg.payload;
+      break;
+    case 'addWords':
+      params.words = msg.payload;
+      break;
     }
     return params;
   }
 
   function loadFile(node, method, params, msg) {
-    temp.open(
-      {
-        suffix: '.txt',
-      },
-      function(err, info) {
+    temp.open({
+      suffix: '.txt'
+    }, function(err, info) {
+      if (err) {
+        node.status({
+          fill: 'red',
+          shape: 'dot',
+          text: 'Error receiving the data buffer for training'
+        });
+        throw err;
+      }
+
+      // Syncing up the asynchronous nature of the stream
+      // so that the full file can be sent to the API.
+      fs.writeFile(info.path, msg.payload, function(err) {
         if (err) {
           node.status({
             fill: 'red',
             shape: 'dot',
-            text: 'Error receiving the data buffer for training',
+            text: 'Error processing data buffer for training'
           });
           throw err;
         }
 
-        // Syncing up the asynchronous nature of the stream
-        // so that the full file can be sent to the API.
-        fs.writeFile(info.path, msg.payload, function(err) {
-          if (err) {
-            node.status({
-              fill: 'red',
-              shape: 'dot',
-              text: 'Error processing data buffer for training',
-            });
-            throw err;
+        switch (method) {
+        case 'addCorpus':
+          params.corpus = fs.createReadStream(info.path);
+          break;
+        case 'addWords':
+          try {
+            params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
+          } catch (err) {
+            params.words = fs.createReadStream(info.path);
           }
+        }
 
-          switch (method) {
-            case 'addCorpus':
-              params.corpus = fs.createReadStream(info.path);
-              break;
-            case 'addWords':
-              try {
-                params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
-              } catch (err) {
-                params.words = fs.createReadStream(info.path);
-              }
-          }
-
-          executeMethod(node, method, params, msg);
-          temp.cleanup();
-        });
-      }
-    );
+        executeMethod(node, method, params, msg);
+        temp.cleanup();
+      });
+    });
   }
 
   function checkForFile(method) {
     switch (method) {
-      case 'addCorpus':
-      case 'addWords':
-        return true;
+    case 'addCorpus':
+    case 'addWords':
+      return true;
     }
     return false;
   }
+
 
   // These are APIs that the node has created to allow it to dynamically fetch Bluemix
   // credentials, and also translation models. This allows the node to keep up to
   // date with new tranlations, without the need for a code update of this node.
 
   // Node RED Admin - fetch and set vcap services
-  RED.httpAdmin.get('/watson-speech-to-text-v1-query-builder/vcap', function(
-    req,
-    res
-  ) {
-    res.json(service ? { bound_service: true } : null);
+  RED.httpAdmin.get('/watson-speech-to-text-v1-query-builder/vcap', function (req, res) {
+    res.json(service ? {bound_service: true} : null);
   });
 
-  // API used by widget to fetch available models
-  RED.httpAdmin.get('/watson-speech-to-text-v1-query-builder/models', function(
-    req,
-    res
-  ) {
+
+   // API used by widget to fetch available models
+  RED.httpAdmin.get('/watson-speech-to-text-v1-query-builder/models', function (req, res) {
     var stt = new STTV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd,
+      password: sPassword ? sPassword : req.query.pwd
     });
 
-    stt.getModels({}, function(err, models) {
+    stt.getModels({}, function(err, models){
       if (err) {
         res.json(err);
       } else {
@@ -380,13 +372,16 @@ module.exports = function(RED) {
     });
   });
 
+
   // This is the Speech to Text V1 Query Builder Node
-  function Node(config) {
+  function Node (config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function(msg) {
-      var method = config['stt-custom-mode'], message = '', params = {};
+    this.on('input', function (msg) {
+      var method = config['stt-custom-mode'],
+        message = '',
+        params = {};
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
@@ -418,8 +413,9 @@ module.exports = function(RED) {
 
   RED.nodes.registerType('watson-speech-to-text-v1-query-builder', Node, {
     credentials: {
-      username: { type: 'text' },
-      password: { type: 'password' },
-    },
+      username: {type:'text'},
+      password: {type:'password'}
+    }
   });
+
 };

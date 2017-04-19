@@ -23,16 +23,16 @@ ServiceUtils.prototype = {
   // that the url associated with the service, contains the matched
   // input value, hence reducing the chances of a false match.
   checkCFForService: function(serviceName, returnBoolean, alchemyRegex) {
-    var regex = alchemyRegex
-      ? RegExp('(http|https)(://)(' + serviceName + ').*')
-      : RegExp('(http|https)(://)([^\/]+)(/)(' + serviceName + ').*');
+    var regex = alchemyRegex ?
+                RegExp('(http|https)(://)('+serviceName+').*') :
+                RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*');
 
     var services = appEnv.getServices();
 
     for (var service in services) {
       if (services[service].hasOwnProperty('credentials')) {
-        if (services[service].credentials.hasOwnProperty('url')) {
-          if (services[service].credentials.url.search(regex) === 0) {
+        if (services[service].credentials.hasOwnProperty('url')){
+          if (services[service].credentials.url.search(regex) === 0){
             return returnBoolean ? true : services[service].credentials;
           }
         }
@@ -46,7 +46,7 @@ ServiceUtils.prototype = {
   // Node: Like the original Document Conversion check, this
   // function will look for all bound instances of Document Conversion.
   getAllServiceDetails: function(serviceName) {
-    var regex = RegExp('(http|https)(://)([^\/]+)(/)(' + serviceName + ').*'),
+    var regex = RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*'),
       services = appEnv.getServices(),
       theList = [];
 
@@ -58,13 +58,12 @@ ServiceUtils.prototype = {
             var v = services[service];
             newCandidate.name = v.name ? v.name : '';
             newCandidate.label = v.label ? v.label : '';
-            newCandidate.url = v.credentials.url ? v.credentials.url : '';
-            newCandidate.username = v.credentials.username
-              ? v.credentials.username
-              : '';
-            newCandidate.password = v.credentials.password
-              ? v.credentials.password
-              : '';
+            newCandidate.url = v.credentials.url ?
+                                    v.credentials.url : '';
+            newCandidate.username = v.credentials.username ?
+                                        v.credentials.username : '';
+            newCandidate.password = v.credentials.password ?
+                                        v.credentials.password : '';
             theList = theList.concat(newCandidate);
           }
         }
@@ -86,6 +85,7 @@ ServiceUtils.prototype = {
   getServiceCredsAlchemy: function(serviceName) {
     return ServiceUtils.prototype.checkCFForService(serviceName, false, true);
   },
+
 };
 
 var serviceutils = new ServiceUtils();

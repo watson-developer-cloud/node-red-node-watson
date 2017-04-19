@@ -14,27 +14,30 @@
  * limitations under the License.
  **/
 
-module.exports = function(RED) {
+module.exports = function (RED) {
   var cfenv = require('cfenv'),
     LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
-    service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
-  (username = null), (password = null), (sUsername = null), (sPassword = null), (endpointUrl =
-    'https://gateway.watsonplatform.net/language-translation/api');
+    service = cfenv.getAppEnv().getServiceCreds(/language translation/i)
+    username = null,
+    password = null,
+    sUsername = null,
+    sPassword = null,
+    endpointUrl = 'https://gateway.watsonplatform.net/language-translation/api';
 
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
   }
 
-  RED.httpAdmin.get('/watson-language-identification/vcap', function(req, res) {
-    res.json(service ? { bound_service: true } : null);
+  RED.httpAdmin.get('/watson-language-identification/vcap', function (req, res) {
+    res.json(service ? {bound_service: true} : null);
   });
 
-  function Node(config) {
+  function Node (config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function(msg) {
+    this.on('input', function (msg) {
       if (!msg.payload) {
         var message = 'Missing property: msg.payload';
         node.error(message, msg);
@@ -54,15 +57,12 @@ module.exports = function(RED) {
         username: username,
         password: password,
         version: 'v2',
-        url: endpointUrl,
+        url: endpointUrl
       });
 
-      node.status({ fill: 'blue', shape: 'dot', text: 'requesting' });
-      language_translation.identify({ text: msg.payload }, function(
-        err,
-        response
-      ) {
-        node.status({});
+      node.status({fill:"blue", shape:"dot", text:"requesting"});
+      language_translation.identify({text: msg.payload}, function (err, response) {
+        node.status({})
         if (err) {
           node.error(err, msg);
         } else {
@@ -75,8 +75,8 @@ module.exports = function(RED) {
   }
   RED.nodes.registerType('watson-language-identification', Node, {
     credentials: {
-      username: { type: 'text' },
-      password: { type: 'password' },
-    },
+      username: {type:"text"},
+      password: {type:"password"}
+    }
   });
 };

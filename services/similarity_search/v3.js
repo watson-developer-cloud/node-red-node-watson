@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-module.exports = function(RED) {
+module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'visual-recognition';
   var serviceutils = require('../../utilities/service-utils'),
     watson = require('watson-developer-cloud'),
@@ -34,8 +34,8 @@ module.exports = function(RED) {
     sAPIKey = service.api_key;
   }
 
-  RED.httpAdmin.get('/watson-similarity-search/vcap', function(req, res) {
-    res.json(service ? { bound_service: true } : null);
+  RED.httpAdmin.get('/watson-similarity-search/vcap', function (req, res) {
+    res.json(service ? {bound_service: true} : null);
   });
 
   function imageCheck(data) {
@@ -43,7 +43,7 @@ module.exports = function(RED) {
   }
 
   function stream_buffer(file, contents, cb) {
-    fs.writeFile(file, contents, function(err) {
+    fs.writeFile(file, contents, function (err) {
       if (err) {
         throw err;
       }
@@ -56,28 +56,22 @@ module.exports = function(RED) {
     // takes precedence over the existing one.
     node.apikey = sAPIKey || node.credentials.apikey;
     if (!node.apikey) {
-      node.status({ fill: 'red', shape: 'ring', text: 'missing credentials' });
-      node.error(
-        'Missing Watson Visual Recognition API service credentials',
-        msg
-      );
+      node.status({fill:'red', shape:'ring', text:'missing credentials'});
+      node.error('Missing Watson Visual Recognition API service credentials', msg);
       return false;
     }
     node.service = watson.visual_recognition({
       api_key: node.apikey,
       version: 'v3',
-      version_date: '2016-05-20',
+      version_date: '2016-05-20'
     });
     return true;
   }
 
   function processResponse(err, body, feature, node, msg) {
     if (err != null && body == null) {
-      node.status({
-        fill: 'red',
-        shape: 'ring',
-        text: 'call to watson similarity search v3 service failed',
-      });
+      node.status({fill:'red', shape:'ring',
+        text:'call to watson similarity search v3 service failed'});
       msg.payload = {};
       if (err.code === null) {
         msg.payload.error = err;
@@ -89,26 +83,17 @@ module.exports = function(RED) {
       }
       node.error(err);
       return;
-    } else if (
-      err == null &&
-      body != null &&
-      body.images != null &&
-      body.images[0] &&
-      body.images[0].error
-    ) {
-      node.status({
-        fill: 'red',
-        shape: 'ring',
-        text: 'call to watson visual recognition v3 service failed',
-      });
+    } else if (err == null && body != null && body.images != null &&
+      body.images[0] && body.images[0].error) {
+      node.status({fill:'red', shape:'ring',
+        text:'call to watson visual recognition v3 service failed'});
       msg.payload = {};
       msg.payload.error_id = body.images[0].error.error_id;
       msg.payload.error = body.images[0].error.description;
       node.send(msg);
     } else {
       if (feature === 'deleteClassifier') {
-        msg.payload =
-          'Successfully deleted classifier_id: ' + msg.params.classifier_id;
+        msg.payload = 'Successfully deleted classifier_id: ' + msg.params.classifier_id ;
       } else {
         msg.payload = body;
       }
@@ -120,30 +105,27 @@ module.exports = function(RED) {
   function processImage(params, node, feature, cb, msg) {
     var image = params.image_file;
     if (imageCheck(image)) {
-      temp.open({ suffix: '.' + fileType(image).ext }, function(err, info) {
+      temp.open({suffix: '.' + fileType(image).ext}, function (err, info) {
         if (err) {
-          this.status({
-            fill: 'red',
-            shape: 'ring',
-            text: 'unable to open image stream',
-          });
+          this.status({fill:'red', shape:'ring', text:'unable to open image stream'});
           node.error('Node has been unable to open the image stream', msg);
           return cb(feature, params);
         }
 
-        stream_buffer(info.path, image, function() {
+        stream_buffer(info.path, image, function () {
           params.image_file = fs.createReadStream(info.path);
           cb(feature, params);
         });
       });
     } else {
-      node.status({ fill: 'red', shape: 'ring', text: 'payload is invalid' });
+      node.status({fill:'red', shape:'ring', text:'payload is invalid'});
       node.error('Payload must be an image buffer', msg);
     }
   }
 
   function addParams(params, msg, paramsToAdd) {
-    var i = null, param = null;
+    var i = null,
+      param = null;
 
     for (i in paramsToAdd) {
       if (paramsToAdd.hasOwnProperty(i)) {
@@ -160,22 +142,22 @@ module.exports = function(RED) {
 
   function executeService(feature, params, node, msg) {
     var requiredParams = {
-      findSimilar: ['collection_id', 'image_file'],
-      createCollection: ['name'],
-      getCollection: ['collection_id'],
-      listCollections: [],
-      deleteCollection: ['collection_id'],
-      addImage: ['collection_id', 'image_file'],
-      listImages: ['collection_id'],
-      getImage: ['collection_id', 'image_id'],
-      deleteImage: ['collection_id', 'image_id'],
-      setImageMetadata: ['collection_id', 'image_id', 'metadata'],
-      getImageMetadata: ['collection_id', 'image_id'],
-      deleteImageMetadata: ['collection_id', 'image_id'],
-    },
+        findSimilar: ['collection_id', 'image_file'],
+        createCollection: ['name'],
+        getCollection: ['collection_id'],
+        listCollections: [],
+        deleteCollection: ['collection_id'],
+        addImage: ['collection_id','image_file'],
+        listImages: ['collection_id'],
+        getImage: ['collection_id','image_id'],
+        deleteImage: ['collection_id','image_id'],
+        setImageMetadata: ['collection_id', 'image_id', 'metadata'],
+        getImageMetadata: ['collection_id', 'image_id'],
+        deleteImageMetadata: ['collection_id', 'image_id']
+      },
       optionalParams = {
         findSimilar: ['limit'],
-        addImage: ['metadata'],
+        addImage: ['metadata']
       };
     params = addParams(params, msg, requiredParams[feature]);
 
@@ -184,7 +166,7 @@ module.exports = function(RED) {
     }
 
     function callWatson(feature, params) {
-      node.service[feature](params, function(err, body) {
+      node.service[feature](params, function (err, body) {
         processResponse(err, body, feature, node, msg);
       });
     }
@@ -197,21 +179,17 @@ module.exports = function(RED) {
   }
 
   function execute(feature, params, node, msg) {
-    node.status({
-      fill: 'blue',
-      shape: 'dot',
-      text: 'Calling ' + feature + ' ...',
-    });
+    node.status({fill:'blue', shape:'dot' , text:'Calling ' + feature + ' ...'});
     executeService(feature, params, node, msg);
   }
 
   // This is the Watson Visual Recognition V3 Node
-  function SimilaritySearchV3Node(config) {
+  function SimilaritySearchV3Node (config) {
     var node = this, b = false, feature = config['image-feature'];
     RED.nodes.createNode(this, config);
     node.config = config;
 
-    node.on('input', function(msg) {
+    node.on('input', function (msg) {
       var params = {};
 
       node.status({});
@@ -222,19 +200,20 @@ module.exports = function(RED) {
       if (!b) {
         return;
       }
-      execute(feature, params, node, msg);
+      execute(feature,params,node,msg);
     });
   }
 
   RED.nodes.registerType('similarity-search-v3', SimilaritySearchV3Node, {
     credentials: {
-      apikey: { type: 'password' },
-    },
+      apikey: {type:'password'}
+    }
   });
 
   RED.nodes.registerType('similarity-search-util-v3', SimilaritySearchV3Node, {
     credentials: {
-      apikey: { type: 'password' },
-    },
+      apikey: {type:'password'}
+    }
   });
+
 };
