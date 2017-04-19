@@ -14,34 +14,33 @@
  * limitations under the License.
  **/
 
-
 // AlchemyAPI Text Analysis functions supported by this node
 var FEATURES = {
   'page-image': 'image',
   'image-kw': 'imageKeywords',
-  'feed': 'feed',
-  'entity': 'entities',
-  'keyword': 'keywords',
-  'title': 'title',
-  'author': 'author',
-  'taxonomy': 'taxonomy',
-  'concept': 'concepts',
-  'relation': 'relations',
+  feed: 'feed',
+  entity: 'entities',
+  keyword: 'keywords',
+  title: 'title',
+  author: 'author',
+  taxonomy: 'taxonomy',
+  concept: 'concepts',
+  relation: 'relations',
   'pub-date': 'publicationDate',
   'doc-sentiment': 'docSentiment',
-  'doc-emotion': 'docEmotions'
+  'doc-emotion': 'docEmotions',
 };
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'gateway-a.watsonplatform.net';
 
   var watson = require('watson-developer-cloud');
 
   var payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
-    apikey, s_apikey,
+    apikey,
+    s_apikey,
     service = serviceutils.getServiceCredsAlchemy(SERVICE_IDENTIFIER);
-
 
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then the api key is stored in the variable s_apikey.
@@ -56,10 +55,9 @@ module.exports = function (RED) {
     s_apikey = service.apikey;
   }
 
-  RED.httpAdmin.get('/alchemy-feature-extract/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/alchemy-feature-extract/vcap', function(req, res) {
+    res.json(service ? { bound_service: true } : null);
   });
-
 
   function buildParams(wanted_features, config, msg) {
     // The watson node-SDK expects the features as a single string.
@@ -84,13 +82,13 @@ module.exports = function (RED) {
 
   // This is the Alchemy Data Node
 
-  function AlchemyFeatureExtractNode (config) {
+  function AlchemyFeatureExtractNode(config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg) {
       if (!msg.payload) {
-        this.status({fill:'red', shape:'ring', text:'missing payload'});
+        this.status({ fill: 'red', shape: 'ring', text: 'missing payload' });
         var message = 'Missing property: msg.payload';
         node.error(message, msg);
         return;
@@ -101,24 +99,32 @@ module.exports = function (RED) {
       this.status({});
 
       if (!apikey) {
-        this.status({fill:'red', shape:'ring', text:'missing credentials'});
+        this.status({
+          fill: 'red',
+          shape: 'ring',
+          text: 'missing credentials',
+        });
         var message = 'Missing Alchemy API service credentials';
         node.error(message, msg);
         return;
       }
 
-      var alchemy_language = watson.alchemy_language( { api_key: apikey } );
+      var alchemy_language = watson.alchemy_language({ api_key: apikey });
 
       // Check which features have been requested.
 
-      var enabled_features = Object.keys(FEATURES).filter(function (feature) {
-        return config[feature]
+      var enabled_features = Object.keys(FEATURES).filter(function(feature) {
+        return config[feature];
       });
 
-
       if (!enabled_features.length) {
-        this.status({fill:'red', shape:'ring', text:'no features selected'});
-        var message = 'AlchemyAPI node must have at least one selected feature.';
+        this.status({
+          fill: 'red',
+          shape: 'ring',
+          text: 'no features selected',
+        });
+        var message =
+          'AlchemyAPI node must have at least one selected feature.';
         node.error(message, msg);
         return;
       }
@@ -128,19 +134,24 @@ module.exports = function (RED) {
       // Splice in the additional options from msg.alchemy_options
       // eg. The user may have entered msg.alchemy_options = {maxRetrieve: 2};
 
-      for (var key in msg.alchemy_options) { params[key] = msg.alchemy_options[key]; }
+      for (var key in msg.alchemy_options) {
+        params[key] = msg.alchemy_options[key];
+      }
 
-      alchemy_language.combined(params, function (err, response) {
+      alchemy_language.combined(params, function(err, response) {
         if (err || response.status === 'ERROR') {
-          node.status({fill:'red', shape:'ring', text:'call to alchmeyapi language service failed'});
+          node.status({
+            fill: 'red',
+            shape: 'ring',
+            text: 'call to alchmeyapi language service failed',
+          });
           console.log('Error:', msg, err);
           node.error(err, msg);
-        }
-        else {
+        } else {
           msg.features = {};
           //msg.features['all'] = response;
 
-          Object.keys(FEATURES).forEach(function (feature) {
+          Object.keys(FEATURES).forEach(function(feature) {
             var answer_feature = FEATURES[feature];
 
             msg.features[feature] = response[answer_feature] || {};
@@ -149,15 +160,13 @@ module.exports = function (RED) {
           node.send(msg);
         }
       });
-
     });
   }
-
 
   //Register the node as alchemy-feature-extract to nodeRED
   RED.nodes.registerType('alchemy-feature-extract', AlchemyFeatureExtractNode, {
     credentials: {
-      apikey: {type:"password"}
-    }
+      apikey: { type: 'password' },
+    },
   });
 };

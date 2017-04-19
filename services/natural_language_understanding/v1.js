@@ -14,20 +14,20 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'natural-language-understanding';
   const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1');
 
   const NLU_FEATURES = {
-    'categories': 'categories',
-    'concepts': 'concepts',
+    categories: 'categories',
+    concepts: 'concepts',
     'doc-emotion': 'emotion',
     'doc-sentiment': 'sentiment',
-    'entity': 'entities',
-    'keyword': 'keywords',
-    'metadata': 'metadata',
-    'relation': 'relations',
-    'semantic': 'semantic_roles'
+    entity: 'entities',
+    keyword: 'keywords',
+    metadata: 'metadata',
+    relation: 'relations',
+    semantic: 'semantic_roles',
   };
 
   var payloadutils = require('../../utilities/payload-utils'),
@@ -40,7 +40,7 @@ module.exports = function (RED) {
 
   function reportError(node, msg, message) {
     var messageTxt = message.error ? message.error : message;
-    node.status({fill:'red', shape:'dot', text: messageTxt});
+    node.status({ fill: 'red', shape: 'dot', text: messageTxt });
     node.error(message, msg);
   }
 
@@ -57,10 +57,9 @@ module.exports = function (RED) {
   }
 
   function checkFeatureRequest(config, options) {
-    var message = '',
-      enabled_features = null;
+    var message = '', enabled_features = null;
 
-    enabled_features = Object.keys(NLU_FEATURES).filter(function (feature) {
+    enabled_features = Object.keys(NLU_FEATURES).filter(function(feature) {
       return config[feature];
     });
 
@@ -77,8 +76,9 @@ module.exports = function (RED) {
 
   function processConceptsOptions(config, features) {
     if (features.concepts) {
-      features.concepts.limit =
-         config['maxconcepts'] ? parseInt(config['maxconcepts']) : 8;
+      features.concepts.limit = config['maxconcepts']
+        ? parseInt(config['maxconcepts'])
+        : 8;
     }
   }
 
@@ -96,10 +96,12 @@ module.exports = function (RED) {
 
   function processEntitiesOptions(config, features) {
     if (features.entities) {
-      features.entities.emotion =
-          config['entity-emotion'] ? config['entity-emotion'] : false;
-      features.entities.sentiment =
-         config['entity-sentiment'] ? config['entity-sentiment'] : false;
+      features.entities.emotion = config['entity-emotion']
+        ? config['entity-emotion']
+        : false;
+      features.entities.sentiment = config['entity-sentiment']
+        ? config['entity-sentiment']
+        : false;
       if (config['maxentities']) {
         features.entities.limit = parseInt(config['maxentities']);
       }
@@ -108,10 +110,12 @@ module.exports = function (RED) {
 
   function processKeywordsOptions(config, features) {
     if (features.keywords) {
-      features.keywords.emotion =
-          config['keyword-emotion'] ? config['keyword-emotion'] : false;
-      features.keywords.sentiment =
-         config['keyword-sentiment'] ? config['keyword-sentiment'] : false;
+      features.keywords.emotion = config['keyword-emotion']
+        ? config['keyword-emotion']
+        : false;
+      features.keywords.sentiment = config['keyword-sentiment']
+        ? config['keyword-sentiment']
+        : false;
       if (config['maxkeywords']) {
         features.keywords.limit = parseInt(config['maxkeywords']);
       }
@@ -120,10 +124,12 @@ module.exports = function (RED) {
 
   function processSemanticRolesOptions(config, features) {
     if (features.semantic_roles) {
-      features.semantic_roles.entities =
-        config['semantic-entities'] ? config['semantic-entities'] : false;
-      features.semantic_roles.keywords =
-        config['semantic-keywords'] ? config['semantic-keywords'] : false;
+      features.semantic_roles.entities = config['semantic-entities']
+        ? config['semantic-entities']
+        : false;
+      features.semantic_roles.keywords = config['semantic-keywords']
+        ? config['semantic-keywords']
+        : false;
       if (config['maxsemantics']) {
         features.semantic_roles.limit = parseInt(config['maxsemantics']);
       }
@@ -145,10 +151,10 @@ module.exports = function (RED) {
     const nlu = new NaturalLanguageUnderstandingV1({
       username: username,
       password: password,
-      version_date: NaturalLanguageUnderstandingV1.VERSION_DATE_2016_01_23
+      version_date: NaturalLanguageUnderstandingV1.VERSION_DATE_2016_01_23,
     });
 
-    var p = new Promise(function resolver(resolve, reject){
+    var p = new Promise(function resolver(resolve, reject) {
       nlu.analyze(options, function(err, data) {
         if (err) {
           reject(err);
@@ -165,20 +171,18 @@ module.exports = function (RED) {
     sPassword = service.password;
   }
 
-  RED.httpAdmin.get('/natural-language-understanding/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/natural-language-understanding/vcap', function(req, res) {
+    res.json(service ? { bound_service: true } : null);
   });
-
 
   // This is the Natural Language Understanding Node
 
-  function NLUNode (config) {
+  function NLUNode(config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg) {
-      var message = '',
-        options = {};
+    this.on('input', function(msg) {
+      var message = '', options = {};
 
       node.status({});
 
@@ -186,7 +190,8 @@ module.exports = function (RED) {
       password = sPassword || this.credentials.password;
 
       if (!username || !password) {
-        message = 'Missing Watson Natural Language Understanding service credentials';
+        message =
+          'Missing Watson Natural Language Understanding service credentials';
       } else {
         message = checkPayload(msg, options);
       }
@@ -197,31 +202,29 @@ module.exports = function (RED) {
 
       if (!message) {
         checkFeatureOptions(config, options);
-        node.status({fill:'blue', shape:'dot', text:'requesting'});
+        node.status({ fill: 'blue', shape: 'dot', text: 'requesting' });
         invokeService(options)
-          .then(function(data){
+          .then(function(data) {
             msg.features = data;
             node.send(msg);
             node.status({});
           })
-          .catch(function(err){
-            reportError(node,msg,err);
+          .catch(function(err) {
+            reportError(node, msg, err);
           });
       }
 
       if (message) {
-        reportError(node,msg,message);
+        reportError(node, msg, message);
       }
-
     });
   }
-
 
   //Register the node as natural-language-understanding to nodeRED
   RED.nodes.registerType('natural-language-understanding', NLUNode, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'}
-    }
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
 };

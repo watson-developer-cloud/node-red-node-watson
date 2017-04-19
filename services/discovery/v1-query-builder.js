@@ -14,8 +14,7 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
-
+module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'discovery';
   var discoveryutils = require('./discovery-utils'),
     DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
@@ -31,19 +30,25 @@ module.exports = function (RED) {
     sPassword = dservice.password;
   }
 
-  RED.httpAdmin.get('/watson-discovery-v1-query-builder/vcap', function (req, res) {
+  RED.httpAdmin.get('/watson-discovery-v1-query-builder/vcap', function(
+    req,
+    res
+  ) {
     res.json(serviceutils.checkServiceBound(SERVICE_IDENTIFIER));
   });
 
   // API used by widget to fetch available environments
-  RED.httpAdmin.get('/watson-discovery-v1-query-builder/environments', function (req, res) {
+  RED.httpAdmin.get('/watson-discovery-v1-query-builder/environments', function(
+    req,
+    res
+  ) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
-      version_date: '2016-12-15'
+      version_date: '2016-12-15',
     });
 
-    discovery.getEnvironments({}, function (err, response) {
+    discovery.getEnvironments({}, function(err, response) {
       if (err) {
         res.json(err);
       } else {
@@ -53,16 +58,21 @@ module.exports = function (RED) {
   });
 
   // API used by widget to fetch available collections in environment
-  RED.httpAdmin.get('/watson-discovery-v1-query-builder/collections', function (req, res) {
+  RED.httpAdmin.get('/watson-discovery-v1-query-builder/collections', function(
+    req,
+    res
+  ) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
-      version_date: '2016-12-15'
+      version_date: '2016-12-15',
     });
 
-    discovery.getCollections({
-      environment_id: req.query.environment_id},
-      function (err, response) {
+    discovery.getCollections(
+      {
+        environment_id: req.query.environment_id,
+      },
+      function(err, response) {
         if (err) {
           res.json(err);
         } else {
@@ -73,18 +83,23 @@ module.exports = function (RED) {
   });
 
   // API used by widget to fetch available collections in environment
-  RED.httpAdmin.get('/watson-discovery-v1-query-builder/schemas', function (req, res) {
+  RED.httpAdmin.get('/watson-discovery-v1-query-builder/schemas', function(
+    req,
+    res
+  ) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
-      version_date: '2016-12-15'
+      version_date: '2016-12-15',
     });
 
-    discovery.query({
-      environment_id: req.query.environment_id,
-      collection_id: req.query.collection_id,
-      count: 1},
-      function (err, response) {
+    discovery.query(
+      {
+        environment_id: req.query.environment_id,
+        collection_id: req.query.collection_id,
+        count: 1,
+      },
+      function(err, response) {
         if (err) {
           res.json(err);
         } else {
@@ -95,11 +110,11 @@ module.exports = function (RED) {
     );
   });
 
-  function Node (config) {
+  function Node(config) {
     var node = this;
     RED.nodes.createNode(this, config);
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg) {
       // Simply return params for query on msg object
       msg.discoveryparams = discoveryutils.buildMsgOverrides(msg, config);
       node.send(msg);
@@ -108,8 +123,8 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-discovery-v1-query-builder', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'}
-    }
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
 };

@@ -14,12 +14,10 @@
  * limitations under the License.
  **/
 
-function ToneUtils () {
-}
-
+function ToneUtils() {}
 
 ToneUtils.prototype = {
-  check: function () {
+  check: function() {
     return '"IBM Watson Node-RED Utilities for Tone Analyser';
   },
 
@@ -29,15 +27,15 @@ ToneUtils.prototype = {
     var message = null;
     var isBuffer = false;
 
-    var hasJSONmethod = (typeof payload.toJSON === 'function') ;
+    var hasJSONmethod = typeof payload.toJSON === 'function';
 
     if (hasJSONmethod === true) {
       if (payload.toJSON().type === 'Buffer') {
         isBuffer = true;
-      }      
-    }      
+      }
+    }
     // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-    if (typeof payload !== 'string' &&  isBuffer !== true) {
+    if (typeof payload !== 'string' && isBuffer !== true) {
       message = 'The payload must be either a string or a Buffer';
     }
 
@@ -50,23 +48,21 @@ ToneUtils.prototype = {
   parseToneOption: function(msg, config) {
     var tones = msg.tones || config.tones;
 
-    return (tones === 'all' ? '' : tones);  	
+    return tones === 'all' ? '' : tones;
   },
 
   // function to parse through the options in preparation
   // for the sevice call.
   parseOptions: function(msg, config) {
     var options = {
-      'text': msg.payload,
-      'sentences': msg.sentences || config.sentences,   
-      'isHTML': msg.contentType || config.contentType    
+      text: msg.payload,
+      sentences: msg.sentences || config.sentences,
+      isHTML: msg.contentType || config.contentType,
     };
 
     options.tones = this.parseToneOption(msg, config);
     return options;
-  }
-
-
+  },
 };
 
 var toneutils = new ToneUtils();

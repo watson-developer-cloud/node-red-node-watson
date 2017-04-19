@@ -29,7 +29,7 @@ PayloadUtils.prototype = {
   // Function that checks if the input string is a url
   urlCheck: function(str) {
     var parsed = url.parse(str);
-    return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
+    return !!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0;
   },
 
   // Function that is syncing up the asynchronous nature of the stream
@@ -50,8 +50,7 @@ PayloadUtils.prototype = {
 
     wstream.on('finish', function() {
       fs.readFile(file, function(err, buf) {
-        var fmt = null,
-          error = null;
+        var fmt = null, error = null;
 
         if (err) {
           error = err;
@@ -73,8 +72,7 @@ PayloadUtils.prototype = {
 
     wstream.on('finish', function() {
       fs.readFile(file, function(err, buf) {
-        var fmt = null,
-          error = null;
+        var fmt = null, error = null;
 
         if (err) {
           throw err;
@@ -88,12 +86,12 @@ PayloadUtils.prototype = {
     request(url).pipe(wstream);
   },
 
-  reportError: function (node, msg, message) {
+  reportError: function(node, msg, message) {
     var messageTxt = message.error ? message.error : message;
 
     msg.watsonerror = messageTxt;
 
-    node.status({fill:'red', shape:'dot', text: messageTxt});
+    node.status({ fill: 'red', shape: 'dot', text: messageTxt });
     node.error(messageTxt, msg);
   },
 
@@ -111,7 +109,7 @@ PayloadUtils.prototype = {
 
     if (ct === 'ja') {
       fn = function(txt, cb) {
-        kuromoji.builder({dicPath: dic_dir}).build(function(err, tknz) {
+        kuromoji.builder({ dicPath: dic_dir }).build(function(err, tknz) {
           if (err) {
             throw err;
           }
@@ -121,7 +119,7 @@ PayloadUtils.prototype = {
       };
     }
     return fn;
-  }
+  },
 };
 
 var payloadutils = new PayloadUtils();

@@ -16,7 +16,6 @@
 
 function DiscoveryUtils() {}
 DiscoveryUtils.prototype = {
-
   buildParamsForName: function(msg, config, params) {
     if (msg.discoveryparams && msg.discoveryparams.environmentname) {
       params.name = msg.discoveryparams.environmentname;
@@ -51,12 +50,21 @@ DiscoveryUtils.prototype = {
 
     params = DiscoveryUtils.prototype.buildParamsForName(msg, config, params);
 
-    ['environment_id','collection_id','configuration_id','query'].forEach(function(f) {
+    [
+      'environment_id',
+      'collection_id',
+      'configuration_id',
+      'query',
+    ].forEach(function(f) {
       params = DiscoveryUtils.prototype.buildParamsFor(msg, config, params, f);
     });
 
-    ['count','filter','aggregation','return'].forEach(function(f) {
-      params = DiscoveryUtils.prototype.buildParamsFromConfig(config, params, f);
+    ['count', 'filter', 'aggregation', 'return'].forEach(function(f) {
+      params = DiscoveryUtils.prototype.buildParamsFromConfig(
+        config,
+        params,
+        f
+      );
     });
 
     return params;
@@ -89,7 +97,7 @@ DiscoveryUtils.prototype = {
     return params;
   },
 
-  paramEnvCheck: function (params) {
+  paramEnvCheck: function(params) {
     var response = '';
     if (!params.environment_id) {
       response = 'Missing Environment ID ';
@@ -97,7 +105,7 @@ DiscoveryUtils.prototype = {
     return response;
   },
 
-  paramCollectionCheck: function (params) {
+  paramCollectionCheck: function(params) {
     var response = '';
     if (!params.collection_id) {
       response = 'Missing Collection ID ';
@@ -105,7 +113,7 @@ DiscoveryUtils.prototype = {
     return response;
   },
 
-  paramConfigurationCheck: function (params) {
+  paramConfigurationCheck: function(params) {
     var response = '';
     if (!params.configuration_id) {
       response = 'Missing Configuration ID ';
@@ -126,11 +134,11 @@ DiscoveryUtils.prototype = {
         fields = DiscoveryUtils.prototype.buildFieldByStep(d[k], fields, t);
       } else {
         switch (k) {
-        case 'text':
-        case 'type':
-        case 'label':
-          fields.push(t);
-          break;
+          case 'text':
+          case 'type':
+          case 'label':
+            fields.push(t);
+            break;
         }
       }
     }
@@ -138,7 +146,7 @@ DiscoveryUtils.prototype = {
   },
 
   // sorting functions
-  uniqueFilter: function (value, index, self) {
+  uniqueFilter: function(value, index, self) {
     return self.indexOf(value) === index;
   },
 
@@ -147,10 +155,16 @@ DiscoveryUtils.prototype = {
     var fields = [];
     if ('object' === typeof schemaData) {
       for (var k in schemaData) {
-        if ('results' === k &&
-                'object' === typeof schemaData[k] &&
-                'object' === typeof schemaData[k][0]) {
-          fields = DiscoveryUtils.prototype.buildFieldByStep(schemaData[k][0], fields, '');
+        if (
+          'results' === k &&
+          'object' === typeof schemaData[k] &&
+          'object' === typeof schemaData[k][0]
+        ) {
+          fields = DiscoveryUtils.prototype.buildFieldByStep(
+            schemaData[k][0],
+            fields,
+            ''
+          );
         }
       }
       if (fields.length) {
@@ -160,12 +174,11 @@ DiscoveryUtils.prototype = {
     return fields;
   },
 
-  reportError: function (node, msg, message) {
+  reportError: function(node, msg, message) {
     var messageTxt = message.error ? message.error : message;
-    node.status({fill:'red', shape:'dot', text: messageTxt});
+    node.status({ fill: 'red', shape: 'dot', text: messageTxt });
     node.error(message, msg);
-  }
-
+  },
 };
 
 var discoveryutils = new DiscoveryUtils();
