@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'language-translator';
   var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
     //cfenv = require('cfenv'),
@@ -32,15 +32,18 @@ module.exports = function (RED) {
     sPassword = service.password;
   }
 
-  RED.httpAdmin.get('/watson-language-translator-identify/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/watson-language-translator-identify/vcap', function(
+    req,
+    res
+  ) {
+    res.json(service ? { bound_service: true } : null);
   });
 
-  function Node (config) {
+  function Node(config) {
     var node = this;
     RED.nodes.createNode(this, config);
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg) {
       if (!msg.payload) {
         var message = 'Missing property: msg.payload';
         node.error(message, msg);
@@ -60,16 +63,19 @@ module.exports = function (RED) {
         username: username,
         password: password,
         version: 'v2',
-        url: endpointUrl
+        url: endpointUrl,
       });
 
-      node.status({fill:'blue', shape:'dot', text:'requesting'});
-      language_translator.identify({text: msg.payload}, function (err, response) {
-        node.status({})
+      node.status({ fill: 'blue', shape: 'dot', text: 'requesting' });
+      language_translator.identify({ text: msg.payload }, function(
+        err,
+        response
+      ) {
+        node.status({});
         if (err) {
           node.error(err, msg);
         } else {
-          msg.languages = response.languages
+          msg.languages = response.languages;
           msg.lang = response.languages[0];
         }
         node.send(msg);
@@ -78,8 +84,8 @@ module.exports = function (RED) {
   }
   RED.nodes.registerType('watson-language-translator-identify', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'}
-    }
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
 };

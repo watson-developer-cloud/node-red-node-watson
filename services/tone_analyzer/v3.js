@@ -14,12 +14,15 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'tone-analyzer';
   var ToneAnalyzerV3 = require('watson-developer-cloud/tone-analyzer/v3'),
     serviceutils = require('../../utilities/service-utils'),
     toneutils = require('../../utilities/tone-utils'),
-    username = '', password = '', sUsername = '', sPassword = '',
+    username = '',
+    password = '',
+    sUsername = '',
+    sPassword = '',
     service = null;
 
   // Require the Cloud Foundry Module to pull credentials from bound service
@@ -38,10 +41,9 @@ module.exports = function (RED) {
   }
 
   // Node RED Admin - fetch and set vcap services
-  RED.httpAdmin.get('/watson-tone-analyzer/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/watson-tone-analyzer/vcap', function(req, res) {
+    res.json(service ? { bound_service: true } : null);
   });
-
 
   // Check that the credentials have been provided
   // Credentials are needed for each the service.
@@ -58,8 +60,7 @@ module.exports = function (RED) {
     }
 
     return taSettings;
-  }
-
+  };
 
   // Function that checks the configuration to make sure that credentials,
   // payload and options have been provied in the correct format.
@@ -73,7 +74,7 @@ module.exports = function (RED) {
       message = 'Missing Tone Analyzer service credentials';
     } else if (msg.payload) {
       message = toneutils.checkPayload(msg.payload);
-    } else  {
+    } else {
       message = 'Missing property: msg.payload';
     }
 
@@ -82,28 +83,26 @@ module.exports = function (RED) {
     }
   };
 
-
   // function when the node recieves input inside a flow.
   // Configuration is first checked before the service is invoked.
   var processOnInput = function(msg, config, node) {
-    checkConfiguration (msg, node, function(err, settings){
+    checkConfiguration(msg, node, function(err, settings) {
       if (err) {
-        node.status({fill:'red', shape:'dot', text:err});
+        node.status({ fill: 'red', shape: 'dot', text: err });
         node.error(err, msg);
         return;
       } else {
-
         var tone_analyzer = new ToneAnalyzerV3({
-          'username': settings.username,
-          'password': settings.password,
-          version_date: '2016-05-19'
+          username: settings.username,
+          password: settings.password,
+          version_date: '2016-05-19',
         });
 
         var options = toneutils.parseOptions(msg, config);
 
-        node.status({fill:'blue', shape:'dot', text:'requesting'});
-        tone_analyzer.tone(options, function (err, response) {
-          node.status({})
+        node.status({ fill: 'blue', shape: 'dot', text: 'requesting' });
+        tone_analyzer.tone(options, function(err, response) {
+          node.status({});
           if (err) {
             node.error(err, msg);
           } else {
@@ -111,29 +110,25 @@ module.exports = function (RED) {
           }
           node.send(msg);
         });
-
       }
     });
-
   };
 
-
   // This is the Tone Analyzer Node.
-  function Node (config) {
+  function Node(config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
     // Invoked whenb the node has received an input as part of a flow.
-    this.on('input', function (msg) {
+    this.on('input', function(msg) {
       processOnInput(msg, config, node);
     });
   }
 
-
   RED.nodes.registerType('watson-tone-analyzer-v3', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'}
-    }
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
 };
