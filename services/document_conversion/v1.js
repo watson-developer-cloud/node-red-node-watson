@@ -44,27 +44,29 @@ module.exports = function(RED) {
     // Perform the Conversion, invoking the conver method
     // on the service.
     node.performConversion = function(msg, filename) {
-      var p = new Promise(function resolver(resolve, reject){
+      var p = new Promise(function resolver(resolve, reject) {
         var document_conversion = new DocumentConversionV1({
           username: node.username,
           password: node.password,
-          version_date: '2015-12-01'
+          version_date: '2015-12-01',
         });
 
-        document_conversion.convert({
-          file: fs.createReadStream(filename),
-          conversion_target: msg.target || node.target,
-          word: msg.word,
-          pdf: msg.pdf,
-          normalized_html: msg.normalized_html
-        }, function(err, response) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response);
+        document_conversion.convert(
+          {
+            file: fs.createReadStream(filename),
+            conversion_target: msg.target || node.target,
+            word: msg.word,
+            pdf: msg.pdf,
+            normalized_html: msg.normalized_html,
+          },
+          function(err, response) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(response);
+            }
           }
-        });
-
+        );
       });
       return p;
     };
@@ -73,12 +75,12 @@ module.exports = function(RED) {
     // the temp file extension so that they seen correctly by the
     // Document Conversion service.
     node.checkForZip = function(pd) {
-      var p = new Promise(function resolver(resolve, reject){
+      var p = new Promise(function resolver(resolve, reject) {
         if ('zip' === pd.format) {
           var f = fs.readFileSync(pd.info.path);
           if (isDocx(f)) {
             var newfilename = pd.info.path + '.docx';
-            fs.rename(pd.info.path, newfilename, function(err){
+            fs.rename(pd.info.path, newfilename, function(err) {
               if (err) {
                 reject('Unable to handle docx file.');
               } else {
@@ -96,7 +98,7 @@ module.exports = function(RED) {
     // Open up the stream, done in a seperate process as makes use
     // of callback
     node.openStream = function(pd, msg) {
-      var p = new Promise(function resolver(resolve, reject){
+      var p = new Promise(function resolver(resolve, reject) {
         pd.stream_payload(pd.info.path, msg.payload, function(format) {
           resolve(format);
         });
@@ -110,16 +112,20 @@ module.exports = function(RED) {
       if (!msg.payload) {
         return Promise.reject('Payload is required');
       }
-      var stream_payload = (typeof msg.payload === 'string') ?
-                              payloadutils.stream_url_format :
-                              payloadutils.stream_buffer;
+      var stream_payload = typeof msg.payload === 'string'
+        ? payloadutils.stream_url_format
+        : payloadutils.stream_buffer;
       if ('number' === typeof msg.payload) {
-        return Promise.reject('Invalid input - expecting a url or a stream buffer');
-      }
-      else if (typeof msg.payload === 'string' && !payloadutils.urlCheck(msg.payload)) {
-        return Promise.reject('Invalid URI, make sure to include the "http(s)" at the beginning.');
-      }
-      else {
+        return Promise.reject(
+          'Invalid input - expecting a url or a stream buffer'
+        );
+      } else if (
+        typeof msg.payload === 'string' && !payloadutils.urlCheck(msg.payload)
+      ) {
+        return Promise.reject(
+          'Invalid URI, make sure to include the "http(s)" at the beginning.'
+        );
+      } else {
         pd.stream_payload = stream_payload;
         return Promise.resolve();
       }
@@ -127,16 +133,19 @@ module.exports = function(RED) {
 
     // Standard temp file open
     node.openTemp = function() {
-      var p = new Promise(function resolver(resolve, reject){
-        temp.open({
-          //suffix: '.docx'
-        }, function(err, info) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(info);
+      var p = new Promise(function resolver(resolve, reject) {
+        temp.open(
+          {
+            //suffix: '.docx'
+          },
+          function(err, info) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(info);
+            }
           }
-        });
+        );
       });
       return p;
     };
@@ -154,43 +163,44 @@ module.exports = function(RED) {
     // Invoked when required to act on msg as part of a flow.
     this.on('input', function(msg) {
       var processData = {};
-      node.verifyCredentials(msg)
-        .then(function(){
+      node
+        .verifyCredentials(msg)
+        .then(function() {
           return node.openTemp();
         })
-        .then(function(info){
+        .then(function(info) {
           processData.info = info;
           return node.payloadCheck(processData, msg);
         })
-        .then(function(){
+        .then(function() {
           return node.openStream(processData, msg);
         })
-        .then(function(format){
+        .then(function(format) {
           processData.format = format;
           return node.checkForZip(processData);
         })
-        .then(function(newfilename){
+        .then(function(newfilename) {
           node.status({
             fill: 'blue',
             shape: 'dot',
-            text: 'converting, this might take some time'
+            text: 'converting, this might take some time',
           });
-          return node.performConversion(msg, newfilename ?
-                                             newfilename :
-                                             processData.info.path);
+          return node.performConversion(
+            msg,
+            newfilename ? newfilename : processData.info.path
+          );
         })
-        .then(function(response){
+        .then(function(response) {
           node.status({});
           msg.payload = response;
           node.send(msg);
         })
-        .catch(function(err){
+        .catch(function(err) {
           var messageTxt = err.error ? err.error : err;
-          node.status({fill:'red', shape:'dot', text: messageTxt});
+          node.status({ fill: 'red', shape: 'dot', text: messageTxt });
           node.error(messageTxt, msg);
         });
     });
-
   }
   RED.nodes.registerType('convert', ConvertNode);
 };

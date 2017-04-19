@@ -17,12 +17,11 @@
 module.exports = function(RED) {
   var cfenv = require('cfenv');
 
-  var services = cfenv.getAppEnv().services,
-    service;
+  var services = cfenv.getAppEnv().services, service;
 
   var username, password;
 
-  var service = cfenv.getAppEnv().getServiceCreds(/tradeoff analytics/i)
+  var service = cfenv.getAppEnv().getServiceCreds(/tradeoff analytics/i);
 
   if (service) {
     username = service.username;
@@ -30,58 +29,59 @@ module.exports = function(RED) {
   }
 
   RED.httpAdmin.get('/watson-tradeoff-analytics/vcap', function(req, res) {
-    res.json(service ? {bound_service: true} : null);
+    res.json(service ? { bound_service: true } : null);
   });
 
   function Node(config) {
-    RED.nodes.createNode(this,config);
+    RED.nodes.createNode(this, config);
     var node = this;
 
-      this.on('input', function(msg) {
-        if (!msg.payload) {
-          var message = 'Missing property: msg.payload';
-          node.error(message, msg);
-          return;
-        }
+    this.on('input', function(msg) {
+      if (!msg.payload) {
+        var message = 'Missing property: msg.payload';
+        node.error(message, msg);
+        return;
+      }
 
-        username = username || this.credentials.username;
-        password = password || this.credentials.password;
+      username = username || this.credentials.username;
+      password = password || this.credentials.password;
 
-        if (!username || !password) {
-          var message = 'Missing Tradeoff Analytics service credentials';
-          node.error(message, msg);
-          return;
-        }
+      if (!username || !password) {
+        var message = 'Missing Tradeoff Analytics service credentials';
+        node.error(message, msg);
+        return;
+      }
 
-        var watson = require('watson-developer-cloud');
+      var watson = require('watson-developer-cloud');
 
-        var tradeoff_analytics = watson.tradeoff_analytics({
-          username: username,
-          password: password,
-          version: 'v1'
-        });
-
-        node.status({fill:"blue", shape:"dot", text:"requesting"});
-        tradeoff_analytics.dilemmas({
-          subject: msg.payload, 
-          columns: msg.columns, 
-          options: msg.options 
-        }, function (err, response) {
-          node.status({});
-          if (err)
-            node.error(err, msg);
-          else 
-            msg.resolution = response.resolution;
-
-          console.log(JSON.stringify(msg.resolution))
-          node.send(msg);
-        });
+      var tradeoff_analytics = watson.tradeoff_analytics({
+        username: username,
+        password: password,
+        version: 'v1',
       });
+
+      node.status({ fill: 'blue', shape: 'dot', text: 'requesting' });
+      tradeoff_analytics.dilemmas(
+        {
+          subject: msg.payload,
+          columns: msg.columns,
+          options: msg.options,
+        },
+        function(err, response) {
+          node.status({});
+          if (err) node.error(err, msg);
+          else msg.resolution = response.resolution;
+
+          console.log(JSON.stringify(msg.resolution));
+          node.send(msg);
+        }
+      );
+    });
   }
-  RED.nodes.registerType("watson-tradeoff-analytics",Node, {
+  RED.nodes.registerType('watson-tradeoff-analytics', Node, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
-    }
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
 };

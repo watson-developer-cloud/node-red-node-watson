@@ -14,30 +14,34 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   var cfenv = require('cfenv');
 
-  var services = cfenv.getAppEnv().services,
-    service;
+  var services = cfenv.getAppEnv().services, service;
 
   var username, password;
 
-  var service = cfenv.getAppEnv().getServiceCreds(/natural language classifier/i)
+  var service = cfenv
+    .getAppEnv()
+    .getServiceCreds(/natural language classifier/i);
 
   if (service) {
     username = service.username;
     password = service.password;
   }
 
-  RED.httpAdmin.get('/watson-natural-language-classifier/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/watson-natural-language-classifier/vcap', function(
+    req,
+    res
+  ) {
+    res.json(service ? { bound_service: true } : null);
   });
 
-  function Node (config) {
+  function Node(config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg) {
       if (!msg.payload) {
         var message = 'Missing property: msg.payload';
         node.error(message, msg);
@@ -58,35 +62,37 @@ module.exports = function (RED) {
       var natural_language_classifier = watson.natural_language_classifier({
         username: username,
         password: password,
-        version: 'v1'
+        version: 'v1',
       });
 
-      var params = {}
+      var params = {};
 
       if (config.mode === 'classify') {
-         params.text = msg.payload;
-         params.classifier_id = config.classifier;
+        params.text = msg.payload;
+        params.classifier_id = config.classifier;
       } else if (config.mode === 'create') {
         params.training_data = msg.payload;
         params.language = config.language;
       } else if (config.mode === 'remove') {
         params.classifier_id = msg.payload;
       } else if (config.mode === 'list') {
-        params.classifier_id = msg.payload;		
+        params.classifier_id = msg.payload;
       } else {
-        var message = 'Unknown Natural Language Classification mode, ' + config.mode;
+        var message =
+          'Unknown Natural Language Classification mode, ' + config.mode;
         node.error(message, msg);
         return;
       }
 
-      node.status({fill:"blue", shape:"dot", text:"requesting"});
-      natural_language_classifier[config.mode](params, function (err, response) {
-        node.status({})
+      node.status({ fill: 'blue', shape: 'dot', text: 'requesting' });
+      natural_language_classifier[config.mode](params, function(err, response) {
+        node.status({});
         if (err) {
           node.error(err, msg);
         } else {
-          msg.payload = (config.mode === 'classify') ? 
-            {classes: response.classes, top_class: response.top_class} : response;
+          msg.payload = config.mode === 'classify'
+            ? { classes: response.classes, top_class: response.top_class }
+            : response;
         }
 
         node.send(msg);
@@ -95,8 +101,8 @@ module.exports = function (RED) {
   }
   RED.nodes.registerType('watson-natural-language-classifier', Node, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
-    }
+      username: { type: 'text' },
+      password: { type: 'password' },
+    },
   });
 };
