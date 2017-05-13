@@ -13,6 +13,7 @@ Node-RED Watson Nodes for IBM Bluemix
 - Natural Language Classifier Node migrated to use url based services utility to detect bound service.
 - Natural Language Classifier Node Migrated to use Promises.
 - Natural Language Classifier now able to use File Inject as input for create mode.
+- Natural Language Classifier Node allows Classifier ID to be set dynamically in classify, list and remove modes.
 
 ### New in version 0.5.4
 - Fix for Service / Name conflicts in Document Conversion Node

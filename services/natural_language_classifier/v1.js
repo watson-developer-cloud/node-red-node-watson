@@ -115,6 +115,9 @@ module.exports = function(RED) {
       case 'classify':
         params.text = msg.payload;
         params.classifier_id = config.classifier;
+        if (msg.nlcparams && msg.nlcparams.classifier_id) {
+          params.classifier_id = msg.nlcparams.classifier_id;
+        }
         break;
       case 'create':
         params.training_data = fs.createReadStream(info.path);
@@ -123,6 +126,9 @@ module.exports = function(RED) {
       case 'remove':
       case 'list':
         params.classifier_id = msg.payload;
+        if (msg.nlcparams && msg.nlcparams.classifier_id) {
+          params.classifier_id = msg.nlcparams.classifier_id;
+        }            
         break;
       default:
         message = 'Unknown Natural Language Classification mode, ' + config.mode;
