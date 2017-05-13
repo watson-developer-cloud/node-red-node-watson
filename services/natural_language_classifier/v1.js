@@ -14,11 +14,12 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'natural-language-classifier';
   const NaturalLanguageClassifierV1 = require('watson-developer-cloud/natural-language-classifier/v1');
 
   var temp = require('temp'),
+    fs = require('fs'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
@@ -35,11 +36,13 @@ module.exports = function (RED) {
   temp.track();
 
 
-  RED.httpAdmin.get('/watson-natural-language-classifier/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/watson-natural-language-classifier/vcap', function(req, res) {
+    res.json(service ? {
+      bound_service: true
+    } : null);
   });
 
-  function Node (config) {
+  function Node(config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
@@ -65,7 +68,46 @@ module.exports = function (RED) {
       }
     };
 
-    node.buildParams = function(msg, config) {
+    // Standard temp file open
+    node.openTemp = function() {
+      var p = new Promise(function resolver(resolve, reject) {
+        temp.open({
+          suffix: '.csv'
+        }, function(err, info) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(info);
+          }
+        });
+      });
+      return p;
+    };
+
+    node.streamFile = function(msg, config, info) {
+      var p = new Promise(function resolver(resolve, reject){
+        payloadutils.stream_buffer(info.path, msg.payload, function(format) {
+          resolve(info);
+        });
+      });
+      return p;
+    };
+
+
+    // If this is a create then the paload will be a stream
+    node.checkForCreate = function(msg, config) {
+      if ('create' !== config.mode) {
+        return Promise.resolve(null);
+      } else {
+        var p = node.openTemp()
+          .then(function(info) {
+            return node.streamFile(msg, config, info);
+          })
+        return p;
+      }
+    };
+
+    node.buildParams = function(msg, config, info) {
       var params = {};
       var message = '';
 
@@ -75,7 +117,7 @@ module.exports = function (RED) {
         params.classifier_id = config.classifier;
         break;
       case 'create':
-        params.training_data = msg.payload;
+        params.training_data = fs.createReadStream(info.path);
         params.language = config.language;
         break;
       case 'remove':
@@ -94,18 +136,20 @@ module.exports = function (RED) {
     };
 
     node.performOperation = function(msg, config, params) {
-      var p = new Promise(function resolver(resolve, reject){
+      var p = new Promise(function resolver(resolve, reject) {
         const natural_language_classifier = new NaturalLanguageClassifierV1({
           username: username,
           password: password,
           version: 'v1'
         });
-        natural_language_classifier[config.mode](params, function (err, response) {
+        natural_language_classifier[config.mode](params, function(err, response) {
           if (err) {
             reject(err);
           } else {
-            msg.payload = (config.mode === 'classify') ?
-              {classes: response.classes, top_class: response.top_class} : response;
+            msg.payload = (config.mode === 'classify') ? {
+              classes: response.classes,
+              top_class: response.top_class
+            } : response;
             resolve();
           }
         });
@@ -115,36 +159,50 @@ module.exports = function (RED) {
     };
 
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg) {
       //var params = {}
       node.verifyCredentials(msg)
-        .then(function(){
+        .then(function() {
           return node.payloadCheck(msg);
         })
-        .then(function(){
-          return node.buildParams(msg, config);
+        .then(function() {
+          return node.checkForCreate(msg, config);
         })
-        .then(function(params){
-          //params = p;
-          console.log('Parameters will be : ' , params);
-          node.status({fill:"blue", shape:"dot", text:"requesting"});
+        .then(function(info) {
+          return node.buildParams(msg, config, info);
+        })
+        .then(function(params) {
+          node.status({
+            fill: "blue",
+            shape: "dot",
+            text: "requesting"
+          });
           return node.performOperation(msg, config, params);
         })
-        .then(function(){
+        .then(function() {
+          temp.cleanup();
           node.status({});
           node.send(msg);
         })
-        .catch(function(err){
+        .catch(function(err) {
           var messageTxt = err.error ? err.error : err;
-          node.status({fill:'red', shape:'dot', text: messageTxt});
+          node.status({
+            fill: 'red',
+            shape: 'dot',
+            text: messageTxt
+          });
           node.error(messageTxt, msg);
         });
     });
   }
   RED.nodes.registerType('watson-natural-language-classifier', Node, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"}
+      username: {
+        type: "text"
+      },
+      password: {
+        type: "password"
+      }
     }
   });
 };
