@@ -16,6 +16,7 @@ Node-RED Watson Nodes for IBM Bluemix
 - Natural Language Classifier Node allows Classifier ID to be set dynamically in classify, list and remove modes.
 - Natural Language Understanding Node now allows language and model overrides on
 msg.nlu_options.language, msg.nlu_options.entity_model and msg.nlu_options.relations_model.
+- Trade-off Analytics Node moved to the deprecated list.
 
 ### New in version 0.5.4
 - Fix for Service / Name conflicts in Document Conversion Node
