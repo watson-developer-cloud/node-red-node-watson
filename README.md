@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.5
+- Discovery Query Builder was not picking up searchable fields.
+
 ### New in version 0.5.4
 - Fix for Service / Name conflicts in Document Conversion Node
 

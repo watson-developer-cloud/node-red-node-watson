@@ -83,6 +83,7 @@ module.exports = function (RED) {
     discovery.query({
       environment_id: req.query.environment_id,
       collection_id: req.query.collection_id,
+      query: 'text:node-red',
       count: 1},
       function (err, response) {
         if (err) {

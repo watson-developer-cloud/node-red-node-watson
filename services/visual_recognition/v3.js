@@ -284,8 +284,18 @@ module.exports = function (RED) {
       });
       break;
     case 'recognizeText':
+      console.log('Soheel - In recognize Text')
       prepareParamsCommon(params, node, msg, function () {
         node.service.recognizeText(params, function(err, body) {
+          console.log('response received');
+          if (err) {
+            console.log('Error recevied : ', err);
+          } else {
+            console.log('Data recevied : ', body);
+            if (body.images) {
+              console.log('Images : ', body.images);
+            }
+          }
           processResponse(err,body,feature,node,msg);
         });
       });
