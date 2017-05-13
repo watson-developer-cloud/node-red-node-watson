@@ -10,6 +10,7 @@ Node-RED Watson Nodes for IBM Bluemix
 ### New in version 0.5.5
 - Discovery Query Builder was not picking up searchable fields.
 - Personality Insights Node reset to use '2016-10-20' version
+- Natural Language Classifier Node migrated to use url based services utility to detect bound service.
 
 ### New in version 0.5.4
 - Fix for Service / Name conflicts in Document Conversion Node

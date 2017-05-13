@@ -15,18 +15,19 @@
  **/
 
 module.exports = function (RED) {
-  var cfenv = require('cfenv');
+  const SERVICE_IDENTIFIER = 'natural-language-classifier';
+  const NaturalLanguageClassifierV1 = require('watson-developer-cloud/natural-language-classifier/v1');
 
-  var services = cfenv.getAppEnv().services,
-    service;
-
-  var username, password;
-
-  var service = cfenv.getAppEnv().getServiceCreds(/natural language classifier/i)
+  var serviceutils = require('../../utilities/service-utils'),
+    service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
+    username = null,
+    password = null,
+    sUsername = null,
+    sPassword = null;
 
   if (service) {
-    username = service.username;
-    password = service.password;
+    sUsername = service.username;
+    sPassword = service.password;
   }
 
   RED.httpAdmin.get('/watson-natural-language-classifier/vcap', function (req, res) {
@@ -44,8 +45,8 @@ module.exports = function (RED) {
         return;
       }
 
-      username = username || this.credentials.username;
-      password = password || this.credentials.password;
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password;
 
       if (!username || !password) {
         var message = 'Missing Natural Language Classifier credentials';
@@ -53,9 +54,7 @@ module.exports = function (RED) {
         return;
       }
 
-      var watson = require('watson-developer-cloud');
-
-      var natural_language_classifier = watson.natural_language_classifier({
+      const natural_language_classifier = new NaturalLanguageClassifierV1({
         username: username,
         password: password,
         version: 'v1'
@@ -72,7 +71,7 @@ module.exports = function (RED) {
       } else if (config.mode === 'remove') {
         params.classifier_id = msg.payload;
       } else if (config.mode === 'list') {
-        params.classifier_id = msg.payload;		
+        params.classifier_id = msg.payload;
       } else {
         var message = 'Unknown Natural Language Classification mode, ' + config.mode;
         node.error(message, msg);
@@ -85,7 +84,7 @@ module.exports = function (RED) {
         if (err) {
           node.error(err, msg);
         } else {
-          msg.payload = (config.mode === 'classify') ? 
+          msg.payload = (config.mode === 'classify') ?
             {classes: response.classes, top_class: response.top_class} : response;
         }
 
