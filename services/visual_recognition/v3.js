@@ -116,48 +116,6 @@ module.exports = function(RED) {
     }
   }
 
-  function processResponse(err, body, feature, node, msg) {
-    if (err != null && body == null) {
-      node.status({
-        fill: 'red',
-        shape: 'ring',
-        text: 'call to watson visual recognition v3 service failed'
-      });
-      msg.result = {};
-      if (err.code == null) {
-        msg.result['error'] = err;
-      } else {
-        msg.result['error_code'] = err.code;
-        if (!err.error) {
-          msg.result['error'] = err.error;
-        }
-      }
-      node.error(err);
-      return;
-    } else if (err == null && body != null && body.images != null &&
-      body.images[0].error) {
-      node.status({
-        fill: 'red',
-        shape: 'ring',
-        text: 'call to watson visual recognition v3 service failed'
-      });
-      msg.result = {};
-      msg.result['error_id'] = body.images[0].error.error_id;
-      msg.result['error'] = body.images[0].error.description;
-      node.send(msg);
-    } else {
-      if (feature === 'deleteClassifier') {
-        msg.result = 'Successfully deleted classifier_id: ' + msg.params.classifier_id;
-      } else {
-        msg.result = body;
-      }
-      node.send(msg);
-      node.status({});
-    }
-  }
-
-
-
   function prepareParamsCommon(params, node, msg, cb) {
     if (imageCheck(msg.payload)) {
       temp.open({
@@ -347,78 +305,6 @@ module.exports = function(RED) {
     return p;
   }
 
-  function old_prepareParamsCreateClassifier(params, node, msg, cb) {
-    var listParams = {},
-      asyncTasks = [],
-      k = null;
-    for (k in msg.params) {
-      if (k.indexOf('_examples') >= 0) {
-        addTask(asyncTasks, msg, k, listParams, node);
-      } else if (k === 'name') {
-        listParams[k] = msg.params[k];
-      }
-    }
-
-    async.parallel(asyncTasks, function(error) {
-      if (error) {
-        throw error;
-      }
-
-      for (var p in listParams) {
-        if (p != null) {
-          params[p] = listParams[p];
-        }
-      }
-      cb();
-    });
-  }
-
-
-  function old_performDeleteAllClassifiers(params, node, msg) {
-    node.service.listClassifiers(params, function(err, body) {
-      node.status({});
-      if (err) {
-        node.status({
-          fill: 'red',
-          shape: 'ring',
-          text: 'Delete All : call to listClassifiers failed'
-        });
-        node.error(err, msg);
-      } else {
-        // Array to hold async tasks
-        var asyncTasks = [],
-          nbTodelete = 0,
-          nbdeleted = 0;
-        nbTodelete = body.classifiers.length;
-        body.classifiers.forEach(function(aClassifier) {
-          asyncTasks.push(function(cb) {
-            var parms = {};
-
-            parms.classifier_id = aClassifier.classifier_id;
-            node.service.deleteClassifier(parms, function(err) {
-              if (err) {
-                node.error(err, msg);
-                return cb('error');
-              }
-              nbdeleted++;
-              cb(null, parms.classifier_id);
-            });
-          });
-        });
-        async.parallel(asyncTasks, function(error, deletedList) {
-          if (deletedList.length === nbTodelete) {
-            msg.result = 'All custom classifiers have been deleted.';
-          } else {
-            msg.result = 'Some Classifiers could have not been deleted;' +
-              'See log for errors.';
-          }
-          node.send(msg);
-          node.status({});
-        });
-      }
-    });
-  }
-
   function performDeleteAllClassifiers(params, node, msg) {
     var p = new Promise(function resolver(resolve, reject){
       node.service.listClassifiers(params, function(err, body) {
@@ -464,34 +350,6 @@ module.exports = function(RED) {
   }
 
 
-  function old_executeService(feature, params, node, msg) {
-    switch (feature) {
-      case 'classifyImage':
-        prepareParamsCommon(params, node, msg, function() {
-          node.service.classify(params, function(err, body) {
-            processResponse(err, body, feature, node, msg);
-          });
-        });
-        break;
-      case 'detectFaces':
-        prepareParamsCommon(params, node, msg, function() {
-          node.service.detectFaces(params, function(err, body) {
-            processResponse(err, body, feature, node, msg);
-          });
-        });
-        break;
-      case 'recognizeText':
-        prepareParamsCommon(params, node, msg, function() {
-          node.service.recognizeText(params, function(err, body) {
-            if (err) {} else {
-              if (body.images) {}
-            }
-            processResponse(err, body, feature, node, msg);
-          });
-        });
-        break;
-    }
-  }
 
   function invokeService(feature, params, node, msg) {
     var p = new Promise(function resolver(resolve, reject){
@@ -646,51 +504,6 @@ module.exports = function(RED) {
         p = Promise.reject('Mode ' + feature + ' not understood');
     }
     return p;
-  }
-
-  function old_executeUtilService(feature, params, node, msg) {
-    switch (feature) {
-      case 'createClassifier':
-        old_prepareParamsCreateClassifier(params, node, msg, function() {
-          node.service.createClassifier(params, function(err, body) {
-            processResponse(err, body, feature, node, msg);
-          });
-        });
-        break;
-      case 'retrieveClassifiersList':
-        node.service.listClassifiers(params, function(err, body) {
-          processResponse(err, body, feature, node, msg);
-        });
-        break;
-      case 'retrieveClassifierDetails':
-        params['classifier_id'] = msg.params['classifier_id'];
-        node.service.getClassifier(params, function(err, body) {
-          processResponse(err, body, feature, node, msg);
-        });
-        break;
-      case 'deleteClassifier':
-        params['classifier_id'] = msg.params['classifier_id'];
-        node.service.deleteClassifier(params, function(err, body) {
-          processResponse(err, body, feature, node, msg);
-        });
-        break;
-      case 'deleteAllClassifiers':
-        old_performDeleteAllClassifiers(params, node, msg);
-        break;
-    }
-  }
-
-  function old_execute(feature, params, node, msg) {
-    node.status({
-      fill: 'blue',
-      shape: 'dot',
-      text: 'Calling ' + feature + ' ...'
-    });
-    if (feature === 'classifyImage' || feature === 'detectFaces' || feature === 'recognizeText') {
-      old_executeService(feature, params, node, msg);
-    } else {
-      old_executeUtilService(feature, params, node, msg);
-    }
   }
 
   function execute(feature, params, node, msg) {
