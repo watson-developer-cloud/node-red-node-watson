@@ -277,6 +277,15 @@ module.exports = function(RED) {
   }
 
 
+  // This is where the two read stream tasks are built, individually
+  // asynTasks will be the two functions that will be invoked added
+  // one at a time, each time this function is invoked
+  // msg holds the parameters
+  // k is the key value for the files in msg.
+  // listParams is where the files will go so that they
+  // can be sent to the service.
+  // callback is the callback that async forces so that it can
+  // control the async functions that it is invoking.
   function addTask(asyncTasks, msg, k, listParams, node) {
     asyncTasks.push(function(callback) {
       var buffer = msg.params[k];
@@ -300,7 +309,45 @@ module.exports = function(RED) {
     });
   }
 
-  function prepareParamsCreateClassifier(params, node, msg, cb) {
+  // This function is expecting
+  // msg.params["name"] : a string name that will be used as prefix
+  // for the returned classifier_id (Required)
+  // msg.params["{classname}_positive_examples"] : a Node.js binary
+  // Buffer of the ZIP that contains a minimum of 10 images. (Required)
+  // msg.params["negative_examples"] : a Node.js binary Buffer of the ZIP
+  // that contains a minimum of 10 images.(Optional)
+
+  function prepareParamsCreateClassifier(params, node, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      var listParams = {},
+        asyncTasks = [],
+        k = null;
+      for (k in msg.params) {
+        if (k.indexOf('_examples') >= 0) {
+          addTask(asyncTasks, msg, k, listParams, node);
+        } else if (k === 'name') {
+          listParams[k] = msg.params[k];
+        }
+      }
+
+      // function is invoked when both asyncTasks have completed.
+      async.parallel(asyncTasks, function(error) {
+        if (error) {
+          reject(error);
+          //throw error;
+        }
+        for (var p in listParams) {
+          if (p != null) {
+            params[p] = listParams[p];
+          }
+        }
+        resolve();
+      });
+    });
+    return p;
+  }
+
+  function old_prepareParamsCreateClassifier(params, node, msg, cb) {
     var listParams = {},
       asyncTasks = [],
       k = null;
@@ -326,7 +373,8 @@ module.exports = function(RED) {
     });
   }
 
-  function performDeleteAllClassifiers(params, node, msg) {
+
+  function old_performDeleteAllClassifiers(params, node, msg) {
     node.service.listClassifiers(params, function(err, body) {
       node.status({});
       if (err) {
@@ -370,6 +418,51 @@ module.exports = function(RED) {
       }
     });
   }
+
+  function performDeleteAllClassifiers(params, node, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      node.service.listClassifiers(params, function(err, body) {
+        node.status({});
+        if (err) {
+          reject(err);
+        } else {
+          // Array to hold async tasks
+          var asyncTasks = [],
+            nbTodelete = 0,
+            nbdeleted = 0;
+          nbTodelete = body.classifiers.length;
+          body.classifiers.forEach(function(aClassifier) {
+            asyncTasks.push(function(cb) {
+              var parms = {};
+
+              parms.classifier_id = aClassifier.classifier_id;
+              node.service.deleteClassifier(parms, function(err) {
+                if (err) {
+                  node.error(err, msg);
+                  return cb('error');
+                }
+                nbdeleted++;
+                cb(null, parms.classifier_id);
+              });
+            });
+          });
+          async.parallel(asyncTasks, function(error, deletedList) {
+            if (deletedList.length === nbTodelete) {
+              msg.result = 'All custom classifiers have been deleted.';
+            } else {
+              msg.result = 'Some Classifiers could have not been deleted;' +
+                'See log for errors.';
+            }
+            resolve();
+            //node.send(msg);
+            //node.status({});
+          });
+        }
+      });
+    });
+    return p;
+  }
+
 
   function old_executeService(feature, params, node, msg) {
     switch (feature) {
@@ -446,11 +539,119 @@ module.exports = function(RED) {
     return p;
   }
 
+  function invokeCreateClassifier(node, params) {
+    var p = new Promise(function resolver(resolve, reject){
+      node.service.createClassifier(params, function(err, body) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(body);
+        }
+      });
+
+    });
+    return p;
+  }
+
+  function invokeListClassifiers(node, params) {
+    var p = new Promise(function resolver(resolve, reject){
+      node.service.listClassifiers(params, function(err, body) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(body);
+        }
+      });
+    });
+    return p;
+  }
+
+  function invokeGetClassifier(node, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      params['classifier_id'] = msg.params['classifier_id'];
+      node.service.getClassifier(params, function(err, body) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(body);
+        }
+      });
+    });
+    return p;
+  }
+
+  function invokeDeleteClassifier(node, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      params['classifier_id'] = msg.params['classifier_id'];
+      node.service.deleteClassifier(params, function(err, body) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(body);
+        }
+      });
+    });
+    return p;
+  }
+
+
+  function executeCreateClassifier(params, node, msg) {
+    var p = prepareParamsCreateClassifier(params, node, msg)
+      .then(function(){
+        return invokeCreateClassifier(node, params);
+      });
+
+    return p;
+  }
 
   function executeUtilService(feature, params, node, msg) {
+    var p = null;
     switch (feature) {
       case 'createClassifier':
-        prepareParamsCreateClassifier(params, node, msg, function() {
+        p = executeCreateClassifier(params, node, msg)
+          //.then(function(){
+          //  return invokeCreateClassifier(node, params);
+          //})
+          .then(function(body){
+            return processTheResponse(body, feature, node, msg);
+          });
+        break;
+
+      case 'retrieveClassifiersList':
+        p = invokeListClassifiers(node, params)
+          .then(function(body){
+            return processTheResponse(body, feature, node, msg);
+          });
+        break;
+
+      case 'retrieveClassifierDetails':
+        p = invokeGetClassifier(node, params, msg)
+          .then(function(body){
+            return processTheResponse(body, feature, node, msg);
+          });
+        break;
+
+      case 'deleteClassifier':
+        p = invokeDeleteClassifier(node, params, msg)
+          .then(function(body){
+            return processTheResponse(body, feature, node, msg);
+          });
+          break;
+
+      case 'deleteAllClassifiers':
+        p = performDeleteAllClassifiers(params, node, msg);
+        break;
+
+      default:
+        p = Promise.reject('Mode ' + feature + ' not understood');
+    }
+    return p;
+  }
+
+  function old_executeUtilService(feature, params, node, msg) {
+    switch (feature) {
+      case 'createClassifier':
+        old_prepareParamsCreateClassifier(params, node, msg, function() {
           node.service.createClassifier(params, function(err, body) {
             processResponse(err, body, feature, node, msg);
           });
@@ -474,7 +675,7 @@ module.exports = function(RED) {
         });
         break;
       case 'deleteAllClassifiers':
-        performDeleteAllClassifiers(params, node, msg);
+        old_performDeleteAllClassifiers(params, node, msg);
         break;
     }
   }
@@ -488,7 +689,7 @@ module.exports = function(RED) {
     if (feature === 'classifyImage' || feature === 'detectFaces' || feature === 'recognizeText') {
       old_executeService(feature, params, node, msg);
     } else {
-      executeUtilService(feature, params, node, msg);
+      old_executeUtilService(feature, params, node, msg);
     }
   }
 
@@ -502,8 +703,8 @@ module.exports = function(RED) {
       return executeService(feature, params, node, msg);
       //return Promise.resolve();
     } else {
-      executeUtilService(feature, params, node, msg);
-      return Promise.resolve();
+      return executeUtilService(feature, params, node, msg);
+      // return Promise.resolve();
     }
   }
 

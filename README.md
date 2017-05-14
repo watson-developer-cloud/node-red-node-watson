@@ -17,6 +17,8 @@ Node-RED Watson Nodes for IBM Bluemix
 - Natural Language Understanding Node now allows language and model overrides on
 msg.nlu_options.language, msg.nlu_options.entity_model and msg.nlu_options.relations_model.
 - Trade-off Analytics Node moved to the deprecated list.
+- Migrated Visual Recognition and Visual Recognition Util nodes to use promises, and
+ensure that all error responses are reported. 
 
 ### New in version 0.5.4
 - Fix for Service / Name conflicts in Document Conversion Node
