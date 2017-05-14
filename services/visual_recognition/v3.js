@@ -114,68 +114,6 @@ module.exports = function(RED) {
     }
   }
 
-  function prepareParamsCommon(params, node, msg, cb) {
-    if (imageCheck(msg.payload)) {
-      temp.open({
-        suffix: '.' + fileType(msg.payload).ext
-      }, function(err, info) {
-        if (err) {
-          this.status({
-            fill: 'red',
-            shape: 'ring',
-            text: 'unable to open image stream'
-          });
-          node.error('Node has been unable to open the image stream', msg);
-          return cb();
-        }
-        stream_buffer(info.path, msg.payload, function() {
-          params['images_file'] = fs.createReadStream(info.path);
-          if (msg.params != null && msg.params.classifier_ids != null) {
-            params['classifier_ids'] = msg.params['classifier_ids'];
-          }
-          if (msg.params != null && msg.params.owners != null) {
-            params['owners'] = msg.params['owners'];
-          }
-          if (msg.params != null && msg.params.threshold != null) {
-            params['threshold'] = msg.params['threshold'];
-          }
-          if (node.config != null && node.config.lang != null) {
-            params['Accept-Language'] = node.config.lang;
-          }
-          if (msg.params != null && msg.params.accept_language != null) {
-            params['Accept-Language'] = msg.params['accept_language'];
-          }
-          cb();
-        });
-      });
-    } else if (urlCheck(msg.payload)) {
-      params['url'] = msg.payload;
-      if (msg.params != null && msg.params.classifier_ids != null) {
-        params['classifier_ids'] = msg.params['classifier_ids'];
-      }
-      if (msg.params != null && msg.params.owners != null) {
-        params['owners'] = msg.params['owners'];
-      }
-      if (msg.params != null && msg.params.threshold != null) {
-        params['threshold'] = msg.params['threshold'];
-      }
-      if (node.config != null && node.config.lang != null) {
-        params['Accept-Language'] = node.config.lang;
-      }
-      if (msg.params != null && msg.params.accept_language != null) {
-        params['Accept-Language'] = msg.params['accept_language'];
-      }
-      return cb();
-    } else {
-      node.status({
-        fill: 'red',
-        shape: 'ring',
-        text: 'payload is invalid'
-      });
-      node.error('Payload must be either an image buffer or a string representing a url', msg);
-    }
-  }
-
   function prepareCommonParams(params, node, msg) {
     var p = new Promise(function resolver(resolve, reject){
       if (imageCheck(msg.payload)) {
