@@ -101,6 +101,21 @@ module.exports = function(RED) {
   }
 
 
+  function processTheResponse(body, feature, node, msg) {
+    if (body == null) {
+      return Promise.reject('call to watson visual recognition v3 service failed');
+    } else if (body.images != null & body.images[0].error) {
+      return Promise.reject(body.images[0].error);
+    } else {
+      if (feature === 'deleteClassifier') {
+        msg.result = 'Successfully deleted classifier_id: ' + msg.params.classifier_id;
+      } else {
+        msg.result = body;
+      }
+      return Promise.resolve();
+    }
+  }
+
   function processResponse(err, body, feature, node, msg) {
     if (err != null && body == null) {
       node.status({
@@ -140,6 +155,8 @@ module.exports = function(RED) {
       node.status({});
     }
   }
+
+
 
   function prepareParamsCommon(params, node, msg, cb) {
     if (imageCheck(msg.payload)) {
@@ -201,6 +218,62 @@ module.exports = function(RED) {
       });
       node.error('Payload must be either an image buffer or a string representing a url', msg);
     }
+  }
+
+  function prepareCommonParams(params, node, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      if (imageCheck(msg.payload)) {
+        var ft = fileType(msg.payload);
+        var ext = ft ? ft.ext : 'tmp';
+        temp.open({
+          suffix: '.' + ext
+        }, function(err, info) {
+          if (err) {
+            reject('Node has been unable to open the image stream');
+          }
+          stream_buffer(info.path, msg.payload, function() {
+            params['images_file'] = fs.createReadStream(info.path);
+            if (msg.params != null && msg.params.classifier_ids != null) {
+              params['classifier_ids'] = msg.params['classifier_ids'];
+            }
+            if (msg.params != null && msg.params.owners != null) {
+              params['owners'] = msg.params['owners'];
+            }
+            if (msg.params != null && msg.params.threshold != null) {
+              params['threshold'] = msg.params['threshold'];
+            }
+            if (node.config != null && node.config.lang != null) {
+              params['Accept-Language'] = node.config.lang;
+            }
+            if (msg.params != null && msg.params.accept_language != null) {
+              params['Accept-Language'] = msg.params['accept_language'];
+            }
+            resolve();
+          });
+        });
+      } else if (urlCheck(msg.payload)) {
+        params['url'] = msg.payload;
+        if (msg.params != null && msg.params.classifier_ids != null) {
+          params['classifier_ids'] = msg.params['classifier_ids'];
+        }
+        if (msg.params != null && msg.params.owners != null) {
+          params['owners'] = msg.params['owners'];
+        }
+        if (msg.params != null && msg.params.threshold != null) {
+          params['threshold'] = msg.params['threshold'];
+        }
+        if (node.config != null && node.config.lang != null) {
+          params['Accept-Language'] = node.config.lang;
+        }
+        if (msg.params != null && msg.params.accept_language != null) {
+          params['Accept-Language'] = msg.params['accept_language'];
+        }
+        resolve();
+      } else {
+        reject('Payload must be either an image buffer or a string representing a url');
+      }
+    });
+    return p;
   }
 
 
@@ -327,33 +400,50 @@ module.exports = function(RED) {
     }
   }
 
-  function executeService(feature, params, node, msg) {
-    switch (feature) {
+  function invokeService(feature, params, node, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      switch (feature) {
       case 'classifyImage':
-        prepareParamsCommon(params, node, msg, function() {
-          node.service.classify(params, function(err, body) {
-            processResponse(err, body, feature, node, msg);
-          });
+        node.service.classify(params, function(err, body) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(body);
+          }
         });
         break;
       case 'detectFaces':
-        prepareParamsCommon(params, node, msg, function() {
-          node.service.detectFaces(params, function(err, body) {
-            processResponse(err, body, feature, node, msg);
-          });
+        node.service.detectFaces(params, function(err, body) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(body);
+          }
         });
         break;
       case 'recognizeText':
-        prepareParamsCommon(params, node, msg, function() {
-          node.service.recognizeText(params, function(err, body) {
-            if (err) {} else {
-              if (body.images) {}
-            }
-            processResponse(err, body, feature, node, msg);
-          });
+        node.service.recognizeText(params, function(err, body) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(body);
+          }
         });
         break;
-    }
+      }
+    });
+    return p;
+  }
+
+  function executeService(feature, params, node, msg) {
+    var p = prepareCommonParams(params, node, msg)
+      .then(function(){
+        return invokeService(feature, params, node, msg);
+      })
+      .then(function(body){
+        return processTheResponse(body, feature, node, msg);
+      });
+    return p;
   }
 
 
@@ -396,7 +486,7 @@ module.exports = function(RED) {
       text: 'Calling ' + feature + ' ...'
     });
     if (feature === 'classifyImage' || feature === 'detectFaces' || feature === 'recognizeText') {
-      executeService(feature, params, node, msg);
+      old_executeService(feature, params, node, msg);
     } else {
       executeUtilService(feature, params, node, msg);
     }
@@ -409,8 +499,8 @@ module.exports = function(RED) {
       text: 'Calling ' + feature + ' ...'
     });
     if (feature === 'classifyImage' || feature === 'detectFaces' || feature === 'recognizeText') {
-      executeService(feature, params, node, msg);
-      return Promise.resolve();
+      return executeService(feature, params, node, msg);
+      //return Promise.resolve();
     } else {
       executeUtilService(feature, params, node, msg);
       return Promise.resolve();
@@ -444,6 +534,8 @@ module.exports = function(RED) {
         })
         .then(function(){
           temp.cleanup();
+          node.status({});
+          node.send(msg);
         })
         .catch(function(err) {
           var messageTxt = err.error ? err.error : err;
