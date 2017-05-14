@@ -80,7 +80,7 @@ module.exports = function(RED) {
       break;
     default:
       return Promise.resolve();
-      break;
+      // break;
     }
   }
 
@@ -465,43 +465,40 @@ module.exports = function(RED) {
   function executeUtilService(feature, params, node, msg) {
     var p = null;
     switch (feature) {
-      case 'createClassifier':
-        p = executeCreateClassifier(params, node, msg)
-          //.then(function(){
-          //  return invokeCreateClassifier(node, params);
-          //})
-          .then(function(body){
-            return processTheResponse(body, feature, node, msg);
-          });
-        break;
+    case 'createClassifier':
+      p = executeCreateClassifier(params, node, msg)
+        .then(function(body){
+          return processTheResponse(body, feature, node, msg);
+        });
+      break;
 
-      case 'retrieveClassifiersList':
-        p = invokeListClassifiers(node, params)
-          .then(function(body){
-            return processTheResponse(body, feature, node, msg);
-          });
-        break;
+    case 'retrieveClassifiersList':
+      p = invokeListClassifiers(node, params)
+        .then(function(body){
+          return processTheResponse(body, feature, node, msg);
+        });
+      break;
 
-      case 'retrieveClassifierDetails':
-        p = invokeGetClassifier(node, params, msg)
-          .then(function(body){
-            return processTheResponse(body, feature, node, msg);
-          });
-        break;
+    case 'retrieveClassifierDetails':
+      p = invokeGetClassifier(node, params, msg)
+        .then(function(body){
+          return processTheResponse(body, feature, node, msg);
+        });
+      break;
 
-      case 'deleteClassifier':
-        p = invokeDeleteClassifier(node, params, msg)
-          .then(function(body){
-            return processTheResponse(body, feature, node, msg);
-          });
-          break;
+    case 'deleteClassifier':
+      p = invokeDeleteClassifier(node, params, msg)
+        .then(function(body){
+          return processTheResponse(body, feature, node, msg);
+        });
+      break;
 
-      case 'deleteAllClassifiers':
-        p = performDeleteAllClassifiers(params, node, msg);
-        break;
+    case 'deleteAllClassifiers':
+      p = performDeleteAllClassifiers(params, node, msg);
+      break;
 
-      default:
-        p = Promise.reject('Mode ' + feature + ' not understood');
+    default:
+      p = Promise.reject('Mode ' + feature + ' not understood');
     }
     return p;
   }

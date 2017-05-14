@@ -16,7 +16,8 @@
 
 module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'natural-language-classifier';
-  const NaturalLanguageClassifierV1 = require('watson-developer-cloud/natural-language-classifier/v1');
+  const NaturalLanguageClassifierV1
+          = require('watson-developer-cloud/natural-language-classifier/v1');
 
   var temp = require('temp'),
     fs = require('fs'),
@@ -102,14 +103,14 @@ module.exports = function(RED) {
         var p = node.openTemp()
           .then(function(info) {
             return node.streamFile(msg, config, info);
-          })
+          });
         return p;
       }
     };
 
     node.buildParams = function(msg, config, info) {
-      var params = {};
-      var message = '';
+      var params = {},
+        message = '';
 
       switch (config.mode) {
       case 'classify':
@@ -128,7 +129,7 @@ module.exports = function(RED) {
         params.classifier_id = msg.payload;
         if (msg.nlcparams && msg.nlcparams.classifier_id) {
           params.classifier_id = msg.nlcparams.classifier_id;
-        }            
+        }
         break;
       default:
         message = 'Unknown Natural Language Classification mode, ' + config.mode;
@@ -179,9 +180,9 @@ module.exports = function(RED) {
         })
         .then(function(params) {
           node.status({
-            fill: "blue",
-            shape: "dot",
-            text: "requesting"
+            fill: 'blue',
+            shape: 'dot',
+            text: 'requesting'
           });
           return node.performOperation(msg, config, params);
         })
@@ -204,10 +205,10 @@ module.exports = function(RED) {
   RED.nodes.registerType('watson-natural-language-classifier', Node, {
     credentials: {
       username: {
-        type: "text"
+        type: 'text'
       },
       password: {
-        type: "password"
+        type: 'password'
       }
     }
   });
