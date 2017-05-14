@@ -104,7 +104,7 @@ module.exports = function(RED) {
   function processTheResponse(body, feature, node, msg) {
     if (body == null) {
       return Promise.reject('call to watson visual recognition v3 service failed');
-    } else if (body.images != null & body.images[0].error) {
+    } else if (body.images != null && body.images[0].error) {
       return Promise.reject(body.images[0].error);
     } else {
       if (feature === 'deleteClassifier') {
@@ -538,13 +538,26 @@ module.exports = function(RED) {
           node.send(msg);
         })
         .catch(function(err) {
-          var messageTxt = err.error ? err.error : err;
+          var messageTxt = err;
+          if (err.error) {
+            messageTxt = err.error;
+          } else if (err.description) {
+            messageTxt = err.description;
+          }
           node.status({
             fill: 'red',
             shape: 'dot',
             text: messageTxt
           });
+
+          msg.result = {};
+          msg.result['error'] = err;
           node.error(messageTxt, msg);
+          // Note: This node.send forwards the error to the next node,
+          // if this isn't desired then this line needs to be removed.
+          // Should be ok as the node.error would already have recorded
+          // the error in the debug console.
+          node.send(msg);
         });
     });
   }
