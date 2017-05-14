@@ -16,8 +16,8 @@
 
 module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'natural-language-classifier';
-  const NaturalLanguageClassifierV1
-          = require('watson-developer-cloud/natural-language-classifier/v1');
+  const NaturalLanguageClassifierV1 =
+           require('watson-developer-cloud/natural-language-classifier/v1');
 
   var temp = require('temp'),
     fs = require('fs'),

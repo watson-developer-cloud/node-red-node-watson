@@ -78,10 +78,8 @@ module.exports = function(RED) {
         return Promise.reject('Bad format : msg.payload must be a URL string or a Node.js Buffer');
       }
       break;
-    default:
-      return Promise.resolve();
-      // break;
     }
+    return Promise.resolve();
   }
 
   function verifyServiceCredentials(node, msg) {
@@ -340,16 +338,12 @@ module.exports = function(RED) {
                 'See log for errors.';
             }
             resolve();
-            //node.send(msg);
-            //node.status({});
           });
         }
       });
     });
     return p;
   }
-
-
 
   function invokeService(feature, params, node, msg) {
     var p = new Promise(function resolver(resolve, reject){
