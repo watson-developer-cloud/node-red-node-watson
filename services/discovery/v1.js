@@ -137,7 +137,7 @@ module.exports = function (RED) {
     var discovery = new DiscoveryV1({
       username: username,
       password: password,
-      version_date: '2016-12-15'
+      version_date: '2017-04-27'
     });
 
     switch (method) {

@@ -56,6 +56,12 @@ module.exports = function (RED) {
     return message;
   }
 
+  function checkAdditonalMsgOptions(msg, options) {
+    if (msg.nlu_options && msg.nlu_options.language) {
+      options['language'] = msg.nlu_options.language;
+    }
+  }
+
   function checkFeatureRequest(config, options) {
     var message = '',
       enabled_features = null;
@@ -94,7 +100,7 @@ module.exports = function (RED) {
     }
   }
 
-  function processEntitiesOptions(config, features) {
+  function processEntitiesOptions(msg, config, features) {
     if (features.entities) {
       features.entities.emotion =
           config['entity-emotion'] ? config['entity-emotion'] : false;
@@ -102,6 +108,17 @@ module.exports = function (RED) {
          config['entity-sentiment'] ? config['entity-sentiment'] : false;
       if (config['maxentities']) {
         features.entities.limit = parseInt(config['maxentities']);
+      }
+      if (msg.nlu_options && msg.nlu_options.entity_model) {
+        features.entities.model = msg.nlu_options.entity_model;
+      }
+    }
+  }
+
+  function processRelationsOptions(msg, config, features) {
+    if (features.relations) {
+      if (msg.nlu_options && msg.nlu_options.relations_model) {
+        features.relations.model = msg.nlu_options.relations_model;
       }
     }
   }
@@ -130,12 +147,13 @@ module.exports = function (RED) {
     }
   }
 
-  function checkFeatureOptions(config, options) {
+  function checkFeatureOptions(msg, config, options) {
     if (options && options.features) {
       processConceptsOptions(config, options.features);
       processEmotionOptions(config, options.features);
       processSentimentOptions(config, options.features);
-      processEntitiesOptions(config, options.features);
+      processEntitiesOptions(msg,config, options.features);
+      processRelationsOptions(msg,config, options.features);
       processKeywordsOptions(config, options.features);
       processSemanticRolesOptions(config, options.features);
     }
@@ -145,7 +163,7 @@ module.exports = function (RED) {
     const nlu = new NaturalLanguageUnderstandingV1({
       username: username,
       password: password,
-      version_date: NaturalLanguageUnderstandingV1.VERSION_DATE_2016_01_23
+      version_date: NaturalLanguageUnderstandingV1.VERSION_DATE_2017_02_27
     });
 
     var p = new Promise(function resolver(resolve, reject){
@@ -192,11 +210,12 @@ module.exports = function (RED) {
       }
 
       if (!message) {
+        checkAdditonalMsgOptions(msg, options);
         message = checkFeatureRequest(config, options);
       }
 
       if (!message) {
-        checkFeatureOptions(config, options);
+        checkFeatureOptions(msg, config, options);
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         invokeService(options)
           .then(function(data){

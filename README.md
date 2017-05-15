@@ -7,6 +7,19 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.5
+- Discovery Query Builder was not picking up searchable fields.
+- Personality Insights Node reset to use '2016-10-20' version
+- Natural Language Classifier Node migrated to use url based services utility to detect bound service.
+- Natural Language Classifier Node Migrated to use Promises.
+- Natural Language Classifier now able to use File Inject as input for create mode.
+- Natural Language Classifier Node allows Classifier ID to be set dynamically in classify, list and remove modes.
+- Natural Language Understanding Node now allows language and model overrides on
+msg.nlu_options.language, msg.nlu_options.entity_model and msg.nlu_options.relations_model.
+- Trade-off Analytics Node moved to the deprecated list.
+- Migrated Visual Recognition and Visual Recognition Util nodes to use promises, and
+ensure that all error responses are reported. 
+
 ### New in version 0.5.4
 - Fix for Service / Name conflicts in Document Conversion Node
 

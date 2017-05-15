@@ -39,7 +39,8 @@ PayloadUtils.prototype = {
       if (err) {
         throw err;
       }
-      cb(fileType(contents).ext);
+      var ft = fileType(contents);
+      cb(ft ? ft.ext : 'tmp');
     });
   },
 

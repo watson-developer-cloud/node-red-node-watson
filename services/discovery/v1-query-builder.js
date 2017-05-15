@@ -40,7 +40,7 @@ module.exports = function (RED) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
-      version_date: '2016-12-15'
+      version_date: '2017-04-27'
     });
 
     discovery.getEnvironments({}, function (err, response) {
@@ -57,7 +57,7 @@ module.exports = function (RED) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
-      version_date: '2016-12-15'
+      version_date: '2017-04-27'
     });
 
     discovery.getCollections({
@@ -77,12 +77,14 @@ module.exports = function (RED) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
-      version_date: '2016-12-15'
+      version_date: '2017-04-27'
     });
 
     discovery.query({
       environment_id: req.query.environment_id,
       collection_id: req.query.collection_id,
+      //query: 'text:node-red',
+      query: 'text:a,text:ibm',
       count: 1},
       function (err, response) {
         if (err) {

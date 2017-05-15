@@ -193,6 +193,16 @@
     <p>The content to be analysed should be passed in on <code>msg.payload</code>.</p>
     <p>Valid <code>msg.payload</code> types: URL, HTML or Text Content.</p>
     <br>
+    <p>It is possible to send custom language and model settings on
+      <code>msg.nlu_options</code>
+      To override the default language detection set
+      <code>msg.nlu_options.language</code> to a ISO 639-1 code.
+      To override the model used for entities set
+      <code>msg.nlu_options.entity_model</code>.
+      To override the model used for relations set
+      <code>msg.nlu_options.relations_model</code>. 
+    </p>
+    <br>
     <p>Results from the API service will made available
       at <code>msg.features</code>. Each feature result will be a separate
       child property.</p>
