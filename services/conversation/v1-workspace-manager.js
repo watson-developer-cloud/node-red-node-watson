@@ -16,7 +16,8 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'conversation';
-  var temp = require('temp'),
+  var pkg = require('../../package.json'),
+    temp = require('temp'),
     fs = require('fs'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
@@ -283,7 +284,10 @@ module.exports = function (RED) {
     var conv = new ConversationV1({
       username: username,
       password: password,
-      version_date: '2017-02-03'
+      version_date: '2017-02-03',
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     node.status({fill:'blue', shape:'dot', text:'executing'});

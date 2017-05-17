@@ -30,7 +30,8 @@ module.exports = function (RED) {
     'semantic': 'semantic_roles'
   };
 
-  var payloadutils = require('../../utilities/payload-utils'),
+  var pkg = require('../../package.json'),
+    payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
@@ -163,7 +164,10 @@ module.exports = function (RED) {
     const nlu = new NaturalLanguageUnderstandingV1({
       username: username,
       password: password,
-      version_date: NaturalLanguageUnderstandingV1.VERSION_DATE_2017_02_27
+      version_date: NaturalLanguageUnderstandingV1.VERSION_DATE_2017_02_27,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     var p = new Promise(function resolver(resolve, reject){

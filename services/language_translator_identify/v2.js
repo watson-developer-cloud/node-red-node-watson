@@ -16,7 +16,8 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'language-translator';
-  var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
+  var pkg = require('../../package.json'),
+    LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
     //cfenv = require('cfenv'),
     serviceutils = require('../../utilities/service-utils'),
     //service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
@@ -60,7 +61,10 @@ module.exports = function (RED) {
         username: username,
         password: password,
         version: 'v2',
-        url: endpointUrl
+        url: endpointUrl,
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
       });
 
       node.status({fill:'blue', shape:'dot', text:'requesting'});

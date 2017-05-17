@@ -16,7 +16,8 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'speech-to-text';
-  var request = require('request'),
+  var pkg = require('../../package.json'),
+    request = require('request'),
     cfenv = require('cfenv'),
     temp = require('temp'),
     url = require('url'),
@@ -62,7 +63,10 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/watson-speech-to-text/models', function (req, res) {
     var stt = new sttV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd
+      password: sPassword ? sPassword : req.query.pwd,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     stt.getModels({}, function(err, models){
@@ -78,7 +82,10 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/watson-speech-to-text/customs', function (req, res) {
     var stt = new sttV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd
+      password: sPassword ? sPassword : req.query.pwd,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     stt.getCustomizations({}, function(err, customs){
@@ -177,7 +184,10 @@ module.exports = function (RED) {
       function performAction(audio, format, cbdone, cbcleanup) {
         var speech_to_text = new sttV1({
           username: username,
-          password: password
+          password: password,
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
         });
 
         // If we get to here then the audio is in one of the supported formats.

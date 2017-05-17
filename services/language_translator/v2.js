@@ -23,7 +23,8 @@ module.exports = function (RED) {
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
   const SERVICE_IDENTIFIER = 'language-translator';
-  var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
+  var pkg = require('../../package.json'),
+    LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
     //cfenv = require('cfenv'),
     serviceutils = require('../../utilities/service-utils'),
     fs = require('fs'),
@@ -59,7 +60,10 @@ module.exports = function (RED) {
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
       version: 'v2',
-      url: endpointUrl
+      url: endpointUrl,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     lt.getModels({}, function (err, models) {
@@ -99,6 +103,7 @@ module.exports = function (RED) {
     // what the request is for, and based on that if the required fields
     // have been provided.
     this.on('input', function (msg) {
+
       var message = '',
         action = msg.action || config.action,
         globalContext = this.context().global,
@@ -108,7 +113,10 @@ module.exports = function (RED) {
           username: username,
           password: password,
           version: 'v2',
-          url: endpointUrl
+          url: endpointUrl,
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
         });
 
       if (!username || !password) {

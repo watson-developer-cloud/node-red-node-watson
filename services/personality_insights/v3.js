@@ -16,7 +16,8 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'personality-insights';
-  var PersonalityInsightsV3 = require('watson-developer-cloud/personality-insights/v3'),
+  var pkg = require('../../package.json'),
+    PersonalityInsightsV3 = require('watson-developer-cloud/personality-insights/v3'),
     payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
@@ -119,7 +120,10 @@ module.exports = function (RED) {
           personality_insights = new PersonalityInsightsV3({
             username: username,
             password: password,
-            version_date: '2016-10-20'
+            version_date: '2016-10-20',
+            headers: {
+              'User-Agent': pkg.name + '-' + pkg.version
+            }
           });
 
         node.status({fill:'blue', shape:'dot', text:'requesting'});

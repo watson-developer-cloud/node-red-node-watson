@@ -14,7 +14,8 @@
  * limitations under the License.
  **/
 module.exports = function(RED) {
-  var temp = require('temp'),
+  var pkg = require('../../package.json'),
+    temp = require('temp'),
     fs = require('fs'),
     isDocx = require('is-docx'),
     serviceutils = require('../../utilities/service-utils'),
@@ -48,7 +49,10 @@ module.exports = function(RED) {
         var document_conversion = new DocumentConversionV1({
           username: node.username,
           password: node.password,
-          version_date: '2015-12-01'
+          version_date: '2015-12-01',
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
         });
 
         document_conversion.convert({

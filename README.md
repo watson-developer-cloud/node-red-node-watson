@@ -7,6 +7,14 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.6
+- User Agent added to following nodes: Conversation, Conversation Workspace Manager,
+Discovery, Discovery Query Builder, Document Conversion, Language Translator,
+Language Translator Utility, Language Indentify, Natural Language Classifier,
+Natural Language Understanding, Personality Insights, Retrieve and Rank,
+Similarity Search, Speech to Text, STT Corpus Builder, Text to Speech,
+TTS Corpus Builder, Tone Analyzer, Visual Recognition
+
 ### New in version 0.5.5
 - Discovery Query Builder was not picking up searchable fields.
 - Personality Insights Node reset to use '2016-10-20' version
@@ -18,7 +26,7 @@ Node-RED Watson Nodes for IBM Bluemix
 msg.nlu_options.language, msg.nlu_options.entity_model and msg.nlu_options.relations_model.
 - Trade-off Analytics Node moved to the deprecated list.
 - Migrated Visual Recognition and Visual Recognition Util nodes to use promises, and
-ensure that all error responses are reported. 
+ensure that all error responses are reported.
 
 ### New in version 0.5.4
 - Fix for Service / Name conflicts in Document Conversion Node
