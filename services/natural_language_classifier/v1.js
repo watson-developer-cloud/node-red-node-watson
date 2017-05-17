@@ -19,7 +19,8 @@ module.exports = function(RED) {
   const NaturalLanguageClassifierV1 =
            require('watson-developer-cloud/natural-language-classifier/v1');
 
-  var temp = require('temp'),
+  var pkg = require('../../package.json'),
+    temp = require('temp'),
     fs = require('fs'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
@@ -147,7 +148,10 @@ module.exports = function(RED) {
         const natural_language_classifier = new NaturalLanguageClassifierV1({
           username: username,
           password: password,
-          version: 'v1'
+          version: 'v1',
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
         });
         natural_language_classifier[config.mode](params, function(err, response) {
           if (err) {

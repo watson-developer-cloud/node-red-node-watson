@@ -16,7 +16,8 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'tone-analyzer';
-  var ToneAnalyzerV3 = require('watson-developer-cloud/tone-analyzer/v3'),
+  var pkg = require('../../package.json'),
+    ToneAnalyzerV3 = require('watson-developer-cloud/tone-analyzer/v3'),
     serviceutils = require('../../utilities/service-utils'),
     toneutils = require('../../utilities/tone-utils'),
     username = '', password = '', sUsername = '', sPassword = '',
@@ -96,7 +97,10 @@ module.exports = function (RED) {
         var tone_analyzer = new ToneAnalyzerV3({
           'username': settings.username,
           'password': settings.password,
-          version_date: '2016-05-19'
+          version_date: '2016-05-19',
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
         });
 
         var options = toneutils.parseOptions(msg, config);

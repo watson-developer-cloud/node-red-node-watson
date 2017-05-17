@@ -16,7 +16,8 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'visual-recognition';
-  var serviceutils = require('../../utilities/service-utils'),
+  var pkg = require('../../package.json'),
+    serviceutils = require('../../utilities/service-utils'),
     watson = require('watson-developer-cloud'),
     imageType = require('image-type'),
     temp = require('temp'),
@@ -63,7 +64,10 @@ module.exports = function (RED) {
     node.service = watson.visual_recognition({
       api_key: node.apikey,
       version: 'v3',
-      version_date: '2016-05-20'
+      version_date: '2016-05-20',
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
     return true;
   }

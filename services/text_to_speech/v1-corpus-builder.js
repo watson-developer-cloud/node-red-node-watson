@@ -16,8 +16,8 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'text-to-speech';
-  var request = require('request'),
-    cfenv = require('cfenv'),
+  var pkg = require('../../package.json'),
+    request = require('request'),
     url = require('url'),
     temp = require('temp'),
     fs = require('fs'),
@@ -151,7 +151,10 @@ module.exports = function (RED) {
   function executeMethod(node, method, params, msg) {
     var tts = new TextToSpeechV1({
       username: username,
-      password: password
+      password: password,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
@@ -319,7 +322,10 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/watson-text-to-speech-v1-query-builder/voices', function (req, res) {
     var tts = new TextToSpeechV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd
+      password: sPassword ? sPassword : req.query.pwd,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     tts.voices({}, function(err, voices){

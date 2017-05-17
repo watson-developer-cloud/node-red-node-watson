@@ -16,9 +16,9 @@
 
 module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'text-to-speech';
-  var cfenv = require('cfenv');
-  var TextToSpeechV1 = require('watson-developer-cloud/text-to-speech/v1');
-  var serviceutils = require('../../utilities/service-utils');
+  var pkg = require('../../package.json'),
+    TextToSpeechV1 = require('watson-developer-cloud/text-to-speech/v1');
+    serviceutils = require('../../utilities/service-utils');
 
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then the username and password will be stored in
@@ -32,7 +32,6 @@ module.exports = function(RED) {
 
   var username, password, sUsername, sPassword;
 
-  //var service = cfenv.getAppEnv().getServiceCreds(/text to speech/i)
   var service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
@@ -49,7 +48,10 @@ module.exports = function(RED) {
   RED.httpAdmin.get('/watson-text-to-speech/voices', function (req, res) {
     var tts = new TextToSpeechV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd
+      password: sPassword ? sPassword : req.query.pwd,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     tts.voices({}, function(err, voices){
@@ -68,7 +70,10 @@ module.exports = function(RED) {
   RED.httpAdmin.get('/watson-text-to-speech/customs', function (req, res) {
     var tts = new TextToSpeechV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd
+      password: sPassword ? sPassword : req.query.pwd,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     tts.getCustomizations({}, function(err, customs){
@@ -102,7 +107,10 @@ module.exports = function(RED) {
 
       var text_to_speech = new TextToSpeechV1({
         username: username,
-        password: password
+        password: password,
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
       });
 
       var params = {

@@ -16,7 +16,8 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'conversation';
-  var ConversationV1 = require('watson-developer-cloud/conversation/v1'),
+  var pkg = require('../../package.json'),
+    ConversationV1 = require('watson-developer-cloud/conversation/v1'),
     serviceutils = require('../../utilities/service-utils'),
     service = null, sUsername = null, sPassword = null;
 
@@ -145,7 +146,10 @@ module.exports = function (RED) {
     node.service = new ConversationV1({
       username: userName,
       password: passWord,
-      version_date: '2017-02-03'
+      version_date: '2017-02-03',
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
     return true;
   }
