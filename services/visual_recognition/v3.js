@@ -17,7 +17,8 @@
 module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'visual-recognition';
   const VisualRecognitionV3 = require('watson-developer-cloud/visual-recognition/v3');
-  var serviceutils = require('../../utilities/service-utils'),
+  var pkg = require('../../package.json'),
+    serviceutils = require('../../utilities/service-utils'),
     //watson = require('watson-developer-cloud'),
     imageType = require('image-type'),
     url = require('url'),
@@ -92,7 +93,10 @@ module.exports = function(RED) {
 
     node.service = new VisualRecognitionV3({
       api_key: node.apikey,
-      version_date: VisualRecognitionV3.VERSION_DATE_2016_05_20
+      version_date: VisualRecognitionV3.VERSION_DATE_2016_05_20,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     return Promise.resolve();

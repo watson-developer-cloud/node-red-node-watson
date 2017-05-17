@@ -16,7 +16,8 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'speech-to-text';
-  var request = require('request'),
+  var pkg = require('../../package.json'),
+    request = require('request'),
     cfenv = require('cfenv'),
     url = require('url'),
     temp = require('temp'),
@@ -181,7 +182,10 @@ module.exports = function (RED) {
   function executeMethod(node, method, params, msg) {
     var stt = new STTV1({
       username: username,
-      password: password
+      password: password,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
@@ -360,7 +364,10 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/watson-speech-to-text-v1-query-builder/models', function (req, res) {
     var stt = new STTV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd
+      password: sPassword ? sPassword : req.query.pwd,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     stt.getModels({}, function(err, models){

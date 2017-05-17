@@ -15,11 +15,12 @@
  **/
 
 module.exports = function (RED) {
-  var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
-  cfenv = require('cfenv'),
-  username = null, password = null, sUsername = null, sPassword = null,
-  service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
-  endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
+  var pkg = require('../../package.json'),
+    LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
+    cfenv = require('cfenv'),
+    username = null, password = null, sUsername = null, sPassword = null,
+    service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
+    endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   if (service) {
     sUsername = service.username;
@@ -73,7 +74,10 @@ module.exports = function (RED) {
         username: username,
         password: password,
         version: 'v2',
-        url: endpointUrl
+        url: endpointUrl,
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
       });
 
       // set global variable in order to make them accessible for the tranlsation node
