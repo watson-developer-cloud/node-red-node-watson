@@ -22,7 +22,7 @@ module.exports = function (RED) {
     qs = require('qs'),
     request = require('request'),
     fileType = require('file-type'),
-    watson = require('watson-developer-cloud');
+    watson = require('watson-developer-cloud'),
     username, password,
     service = cfenv.getAppEnv().getServiceCreds(/retrieve and rank/i);
 
