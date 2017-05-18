@@ -17,10 +17,25 @@
 function ToneUtils () {
 }
 
-
 ToneUtils.prototype = {
   check: function () {
     return '"IBM Watson Node-RED Utilities for Tone Analyser';
+  },
+
+  isJsonString: function(str) {
+    try {
+      JSON.parse(str);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  },
+
+  isJsonObject: function(str) {
+    if (str instanceof Array || str instanceof Object) {
+      return true;
+    }
+    return false;
   },
 
   // Function that checks the payload and determines
@@ -29,16 +44,11 @@ ToneUtils.prototype = {
     var message = null;
     var isBuffer = false;
 
-    var hasJSONmethod = (typeof payload.toJSON === 'function') ;
+    var isJSON = this.isJsonString(payload) || this.isJsonObject(payload);
 
-    if (hasJSONmethod === true) {
-      if (payload.toJSON().type === 'Buffer') {
-        isBuffer = true;
-      }      
-    }      
     // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-    if (typeof payload !== 'string' &&  isBuffer !== true) {
-      message = 'The payload must be either a string or a Buffer';
+    if (typeof payload !== 'string' &&  isJSON !== true) {
+      message = 'The payload must be either a string or a JSON Buffer';
     }
 
     return message;
@@ -50,7 +60,7 @@ ToneUtils.prototype = {
   parseToneOption: function(msg, config) {
     var tones = msg.tones || config.tones;
 
-    return (tones === 'all' ? '' : tones);  	
+    return (tones === 'all' ? '' : tones);
   },
 
   // function to parse through the options in preparation
@@ -58,14 +68,16 @@ ToneUtils.prototype = {
   parseOptions: function(msg, config) {
     var options = {
       'text': msg.payload,
-      'sentences': msg.sentences || config.sentences,   
-      'isHTML': msg.contentType || config.contentType    
+      'sentences': msg.sentences || config.sentences,
+      'isHTML': msg.contentType || config.contentType
     };
+    if (this.isJsonObject(msg.payload)) {
+      options.text = JSON.stringify(msg.payload);
+    }
 
     options.tones = this.parseToneOption(msg, config);
     return options;
   }
-
 
 };
 
