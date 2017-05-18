@@ -19,6 +19,7 @@ module.exports = function (RED) {
   var pkg = require('../../package.json'),
     ToneAnalyzerV3 = require('watson-developer-cloud/tone-analyzer/v3'),
     serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
     toneutils = require('../../utilities/tone-utils'),
     username = '', password = '', sUsername = '', sPassword = '',
     service = null;
@@ -127,13 +128,13 @@ module.exports = function (RED) {
       })
       .then(function(data){
         node.status({})
+        msg.response = data;
         node.send(msg);
         node.status({});
       })
       .catch(function(err){
-        msg.response = err;
-        node.status({fill:'red', shape:'dot', text: err});
-        node.error(err, msg);
+        payloadutils.reportError(node,msg,err);
+        node.send(msg);
       });
     }
 

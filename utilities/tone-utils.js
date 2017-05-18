@@ -66,6 +66,10 @@ ToneUtils.prototype = {
   parseOptions: function(msg, config) {
     var options = {};
 
+    if (!config['tone-method']) {
+      config['tone-method'] = 'generalTone';
+    }
+
     switch (config['tone-method']) {
     case 'generalTone' :
       options.sentences = msg.sentences || config.sentences;
@@ -76,12 +80,9 @@ ToneUtils.prototype = {
                             msg.payload;
       break
     case 'customerEngagementTone' :
-      options.utterances = this.isJsonObject(msg.payload) ?
-                                    JSON.stringify(msg.payload) :
-                                    msg.payload;
-      if (this.isJsonObject(msg.payload)) {
-        options.utterances = JSON.stringify(msg.payload);
-      }
+      options.utterances = this.isJsonString(msg.payload) ?
+                                      JSON.parse(msg.payload) :
+                                      msg.payload;
       break;
     }
 
