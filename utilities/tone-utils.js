@@ -42,15 +42,13 @@ ToneUtils.prototype = {
   // whether it is JSON or a Buffer
   checkPayload: function(payload) {
     var message = null;
-    var isBuffer = false;
-
     var isJSON = this.isJsonString(payload) || this.isJsonObject(payload);
 
     // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
     if (typeof payload !== 'string' &&  isJSON !== true) {
-      message = 'The payload must be either a string or a JSON Buffer';
+      message = 'The payload must be either a string, JSON or a Buffer';
     }
-
+    
     return message;
   },
 
