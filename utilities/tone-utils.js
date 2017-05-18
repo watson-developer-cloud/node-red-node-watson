@@ -48,7 +48,7 @@ ToneUtils.prototype = {
     if (typeof payload !== 'string' &&  isJSON !== true) {
       message = 'The payload must be either a string, JSON or a Buffer';
     }
-    
+
     return message;
   },
 
@@ -64,16 +64,27 @@ ToneUtils.prototype = {
   // function to parse through the options in preparation
   // for the sevice call.
   parseOptions: function(msg, config) {
-    var options = {
-      'text': msg.payload,
-      'sentences': msg.sentences || config.sentences,
-      'isHTML': msg.contentType || config.contentType
-    };
-    if (this.isJsonObject(msg.payload)) {
-      options.text = JSON.stringify(msg.payload);
+    var options = {};
+
+    switch (config['tone-method']) {
+    case 'generalTone' :
+      options.sentences = msg.sentences || config.sentences;
+      options.isHTML = msg.contentType || config.contentType;
+      options.tones = this.parseToneOption(msg, config);
+      options.text = this.isJsonObject(msg.payload) ?
+                            JSON.stringify(msg.payload) :
+                            msg.payload;
+      break
+    case 'customerEngagementTone' :
+      options.utterances = this.isJsonObject(msg.payload) ?
+                                    JSON.stringify(msg.payload) :
+                                    msg.payload;
+      if (this.isJsonObject(msg.payload)) {
+        options.utterances = JSON.stringify(msg.payload);
+      }
+      break;
     }
 
-    options.tones = this.parseToneOption(msg, config);
     return options;
   }
 

@@ -84,6 +84,35 @@ module.exports = function (RED) {
   };
 
 
+  function invokeService(config, options, settings) {
+    const tone_analyzer = new ToneAnalyzerV3({
+      'username': settings.username,
+      'password': settings.password,
+      version_date: '2016-05-19',
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
+    });
+
+    var p = new Promise(function resolver(resolve, reject){
+      switch (config['tone-method']) {
+      case 'generalTone' :
+        tone_analyzer.tone(options, function (err, response) {
+          if (err) {
+            reject(err);
+          }
+          resolve(response);
+      });
+        break;
+      case 'customerEngagementTone' :
+        reject('customer Engagement Tone not yet implemented in this node');
+        break;
+      }
+    });
+
+    return p;
+  }
+
   // function when the node recieves input inside a flow.
   // Configuration is first checked before the service is invoked.
   var processOnInput = function(msg, config, node) {
@@ -94,28 +123,21 @@ module.exports = function (RED) {
         return;
       } else {
 
-        var tone_analyzer = new ToneAnalyzerV3({
-          'username': settings.username,
-          'password': settings.password,
-          version_date: '2016-05-19',
-          headers: {
-            'User-Agent': pkg.name + '-' + pkg.version
-          }
-        });
-
         var options = toneutils.parseOptions(msg, config);
 
         node.status({fill:'blue', shape:'dot', text:'requesting'});
-        tone_analyzer.tone(options, function (err, response) {
-          node.status({})
-          if (err) {
-            node.error(err, msg);
-          } else {
-            msg.response = response;
-          }
-          node.send(msg);
-        });
 
+        invokeService(config, options, settings)
+          .then(function(data){
+            node.status({})
+            node.send(msg);
+            node.status({});
+          })
+          .catch(function(err){
+            msg.response = err;
+            node.status({fill:'red', shape:'dot', text: err});
+            node.error(err, msg);
+          });
       }
     });
 
