@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.7
+- Fix to Tone Analyzer to allow JSON as input
+
 ### New in version 0.5.6
 - User Agent added to following nodes: Conversation, Conversation Workspace Manager,
 Discovery, Discovery Query Builder, Document Conversion, Language Translator,
