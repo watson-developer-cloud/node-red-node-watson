@@ -64,7 +64,7 @@ module.exports = function (RED) {
 
   // Function that checks the configuration to make sure that credentials,
   // payload and options have been provied in the correct format.
-  var checkConfiguration = function(msg, node, cb) {
+  var checkConfiguration = function(msg, node) {
     var message = null;
     var taSettings = null;
 
@@ -78,8 +78,10 @@ module.exports = function (RED) {
       message = 'Missing property: msg.payload';
     }
 
-    if (cb) {
-      cb(message, taSettings);
+    if (message) {
+      return Promise.reject(message);
+    } else {
+      return Promise.resolve(taSettings);
     }
   };
 
@@ -116,32 +118,23 @@ module.exports = function (RED) {
   // function when the node recieves input inside a flow.
   // Configuration is first checked before the service is invoked.
   var processOnInput = function(msg, config, node) {
-    checkConfiguration (msg, node, function(err, settings){
-      if (err) {
-        node.status({fill:'red', shape:'dot', text:err});
-        node.error(err, msg);
-        return;
-      } else {
-
+    checkConfiguration(msg, node)
+      .then(function(settings) {
         var options = toneutils.parseOptions(msg, config);
-
         node.status({fill:'blue', shape:'dot', text:'requesting'});
-
-        invokeService(config, options, settings)
-          .then(function(data){
-            node.status({})
-            node.send(msg);
-            node.status({});
-          })
-          .catch(function(err){
-            msg.response = err;
-            node.status({fill:'red', shape:'dot', text: err});
-            node.error(err, msg);
-          });
-      }
-    });
-
-  };
+        return invokeService(config, options, settings);
+      })
+      .then(function(data){
+        node.status({})
+        node.send(msg);
+        node.status({});
+      })
+      .catch(function(err){
+        msg.response = err;
+        node.status({fill:'red', shape:'dot', text: err});
+        node.error(err, msg);
+      });
+    }
 
 
   // This is the Tone Analyzer Node.
