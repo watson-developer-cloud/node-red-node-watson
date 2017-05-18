@@ -85,7 +85,6 @@ module.exports = function (RED) {
     }
   };
 
-
   function invokeService(config, options, settings) {
     const tone_analyzer = new ToneAnalyzerV3({
       'username': settings.username,
@@ -97,19 +96,21 @@ module.exports = function (RED) {
     });
 
     var p = new Promise(function resolver(resolve, reject){
+      var m = 'tone';
       switch (config['tone-method']) {
       case 'generalTone' :
-        tone_analyzer.tone(options, function (err, response) {
-          if (err) {
-            reject(err);
-          }
-          resolve(response);
-      });
         break;
       case 'customerEngagementTone' :
-        reject('customer Engagement Tone not yet implemented in this node');
+        m = 'tone_chat';
         break;
       }
+      tone_analyzer[m](options, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(response);
+        }
+      });
     });
 
     return p;
@@ -142,12 +143,11 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    // Invoked whenb the node has received an input as part of a flow.
+    // Invoked when the node has received an input as part of a flow.
     this.on('input', function (msg) {
       processOnInput(msg, config, node);
     });
   }
-
 
   RED.nodes.registerType('watson-tone-analyzer-v3', Node, {
     credentials: {
