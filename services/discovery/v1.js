@@ -21,6 +21,7 @@ module.exports = function (RED) {
     discoveryutils = require('./discovery-utils'),
     DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
     serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
@@ -33,6 +34,10 @@ module.exports = function (RED) {
     case 'createEnvrionment':
       response = discoveryutils.paramNameCheck(params) +
             discoveryutils.paramDescriptionCheck(params);
+      break;
+    case 'createConfiguration':
+      response = discoveryutils.paramEnvCheck(params) +
+          discoveryutils.paramJSONCheck(params);
       break;
     case 'getEnvironmentDetails':
     case 'listCollections':
@@ -129,6 +134,21 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeCreateConfiguration(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.createConfiguration(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.configuration = response.configuration ? response.configuration : response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+
   function executeListConfigurations(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
       discovery.getConfigurations(params, function (err, response) {
@@ -203,6 +223,9 @@ module.exports = function (RED) {
     case 'getCollectionDetails':
       p = executeGetCollectionDetails(node, discovery, params, msg);
       break;
+    case 'createConfiguration':
+      p = executeCreateConfiguration(node, discovery, params, msg);
+      break;
     case 'listConfigurations':
       p = executeListConfigurations(node, discovery, params, msg);
       break;
@@ -270,7 +293,8 @@ module.exports = function (RED) {
           node.send(msg);
         })
         .catch(function(err){
-          discoveryutils.reportError(node,msg,err);
+          //discoveryutils.reportError(node,msg,err);
+          payloadutils.reportError(node,msg,err);
           node.send(msg);
         });
     });

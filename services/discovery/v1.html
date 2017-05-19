@@ -41,6 +41,7 @@
             <option value="getEnvironmentDetails">Retrieve environment details</option>
             <option value="listCollections">List existing collections</option>
             <option value="getCollectionDetails">Retrieve collection details</option>
+      <!--      <option value="createConfiguration">Create new configuration</option> -->
             <option value="listConfigurations">List existing configurations</option>
             <option value="getConfigurationDetails">Retrieve configuration details</option>
             <option value="query">Search in collection</option>
@@ -286,6 +287,7 @@
         case 'listEnvrionments':
           fields.push('#node-input-environmentname');
           break;
+        case 'createConfiguration':
         case 'getEnvironmentDetails':
         case 'listCollections':
           fields.push('#node-input-environment_id');

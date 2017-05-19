@@ -30,6 +30,19 @@ DiscoveryUtils.prototype = {
     return params;
   },
 
+  buildParamsForPayload: function(msg, config, params) {
+    var isJSON = DiscoveryUtils.prototype.isJsonString(msg.payload) ||
+                        DiscoveryUtils.prototype.isJsonObject(msg.payload);
+
+    // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
+    if (typeof msg.payload === 'string' ||  isJSON) {
+      params.file = DiscoveryUtils.prototype.isJsonObject(msg.payload) ?
+                           JSON.stringify(msg.payload) :
+                           msg.payload;
+    }
+    return params;
+  },
+
   buildParamsFor: function(msg, config, params, field) {
     if (msg.discoveryparams && msg.discoveryparams[field]) {
       params[field] = msg.discoveryparams[field];
@@ -59,6 +72,8 @@ DiscoveryUtils.prototype = {
     ['count','filter','aggregation','return'].forEach(function(f) {
       params = DiscoveryUtils.prototype.buildParamsFromConfig(config, params, f);
     });
+
+    params = DiscoveryUtils.prototype.buildParamsForPayload(msg, config, params);
 
     return params;
   },
@@ -94,6 +109,14 @@ DiscoveryUtils.prototype = {
     var response = '';
     if (!params.environment_id) {
       response = 'Missing Environment ID ';
+    }
+    return response;
+  },
+
+  paramJSONCheck: function (params) {
+    var response = '';
+    if (!params.file) {
+      response = 'Missing JSON file on payload';
     }
     return response;
   },
@@ -177,11 +200,28 @@ DiscoveryUtils.prototype = {
     return fields;
   },
 
-  reportError: function (node, msg, message) {
-    var messageTxt = message.error ? message.error : message;
-    node.status({fill:'red', shape:'dot', text: messageTxt});
-    node.error(message, msg);
+//  reportError: function (node, msg, message) {
+//    var messageTxt = message.error ? message.error : message;
+//    node.status({fill:'red', shape:'dot', text: messageTxt});
+//    node.error(message, msg);
+//  } ,
+
+  isJsonString: function(str) {
+    try {
+      JSON.parse(str);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  },
+
+  isJsonObject: function(str) {
+    if (str instanceof Array || str instanceof Object) {
+      return true;
+    }
+    return false;
   }
+
 
 };
 
