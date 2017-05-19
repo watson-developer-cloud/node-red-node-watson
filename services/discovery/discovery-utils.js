@@ -35,12 +35,12 @@ DiscoveryUtils.prototype = {
   },
 
   buildParamsForPayload: function(msg, config, params) {
-    var isJSON = DiscoveryUtils.prototype.isJsonString(msg.payload) ||
-                        DiscoveryUtils.prototype.isJsonObject(msg.payload);
+    var isJSON = this.isJsonString(msg.payload) ||
+                        this.isJsonObject(msg.payload);
 
     // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
     if (typeof msg.payload === 'string' ||  isJSON) {
-      params.file = DiscoveryUtils.prototype.isJsonObject(msg.payload) ?
+      params.file = this.isJsonObject(msg.payload) ?
                            JSON.stringify(msg.payload) :
                            msg.payload;
     }
@@ -65,20 +65,21 @@ DiscoveryUtils.prototype = {
 
   buildParams: function(msg, config) {
     var params = {};
+      me = this;
 
-    params = DiscoveryUtils.prototype.buildParamsForName(msg, config, params);
+    params = this.buildParamsForName(msg, config, params);
 
     ['environment_id','collection_id','configuration_id',
         'collection_name',
         'query','description','size'].forEach(function(f) {
-      params = DiscoveryUtils.prototype.buildParamsFor(msg, config, params, f);
+      params = me.buildParamsFor(msg, config, params, f);
     });
 
     ['count','filter','aggregation','return'].forEach(function(f) {
-      params = DiscoveryUtils.prototype.buildParamsFromConfig(config, params, f);
+      params = me.buildParamsFromConfig(config, params, f);
     });
 
-    params = DiscoveryUtils.prototype.buildParamsForPayload(msg, config, params);
+    params = this.buildParamsForPayload(msg, config, params);
 
     return params;
   },
@@ -168,7 +169,7 @@ DiscoveryUtils.prototype = {
       }
 
       if ('object' === typeof d[k]) {
-        fields = DiscoveryUtils.prototype.buildFieldByStep(d[k], fields, t);
+        fields = this.buildFieldByStep(d[k], fields, t);
       } else {
         switch (k) {
         case 'text':
@@ -195,11 +196,11 @@ DiscoveryUtils.prototype = {
         if ('results' === k &&
                 'object' === typeof schemaData[k] &&
                 'object' === typeof schemaData[k][0]) {
-          fields = DiscoveryUtils.prototype.buildFieldByStep(schemaData[k][0], fields, '');
+          fields = this.buildFieldByStep(schemaData[k][0], fields, '');
         }
       }
       if (fields.length) {
-        fields = fields.filter(DiscoveryUtils.prototype.uniqueFilter);
+        fields = fields.filter(this.uniqueFilter);
       }
     }
     return fields;

@@ -80,7 +80,6 @@ module.exports = function (RED) {
   function executeListEnvrionments(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
       discovery.getEnvironments(params, function (err, response) {
-        console.log('return from getEnvrionments : ', response);
         if (err) {
           reject(err);
         } else {
