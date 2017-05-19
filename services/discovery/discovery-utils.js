@@ -26,6 +26,10 @@ DiscoveryUtils.prototype = {
       params.name = msg.discoveryparams.configurationname;
     } else if (config.configurationname) {
       params.name = config.configurationname;
+    } else if (msg.discoveryparams && msg.discoveryparams.collection_name) {
+      params.name = msg.discoveryparams.collection_name;
+    } else if (config.collection_name) {
+      params.name = config.collection_name;
     }
     return params;
   },
@@ -65,6 +69,7 @@ DiscoveryUtils.prototype = {
     params = DiscoveryUtils.prototype.buildParamsForName(msg, config, params);
 
     ['environment_id','collection_id','configuration_id',
+        'collection_name',
         'query','description','size'].forEach(function(f) {
       params = DiscoveryUtils.prototype.buildParamsFor(msg, config, params, f);
     });

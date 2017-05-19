@@ -39,6 +39,7 @@
             <option value="createEnvrionment">Create new environment</option>
             <option value="listEnvrionments">List existing environments</option>
             <option value="getEnvironmentDetails">Retrieve environment details</option>
+      <!--      <option value="createCollection">Create new collection</option>  -->
             <option value="listCollections">List existing collections</option>
             <option value="getCollectionDetails">Retrieve collection details</option>
       <!--      <option value="createConfiguration">Create new configuration</option> -->
@@ -55,6 +56,10 @@
     <div class="form-row">
         <label for="node-input-environment_id"><i class="fa fa-tag"></i> Environment ID</label>
         <input type="text" id="node-input-environment_id" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-collection_name"><i class="fa fa-tag"></i> Collection Name</label>
+        <input type="text" id="node-input-collection_name" placeholder="">
     </div>
     <div class="form-row">
         <label for="node-input-collection_id"><i class="fa fa-tag"></i> Collection ID</label>
@@ -257,6 +262,7 @@
     disV1.hideAll = function() {
       $('#node-input-environmentname').parent().hide();
       $('#node-input-environment_id').parent().hide();
+      $('#node-input-collection_name').parent().hide();
       $('#node-input-collection_id').parent().hide();
       $('#node-input-configurationname').parent().hide();
       $('#node-input-configuration_id').parent().hide();
@@ -286,6 +292,12 @@
           break;
         case 'listEnvrionments':
           fields.push('#node-input-environmentname');
+          break;
+        case 'createCollection':
+          fields.push('#node-input-environment_id'
+                          + ', #node-input-configuration_id'
+                          + ', #node-input-collection_name'
+                          + ', #node-input-description');
           break;
         case 'createConfiguration':
         case 'getEnvironmentDetails':
@@ -353,6 +365,7 @@
                 collection_id: {value: ""},
                 configurationname: {value: ""},
                 configuration_id: {value: ""},
+                collection_name: {value: ""},
                 count: {value: "1"},
                 query: {value: ""},
                 filter: {value: ""},

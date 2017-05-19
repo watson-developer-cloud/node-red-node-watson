@@ -106,6 +106,30 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeCreateCollection(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+
+      //params.body = {};
+      //['name','description','collection_name'
+      //    'configuration_id'].forEach(function(f) {
+      //  params.body[f] = params[f];
+      //  //delete params[f];
+      //});
+
+      //console.log('about to create collection with params : ', params);
+      discovery.createCollection(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.collection = response.collection ? response.collection : response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+
   function executeListCollections(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
       discovery.getCollections(params, function (err, response) {
@@ -147,7 +171,6 @@ module.exports = function (RED) {
     });
     return p;
   }
-
 
   function executeListConfigurations(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
@@ -216,6 +239,9 @@ module.exports = function (RED) {
       break;
     case 'getEnvironmentDetails':
       p = executeEnvrionmentDetails(node, discovery, params, msg);
+      break;
+    case 'createCollection':
+      p = executeCreateCollection(node, discovery, params, msg);
       break;
     case 'listCollections':
       p = executeListCollections(node, discovery, params, msg);
