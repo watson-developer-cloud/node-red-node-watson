@@ -10,6 +10,7 @@ Node-RED Watson Nodes for IBM Bluemix
 ### New in version 0.5.7
 - Fix to Tone Analyzer to allow JSON as input
 - Enabled Conversation Tone method to Tone Analyzer Node
+- Discovery Node now supports: Create Environment
 
 ### New in version 0.5.6
 - User Agent added to following nodes: Conversation, Conversation Workspace Manager,

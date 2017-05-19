@@ -25,7 +25,7 @@ DiscoveryUtils.prototype = {
     } else if (msg.discoveryparams && msg.discoveryparams.configurationname) {
       params.name = msg.discoveryparams.configurationname;
     } else if (config.configurationname) {
-      params.name = config.cofigurationname;
+      params.name = config.configurationname;
     }
     return params;
   },
@@ -51,7 +51,8 @@ DiscoveryUtils.prototype = {
 
     params = DiscoveryUtils.prototype.buildParamsForName(msg, config, params);
 
-    ['environment_id','collection_id','configuration_id','query'].forEach(function(f) {
+    ['environment_id','collection_id','configuration_id',
+        'query','description','size'].forEach(function(f) {
       params = DiscoveryUtils.prototype.buildParamsFor(msg, config, params, f);
     });
 
@@ -93,6 +94,22 @@ DiscoveryUtils.prototype = {
     var response = '';
     if (!params.environment_id) {
       response = 'Missing Environment ID ';
+    }
+    return response;
+  },
+
+  paramNameCheck: function (params) {
+    var response = '';
+    if (!params.name) {
+      response = 'Missing Name ';
+    }
+    return response;
+  },
+
+  paramDescriptionCheck: function (params) {
+    var response = '';
+    if (!params.description) {
+      response = 'Missing Description ';
     }
     return response;
   },

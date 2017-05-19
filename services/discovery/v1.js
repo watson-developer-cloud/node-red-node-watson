@@ -30,6 +30,10 @@ module.exports = function (RED) {
   function checkParams(method, params){
     var response = '';
     switch (method) {
+    case 'createEnvrionment':
+      response = discoveryutils.paramNameCheck(params) +
+            discoveryutils.paramDescriptionCheck(params);
+      break;
     case 'getEnvironmentDetails':
     case 'listCollections':
       response = discoveryutils.paramEnvCheck(params);
@@ -48,6 +52,18 @@ module.exports = function (RED) {
       break;
     }
     return response;
+  }
+
+  function executeCreateEnvrionment(node, discovery, params, msg) {
+    discovery.createEnvironment(params, function (err, response) {
+      node.status({});
+      if (err) {
+        discoveryutils.reportError(node, msg, err.error);
+      } else {
+        msg.environment = response.environment ? response.environment : response;
+      }
+      node.send(msg);
+    });
   }
 
   function executeListEnvrionments(node, discovery, params, msg) {
@@ -134,6 +150,11 @@ module.exports = function (RED) {
     });
   }
 
+  function unknownMethod(node, discovery, params, msg) {
+    discoveryutils.reportError(node, msg, 'Unknown Method');
+    node.send(msg);
+  }
+
   function executeMethod(node, method, params, msg) {
     var discovery = new DiscoveryV1({
       username: username,
@@ -145,6 +166,9 @@ module.exports = function (RED) {
     });
 
     switch (method) {
+    case 'createEnvrionment':
+      executeCreateEnvrionment(node, discovery, params, msg);
+      break;
     case 'listEnvrionments':
       executeListEnvrionments(node, discovery, params, msg);
       break;
@@ -165,6 +189,9 @@ module.exports = function (RED) {
       break;
     case 'query':
       executeQuery(node, discovery, params, msg);
+      break;
+    default :
+      unknownMethod(node, discovery, params, msg);
       break;
     }
 
