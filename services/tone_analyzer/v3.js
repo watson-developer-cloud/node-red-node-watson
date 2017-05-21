@@ -66,8 +66,8 @@ module.exports = function (RED) {
   // Function that checks the configuration to make sure that credentials,
   // payload and options have been provied in the correct format.
   var checkConfiguration = function(msg, node) {
-    var message = null;
-    var taSettings = null;
+    var message = null,
+      taSettings = null;
 
     taSettings = checkCreds(node.credentials);
 
@@ -136,7 +136,7 @@ module.exports = function (RED) {
         payloadutils.reportError(node,msg,err);
         node.send(msg);
       });
-    }
+  }
 
 
   // This is the Tone Analyzer Node.

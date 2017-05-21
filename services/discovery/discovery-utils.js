@@ -39,7 +39,7 @@ DiscoveryUtils.prototype = {
                         this.isJsonObject(msg.payload);
 
     // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-    if (typeof msg.payload === 'string' ||  isJSON) {
+    if (typeof msg.payload === 'string' || isJSON) {
       params.file = this.isJsonObject(msg.payload) ?
                            JSON.stringify(msg.payload) :
                            msg.payload;
@@ -64,14 +64,14 @@ DiscoveryUtils.prototype = {
   },
 
   buildParams: function(msg, config) {
-    var params = {};
+    var params = {},
       me = this;
 
     params = this.buildParamsForName(msg, config, params);
 
     ['environment_id','collection_id','configuration_id',
-        'collection_name',
-        'query','description','size'].forEach(function(f) {
+      'collection_name',
+      'query','description','size'].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);
     });
 
