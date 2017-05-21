@@ -19,6 +19,7 @@ module.exports = function (RED) {
   var pkg = require('../../package.json'),
     ToneAnalyzerV3 = require('watson-developer-cloud/tone-analyzer/v3'),
     serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
     toneutils = require('../../utilities/tone-utils'),
     username = '', password = '', sUsername = '', sPassword = '',
     service = null;
@@ -64,9 +65,9 @@ module.exports = function (RED) {
 
   // Function that checks the configuration to make sure that credentials,
   // payload and options have been provied in the correct format.
-  var checkConfiguration = function(msg, node, cb) {
-    var message = null;
-    var taSettings = null;
+  var checkConfiguration = function(msg, node) {
+    var message = null,
+      taSettings = null;
 
     taSettings = checkCreds(node.credentials);
 
@@ -78,48 +79,64 @@ module.exports = function (RED) {
       message = 'Missing property: msg.payload';
     }
 
-    if (cb) {
-      cb(message, taSettings);
+    if (message) {
+      return Promise.reject(message);
+    } else {
+      return Promise.resolve(taSettings);
     }
   };
 
+  function invokeService(config, options, settings) {
+    const tone_analyzer = new ToneAnalyzerV3({
+      'username': settings.username,
+      'password': settings.password,
+      version_date: '2016-05-19',
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
+    });
+
+    var p = new Promise(function resolver(resolve, reject){
+      var m = 'tone';
+      switch (config['tone-method']) {
+      case 'generalTone' :
+        break;
+      case 'customerEngagementTone' :
+        m = 'tone_chat';
+        break;
+      }
+      tone_analyzer[m](options, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(response);
+        }
+      });
+    });
+
+    return p;
+  }
 
   // function when the node recieves input inside a flow.
   // Configuration is first checked before the service is invoked.
   var processOnInput = function(msg, config, node) {
-    checkConfiguration (msg, node, function(err, settings){
-      if (err) {
-        node.status({fill:'red', shape:'dot', text:err});
-        node.error(err, msg);
-        return;
-      } else {
-
-        var tone_analyzer = new ToneAnalyzerV3({
-          'username': settings.username,
-          'password': settings.password,
-          version_date: '2016-05-19',
-          headers: {
-            'User-Agent': pkg.name + '-' + pkg.version
-          }
-        });
-
+    checkConfiguration(msg, node)
+      .then(function(settings) {
         var options = toneutils.parseOptions(msg, config);
-
         node.status({fill:'blue', shape:'dot', text:'requesting'});
-        tone_analyzer.tone(options, function (err, response) {
-          node.status({})
-          if (err) {
-            node.error(err, msg);
-          } else {
-            msg.response = response;
-          }
-          node.send(msg);
-        });
-
-      }
-    });
-
-  };
+        return invokeService(config, options, settings);
+      })
+      .then(function(data){
+        node.status({})
+        msg.response = data;
+        node.send(msg);
+        node.status({});
+      })
+      .catch(function(err){
+        payloadutils.reportError(node,msg,err);
+        node.send(msg);
+      });
+  }
 
 
   // This is the Tone Analyzer Node.
@@ -127,12 +144,11 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    // Invoked whenb the node has received an input as part of a flow.
+    // Invoked when the node has received an input as part of a flow.
     this.on('input', function (msg) {
       processOnInput(msg, config, node);
     });
   }
-
 
   RED.nodes.registerType('watson-tone-analyzer-v3', Node, {
     credentials: {

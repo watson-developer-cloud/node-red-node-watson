@@ -32,6 +32,15 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+
+    <div class="form-row">
+        <label for="node-input-tone-method"><i class="fa fa-book"></i> Method: </label>
+        <select type="text" id="node-input-tone-method" style="display: inline-block; width: 70%;">
+            <option value="generalTone">General Tone</option>
+            <option value="customerEngagementTone">Customer Engagement Tone</option>
+        </select>
+    </div>
+
     <div class="form-row">
         <label for="node-input-tones"><i class="fa fa-comments-o"></i> Tones</label>
         <select type="text" id="node-input-tones" style="display: inline-block; width: 70%;" >
@@ -55,22 +64,91 @@
             <option value="true">HTML</option>
         </select>
     </div>
- 
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-tone-analyzer-v3">
-    <p>The Tone Analyzer service uses linguistic analysis to detect emotional tones, social propensities, 
+    <p>The Tone Analyzer service uses linguistic analysis to detect emotional tones, social propensities,
        and writing styles in written communication.</p>
     <p>The text to analyze should be passed in on <b>msg.payload</b>.</p>
     <p>The service response will be returned on <b>msg.response</b>.</p>
     <p>The tone and sentances can be programmaticaly set in <code>msg.tones</code>
     and <code>msg.sentences</code></p>
-    <p>Usng the node editor dialog users can filter the results by tone (emotion, language or social) and 
+    <p>Usng the node editor dialog users can filter the results by tone (emotion, language or social) and
       whether to include sentence-level analysis.</p>
+    <p>When running the Conversational Chat Tone, the input needs to follow the
+    chat json format for utterences. </p>
     <p>For more information about the Tone Analyzer service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/tone-analyzer.html">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
+  // Need to simulate a namespace, so that some of the variables don't leak across nodes
+  function ToneAnalyzerV3 () {}
+
+  // This is the namespace for this version of this Node.
+  var ToneV3 = new ToneAnalyzerV3();
+
+  ToneV3.showSelectedFields = function(fields) {
+    for (i = 0; i < fields.length; i++) {
+      $(fields[i]).parent().show();
+    }
+  }
+
+  ToneV3.hideSelectedFields = function(fields) {
+    for (i = 0; i < fields.length; i++) {
+      $(fields[i]).parent().hide();
+    }
+  }
+
+  ToneV3.hideAll = function() {
+    fields = [];
+    fields.push('#node-input-tones');
+    fields.push('#node-input-sentences');
+    fields.push('#node-input-contentType');
+    ToneV3.hideSelectedFields(fields);
+  };
+
+  ToneV3.processSelectedMethod = function(method) {
+    ToneV3.hideAll();
+    fields = [];
+    switch (method) {
+      case 'generalTone':
+        fields.push('#node-input-tones');
+        fields.push('#node-input-sentences');
+        fields.push('#node-input-contentType');
+        break;
+    }
+    ToneV3.showSelectedFields(fields);
+  }
+
+
+  ToneV3.UIListeners = function () {
+    $('#node-input-tone-method').change(function(val){
+      var method = $('#node-input-tone-method').val();
+      ToneV3.processSelectedMethod(method);
+    });
+  }
+
+  ToneV3.checkForPrepare = function () {
+    ToneV3.hideAll();
+    ToneV3.UIListeners();
+  };
+
+  // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
+  function oneditprepare() {
+    ToneV3.checkForPrepare();
+    $.getJSON('watson-tone-analyzer/vcap/')
+      .done(function (service) {
+        $('.credentials').toggle(!service);
+      })
+      .fail(function () {
+        $('.credentials').show();
+      }).always(function () {
+        $('#credentials-check').hide();
+      })
+  }
+
+
     (function() {
         RED.nodes.registerType('watson-tone-analyzer-v3', {
             category: 'IBM Watson',
@@ -78,7 +156,8 @@
                 name: {value: ""},
                 tones: {value: "all"},
                 sentences: {value: "true"},
-                contentType: {value: "false"}
+                contentType: {value: "false"},
+                "tone-method": {value:"generalTone"}
             },
             credentials: {
               username: {type:"text"},
@@ -95,17 +174,7 @@
             labelStyle: function() {
                 return this.name ? "node_label_italic" : "";
             },
-            oneditprepare: function() {
-                $.getJSON('watson-tone-analyzer/vcap/')
-                  .done(function (service) {
-                    $('.credentials').toggle(!service);
-                  })
-                  .fail(function () {
-                    $('.credentials').show();
-                  }).always(function () {
-                    $('#credentials-check').hide();
-                  })
-            }
+            oneditprepare: oneditprepare
         });
     })();
 </script>

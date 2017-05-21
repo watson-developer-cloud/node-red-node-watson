@@ -36,10 +36,13 @@
     <div class="form-row">
         <label for="node-input-discovery-method"><i class="fa fa-book"></i> Method: </label>
         <select type="text" id="node-input-discovery-method" style="display: inline-block; width: 70%;">
-            <option value="listEnvrionments">List existing envionments</option>
+            <option value="createEnvrionment">Create new environment</option>
+            <option value="listEnvrionments">List existing environments</option>
             <option value="getEnvironmentDetails">Retrieve environment details</option>
+            <option value="createCollection">Create new collection</option>
             <option value="listCollections">List existing collections</option>
             <option value="getCollectionDetails">Retrieve collection details</option>
+            <option value="createConfiguration">Create new configuration</option>
             <option value="listConfigurations">List existing configurations</option>
             <option value="getConfigurationDetails">Retrieve configuration details</option>
             <option value="query">Search in collection</option>
@@ -53,6 +56,10 @@
     <div class="form-row">
         <label for="node-input-environment_id"><i class="fa fa-tag"></i> Environment ID</label>
         <input type="text" id="node-input-environment_id" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-collection_name"><i class="fa fa-tag"></i> Collection Name</label>
+        <input type="text" id="node-input-collection_name" placeholder="">
     </div>
     <div class="form-row">
         <label for="node-input-collection_id"><i class="fa fa-tag"></i> Collection ID</label>
@@ -86,6 +93,15 @@
         <label for="node-input-return"><i class="fa fa-tag"></i> List of sections to return</label>
         <input type="text" id="node-input-return" placeholder="">
     </div>
+    <div class="form-row">
+        <label for="node-input-description"><i class="fa fa-tag"></i> Description</label>
+        <input type="text" id="node-input-description" placeholder="Name">
+    </div>
+    <div class="form-row">
+      <label for="node-input-size">Envrionment Size</label>
+      <input type="number" min="0" max="4"
+             id="node-input-size" />
+    </div>
 
 </script>
 
@@ -93,9 +109,26 @@
     <p>This is the Node for the V1 Watson Discovery service.</p>
     <p>The following methods are available:</p>
     <ul>
+    <li>
+        <p><b>Create New Environment</b><p>
+        <p>For this method the node needs an Environment Name,
+        Description and Environment Size as input.
+        </p>
+        <p>The name and description can be overridden by specifying
+          in <code>msg.discoveryparams.environmentname</code>
+          , <code>msg.discoveryparams.description</code>
+          and <code>msg.discoveryparams.size</code>
+        </p>
+        <p>Node output : </p>
+          <ul>
+            <li><code>msg.environment</code> : Information about the
+            newly created envrionment.</li>
+          </ul>
+    </li>
+    <br/>
         <li>
-            <p><b>List Existing Envrionments</b><p>
-            <p>For this methong the node does not need any input. If the envrionment name field is left blank
+            <p><b>List Existing Environments</b><p>
+            <p>For this method the node does not need any input. If the envrionment name field is left blank
       it will list all envrionments created for the instance of the Discovery service.
       If the envrionment name is specified, then only the details for
       the Discovery envrionment with the specified name will be returned.
@@ -229,6 +262,7 @@
     disV1.hideAll = function() {
       $('#node-input-environmentname').parent().hide();
       $('#node-input-environment_id').parent().hide();
+      $('#node-input-collection_name').parent().hide();
       $('#node-input-collection_id').parent().hide();
       $('#node-input-configurationname').parent().hide();
       $('#node-input-configuration_id').parent().hide();
@@ -237,6 +271,8 @@
       $('#node-input-filter').parent().hide();
       $('#node-input-aggregation').parent().hide();
       $('#node-input-return').parent().hide();
+      $('#node-input-description').parent().hide();
+      $('#node-input-size').parent().hide();
     };
 
     disV1.showSelectedFields = function(fields) {
@@ -249,9 +285,21 @@
       disV1.hideAll();
       fields = [];
       switch (method) {
+        case 'createEnvrionment':
+          fields.push('#node-input-environmentname'
+                          + ', #node-input-size'
+                          + ', #node-input-description');
+          break;
         case 'listEnvrionments':
           fields.push('#node-input-environmentname');
           break;
+        case 'createCollection':
+          fields.push('#node-input-environment_id'
+                          + ', #node-input-configuration_id'
+                          + ', #node-input-collection_name'
+                          + ', #node-input-description');
+          break;
+        case 'createConfiguration':
         case 'getEnvironmentDetails':
         case 'listCollections':
           fields.push('#node-input-environment_id');
@@ -317,11 +365,14 @@
                 collection_id: {value: ""},
                 configurationname: {value: ""},
                 configuration_id: {value: ""},
+                collection_name: {value: ""},
                 count: {value: "1"},
                 query: {value: ""},
                 filter: {value: ""},
                 aggregation: {value: ""},
                 return: {value: ""},
+                description: {value: ""},
+                size: {value: 0},
                 "discovery-method": {value:"listEnvrionments"}
             },
             credentials: {

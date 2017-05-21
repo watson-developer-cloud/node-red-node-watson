@@ -21,6 +21,7 @@ module.exports = function (RED) {
     discoveryutils = require('./discovery-utils'),
     DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
     serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
@@ -30,6 +31,14 @@ module.exports = function (RED) {
   function checkParams(method, params){
     var response = '';
     switch (method) {
+    case 'createEnvrionment':
+      response = discoveryutils.paramNameCheck(params) +
+            discoveryutils.paramDescriptionCheck(params);
+      break;
+    case 'createConfiguration':
+      response = discoveryutils.paramEnvCheck(params) +
+          discoveryutils.paramJSONCheck(params);
+      break;
     case 'getEnvironmentDetails':
     case 'listCollections':
       response = discoveryutils.paramEnvCheck(params);
@@ -47,95 +56,169 @@ module.exports = function (RED) {
              discoveryutils.paramConfigurationCheck(params);
       break;
     }
-    return response;
+    if (response) {
+      return Promise.reject(response);
+    } else {
+      return Promise.resolve();
+    }
+  }
+
+  function executeCreateEnvrionment(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.createEnvironment(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.environment = response.environment ? response.environment : response;
+          resolve();
+        }
+      });
+    });
+    return p;
   }
 
   function executeListEnvrionments(node, discovery, params, msg) {
-    discovery.getEnvironments(params, function (err, response) {
-      node.status({});
-      if (err) {
-        discoveryutils.reportError(node, msg, err.error);
-      } else {
-        msg.environments = response.environments ? response.environments : [];
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.getEnvironments(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.environments = response.environments ? response.environments : [];
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
   function executeEnvrionmentDetails(node, discovery, params, msg) {
-    discovery.getEnvironment(params, function (err, response) {
-      node.status({});
-      if (err) {
-        discoveryutils.reportError(node, msg, err.error);
-      } else {
-        msg.environment_details = response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.getEnvironment(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.environment_details = response;
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
-  function executeListCollections(node, discovery, params, msg) {
-    discovery.getCollections(params, function (err, response) {
-      node.status({});
-      if (err) {
-        discoveryutils.reportError(node, msg, err.error);
-      } else {
-        msg.collections = response.collections ? response.collections : [];
-      }
-      node.send(msg);
+  function executeCreateCollection(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+
+      //params.body = {};
+      //['name','description','collection_name'
+      //    'configuration_id'].forEach(function(f) {
+      //  params.body[f] = params[f];
+      //  //delete params[f];
+      //});
+
+      //console.log('about to create collection with params : ', params);
+      discovery.createCollection(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.collection = response.collection ? response.collection : response;
+          resolve();
+        }
+      });
     });
+    return p;
+  }
+
+
+  function executeListCollections(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.getCollections(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.collections = response.collections ? response.collections : [];
+          resolve();
+        }
+      });
+    });
+    return p;
   }
 
   function executeGetCollectionDetails(node, discovery, params, msg) {
-    discovery.getCollection(params, function (err, response) {
-      node.status({});
-      if (err) {
-        discoveryutils.reportError(node, msg, err.error);
-      } else {
-        msg.collection_details = response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.getCollection(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.collection_details = response;
+          resolve();
+        }
+      });
     });
+    return p;
+  }
+
+  function executeCreateConfiguration(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.createConfiguration(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.configuration = response.configuration ? response.configuration : response;
+          resolve();
+        }
+      });
+    });
+    return p;
   }
 
   function executeListConfigurations(node, discovery, params, msg) {
-    discovery.getConfigurations(params, function (err, response) {
-      node.status({});
-      if (err) {
-        discoveryutils.reportError(node, msg, err.error);
-      } else {
-        msg.configurations = response.configurations ? response.configurations : [];
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.getConfigurations(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.configurations = response.configurations ? response.configurations : [];
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
   function executeGetConfigurationDetails(node, discovery, params, msg) {
-    discovery.getConfiguration(params, function (err, response) {
-      node.status({});
-      if (err) {
-        discoveryutils.reportError(node, msg, err.error);
-      } else {
-        msg.configuration_details = response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.getConfiguration(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.configuration_details = response;
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
   function executeQuery(node, discovery, params, msg) {
-    discovery.query(params, function (err, response) {
-      node.status({});
-      if (err) {
-        discoveryutils.reportError(node, msg, err.error);
-      } else {
-        msg.search_results = response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.query(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.search_results = response;
+          resolve();
+        }
+      });
     });
+    return p;
+  }
+
+  function unknownMethod(node, discovery, params, msg) {
+    return Promise.reject('Unable to process as unknown mode has been specified');
   }
 
   function executeMethod(node, method, params, msg) {
-    var discovery = new DiscoveryV1({
+    const discovery = new DiscoveryV1({
       username: username,
       password: password,
       version_date: '2017-04-27',
@@ -144,31 +227,59 @@ module.exports = function (RED) {
       }
     });
 
+    var p = null;
+
     switch (method) {
+    case 'createEnvrionment':
+      p = executeCreateEnvrionment(node, discovery, params, msg);
+      break;
     case 'listEnvrionments':
-      executeListEnvrionments(node, discovery, params, msg);
+      p = executeListEnvrionments(node, discovery, params, msg);
       break;
     case 'getEnvironmentDetails':
-      executeEnvrionmentDetails(node, discovery, params, msg);
+      p = executeEnvrionmentDetails(node, discovery, params, msg);
+      break;
+    case 'createCollection':
+      p = executeCreateCollection(node, discovery, params, msg);
       break;
     case 'listCollections':
-      executeListCollections(node, discovery, params, msg);
+      p = executeListCollections(node, discovery, params, msg);
       break;
     case 'getCollectionDetails':
-      executeGetCollectionDetails(node, discovery, params, msg);
+      p = executeGetCollectionDetails(node, discovery, params, msg);
+      break;
+    case 'createConfiguration':
+      p = executeCreateConfiguration(node, discovery, params, msg);
       break;
     case 'listConfigurations':
-      executeListConfigurations(node, discovery, params, msg);
+      p = executeListConfigurations(node, discovery, params, msg);
       break;
     case 'getConfigurationDetails':
-      executeGetConfigurationDetails(node, discovery, params, msg);
+      p = executeGetConfigurationDetails(node, discovery, params, msg);
       break;
     case 'query':
-      executeQuery(node, discovery, params, msg);
+      p = executeQuery(node, discovery, params, msg);
+      break;
+    default :
+      p = unknownMethod(node, discovery, params, msg);
       break;
     }
-
+    return p;
   }
+
+  function initialCheck(u, p, m) {
+    var message = '';
+    if (!u || !p) {
+      message = 'Missing Watson Discovery service credentials';
+    } else if (!m || '' === m) {
+      message = 'Required Discovery method has not been specified';
+    }
+    if (message){
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
+  }
+
 
   if (dservice) {
     sUsername = dservice.username;
@@ -192,22 +303,25 @@ module.exports = function (RED) {
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
 
-      if (!username || !password) {
-        message = 'Missing Watson Discovery service credentials';
-      } else if (!method || '' === method) {
-        message = 'Required Discovery method has not been specified';
-      } else {
-        params = discoveryutils.buildParams(msg,config);
-        message = checkParams(method, params);
-      }
-
-      if (message) {
-        discoveryutils.reportError(node,msg,message);
-        return;
-      }
-
-      node.status({fill:'blue', shape:'dot', text:'requesting'});
-      executeMethod(node, method, params, msg);
+      node.status({});
+      initialCheck(username, password, method)
+        .then(function(){
+          params = discoveryutils.buildParams(msg,config);
+          return checkParams(method, params);
+        })
+        .then(function(){
+          node.status({fill:'blue', shape:'dot', text:'requesting'});
+          return executeMethod(node, method, params, msg);
+        })
+        .then(function(){
+          node.status({});
+          node.send(msg);
+        })
+        .catch(function(err){
+          //discoveryutils.reportError(node,msg,err);
+          payloadutils.reportError(node,msg,err);
+          node.send(msg);
+        });
     });
   }
 
