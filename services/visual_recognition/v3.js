@@ -27,8 +27,8 @@ module.exports = function(RED) {
     fileType = require('file-type'),
     fs = require('fs'),
     async = require('async'),
-    toArray = require('stream-to-array')
-  sAPIKey = null,
+    toArray = require('stream-to-array'),
+    sAPIKey = null,
     service = null;
 
   // temp is being used for file streaming to allow the file to arrive so it can be processed.
