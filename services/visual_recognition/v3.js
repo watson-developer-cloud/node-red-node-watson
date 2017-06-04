@@ -92,7 +92,7 @@ module.exports = function(RED) {
   function checkForStream(msg) {
     var p = new Promise(function resolver(resolve, reject) {
       if (payloadutils.isReadableStream(msg.payload)) {
-        msg.payload.resume();
+        //msg.payload.resume();
         toArray(msg.payload)
           .then(function(parts) {
             var buffers = [];
