@@ -9,6 +9,7 @@ Node-RED Watson Nodes for IBM Bluemix
 
 ### New in version 0.5.8
 - Visual Reconition Node, now accepts readstream on msg.payload
+- Add passages parameter to Discovery Node 
 
 ### New in version 0.5.7
 - Fix to Tone Analyzer to allow JSON as input

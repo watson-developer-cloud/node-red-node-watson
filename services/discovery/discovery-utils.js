@@ -71,7 +71,7 @@ DiscoveryUtils.prototype = {
 
     ['environment_id','collection_id','configuration_id',
       'collection_name',
-      'query','description','size'].forEach(function(f) {
+      'query','passages','description','size'].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);
     });
 
@@ -106,6 +106,9 @@ DiscoveryUtils.prototype = {
         params.query += ',';
       }
       params.query += config.query3 + ':"' + config.queryvalue3 + '"';
+    }
+    if (config.passages) {
+      params.passages = config.passages;
     }
 
     return params;
