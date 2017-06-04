@@ -13,7 +13,8 @@
 	  "image-type": "^2.0.2",
     "watson-developer-cloud": "^2.32.1",
     "kuromoji": "^0.0.5",
-    "is-docx": "^0.0.3"
+    "is-docx": "^0.0.3",
+    "stream-to-array" : "^2.3.0" 
   },
   "repository": {
     "type": "git",
