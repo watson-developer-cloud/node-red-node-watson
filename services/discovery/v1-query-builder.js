@@ -68,8 +68,8 @@ module.exports = function(RED) {
     });
 
     discovery.getCollections({
-        environment_id: req.query.environment_id
-      },
+      environment_id: req.query.environment_id
+    },
       function(err, response) {
         if (err) {
           res.json(err);
@@ -92,12 +92,11 @@ module.exports = function(RED) {
     });
 
     discovery.query({
-        environment_id: req.query.environment_id,
-        collection_id: req.query.collection_id,
-        //query: 'text:node-red',
-        query: 'text:a,text:ibm',
-        count: 1
-      },
+      environment_id: req.query.environment_id,
+      collection_id: req.query.collection_id,
+      query: 'text:a,text:ibm',
+      count: 1
+    },
       function(err, response) {
         if (err) {
           res.json(err);

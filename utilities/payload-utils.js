@@ -17,7 +17,7 @@ var url = require('url'),
   fs = require('fs'),
   fileType = require('file-type'),
   request = require('request'),
-  path = require('path');
+  path = require('path'),
   stream = require('stream');
 
 function PayloadUtils() {}

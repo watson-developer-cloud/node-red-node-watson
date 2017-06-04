@@ -95,10 +95,10 @@ module.exports = function(RED) {
         //msg.payload.resume();
         toArray(msg.payload)
           .then(function(parts) {
-            var buffers = [];
+            var buffers = [], part;
 
             for (var i = 0; i < parts.length; ++i) {
-              var part = parts[i];
+              part = parts[i];
               buffers.push((part instanceof Buffer) ? part : new Buffer(part));
             }
             msg.payload = Buffer.concat(buffers);
@@ -426,7 +426,7 @@ module.exports = function(RED) {
         .then(function(body) {
           return processTheResponse(body, feature, node, msg);
         });
-        break;
+      break;
 
     case 'retrieveClassifiersList':
       p = invokeListClassifiers(node, params)
