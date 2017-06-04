@@ -95,7 +95,7 @@ module.exports = function(RED) {
         //msg.payload.resume();
         toArray(msg.payload)
           .then(function(parts) {
-            var buffers = [], part;
+            var buffers = [], part = null;
 
             for (var i = 0; i < parts.length; ++i) {
               part = parts[i];
@@ -103,7 +103,6 @@ module.exports = function(RED) {
             }
             msg.payload = Buffer.concat(buffers);
             resolve();
-
           });
       } else {
         resolve();
