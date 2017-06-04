@@ -77,6 +77,13 @@
         <label for="node-input-count"><i class="fa fa-tag"></i> Number of documents</label>
         <input type="text" id="node-input-count" placeholder="">
     </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-passages" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-passages" style="width: 70%;"> Passages</label>
+    </div>
+
     <div class="form-row">
         <label for="node-input-query"><i class="fa fa-tag"></i> Query for Search</label>
         <input type="text" id="node-input-query" placeholder="">
@@ -230,12 +237,16 @@
             and <code>msg.discoveryparams.collection_id</code>
             </p>
             <p>Optionally you can specify the number of documents to retrieve, a
-               query to find the most relevant search results, a filter
-               to limit the search results an aggregation to return an
+               query to find the most relevant search results, whether to
+               retrieve the most relevant passages,
+               to limit the search results, an aggregation to return an
                exact result, and a comma separated list of the sections of the
                documents to return.</p>
             <p>The query being submitted can be overridden by specifying the
             query in <code>msg.discoveryparams.query</code>.
+            </p>
+            <p>The passages parameter can be overridden by specifying
+            <code>msg.discoveryparams.passages</code>.
             </p>
             <p>Node output : </p>
               <ul>
@@ -267,6 +278,7 @@
       $('#node-input-configurationname').parent().hide();
       $('#node-input-configuration_id').parent().hide();
       $('#node-input-count').parent().hide();
+      $('#node-input-passages').parent().hide();
       $('#node-input-query').parent().hide();
       $('#node-input-filter').parent().hide();
       $('#node-input-aggregation').parent().hide();
@@ -320,6 +332,7 @@
           fields.push('#node-input-environment_id'
                          + ', #node-input-collection_id'
                          + ', #node-input-count'
+                         + ', #node-input-passages'
                          + ', #node-input-query'
                          + ', #node-input-filter'
                          + ', #node-input-aggregation'
@@ -367,6 +380,7 @@
                 configuration_id: {value: ""},
                 collection_name: {value: ""},
                 count: {value: "1"},
+                passages: {value: "false"},
                 query: {value: ""},
                 filter: {value: ""},
                 aggregation: {value: ""},

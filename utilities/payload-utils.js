@@ -17,7 +17,8 @@ var url = require('url'),
   fs = require('fs'),
   fileType = require('file-type'),
   request = require('request'),
-  path = require('path');
+  path = require('path'),
+  stream = require('stream');
 
 function PayloadUtils() {}
 
@@ -89,13 +90,26 @@ PayloadUtils.prototype = {
     request(url).pipe(wstream);
   },
 
-  reportError: function (node, msg, message) {
-    var messageTxt = message.error ? message.error : message;
+  reportError: function (node, msg, err) {
+    var messageTxt = err;
+
+    if (err.error) {
+      messageTxt = err.error;
+    } else if (err.description) {
+      messageTxt = err.description;
+    } else if (err.message) {
+      messageTxt = err.message;
+    }
 
     msg.watsonerror = messageTxt;
-
     node.status({fill:'red', shape:'dot', text: messageTxt});
     node.error(messageTxt, msg);
+  },
+
+  isReadableStream : function (obj) {
+    return obj instanceof stream.Stream &&
+        typeof (obj._read === 'function') &&
+        typeof (obj._readableState === 'object');
   },
 
   // Function that is returns a function to count
