@@ -19,6 +19,7 @@ module.exports = function(RED) {
   const VisualRecognitionV3 = require('watson-developer-cloud/visual-recognition/v3');
   var pkg = require('../../package.json'),
     serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
     //watson = require('watson-developer-cloud'),
     imageType = require('image-type'),
     url = require('url'),
@@ -26,6 +27,7 @@ module.exports = function(RED) {
     fileType = require('file-type'),
     fs = require('fs'),
     async = require('async'),
+    toArray = require('stream-to-array'),
     sAPIKey = null,
     service = null;
 
@@ -75,12 +77,39 @@ module.exports = function(RED) {
     case 'classifyImage':
     case 'detectFaces':
     case 'recognizeText':
-      if (typeof msg.payload === 'boolean' || typeof msg.payload === 'number') {
+      if (typeof msg.payload === 'boolean' ||
+        typeof msg.payload === 'number') {
         return Promise.reject('Bad format : msg.payload must be a URL string or a Node.js Buffer');
       }
       break;
     }
     return Promise.resolve();
+  }
+
+
+  // Even though Visual Reconition SDK can accept a filestream as input
+  // it can't handle the one on msg.payload, so read it into a buffer
+  function checkForStream(msg) {
+    var p = new Promise(function resolver(resolve, reject) {
+      if (payloadutils.isReadableStream(msg.payload)) {
+        //msg.payload.resume();
+        toArray(msg.payload)
+          .then(function(parts) {
+            var buffers = [], part = null;
+
+            for (var i = 0; i < parts.length; ++i) {
+              part = parts[i];
+              buffers.push((part instanceof Buffer) ? part : new Buffer(part));
+            }
+            msg.payload = Buffer.concat(buffers);
+            resolve();
+          });
+      } else {
+        resolve();
+      }
+    });
+    return p;
+
   }
 
   function verifyServiceCredentials(node, msg) {
@@ -118,8 +147,26 @@ module.exports = function(RED) {
     }
   }
 
+  function setCommonParams(node, msg, params) {
+    if (msg.params != null && msg.params.classifier_ids != null) {
+      params['classifier_ids'] = msg.params['classifier_ids'];
+    }
+    if (msg.params != null && msg.params.owners != null) {
+      params['owners'] = msg.params['owners'];
+    }
+    if (msg.params != null && msg.params.threshold != null) {
+      params['threshold'] = msg.params['threshold'];
+    }
+    if (node.config != null && node.config.lang != null) {
+      params['Accept-Language'] = node.config.lang;
+    }
+    if (msg.params != null && msg.params.accept_language != null) {
+      params['Accept-Language'] = msg.params['accept_language'];
+    }
+  }
+
   function prepareCommonParams(params, node, msg) {
-    var p = new Promise(function resolver(resolve, reject){
+    var p = new Promise(function resolver(resolve, reject) {
       if (imageCheck(msg.payload)) {
         var ft = fileType(msg.payload);
         var ext = ft ? ft.ext : 'tmp';
@@ -131,41 +178,13 @@ module.exports = function(RED) {
           }
           stream_buffer(info.path, msg.payload, function() {
             params['images_file'] = fs.createReadStream(info.path);
-            if (msg.params != null && msg.params.classifier_ids != null) {
-              params['classifier_ids'] = msg.params['classifier_ids'];
-            }
-            if (msg.params != null && msg.params.owners != null) {
-              params['owners'] = msg.params['owners'];
-            }
-            if (msg.params != null && msg.params.threshold != null) {
-              params['threshold'] = msg.params['threshold'];
-            }
-            if (node.config != null && node.config.lang != null) {
-              params['Accept-Language'] = node.config.lang;
-            }
-            if (msg.params != null && msg.params.accept_language != null) {
-              params['Accept-Language'] = msg.params['accept_language'];
-            }
+            setCommonParams(node, msg, params);
             resolve();
           });
         });
       } else if (urlCheck(msg.payload)) {
         params['url'] = msg.payload;
-        if (msg.params != null && msg.params.classifier_ids != null) {
-          params['classifier_ids'] = msg.params['classifier_ids'];
-        }
-        if (msg.params != null && msg.params.owners != null) {
-          params['owners'] = msg.params['owners'];
-        }
-        if (msg.params != null && msg.params.threshold != null) {
-          params['threshold'] = msg.params['threshold'];
-        }
-        if (node.config != null && node.config.lang != null) {
-          params['Accept-Language'] = node.config.lang;
-        }
-        if (msg.params != null && msg.params.accept_language != null) {
-          params['Accept-Language'] = msg.params['accept_language'];
-        }
+        setCommonParams(node, msg, params);
         resolve();
       } else {
         reject('Payload must be either an image buffer or a string representing a url');
@@ -216,7 +235,7 @@ module.exports = function(RED) {
   // that contains a minimum of 10 images.(Optional)
 
   function prepareParamsCreateClassifier(params, node, msg) {
-    var p = new Promise(function resolver(resolve, reject){
+    var p = new Promise(function resolver(resolve, reject) {
       var listParams = {},
         asyncTasks = [],
         k = null;
@@ -246,7 +265,7 @@ module.exports = function(RED) {
   }
 
   function performDeleteAllClassifiers(params, node, msg) {
-    var p = new Promise(function resolver(resolve, reject){
+    var p = new Promise(function resolver(resolve, reject) {
       node.service.listClassifiers(params, function(err, body) {
         node.status({});
         if (err) {
@@ -288,7 +307,7 @@ module.exports = function(RED) {
   }
 
   function invokeService(feature, params, node, msg) {
-    var p = new Promise(function resolver(resolve, reject){
+    var p = new Promise(function resolver(resolve, reject) {
       switch (feature) {
       case 'classifyImage':
         node.service.classify(params, function(err, body) {
@@ -324,17 +343,17 @@ module.exports = function(RED) {
 
   function executeService(feature, params, node, msg) {
     var p = prepareCommonParams(params, node, msg)
-      .then(function(){
+      .then(function() {
         return invokeService(feature, params, node, msg);
       })
-      .then(function(body){
+      .then(function(body) {
         return processTheResponse(body, feature, node, msg);
       });
     return p;
   }
 
   function invokeCreateClassifier(node, params) {
-    var p = new Promise(function resolver(resolve, reject){
+    var p = new Promise(function resolver(resolve, reject) {
       node.service.createClassifier(params, function(err, body) {
         if (err) {
           reject(err);
@@ -348,7 +367,7 @@ module.exports = function(RED) {
   }
 
   function invokeListClassifiers(node, params) {
-    var p = new Promise(function resolver(resolve, reject){
+    var p = new Promise(function resolver(resolve, reject) {
       node.service.listClassifiers(params, function(err, body) {
         if (err) {
           reject(err);
@@ -361,7 +380,7 @@ module.exports = function(RED) {
   }
 
   function invokeGetClassifier(node, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
+    var p = new Promise(function resolver(resolve, reject) {
       params['classifier_id'] = msg.params['classifier_id'];
       node.service.getClassifier(params, function(err, body) {
         if (err) {
@@ -375,7 +394,7 @@ module.exports = function(RED) {
   }
 
   function invokeDeleteClassifier(node, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
+    var p = new Promise(function resolver(resolve, reject) {
       params['classifier_id'] = msg.params['classifier_id'];
       node.service.deleteClassifier(params, function(err, body) {
         if (err) {
@@ -391,7 +410,7 @@ module.exports = function(RED) {
 
   function executeCreateClassifier(params, node, msg) {
     var p = prepareParamsCreateClassifier(params, node, msg)
-      .then(function(){
+      .then(function() {
         return invokeCreateClassifier(node, params);
       });
 
@@ -403,28 +422,28 @@ module.exports = function(RED) {
     switch (feature) {
     case 'createClassifier':
       p = executeCreateClassifier(params, node, msg)
-        .then(function(body){
+        .then(function(body) {
           return processTheResponse(body, feature, node, msg);
         });
       break;
 
     case 'retrieveClassifiersList':
       p = invokeListClassifiers(node, params)
-        .then(function(body){
+        .then(function(body) {
           return processTheResponse(body, feature, node, msg);
         });
       break;
 
     case 'retrieveClassifierDetails':
       p = invokeGetClassifier(node, params, msg)
-        .then(function(body){
+        .then(function(body) {
           return processTheResponse(body, feature, node, msg);
         });
       break;
 
     case 'deleteClassifier':
       p = invokeDeleteClassifier(node, params, msg)
-        .then(function(body){
+        .then(function(body) {
           return processTheResponse(body, feature, node, msg);
         });
       break;
@@ -466,44 +485,35 @@ module.exports = function(RED) {
       var params = {};
 
       node.status({});
-      // so there is at most 1 temp file at a time (did not found a better solution...)
-      //temp.cleanup();
 
       verifyPayload(msg)
-        .then(function(){
+        .then(function() {
+          return checkForStream(msg);
+        })
+        .then(function() {
           return verifyInputs(feature, msg);
         })
-        .then(function(){
+        .then(function() {
           return verifyServiceCredentials(node, msg);
         })
-        .then(function(){
+        .then(function() {
           return execute(feature, params, node, msg);
         })
-        .then(function(){
+        .then(function() {
           temp.cleanup();
           node.status({});
           node.send(msg);
         })
         .catch(function(err) {
-          var messageTxt = err;
-          if (err.error) {
-            messageTxt = err.error;
-          } else if (err.description) {
-            messageTxt = err.description;
-          }
-          node.status({
-            fill: 'red',
-            shape: 'dot',
-            text: messageTxt
-          });
+          payloadutils.reportError(node, msg, err);
 
           msg.result = {};
           msg.result['error'] = err;
-          node.error(messageTxt, msg);
           // Note: This node.send forwards the error to the next node,
           // if this isn't desired then this line needs to be removed.
           // Should be ok as the node.error would already have recorded
           // the error in the debug console.
+          temp.cleanup();
           node.send(msg);
         });
     });
