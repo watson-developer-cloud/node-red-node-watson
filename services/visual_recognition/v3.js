@@ -74,14 +74,14 @@ module.exports = function(RED) {
 
   function verifyInputs(feature, msg) {
     switch (feature) {
-      case 'classifyImage':
-      case 'detectFaces':
-      case 'recognizeText':
-        if (typeof msg.payload === 'boolean' ||
-          typeof msg.payload === 'number') {
-          return Promise.reject('Bad format : msg.payload must be a URL string or a Node.js Buffer');
-        }
-        break;
+    case 'classifyImage':
+    case 'detectFaces':
+    case 'recognizeText':
+      if (typeof msg.payload === 'boolean' ||
+        typeof msg.payload === 'number') {
+        return Promise.reject('Bad format : msg.payload must be a URL string or a Node.js Buffer');
+      }
+      break;
     }
     return Promise.resolve();
   }
@@ -310,33 +310,33 @@ module.exports = function(RED) {
   function invokeService(feature, params, node, msg) {
     var p = new Promise(function resolver(resolve, reject) {
       switch (feature) {
-        case 'classifyImage':
-          node.service.classify(params, function(err, body) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(body);
-            }
-          });
-          break;
-        case 'detectFaces':
-          node.service.detectFaces(params, function(err, body) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(body);
-            }
-          });
-          break;
-        case 'recognizeText':
-          node.service.recognizeText(params, function(err, body) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(body);
-            }
-          });
-          break;
+      case 'classifyImage':
+        node.service.classify(params, function(err, body) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(body);
+          }
+        });
+        break;
+      case 'detectFaces':
+        node.service.detectFaces(params, function(err, body) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(body);
+          }
+        });
+        break;
+      case 'recognizeText':
+        node.service.recognizeText(params, function(err, body) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(body);
+          }
+        });
+        break;
       }
     });
     return p;
@@ -421,40 +421,40 @@ module.exports = function(RED) {
   function executeUtilService(feature, params, node, msg) {
     var p = null;
     switch (feature) {
-      case 'createClassifier':
-        p = executeCreateClassifier(params, node, msg)
-          .then(function(body) {
-            return processTheResponse(body, feature, node, msg);
-          });
+    case 'createClassifier':
+      p = executeCreateClassifier(params, node, msg)
+        .then(function(body) {
+          return processTheResponse(body, feature, node, msg);
+        });
         break;
 
-      case 'retrieveClassifiersList':
-        p = invokeListClassifiers(node, params)
-          .then(function(body) {
-            return processTheResponse(body, feature, node, msg);
-          });
-        break;
+    case 'retrieveClassifiersList':
+      p = invokeListClassifiers(node, params)
+        .then(function(body) {
+          return processTheResponse(body, feature, node, msg);
+        });
+      break;
 
-      case 'retrieveClassifierDetails':
-        p = invokeGetClassifier(node, params, msg)
-          .then(function(body) {
-            return processTheResponse(body, feature, node, msg);
-          });
-        break;
+    case 'retrieveClassifierDetails':
+      p = invokeGetClassifier(node, params, msg)
+        .then(function(body) {
+          return processTheResponse(body, feature, node, msg);
+        });
+      break;
 
-      case 'deleteClassifier':
-        p = invokeDeleteClassifier(node, params, msg)
-          .then(function(body) {
-            return processTheResponse(body, feature, node, msg);
-          });
-        break;
+    case 'deleteClassifier':
+      p = invokeDeleteClassifier(node, params, msg)
+        .then(function(body) {
+          return processTheResponse(body, feature, node, msg);
+        });
+      break;
 
-      case 'deleteAllClassifiers':
-        p = performDeleteAllClassifiers(params, node, msg);
-        break;
+    case 'deleteAllClassifiers':
+      p = performDeleteAllClassifiers(params, node, msg);
+      break;
 
-      default:
-        p = Promise.reject('Mode ' + feature + ' not understood');
+    default:
+      p = Promise.reject('Mode ' + feature + ' not understood');
     }
     return p;
   }

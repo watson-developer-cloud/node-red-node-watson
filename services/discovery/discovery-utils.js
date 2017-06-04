@@ -36,13 +36,13 @@ DiscoveryUtils.prototype = {
 
   buildParamsForPayload: function(msg, config, params) {
     var isJSON = this.isJsonString(msg.payload) ||
-                        this.isJsonObject(msg.payload);
+      this.isJsonObject(msg.payload);
 
     // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
     if (typeof msg.payload === 'string' || isJSON) {
       params.file = this.isJsonObject(msg.payload) ?
-                           JSON.stringify(msg.payload) :
-                           msg.payload;
+        JSON.stringify(msg.payload) :
+        msg.payload;
     }
     return params;
   },
@@ -69,13 +69,14 @@ DiscoveryUtils.prototype = {
 
     params = this.buildParamsForName(msg, config, params);
 
-    ['environment_id','collection_id','configuration_id',
+    ['environment_id', 'collection_id', 'configuration_id',
       'collection_name',
-      'query','passages','description','size'].forEach(function(f) {
+      'query', 'passages', 'description', 'size'
+    ].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);
     });
 
-    ['count','filter','aggregation','return'].forEach(function(f) {
+    ['count', 'filter', 'aggregation', 'return'].forEach(function(f) {
       params = me.buildParamsFromConfig(config, params, f);
     });
 
@@ -114,7 +115,7 @@ DiscoveryUtils.prototype = {
     return params;
   },
 
-  paramEnvCheck: function (params) {
+  paramEnvCheck: function(params) {
     var response = '';
     if (!params.environment_id) {
       response = 'Missing Environment ID ';
@@ -122,7 +123,7 @@ DiscoveryUtils.prototype = {
     return response;
   },
 
-  paramJSONCheck: function (params) {
+  paramJSONCheck: function(params) {
     var response = '';
     if (!params.file) {
       response = 'Missing JSON file on payload';
@@ -130,7 +131,7 @@ DiscoveryUtils.prototype = {
     return response;
   },
 
-  paramNameCheck: function (params) {
+  paramNameCheck: function(params) {
     var response = '';
     if (!params.name) {
       response = 'Missing Name ';
@@ -138,7 +139,7 @@ DiscoveryUtils.prototype = {
     return response;
   },
 
-  paramDescriptionCheck: function (params) {
+  paramDescriptionCheck: function(params) {
     var response = '';
     if (!params.description) {
       response = 'Missing Description ';
@@ -146,7 +147,7 @@ DiscoveryUtils.prototype = {
     return response;
   },
 
-  paramCollectionCheck: function (params) {
+  paramCollectionCheck: function(params) {
     var response = '';
     if (!params.collection_id) {
       response = 'Missing Collection ID ';
@@ -154,7 +155,7 @@ DiscoveryUtils.prototype = {
     return response;
   },
 
-  paramConfigurationCheck: function (params) {
+  paramConfigurationCheck: function(params) {
     var response = '';
     if (!params.configuration_id) {
       response = 'Missing Configuration ID ';
@@ -187,7 +188,7 @@ DiscoveryUtils.prototype = {
   },
 
   // sorting functions
-  uniqueFilter: function (value, index, self) {
+  uniqueFilter: function(value, index, self) {
     return self.indexOf(value) === index;
   },
 
@@ -197,8 +198,8 @@ DiscoveryUtils.prototype = {
     if ('object' === typeof schemaData) {
       for (var k in schemaData) {
         if ('results' === k &&
-                'object' === typeof schemaData[k] &&
-                'object' === typeof schemaData[k][0]) {
+          'object' === typeof schemaData[k] &&
+          'object' === typeof schemaData[k][0]) {
           fields = this.buildFieldByStep(schemaData[k][0], fields, '');
         }
       }
@@ -209,11 +210,11 @@ DiscoveryUtils.prototype = {
     return fields;
   },
 
-//  reportError: function (node, msg, message) {
-//    var messageTxt = message.error ? message.error : message;
-//    node.status({fill:'red', shape:'dot', text: messageTxt});
-//    node.error(message, msg);
-//  } ,
+  //  reportError: function (node, msg, message) {
+  //    var messageTxt = message.error ? message.error : message;
+  //    node.status({fill:'red', shape:'dot', text: messageTxt});
+  //    node.error(message, msg);
+  //  } ,
 
   isJsonString: function(str) {
     try {
