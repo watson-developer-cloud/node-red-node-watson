@@ -1,4 +1,4 @@
-default-endpoint<!--
+<!--
   Copyright 2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +15,15 @@ default-endpoint<!--
 -->
 
 <script type="text/x-red" data-template-name="watson-conversation-v1">
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-
     <div id="credentials-check" class="form-row">
         <div class="form-tips">
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
         </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
     </div>
 
     <div class="form-row credentials" style="display: none;">
@@ -142,7 +142,7 @@ default-endpoint<!--
               multiuser: {value: false},
               context: {value: true},
               'default-endpoint' :{value: true},
-              'service-endpoint' :{value: 'https://gateway.watsonplatform.net/conversation/api'},
+              'service-endpoint' :{value: 'https://gateway.watsonplatform.net/conversation/api'}
             },
             credentials: {
               username: {type:'text'},
