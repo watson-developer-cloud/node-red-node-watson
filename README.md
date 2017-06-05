@@ -7,9 +7,13 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.9
+- Endpoint can now be specified in Conversation,
+and Conversation Workspace Manager nodes. 
+
 ### New in version 0.5.8
 - Visual Reconition Node, now accepts readstream on msg.payload
-- Add passages parameter to Discovery Node 
+- Add passages parameter to Discovery Node
 
 ### New in version 0.5.7
 - Fix to Tone Analyzer to allow JSON as input
