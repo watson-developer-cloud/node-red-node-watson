@@ -135,10 +135,7 @@ module.exports = function(RED) {
     // If msg.params contain credentials then these will Overridde
     // the bound or configured credentials.
     const serviceSettings = {
-      //username: userName,
-      //password: passWord,
       version_date: '2017-05-26',
-      //url:'https://gateway-fra.watsonplatform.net/conversation/api',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -168,6 +165,9 @@ module.exports = function(RED) {
       }
     }
 
+    if (service) {
+      endpoint = service.url;
+    }
     if (!config['default-endpoint'] && config['service-endpoint']) {
       endpoint = config['service-endpoint'];
     }
