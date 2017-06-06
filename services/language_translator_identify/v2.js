@@ -18,9 +18,8 @@ module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'language-translator';
   var pkg = require('../../package.json'),
     LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
-    //cfenv = require('cfenv'),
+    payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
-    //service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
@@ -35,36 +34,23 @@ module.exports = function (RED) {
     sEndpoint = service.url;
   }
 
-  RED.httpAdmin.get('/watson-language-translator-identify/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
-  });
+  function initialCheck(u, p) {
+    if (!u || !p) {
+      return Promise.reject('Missing Watson Language Translator service credentials');
+    }
+    return Promise.resolve();
+  }
 
-  function Node (config) {
-    var node = this, serviceSettings = {};
-    RED.nodes.createNode(this, config);
+  function payloadCheck(msg) {
+    if (!msg.payload) {
+      return Promise.reject('Missing property: msg.payload');
+    }
+    return Promise.resolve();
+  }
 
-    this.on('input', function (msg) {
-      if (!msg.payload) {
-        var message = 'Missing property: msg.payload';
-        node.error(message, msg);
-        return;
-      }
-
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password;
-
-      if (!username || !password) {
-        var message = 'Missing Watson Language Translator service credentials';
-        node.error(message, msg);
-        return;
-      }
-
-      endpoint = sEndpoint;
-      if ((!config['default-endpoint']) && config['service-endpoint']) {
-        endpoint = config['service-endpoint'];
-      }
-
-      serviceSettings = {
+  function execute(node, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      var serviceSettings = {
         username: username,
         password: password,
         version: 'v2',
@@ -72,25 +58,60 @@ module.exports = function (RED) {
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
-      };
-
+      };;
       if (endpoint) {
         serviceSettings.url = endpoint;
       }
 
       var language_translator = new LanguageTranslatorV2(serviceSettings);
 
-      node.status({fill:'blue', shape:'dot', text:'requesting'});
       language_translator.identify({text: msg.payload}, function (err, response) {
-        node.status({})
         if (err) {
-          node.error(err, msg);
+          reject(err);
         } else {
           msg.languages = response.languages
           msg.lang = response.languages[0];
+          resolve();
         }
-        node.send(msg);
       });
+
+    });
+    return p;
+  }
+
+  RED.httpAdmin.get('/watson-language-translator-identify/vcap', function (req, res) {
+    res.json(service ? {bound_service: true} : null);
+  });
+
+  function Node (config) {
+    var node = this;
+    RED.nodes.createNode(this, config);
+
+    this.on('input', function (msg) {
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password;
+
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
+
+      node.status({});
+      initialCheck(username, password)
+        .then(function(){
+          return payloadCheck(msg);
+        })
+        .then(function(){
+          node.status({fill:'blue', shape:'dot', text:'requesting'});
+          return execute(node, msg);
+        })
+        .then(function(){
+          node.status({});
+          node.send(msg);
+        })
+        .catch(function(err){
+          payloadutils.reportError(node,msg,err);
+        });
     });
   }
   RED.nodes.registerType('watson-language-translator-identify', Node, {
