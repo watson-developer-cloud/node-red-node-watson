@@ -445,12 +445,12 @@ module.exports = function (RED) {
           return executeAction(msg, action);
         })
         .then(function(){
-          //temp.cleanup();
+          temp.cleanup();
           node.status({});
           node.send(msg);
         })
         .catch(function(err){
-          //temp.cleanup();
+          temp.cleanup();
           payloadutils.reportError(node,msg,err);
           node.send(msg);
         });
