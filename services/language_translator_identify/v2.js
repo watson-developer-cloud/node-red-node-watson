@@ -26,11 +26,13 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
-    endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
+    endpoint = '', sEndpoint;
+    //endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
 
   RED.httpAdmin.get('/watson-language-translator-identify/vcap', function (req, res) {
@@ -38,7 +40,7 @@ module.exports = function (RED) {
   });
 
   function Node (config) {
-    var node = this;
+    var node = this, serviceSettings = {};
     RED.nodes.createNode(this, config);
 
     this.on('input', function (msg) {
@@ -57,15 +59,26 @@ module.exports = function (RED) {
         return;
       }
 
-      var language_translator = new LanguageTranslatorV2({
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
+
+      serviceSettings = {
         username: username,
         password: password,
         version: 'v2',
-        url: endpointUrl,
+        //url: endpointUrl,
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
-      });
+      };
+
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
+
+      var language_translator = new LanguageTranslatorV2(serviceSettings);
 
       node.status({fill:'blue', shape:'dot', text:'requesting'});
       language_translator.identify({text: msg.payload}, function (err, response) {
