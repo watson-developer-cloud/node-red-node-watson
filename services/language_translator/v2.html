@@ -39,6 +39,16 @@
         <input type="password" id="node-input-password" placeholder="Password"/>
     </div>
 
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-cwm-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-cwm-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/language-translator/api">
+    </div>
+
     <div class="form-row">
         <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
         <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
@@ -281,8 +291,9 @@
   tor.checkModels = function () {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
+    var e = $('#node-input-service-endpoint').val();
 
-    $.getJSON('watson-translator/models/', {un: u, pwd: p}).done(function (data) {
+    $.getJSON('watson-translator/models/', {un: u, pwd: p, e: e}).done(function (data) {
       if (data.models) {
         tor.models = data.models;
         tor.have_credentials = true;
@@ -590,6 +601,15 @@
       lg_parameters_selected = $('#node-input-lgparams2').val();
     });
 
+    $('#node-input-default-endpoint').change(function () {
+      var checked = $('#node-input-default-endpoint').prop('checked')
+      if (checked) {
+        $('#node-input-service-endpoint').parent().hide();
+      } else {
+        $('#node-input-service-endpoint').parent().show();
+      }
+    });
+
   }
 
   // The dynamic nature of the selection fields in this node has caused problems.
@@ -690,7 +710,10 @@
                 filetype: {value: 'forcedglossary'},
                 trainid: {value: ''},
                 lgparams2: {value: 'lparams'},
-                ldparamshidden2: {value: ''}
+                ldparamshidden2: {value: ''},
+                'default-endpoint' :{value: true},
+                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/language-translator/api'}
+
             },
             credentials: {
               username: {type: 'text'}

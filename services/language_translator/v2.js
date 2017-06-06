@@ -35,14 +35,16 @@ module.exports = function (RED) {
     sPassword = null,
     //service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
+    endpoint = '',
+    sEndpoint = 'https://gateway-fra.watsonplatform.net/language-translator/api';
+    //endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   temp.track();
-
 
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
 
   // These are APIs that the node has created to allow it to dynamically fetch Bluemix
@@ -56,11 +58,13 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-translator/models', function (req, res) {
+    endpoint = sEndpoint ? sEndpoint : req.query.e;
+
     var lt = new LanguageTranslatorV2({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
       version: 'v2',
-      url: endpointUrl,
+      url: endpoint,
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -96,28 +100,40 @@ module.exports = function (RED) {
     // is a request to refresh the model list.
     // Credentials are needed for each of the modes.
 
-    username = sUsername || this.credentials.username;
-    password = sPassword || this.credentials.password || config.password;
 
     // The node has received an input as part of a flow, need to determine
     // what the request is for, and based on that if the required fields
     // have been provided.
     this.on('input', function (msg) {
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password || config.password;
 
       var message = '',
         action = msg.action || config.action,
         globalContext = this.context().global,
         tmpmodel_id = globalContext.get('g_model_id'),
         result = '',
-        language_translator = new LanguageTranslatorV2({
+        language_translator = null,
+        serviceSettings = {
           username: username,
           password: password,
           version: 'v2',
-          url: endpointUrl,
+          //url: sEndpoint,
           headers: {
             'User-Agent': pkg.name + '-' + pkg.version
           }
-        });
+        };
+
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
+
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
+
+      language_translator = new LanguageTranslatorV2(serviceSettings);
 
       if (!username || !password) {
         message = 'Missing Watson Language Translator service credentials';

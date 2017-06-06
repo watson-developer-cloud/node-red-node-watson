@@ -25,7 +25,7 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
-    endpoint = '', sEndpoint;
+    endpoint = '', sEndpoint = '';
     //endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   if (service) {
