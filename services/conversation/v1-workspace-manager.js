@@ -24,7 +24,7 @@ module.exports = function (RED) {
     ConversationV1 = require('watson-developer-cloud/conversation/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = '', password = '', sUsername = '', sPassword = '',
-    endpoint = '', sEndpoint;
+    endpoint = '', sEndpoint = '';
 
   temp.track();
 
@@ -661,10 +661,12 @@ module.exports = function (RED) {
           return executeMethod(node, method, params, msg);
         })
         .then(function(){
+          temp.cleanup();
           node.status({});
           node.send(msg);
         })
         .catch(function(err){
+          temp.cleanup();
           payloadutils.reportError(node,msg,err);
         });
 
