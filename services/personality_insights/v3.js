@@ -25,6 +25,8 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
+    endpoint = '',
+    sEndpoint = 'https://gateway.watsonplatform.net/personality-insights/api',
 
     VALID_INPUT_LANGUAGES = ['ar','en','es','ja'],
     VALID_RESPONSE_LANGUAGES = ['ar','de','en','es','fr','it','ja','ko','pt-br','zh-cn','zh-tw'];
@@ -32,6 +34,7 @@ module.exports = function (RED) {
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
 
   // This HTTP GET REST request is used by the browser side of the node to
@@ -107,6 +110,14 @@ module.exports = function (RED) {
     return Promise.resolve(params);
   }
 
+  function setEndPoint(config) {
+    endpoint = sEndpoint;
+    if ((!config['default-endpoint']) && config['service-endpoint']) {
+      endpoint = config['service-endpoint'];
+    }
+    return Promise.resolve();
+  }
+
   function executeService(msg, params) {
     var p = new Promise(function resolver(resolve, reject) {
       var personality_insights = null,
@@ -118,6 +129,10 @@ module.exports = function (RED) {
             'User-Agent': pkg.name + '-' + pkg.version
           }
         };
+
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
 
       personality_insights = new PersonalityInsightsV3(serviceSettings);
 
@@ -152,8 +167,11 @@ module.exports = function (RED) {
         return credentialsCheck(node);
       })
       .then(function(){
-        return prepareParams(msg, config);
+        return setEndPoint(config);
       })
+      .then(function(){
+        return prepareParams(msg, config);
+      })      
       .then(function(params){
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         return executeService(msg, params);
