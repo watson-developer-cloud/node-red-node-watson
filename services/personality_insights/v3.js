@@ -76,6 +76,7 @@ module.exports = function (RED) {
     if (!username || !password) {
       return Promise.reject('Missing Personality Insights service credentials');
     }
+    return Promise.resolve();
   }
 
   // This function prepares the params object for the
@@ -171,7 +172,7 @@ module.exports = function (RED) {
       })
       .then(function(){
         return prepareParams(msg, config);
-      })      
+      })
       .then(function(params){
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         return executeService(msg, params);

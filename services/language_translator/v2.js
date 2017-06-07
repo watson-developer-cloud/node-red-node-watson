@@ -127,7 +127,7 @@ module.exports = function (RED) {
           tmpmodel_id = globalContext.get('g_model_id');
 
         if (tmpmodel_id && tmpmodel_id.length > 1) {
-          result = tmpmodel_id.split('-');
+          var result = tmpmodel_id.split('-');
           //msg.model_id = tmpmodel_id;
           msg.domain = result[2];
           msg.srclang = result[0];
@@ -205,7 +205,7 @@ module.exports = function (RED) {
       if (!filetype) {
         return Promise.reject('Filetype needs must be set for train mode');
       }
-      return Promise.resolve({ basemodel:basemodel, filetype:filetype})
+      return Promise.resolve({ basemodel:basemodel, filetype:filetype});
     }
 
     function loadFile() {
@@ -288,12 +288,12 @@ module.exports = function (RED) {
             model_id: trainid,
           },
           function (err) {
-              if (err) {
-                reject(err);
-              } else {
-                msg.payload = 'Model ' + trainid + ' has been deleted';
-                resolve();
-              }
+            if (err) {
+              reject(err);
+            } else {
+              msg.payload = 'Model ' + trainid + ' has been deleted';
+              resolve();
+            }
           });
       });
       return p;
@@ -341,7 +341,7 @@ module.exports = function (RED) {
         })
         .then(function(params){
           return doTrain(language_translator, msg, params);
-        })
+        });
 
       return p;
     }

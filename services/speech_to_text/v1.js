@@ -230,7 +230,7 @@ module.exports = function (RED) {
       var p = new Promise(function resolver(resolve, reject){
         var model = config.lang + '_' + config.band,
           params = {},
-          speech_to_text = null;
+          speech_to_text = null,
           serviceSettings = {
             username: username,
             password: password,

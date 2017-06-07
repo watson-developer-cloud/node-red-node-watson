@@ -50,20 +50,21 @@ module.exports = function (RED) {
 
   function execute(node, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      var serviceSettings = {
-        username: username,
-        password: password,
-        version: 'v2',
-        //url: endpointUrl,
-        headers: {
-          'User-Agent': pkg.name + '-' + pkg.version
-        }
-      };;
+      var language_translator = null,
+        serviceSettings = {
+          username: username,
+          password: password,
+          version: 'v2',
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
+        };
+
       if (endpoint) {
         serviceSettings.url = endpoint;
       }
 
-      var language_translator = new LanguageTranslatorV2(serviceSettings);
+      language_translator = new LanguageTranslatorV2(serviceSettings);
 
       language_translator.identify({text: msg.payload}, function (err, response) {
         if (err) {

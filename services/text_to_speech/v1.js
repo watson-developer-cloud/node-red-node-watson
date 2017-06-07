@@ -17,7 +17,7 @@
 module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'text-to-speech';
   var pkg = require('../../package.json'),
-    TextToSpeechV1 = require('watson-developer-cloud/text-to-speech/v1');
+    TextToSpeechV1 = require('watson-developer-cloud/text-to-speech/v1'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     endpoint = '',
@@ -125,7 +125,7 @@ module.exports = function(RED) {
 
     function performTTS(msg, params) {
       var p = new Promise(function resolver(resolve, reject) {
-        var text_to_speech  = null;
+        var text_to_speech = null,
           serviceSettings = {
             username: username,
             password: password,
@@ -134,9 +134,9 @@ module.exports = function(RED) {
             }
           };
 
-          if (endpoint) {
-            serviceSettings.url = endpoint;
-          }
+        if (endpoint) {
+          serviceSettings.url = endpoint;
+        }
 
         text_to_speech = new TextToSpeechV1(serviceSettings);
         text_to_speech.synthesize(params, function (err, body, response) {
@@ -154,7 +154,7 @@ module.exports = function(RED) {
       msg.speech = body;
       if (config['payload-response']) {
         msg.payload = body;
-      } 
+      }
       return Promise.resolve();
     }
 
