@@ -22,6 +22,8 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     toneutils = require('../../utilities/tone-utils'),
     username = '', password = '', sUsername = '', sPassword = '',
+    endpoint = '',
+    sEndpoint = 'https://gateway.watsonplatform.net/tone-analyzer/api',
     service = null;
 
   // Require the Cloud Foundry Module to pull credentials from bound service
@@ -37,6 +39,7 @@ module.exports = function (RED) {
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
 
   // Node RED Admin - fetch and set vcap services
@@ -86,15 +89,27 @@ module.exports = function (RED) {
     }
   };
 
+
   function invokeService(config, options, settings) {
-    const tone_analyzer = new ToneAnalyzerV3({
+    var serviceSettings = {
       'username': settings.username,
       'password': settings.password,
       version_date: '2016-05-19',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
-    });
+    };
+
+    endpoint = sEndpoint;
+    if ((!config['default-endpoint']) && config['service-endpoint']) {
+      endpoint = config['service-endpoint'];
+    }
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    const tone_analyzer = new ToneAnalyzerV3(serviceSettings);
 
     var p = new Promise(function resolver(resolve, reject){
       var m = 'tone';

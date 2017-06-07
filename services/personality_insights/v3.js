@@ -25,6 +25,8 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
+    endpoint = '',
+    sEndpoint = 'https://gateway.watsonplatform.net/personality-insights/api',
 
     VALID_INPUT_LANGUAGES = ['ar','en','es','ja'],
     VALID_RESPONSE_LANGUAGES = ['ar','de','en','es','fr','it','ja','ko','pt-br','zh-cn','zh-tw'];
@@ -32,6 +34,7 @@ module.exports = function (RED) {
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
 
   // This HTTP GET REST request is used by the browser side of the node to
@@ -39,6 +42,42 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/watson-personality-insights-v3/vcap', function (req, res) {
     res.json(service ? {bound_service: true} : null);
   });
+
+
+  function payloadCheck(msg) {
+    if (!msg.payload) {
+      return Promise.reject('Missing property: msg.payload');
+    }
+    if ('string' !== typeof(msg.payload)) {
+      return Promise.reject('submitted msg.payload is not text');
+    }
+    return Promise.resolve();
+  }
+
+  function wordcountCheck(msg, config) {
+    var p = new Promise(function resolver(resolve, reject) {
+      var wc = payloadutils.word_count(config.inputlang);
+      wc(msg.payload, function (length) {
+        if (length < 100) {
+          reject('Personality insights requires a minimum of one hundred words.' +
+                            ' Only ' + length + ' submitted');
+        } else {
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function credentialsCheck(node) {
+    username = sUsername || node.credentials.username;
+    password = sPassword || node.credentials.password;
+
+    if (!username || !password) {
+      return Promise.reject('Missing Personality Insights service credentials');
+    }
+    return Promise.resolve();
+  }
 
   // This function prepares the params object for the
   // call to Personality Insights
@@ -69,7 +108,46 @@ module.exports = function (RED) {
       }
     };
 
-    return params;
+    return Promise.resolve(params);
+  }
+
+  function setEndPoint(config) {
+    endpoint = sEndpoint;
+    if ((!config['default-endpoint']) && config['service-endpoint']) {
+      endpoint = config['service-endpoint'];
+    }
+    return Promise.resolve();
+  }
+
+  function executeService(msg, params) {
+    var p = new Promise(function resolver(resolve, reject) {
+      var personality_insights = null,
+        serviceSettings = {
+          username: username,
+          password: password,
+          version_date: '2016-10-20',
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
+        };
+
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
+
+      personality_insights = new PersonalityInsightsV3(serviceSettings);
+
+      personality_insights.profile(params, function(err, response){
+        if (err) {
+          reject(err);
+        } else {
+          msg.insights = response;
+          resolve();
+        }
+      });
+
+    });
+    return p;
   }
 
   // This is the start of the Node Code. In this case only on input
@@ -77,68 +155,35 @@ module.exports = function (RED) {
   function Node(config) {
     RED.nodes.createNode(this,config);
     var node = this,
-      wc = payloadutils.word_count(config.inputlang),
       message = '';
 
     this.on('input', function (msg) {
-      //var self = this;
+      node.status({});
 
-      if (!msg.payload) {
-        message = 'Missing property: msg.payload';
-        node.status({fill:'red', shape:'ring', text:'missing payload'});
-        node.error(message, msg);
-        return;
-      }
-
-      if ('string' !== typeof(msg.payload)) {
-        message = 'submitted msg.payload is not text';
-        node.status({fill:'red', shape:'ring', text:'payload is not text'});
-        node.error(message, msg);
-        return;
-      }
-
-      wc(msg.payload, function (length) {
-        if (length < 100) {
-          message = 'Personality insights requires a minimum of one hundred words.' +
-                            ' Only ' + length + ' submitted';
-          node.status({fill:'red', shape:'ring', text:'insufficient words submitted'});
-          node.error(message, msg);
-          return;
-        }
-
-        username = sUsername || node.credentials.username;
-        password = sPassword || node.credentials.password;
-
-        if (!username || !password) {
-          message = 'Missing Personality Insights service credentials';
-          node.status({fill:'red', shape:'ring', text:'missing credentials'});
-          node.error(message, msg);
-          return;
-        }
-
-        var params = prepareParams(msg, config),
-          personality_insights = new PersonalityInsightsV3({
-            username: username,
-            password: password,
-            version_date: '2016-10-20',
-            headers: {
-              'User-Agent': pkg.name + '-' + pkg.version
-            }
-          });
-
+      payloadCheck(msg)
+      .then(function(){
+        return wordcountCheck(msg, config);
+      })
+      .then(function(){
+        return credentialsCheck(node);
+      })
+      .then(function(){
+        return setEndPoint(config);
+      })
+      .then(function(){
+        return prepareParams(msg, config);
+      })
+      .then(function(params){
         node.status({fill:'blue', shape:'dot', text:'requesting'});
-        personality_insights.profile(params, function(err, response){
-          node.status({});
-          if (err) {
-            node.status({fill:'red', shape:'ring', text:'processing error'});
-            node.error(err, msg);
-          } else{
-            msg.insights = response;
-          }
-
-          node.send(msg);
-        });
-
+        return executeService(msg, params);
+      })
+      .then(function(){
+        node.status({});
+        node.send(msg);
+      })
+      .catch(function(err){
+        payloadutils.reportError(node, msg, err);
+        node.send(msg);
       });
     });
   }

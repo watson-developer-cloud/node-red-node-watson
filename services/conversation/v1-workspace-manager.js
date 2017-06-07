@@ -23,7 +23,8 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     ConversationV1 = require('watson-developer-cloud/conversation/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = '', password = '', sUsername = '', sPassword = '';
+    username = '', password = '', sUsername = '', sPassword = '',
+    endpoint = '', sEndpoint = '';
 
   temp.track();
 
@@ -40,6 +41,7 @@ module.exports = function (RED) {
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
 
   function executeListWorkspaces(node, conv, params, msg) {
@@ -281,14 +283,21 @@ module.exports = function (RED) {
   }
 
   function executeMethod(node, method, params, msg) {
-    var conv = new ConversationV1({
-      username: username,
-      password: password,
-      version_date: '2017-02-03',
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
-      }
-    });
+    var conv = null,
+      serviceSettings = {
+        username: username,
+        password: password,
+        version_date: '2017-02-03',
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
+      };
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    conv = new ConversationV1(serviceSettings);
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
 
@@ -622,6 +631,11 @@ module.exports = function (RED) {
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
 
+      endpoint = sEndpoint;
+      if ((!config['cwm-default-endpoint']) && config['cwm-service-endpoint']) {
+        endpoint = config['cwm-service-endpoint'];
+      }
+
       node.status({});
       initialCheck(username, password, method)
         .then(function(){
@@ -647,10 +661,12 @@ module.exports = function (RED) {
           return executeMethod(node, method, params, msg);
         })
         .then(function(){
+          temp.cleanup();
           node.status({});
           node.send(msg);
         })
         .catch(function(err){
+          temp.cleanup();
           payloadutils.reportError(node,msg,err);
         });
 

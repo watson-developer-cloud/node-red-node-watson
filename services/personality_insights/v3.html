@@ -32,6 +32,17 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-cwm-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-cwm-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/personality-insights/api">
+    </div>
+
     <div class="form-row">
         <label for="node-input-inputlang"><i class="fa fa-language"></i> Input Text Language</label>
         <select type="text" id="node-input-inputlang" style="display: inline-block; width: 70%;" >
@@ -107,7 +118,9 @@
                 inputlang: {value: "en"},
                 outputlang: {value: "en"},
                 rawscores: {value: false},
-                consumption: {value: false}
+                consumption: {value: false},
+                'default-endpoint' :{value: true},
+                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/personality-insights/api'}                
             },
             credentials: {
               username: {type:"text"},
@@ -125,6 +138,15 @@
                 return this.name ? "node_label_italic" : "";
             },
             oneditprepare: function() {
+                $('#node-input-default-endpoint').change(function () {
+                  var checked = $('#node-input-default-endpoint').prop('checked')
+                  if (checked) {
+                    $('#node-input-service-endpoint').parent().hide();
+                  } else {
+                    $('#node-input-service-endpoint').parent().show();
+                  }
+                });
+
                 $.getJSON('watson-personality-insights-v3/vcap/')
                   .done(function (service) {
                     $('.credentials').toggle(!service);
