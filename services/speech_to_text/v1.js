@@ -290,6 +290,9 @@ module.exports = function (RED) {
           });
         });
       }
+      if (config['payload-response']) {
+        msg.payload = msg.transcription;
+      }
 
       return Promise.resolve();
     }

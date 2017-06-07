@@ -152,6 +152,9 @@ module.exports = function(RED) {
 
     function processResponse(msg, body) {
       msg.speech = body;
+      if (config['payload-response']) {
+        msg.payload = body;
+      } 
       return Promise.resolve();
     }
 

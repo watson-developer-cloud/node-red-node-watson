@@ -84,6 +84,12 @@
         </select>
     </div>
 
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-payload-response" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-payload-response" style="width: 70%;"> Place output on msg.payload</label>
+    </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-text-to-speech">
@@ -475,6 +481,7 @@
                 voicehidden: {value: ""},
                 format: {value: "audio/wav"},
                 password: {value: ''},
+                'payload-response' :{value: false},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://stream.watsonplatform.net/text-to-speech/api'}
             },
