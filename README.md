@@ -7,9 +7,17 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.9
+- Text to Speech speech on msg.payload option.
+- Speech to Text transcription on msg.payload option
+- Endpoint can now be specified in Conversation,
+Conversation Workspace Manager Language Identify, Language Translator,
+Speech to Text, STT Corpus Builder, Text to Speech, TTS Corpus Builder,
+Personality Insights and Tone Analyzer nodes.
+
 ### New in version 0.5.8
 - Visual Reconition Node, now accepts readstream on msg.payload
-- Add passages parameter to Discovery Node 
+- Add passages parameter to Discovery Node
 
 ### New in version 0.5.7
 - Fix to Tone Analyzer to allow JSON as input

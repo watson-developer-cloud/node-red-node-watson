@@ -101,7 +101,7 @@ module.exports = function(RED) {
 
     // workspaceid can be either configured in the node,
     // or sent into msg.params.workspace_id
-    if (config.workspaceid && config.workspaceid) {
+    if (config.workspaceid) {
       params.workspace_id = config.workspaceid;
     }
     if (msg.params && msg.params.workspace_id) {
@@ -129,13 +129,21 @@ module.exports = function(RED) {
   }
 
 
-  function verifyServiceCredentials(node, msg) {
+  function verifyServiceCredentials(node, msg, config) {
     // If it is present the newly provided user entered key
     // takes precedence over the existing one.
     // If msg.params contain credentials then these will Overridde
     // the bound or configured credentials.
+    const serviceSettings = {
+      version_date: '2017-05-26',
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
+    };
+
     var userName = sUsername || node.credentials.username,
-      passWord = sPassword || node.credentials.password;
+      passWord = sPassword || node.credentials.password,
+      endpoint = '';
 
     if (!(userName || msg.params.username) ||
       !(passWord || msg.params.password)) {
@@ -157,14 +165,24 @@ module.exports = function(RED) {
       }
     }
 
-    node.service = new ConversationV1({
-      username: userName,
-      password: passWord,
-      version_date: '2017-02-03',
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
-      }
-    });
+    if (service) {
+      endpoint = service.url;
+    }
+    if (!config['default-endpoint'] && config['service-endpoint']) {
+      endpoint = config['service-endpoint'];
+    }
+    if (msg.params && msg.params.endpoint) {
+      endpoint = msg.params.endpoint;
+    }
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    serviceSettings.username = userName;
+    serviceSettings.password = passWord;
+
+    node.service = new ConversationV1(serviceSettings);
     return true;
   }
 
@@ -227,7 +245,7 @@ module.exports = function(RED) {
       if (!b) {
         return;
       }
-      b = verifyServiceCredentials(node, msg);
+      b = verifyServiceCredentials(node, msg, config);
       if (!b) {
         return;
       }

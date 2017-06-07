@@ -20,11 +20,15 @@ module.exports = function (RED) {
     cfenv = require('cfenv'),
     username = null, password = null, sUsername = null, sPassword = null,
     service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
-    endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
+    endpoint = '',
+    sEndpoint = 'https://gateway.watsonplatform.net/language-translator/api';
+
+    //endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
 
   // These are APIs that the node has created to allow it to dynamically fetch Bluemix
@@ -62,7 +66,16 @@ module.exports = function (RED) {
     // what the request is for, and based on that if the required fields
     // have been provided.
     this.on('input', function (msg) {
-      var message = '';
+
+      var message = '',
+        serviceSettings = {
+          username: username,
+          password: password,
+          version: 'v2',
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
+        };
 
       if (!username || !password) {
         message = 'Missing Language Translation service credentials';
@@ -70,15 +83,15 @@ module.exports = function (RED) {
         return;
       }
 
-      var lt = new LanguageTranslatorV2({
-        username: username,
-        password: password,
-        version: 'v2',
-        url: endpointUrl,
-        headers: {
-          'User-Agent': pkg.name + '-' + pkg.version
-        }
-      });
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
+
+      var lt = new LanguageTranslatorV2(serviceSettings);
 
       // set global variable in order to make them accessible for the tranlsation node
       var globalContext = this.context().global;
