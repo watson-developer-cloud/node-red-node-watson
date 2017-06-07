@@ -9,8 +9,8 @@ Node-RED Watson Nodes for IBM Bluemix
 
 ### New in version 0.5.9
 - Endpoint can now be specified in Conversation,
-Conversation Workspace Manager Language Identify, Language Translation,
-Personality Insight and Tone Analyzer nodes.
+Conversation Workspace Manager Language Identify, Language Translator,
+Speech to Text, Personality Insight and Tone Analyzer nodes.
 
 ### New in version 0.5.8
 - Visual Reconition Node, now accepts readstream on msg.payload

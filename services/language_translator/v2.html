@@ -42,10 +42,10 @@
     <div class="form-row credentials">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-cwm-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
     </div>
     <div class="form-row">
-        <label for="node-input-cwm-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
         <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/language-translator/api">
     </div>
 
@@ -292,8 +292,14 @@
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
     var e = $('#node-input-service-endpoint').val();
+    var creds = {un: u, pwd: p};
 
-    $.getJSON('watson-translator/models/', {un: u, pwd: p, e: e}).done(function (data) {
+    if (! $('#node-input-default-endpoint').prop('checked')) {
+      creds.e = e;
+    }
+
+    $.getJSON('watson-translator/models/', creds)
+    .done(function (data) {
       if (data.models) {
         tor.models = data.models;
         tor.have_credentials = true;

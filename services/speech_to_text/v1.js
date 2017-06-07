@@ -26,6 +26,9 @@ module.exports = function (RED) {
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     sttV1 = require('watson-developer-cloud/speech-to-text/v1'),
+    username = '', password = '', sUsername = '', sPassword = '',
+    endpoint = '',
+    sEndpoint = 'https://stream.watsonplatform.net/speech-to-text/api',
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   // Require the Cloud Foundry Module to pull credentials from bound service
@@ -38,11 +41,10 @@ module.exports = function (RED) {
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
 
-  var username, password, sUsername, sPassword;
-
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
 
   // temp is being used for file streaming to allow the file to arrive so it can be processed.
@@ -59,9 +61,13 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-speech-to-text/models', function (req, res) {
+    //endpoint = sEndpoint ? sEndpoint : req.query.e;
+    endpoint = req.query.e ? req.query.e : sEndpoint;
+
     var stt = new sttV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
+      url: endpoint,
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -78,9 +84,13 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available customisations
   RED.httpAdmin.get('/watson-speech-to-text/customs', function (req, res) {
+    //endpoint = sEndpoint ? sEndpoint : req.query.e;
+    endpoint = req.query.e ? req.query.e : sEndpoint;
+
     var stt = new sttV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
+      url: endpoint,
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -218,15 +228,22 @@ module.exports = function (RED) {
 
     function performSTT(audioData) {
       var p = new Promise(function resolver(resolve, reject){
-        var model = config.lang + '_' + config.band;
-          params = {};
-          speech_to_text = new sttV1({
+        var model = config.lang + '_' + config.band,
+          params = {},
+          speech_to_text = null;
+          serviceSettings = {
             username: username,
             password: password,
             headers: {
               'User-Agent': pkg.name + '-' + pkg.version
             }
-          });
+          };
+
+        if (endpoint) {
+          serviceSettings.url = endpoint;
+        }
+
+        speech_to_text = new sttV1(serviceSettings);
 
         // If we get to here then the audio is in one of the supported formats.
         if (audioData.format === 'ogg') {
@@ -282,6 +299,11 @@ module.exports = function (RED) {
       // specified by the user in the dialog.
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
+
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
 
       node.status({});
 

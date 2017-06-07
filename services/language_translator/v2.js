@@ -59,7 +59,8 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-translator/models', function (req, res) {
-    endpoint = sEndpoint ? sEndpoint : req.query.e;
+    //endpoint = sEndpoint ? sEndpoint : req.query.e;
+    endpoint = req.query.e ? req.query.e : sEndpoint;
 
     var lt = new LanguageTranslatorV2({
       username: sUsername ? sUsername : req.query.un,
