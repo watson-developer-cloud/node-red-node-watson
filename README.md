@@ -12,8 +12,8 @@ Node-RED Watson Nodes for IBM Bluemix
 - Speech to Text transcription on msg.payload option
 - Endpoint can now be specified in Conversation,
 Conversation Workspace Manager Language Identify, Language Translator,
-Speech to Text, STT Corpus Builder, Text to Speech, Personality Insights
-and Tone Analyzer nodes.
+Speech to Text, STT Corpus Builder, Text to Speech, TTS Corpus Builder,
+Personality Insights and Tone Analyzer nodes.
 
 ### New in version 0.5.8
 - Visual Reconition Node, now accepts readstream on msg.payload
