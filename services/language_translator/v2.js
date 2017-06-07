@@ -350,7 +350,7 @@ module.exports = function (RED) {
       var p = determineCustomModelId(msg)
         .then(function(model_id){
           return doTranslate(language_translator, msg, model_id);
-        })
+        });
       return p;
     }
 
@@ -359,7 +359,7 @@ module.exports = function (RED) {
       var p = determineModelId(msg)
         .then(function(model_id){
           return doTranslate(language_translator, msg, model_id);
-        })
+        });
       return p;
     }
 
