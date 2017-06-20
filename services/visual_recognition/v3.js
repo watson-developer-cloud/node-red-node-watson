@@ -72,6 +72,35 @@ module.exports = function(RED) {
     }
   }
 
+// "classify", "faces" or "text"
+//             <option value="detectFaces">Detect Faces</option>
+//            <option value="recognizeText">Recognize Text</option>
+// <option selected="selected" value="classifyImage">Classify an image</option>
+
+
+  function verifyFeatureMode(node, msg, config) {
+    const theOptions = {
+      'classify' : 'classifyImage',
+      'faces' : 'detectFaces',
+      'text' : 'recognizeText'
+    };
+
+    var f = config['image-feature'];
+
+    if (msg.params && msg.params.detect_mode) {
+      if (msg.params.detect_mode in theOptions) {
+        f = theOptions[msg.params.detect_mode];
+      } else {
+        node.error('Invalid parameter setting for detect_mode, using configuration value');
+      }
+    }
+    if (!f) {
+      node.error('No configuration value for detect mode found, defaulting to classify');
+      f = theOptions['classify'];
+    }
+    return Promise.resolve(f);
+  }
+
   function verifyInputs(feature, msg) {
     switch (feature) {
     case 'classifyImage':
@@ -477,7 +506,8 @@ module.exports = function(RED) {
   function WatsonVisualRecognitionV3Node(config) {
     var node = this,
       b = false,
-      feature = config['image-feature'];
+      feature = '';
+
     RED.nodes.createNode(this, config);
     node.config = config;
 
@@ -488,6 +518,10 @@ module.exports = function(RED) {
 
       verifyPayload(msg)
         .then(function() {
+          return verifyFeatureMode(node, msg, config);
+        })
+        .then(function(f) {
+          feature = f;
           return checkForStream(msg);
         })
         .then(function() {
