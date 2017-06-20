@@ -68,6 +68,32 @@
     </div>
 
     <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-passages" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-passages" style="width: 70%;"> Passages</label>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-passageshidden"/>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-nlp_query" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-nlp_query" style="width: 70%;"> Query in Plain Language</label>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-nlp_queryhidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-querynlp"><i class="fa fa-book"></i> NLP Query </label>
+        <input type="text" id="node-input-querynlp" placeholder="">
+    </div>
+    <div>
+        <input type="hidden" id="node-input-querynlphidden"/>
+    </div>
+
+    <div class="form-row">
         <label for="node-input-query1"><i class="fa fa-book"></i> Query Key 1</label>
         <select type="text" id="node-input-query1" style="display: inline-block; vertical-align:middle; width: 70%;">
         </select>
@@ -98,15 +124,6 @@
     <div>
         <input type="hidden" id="node-input-query3hidden"/>
         <input type="hidden" id="node-input-queryvalue3hidden"/>
-    </div>
-
-    <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-passages" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-passages" style="width: 70%;"> Passages</label>
-    </div>
-    <div>
-        <input type="hidden" id="node-input-passageshidden"/>
     </div>
 
 </script>
@@ -150,14 +167,17 @@
     disQB.query2_selected = $('#node-input-query2hidden').val();
     disQB.query3_selected = $('#node-input-query3hidden').val();
     disQB.passages_selected = $('#node-input-passageshidden').val();
+    disQB.nlp_query_selected = $('#node-input-nlp_queryhidden').val();
 
     // Nothing is to be shown unless the values to show in the listCollections
     // can be obtained from the service.
     disQB.hideAll = function() {
       $('#credentials-not-found').show();
+      cv1wm.hideSelectedFields(fields);
       $('#something-went-wrong').hide();
       $('#node-input-environment').parent().hide();
       $('#node-input-collection').parent().hide();
+      $('#node-input-querynlp').parent().hide();
       $('#node-input-query1').parent().hide();
       $('#node-input-query2').parent().hide();
       $('#node-input-query3').parent().hide();
@@ -166,6 +186,12 @@
     disQB.showSelectedFields = function(fields) {
       for (i = 0; i < fields.length; i++) {
         $(fields[i]).parent().show();
+      }
+    }
+
+    disQB.hideSelectedFields = function(fields) {
+      for (i = 0; i < fields.length; i++) {
+        $(fields[i]).parent().hide();
       }
     }
 
@@ -214,6 +240,21 @@
 
       $('#node-input-query3').change(function (val) {
         disQB.query3_selected = $('#node-input-query3').val();
+      });
+
+      $('input#node-input-nlp_query').change(function () {
+          var checked = $('input#node-input-nlp_query').prop('checked');
+          if (checked) {
+            $('#node-input-querynlp').parent().show();
+            $('#node-input-query1').parent().hide();
+            $('#node-input-query2').parent().hide();
+            $('#node-input-query3').parent().hide();
+          } else {
+            $('#node-input-querynlp').parent().hide();
+            $('#node-input-query1').parent().show();
+            $('#node-input-query2').parent().show();
+            $('#node-input-query3').parent().show();
+          }
       });
 
     }
@@ -372,9 +413,12 @@
     // three query switch lists can be shown.
     disQB.showSchemas = function () {
       if (disQB.schemas && disQB.schemaCheck()) {
-        $('select#node-input-query1').parent().show();
-        $('select#node-input-query2').parent().show();
-        $('select#node-input-query3').parent().show();
+        var checked = $('input#node-input-nlp_query').prop('checked');
+        if (!checked) {
+          $('select#node-input-query1').parent().show();
+          $('select#node-input-query2').parent().show();
+          $('select#node-input-query3').parent().show();
+        }
         disQB.populateSchemas();
       }
     }
@@ -497,32 +541,37 @@
     // they can be restored.
     disQB.restoreHidden = function () {
       disQB.environment_selected = $('#node-input-environmenthidden').val();
-      $('select#node-input-environment').val(disQB.environment_selected);
+      $('#node-input-environment').val(disQB.environment_selected);
 
       disQB.collection_selected = $('#node-input-collectionhidden').val();
-      $('select#node-input-collection').val(disQB.collection_selected);
+      $('#node-input-collection').val(disQB.collection_selected);
+
+      disQB.querynlp_selected = $('#node-input-querynlphidden').val();
+      $('#node-input-querynlp').val(disQB.querynlp_selected);
 
       disQB.query1_selected = $('#node-input-query1hidden').val();
-      $('select#node-input-query1').val(disQB.query1_selected);
+      $('#node-input-query1').val(disQB.query1_selected);
 
       disQB.queryvalue1_selected = $('#node-input-queryvalue1hidden').val();
-      $('select#node-input-queryvalue1').val(disQB.queryvalue1_selected);
+      $('#node-input-queryvalue1').val(disQB.queryvalue1_selected);
 
       disQB.query2_selected = $('#node-input-query2hidden').val();
-      $('select#node-input-query2').val(disQB.query2_selected);
+      $('#node-input-query2').val(disQB.query2_selected);
 
       disQB.queryvalue2_selected = $('#node-input-queryvalue2hidden').val();
-      $('select#node-input-queryvalue2').val(disQB.queryvalue2_selected);
+      $('#node-input-queryvalue2').val(disQB.queryvalue2_selected);
 
       disQB.query3_selected = $('#node-input-query3hidden').val();
-      $('select#node-input-query3').val(disQB.query3_selected);
+      $('#node-input-query3').val(disQB.query3_selected);
 
       disQB.queryvalue3_selected = $('#node-input-queryvalue3hidden').val();
-      $('select#node-input-queryvalue3').val(disQB.queryvalue3_selected);
+      $('#node-input-queryvalue3').val(disQB.queryvalue3_selected);
 
       disQB.passages_selected = $('#node-input-passageshidden').val();
-      $('inpu#node-input-passages').val(disQB.passages_selected);
+      $('#node-input-passages').val(disQB.passages_selected);
 
+      disQB.nlp_query_selected = $('#node-input-nlp_queryhidden').val();
+      $('#node-input-nlp_query').val(disQB.nlp_query_selected);
     }
 
 
@@ -579,6 +628,9 @@
       disQB.collection_selected = $('#node-input-collection').val();
       $('#node-input-collectionhidden').val(disQB.collection_selected);
 
+      disQB.querynlp_selected = $('#node-input-querynlp').val();
+      $('#node-input-querynlphidden').val(disQB.querynlp_selected);
+
       disQB.query1_selected = $('#node-input-query1').val();
       $('#node-input-query1hidden').val(disQB.query1_selected);
 
@@ -599,6 +651,9 @@
 
       disQB.passages_selected = $('#node-input-passages').val();
       $('#node-input-passageshidden').val(disQB.passages_selected);
+
+      disQB.nlp_query_selected = $('#node-input-nlp_query').val();
+      $('#node-input-nlp_queryhidden').val(disQB.nlp_query_selected);
     }
 
     (function() {
@@ -611,6 +666,10 @@
                 environmenthidden: {value: ''},
                 collection: {value: ''},
                 collectionhidden: {value: ''},
+                nlp_query: {value: 'true'},
+                nlp_queryhidden: {value: 'true'},
+                querynlp: {value: ''},
+                querynlphidden: {value: ''},
                 query1: {value: ''},
                 query1hidden: {value: ''},
                 queryvalue1: {value: ''},
