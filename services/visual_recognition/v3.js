@@ -87,8 +87,7 @@ module.exports = function(RED) {
 
     var f = config['image-feature'];
 
-    if (msg.params && msg.params.detect_mode)
-    {
+    if (msg.params && msg.params.detect_mode) {
       if (msg.params.detect_mode in theOptions) {
         f = theOptions[msg.params.detect_mode];
       } else {
