@@ -243,7 +243,7 @@
       });
 
       $('input#node-input-nlp_query').change(function () {
-          var checked = $('input#node-input-nlp_query').prop('checked')
+          var checked = $('input#node-input-nlp_query').prop('checked');
           if (checked) {
             $('#node-input-querynlp').parent().show();
             $('#node-input-query1').parent().hide();
@@ -413,9 +413,12 @@
     // three query switch lists can be shown.
     disQB.showSchemas = function () {
       if (disQB.schemas && disQB.schemaCheck()) {
-        $('select#node-input-query1').parent().show();
-        $('select#node-input-query2').parent().show();
-        $('select#node-input-query3').parent().show();
+        var checked = $('input#node-input-nlp_query').prop('checked');
+        if (!checked) {
+          $('select#node-input-query1').parent().show();
+          $('select#node-input-query2').parent().show();
+          $('select#node-input-query3').parent().show();
+        }
         disQB.populateSchemas();
       }
     }

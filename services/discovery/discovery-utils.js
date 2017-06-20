@@ -124,7 +124,7 @@ DiscoveryUtils.prototype = {
       params.query = config.querynlp;
       params.nlp_query = config.nlp_query;
     } else {
-      params = buildStructuredQuery(msg, config, params);
+      params = this.buildStructuredQuery(msg, config, params);
     }
     return params;
   },
