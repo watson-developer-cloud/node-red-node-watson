@@ -36,6 +36,7 @@
     <div class="form-row">
         <label for="node-input-discovery-method"><i class="fa fa-book"></i> Method: </label>
         <select type="text" id="node-input-discovery-method" style="display: inline-block; width: 70%;">
+            <option value="query">Search in collection</option>
             <option value="createEnvrionment">Create new environment</option>
             <option value="listEnvrionments">List existing environments</option>
             <option value="getEnvironmentDetails">Retrieve environment details</option>
@@ -45,7 +46,6 @@
             <option value="createConfiguration">Create new configuration</option>
             <option value="listConfigurations">List existing configurations</option>
             <option value="getConfigurationDetails">Retrieve configuration details</option>
-            <option value="query">Search in collection</option>
         </select>
     </div>
 
@@ -85,9 +85,17 @@
     </div>
 
     <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-nlp_query" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-nlp_query" style="width: 70%;"> Query in Plain Language</label>
+    </div>
+
+    <div class="form-row">
         <label for="node-input-query"><i class="fa fa-tag"></i> Query for Search</label>
         <input type="text" id="node-input-query" placeholder="">
     </div>
+
+
     <div class="form-row">
         <label for="node-input-filter"><i class="fa fa-tag"></i> Filter for Search</label>
         <input type="text" id="node-input-filter" placeholder="">
@@ -279,6 +287,7 @@
       $('#node-input-configuration_id').parent().hide();
       $('#node-input-count').parent().hide();
       $('#node-input-passages').parent().hide();
+      $('#node-input-nlp_query').parent().hide();
       $('#node-input-query').parent().hide();
       $('#node-input-filter').parent().hide();
       $('#node-input-aggregation').parent().hide();
@@ -333,6 +342,7 @@
                          + ', #node-input-collection_id'
                          + ', #node-input-count'
                          + ', #node-input-passages'
+                         + ', #node-input-nlp_query'
                          + ', #node-input-query'
                          + ', #node-input-filter'
                          + ', #node-input-aggregation'
@@ -372,37 +382,38 @@
         RED.nodes.registerType('watson-discovery-v1', {
             category: 'IBM Watson',
             defaults: {
-                name: {value: ""},
-                environmentname: {value: ""},
-                environment_id: {value: ""},
-                collection_id: {value: ""},
-                configurationname: {value: ""},
-                configuration_id: {value: ""},
-                collection_name: {value: ""},
-                count: {value: "1"},
-                passages: {value: "false"},
-                query: {value: ""},
-                filter: {value: ""},
-                aggregation: {value: ""},
-                return: {value: ""},
-                description: {value: ""},
+                name: {value: ''},
+                environmentname: {value: ''},
+                environment_id: {value: ''},
+                collection_id: {value: ''},
+                configurationname: {value: ''},
+                configuration_id: {value: ''},
+                collection_name: {value: ''},
+                count: {value: '1'},
+                passages: {value: 'false'},
+                nlp_query: {value: 'false'},
+                query: {value: ''},
+                filter: {value: ''},
+                aggregation: {value: ''},
+                return: {value: ''},
+                description: {value: ''},
                 size: {value: 0},
-                "discovery-method": {value:"listEnvrionments"}
+                'discovery-method': {value:'listEnvrionments'}
             },
             credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
+              username: {type:'text'},
+              password: {type:'password'}
             },
-            color: "rgb(230,140,80)",
+            color: 'rgb(230,140,80)',
             inputs: 1,
             outputs: 1,
-            icon: "discovery.png",
-            paletteLabel: "discovery",
+            icon: 'discovery.png',
+            paletteLabel: 'discovery',
             label: function() {
-                return this.name || "discovery";
+                return this.name || 'discovery';
             },
             labelStyle: function() {
-                return this.name ? "node_label_italic" : "";
+                return this.name ? 'node_label_italic' : '';
             },
             oneditprepare: oneditprepare
         });

@@ -34,6 +34,21 @@ DiscoveryUtils.prototype = {
     return params;
   },
 
+  buildParamsForQuery: function(msg, config, params) {
+    var sourceField = 'query',
+      targetField = 'query';
+
+    if (config.nlp_query) {
+      targetField = 'natural_language_query';
+    }
+    if (msg.discoveryparams && msg.discoveryparams[sourceField]) {
+      params[targetField] = msg.discoveryparams[sourceField];
+    } else if (config[sourceField]) {
+      params[targetField] = config[sourceField];
+    }
+    return params;
+  },
+
   buildParamsForPayload: function(msg, config, params) {
     var isJSON = this.isJsonString(msg.payload) ||
       this.isJsonObject(msg.payload);
@@ -67,11 +82,12 @@ DiscoveryUtils.prototype = {
     var params = {},
       me = this;
 
-    params = this.buildParamsForName(msg, config, params);
+    params = me.buildParamsForName(msg, config, params);
+    params = me.buildParamsForQuery(msg, config, params);
 
     ['environment_id', 'collection_id', 'configuration_id',
       'collection_name',
-      'query', 'passages', 'description', 'size'
+      'passages', 'description', 'size'
     ].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);
     });
