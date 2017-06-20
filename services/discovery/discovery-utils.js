@@ -38,7 +38,7 @@ DiscoveryUtils.prototype = {
     var sourceField = 'query',
       targetField = 'query';
 
-    if (config.nlp_query) {
+    if (config.nlp_query || msg.discoveryparams.nlp_query) {
       targetField = 'natural_language_query';
     }
     if (msg.discoveryparams && msg.discoveryparams[sourceField]) {
@@ -109,6 +109,27 @@ DiscoveryUtils.prototype = {
     if (config.collection) {
       params.collection_id = config.collection;
     }
+
+    if (config.passages) {
+      params.passages = config.passages;
+    }
+
+    params = this.buildMsgQueryOverrides(msg, config, params);
+
+    return params;
+  },
+
+  buildMsgQueryOverrides: function(msg, config, params) {
+    if (config.nlp_query) {
+      params.query = config.querynlp;
+      params.nlp_query = config.nlp_query;
+    } else {
+      params = buildStructuredQuery(msg, config, params);
+    }
+    return params;
+  },
+
+  buildStructuredQuery: function(msg, config, params) {
     if (config.query1 && config.queryvalue1) {
       params.query = config.query1 + ':"' + config.queryvalue1 + '"';
     }
@@ -124,12 +145,9 @@ DiscoveryUtils.prototype = {
       }
       params.query += config.query3 + ':"' + config.queryvalue3 + '"';
     }
-    if (config.passages) {
-      params.passages = config.passages;
-    }
-
     return params;
   },
+
 
   paramEnvCheck: function(params) {
     var response = '';
