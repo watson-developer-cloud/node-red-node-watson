@@ -31,14 +31,45 @@ ServiceUtils.prototype = {
 
     for (var service in services) {
       if (services[service].hasOwnProperty('credentials')) {
-        if(services[service].credentials.hasOwnProperty('url')){
-          if(services[service].credentials.url.search(regex) === 0){
+        if (services[service].credentials.hasOwnProperty('url')){
+          if (services[service].credentials.url.search(regex) === 0){
             return returnBoolean ? true : services[service].credentials;
           }
         }
       }
     }
     return returnBoolean ? false : null;
+  },
+
+  // Function to return all the details of a service. Used by Document
+  // Conversion Node to provide a list and a choice to the user.
+  // Node: Like the original Document Conversion check, this
+  // function will look for all bound instances of Document Conversion.
+  getAllServiceDetails: function(serviceName) {
+    var regex = RegExp('(http|https)(://)([^\/]+)(/)('+serviceName+').*'),
+      services = appEnv.getServices(),
+      theList = [];
+
+    for (var service in services) {
+      if (services[service].hasOwnProperty('credentials')) {
+        if (services[service].credentials.hasOwnProperty('url')) {
+          if (services[service].credentials.url.search(regex) === 0) {
+            var newCandidate = {};
+            var v = services[service];
+            newCandidate.name = v.name ? v.name : '';
+            newCandidate.label = v.label ? v.label : '';
+            newCandidate.url = v.credentials.url ?
+                                    v.credentials.url : '';
+            newCandidate.username = v.credentials.username ?
+                                        v.credentials.username : '';
+            newCandidate.password = v.credentials.password ?
+                                        v.credentials.password : '';
+            theList = theList.concat(newCandidate);
+          }
+        }
+      }
+    }
+    return theList;
   },
 
   // Check for service return a boolean to indicate if it is bound in

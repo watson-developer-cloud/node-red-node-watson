@@ -16,7 +16,8 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'speech-to-text';
-  var request = require('request'),
+  var pkg = require('../../package.json'),
+    request = require('request'),
     cfenv = require('cfenv'),
     url = require('url'),
     temp = require('temp'),
@@ -26,7 +27,9 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     STTV1 = require('watson-developer-cloud/speech-to-text/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = '', password = '', sUsername = '', sPassword = '';
+    username = '', password = '', sUsername = '', sPassword = '',
+    endpoint = '',
+    sEndpoint = 'https://stream.watsonplatform.net/speech-to-text/api';
 
   temp.track();
 
@@ -43,17 +46,8 @@ module.exports = function (RED) {
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
-
-/*
-  function reportError (node, msg, message) {
-    var messageTxt = message.error ? message.error : message;
-    msg.stterror = messageTxt;
-
-    node.status({fill:'red', shape:'dot', text: messageTxt});
-    node.error(messageTxt, msg);
-  }
-*/
 
   function executeCreateCustomisation(node, stt, params, msg) {
     stt.createCustomization(params, function (err, response) {
@@ -179,10 +173,20 @@ module.exports = function (RED) {
   }
 
   function executeMethod(node, method, params, msg) {
-    var stt = new STTV1({
-      username: username,
-      password: password
-    });
+    var stt = null,
+      serviceSettings = {
+        username: username,
+        password: password,
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
+      };
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    stt = new STTV1(serviceSettings);
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
 
@@ -358,9 +362,15 @@ module.exports = function (RED) {
 
    // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-speech-to-text-v1-query-builder/models', function (req, res) {
+    endpoint = req.query.e ? req.query.e : sEndpoint;
+
     var stt = new STTV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd
+      password: sPassword ? sPassword : req.query.pwd,
+      url: endpoint,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     stt.getModels({}, function(err, models){
@@ -385,6 +395,11 @@ module.exports = function (RED) {
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
+
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
 
       if (!username || !password) {
         message = 'Missing Watson Speech to Text service credentials';

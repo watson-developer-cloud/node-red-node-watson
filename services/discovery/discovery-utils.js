@@ -25,7 +25,39 @@ DiscoveryUtils.prototype = {
     } else if (msg.discoveryparams && msg.discoveryparams.configurationname) {
       params.name = msg.discoveryparams.configurationname;
     } else if (config.configurationname) {
-      params.name = config.cofigurationname;
+      params.name = config.configurationname;
+    } else if (msg.discoveryparams && msg.discoveryparams.collection_name) {
+      params.name = msg.discoveryparams.collection_name;
+    } else if (config.collection_name) {
+      params.name = config.collection_name;
+    }
+    return params;
+  },
+
+  buildParamsForQuery: function(msg, config, params) {
+    var sourceField = 'query',
+      targetField = 'query';
+
+    if (config.nlp_query || msg.discoveryparams.nlp_query) {
+      targetField = 'natural_language_query';
+    }
+    if (msg.discoveryparams && msg.discoveryparams[sourceField]) {
+      params[targetField] = msg.discoveryparams[sourceField];
+    } else if (config[sourceField]) {
+      params[targetField] = config[sourceField];
+    }
+    return params;
+  },
+
+  buildParamsForPayload: function(msg, config, params) {
+    var isJSON = this.isJsonString(msg.payload) ||
+      this.isJsonObject(msg.payload);
+
+    // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
+    if (typeof msg.payload === 'string' || isJSON) {
+      params.file = this.isJsonObject(msg.payload) ?
+        JSON.stringify(msg.payload) :
+        msg.payload;
     }
     return params;
   },
@@ -47,17 +79,24 @@ DiscoveryUtils.prototype = {
   },
 
   buildParams: function(msg, config) {
-    var params = {};
+    var params = {},
+      me = this;
 
-    params = DiscoveryUtils.prototype.buildParamsForName(msg, config, params);
+    params = me.buildParamsForName(msg, config, params);
+    params = me.buildParamsForQuery(msg, config, params);
 
-    ['environment_id','collection_id','configuration_id','query'].forEach(function(f) {
-      params = DiscoveryUtils.prototype.buildParamsFor(msg, config, params, f);
+    ['environment_id', 'collection_id', 'configuration_id',
+      'collection_name',
+      'passages', 'description', 'size'
+    ].forEach(function(f) {
+      params = me.buildParamsFor(msg, config, params, f);
     });
 
-    ['count','filter','aggregation','return'].forEach(function(f) {
-      params = DiscoveryUtils.prototype.buildParamsFromConfig(config, params, f);
+    ['count', 'filter', 'aggregation', 'return'].forEach(function(f) {
+      params = me.buildParamsFromConfig(config, params, f);
     });
+
+    params = this.buildParamsForPayload(msg, config, params);
 
     return params;
   },
@@ -70,6 +109,27 @@ DiscoveryUtils.prototype = {
     if (config.collection) {
       params.collection_id = config.collection;
     }
+
+    if (config.passages) {
+      params.passages = config.passages;
+    }
+
+    params = this.buildMsgQueryOverrides(msg, config, params);
+
+    return params;
+  },
+
+  buildMsgQueryOverrides: function(msg, config, params) {
+    if (config.nlp_query) {
+      params.query = config.querynlp;
+      params.nlp_query = config.nlp_query;
+    } else {
+      params = this.buildStructuredQuery(msg, config, params);
+    }
+    return params;
+  },
+
+  buildStructuredQuery: function(msg, config, params) {
     if (config.query1 && config.queryvalue1) {
       params.query = config.query1 + ':"' + config.queryvalue1 + '"';
     }
@@ -85,11 +145,11 @@ DiscoveryUtils.prototype = {
       }
       params.query += config.query3 + ':"' + config.queryvalue3 + '"';
     }
-
     return params;
   },
 
-  paramEnvCheck: function (params) {
+
+  paramEnvCheck: function(params) {
     var response = '';
     if (!params.environment_id) {
       response = 'Missing Environment ID ';
@@ -97,7 +157,31 @@ DiscoveryUtils.prototype = {
     return response;
   },
 
-  paramCollectionCheck: function (params) {
+  paramJSONCheck: function(params) {
+    var response = '';
+    if (!params.file) {
+      response = 'Missing JSON file on payload';
+    }
+    return response;
+  },
+
+  paramNameCheck: function(params) {
+    var response = '';
+    if (!params.name) {
+      response = 'Missing Name ';
+    }
+    return response;
+  },
+
+  paramDescriptionCheck: function(params) {
+    var response = '';
+    if (!params.description) {
+      response = 'Missing Description ';
+    }
+    return response;
+  },
+
+  paramCollectionCheck: function(params) {
     var response = '';
     if (!params.collection_id) {
       response = 'Missing Collection ID ';
@@ -105,7 +189,7 @@ DiscoveryUtils.prototype = {
     return response;
   },
 
-  paramConfigurationCheck: function (params) {
+  paramConfigurationCheck: function(params) {
     var response = '';
     if (!params.configuration_id) {
       response = 'Missing Configuration ID ';
@@ -123,7 +207,7 @@ DiscoveryUtils.prototype = {
       }
 
       if ('object' === typeof d[k]) {
-        fields = DiscoveryUtils.prototype.buildFieldByStep(d[k], fields, t);
+        fields = this.buildFieldByStep(d[k], fields, t);
       } else {
         switch (k) {
         case 'text':
@@ -138,7 +222,7 @@ DiscoveryUtils.prototype = {
   },
 
   // sorting functions
-  uniqueFilter: function (value, index, self) {
+  uniqueFilter: function(value, index, self) {
     return self.indexOf(value) === index;
   },
 
@@ -148,23 +232,40 @@ DiscoveryUtils.prototype = {
     if ('object' === typeof schemaData) {
       for (var k in schemaData) {
         if ('results' === k &&
-                'object' === typeof schemaData[k] &&
-                'object' === typeof schemaData[k][0]) {
-          fields = DiscoveryUtils.prototype.buildFieldByStep(schemaData[k][0], fields, '');
+          'object' === typeof schemaData[k] &&
+          'object' === typeof schemaData[k][0]) {
+          fields = this.buildFieldByStep(schemaData[k][0], fields, '');
         }
       }
       if (fields.length) {
-        fields = fields.filter(DiscoveryUtils.prototype.uniqueFilter);
+        fields = fields.filter(this.uniqueFilter);
       }
     }
     return fields;
   },
 
-  reportError: function (node, msg, message) {
-    var messageTxt = message.error ? message.error : message;
-    node.status({fill:'red', shape:'dot', text: messageTxt});
-    node.error(message, msg);
+  //  reportError: function (node, msg, message) {
+  //    var messageTxt = message.error ? message.error : message;
+  //    node.status({fill:'red', shape:'dot', text: messageTxt});
+  //    node.error(message, msg);
+  //  } ,
+
+  isJsonString: function(str) {
+    try {
+      JSON.parse(str);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  },
+
+  isJsonObject: function(str) {
+    if (str instanceof Array || str instanceof Object) {
+      return true;
+    }
+    return false;
   }
+
 
 };
 

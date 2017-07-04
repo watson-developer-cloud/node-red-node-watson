@@ -24,6 +24,7 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
         <input type="text" id="node-input-username" placeholder="Username">
@@ -32,10 +33,20 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-cwm-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-cwm-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/language-translator/api">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="watson-language-translator-identify">
-    <p>Packaged in with release 0.4.43 of node-red-node-watson</p>
+    <p>Packaged in with release 0.5.11 of node-red-node-watson</p>
     <p>The Watson Language Translator service can be used to identify languages used in a text input. <p>
     <p>Node input : </p>
     <ul>
@@ -52,38 +63,54 @@
 </script>
 
 <script type="text/javascript">
+
+// This is the on edit prepare function, which will be invoked everytime the dialog
+// is shown.
+  function li2oneditprepare() {
+    $('#node-input-default-endpoint').change(function () {
+      var checked = $('#node-input-default-endpoint').prop('checked')
+      if (checked) {
+        $('#node-input-service-endpoint').parent().hide();
+      } else {
+        $('#node-input-service-endpoint').parent().show();
+      }
+    });
+
+    $.getJSON('watson-language-translator-identify/vcap/')
+      .done(function (service) {
+        $('.credentials').toggle(!service);
+      })
+      .fail(function () {
+        $('.credentials').show();
+      }).always(function () {
+        $('#credentials-check').hide();
+      });
+  }
+
     (function() {
         RED.nodes.registerType('watson-language-translator-identify', {
             category: 'IBM Watson',
             defaults: {
-                name: {value: ""}
+                name: {value: ''},
+                'default-endpoint' :{value: true},
+                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/language-translator/api'}
             },
             credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
+              username: {type:'text'},
+              password: {type:'password'}
             },
-            color: "rgb(84,149,230)",
+            color: 'rgb(84,149,230)',
             inputs: 1,
             outputs: 1,
-            icon: "LanguageTranslator25x25.png",
-            paletteLabel: "language identify",
+            icon: 'LanguageTranslator25x25.png',
+            paletteLabel: 'language identify',
             label: function() {
-                return this.name || "language identify";
+                return this.name || 'language identify';
             },
             labelStyle: function() {
-                return this.name ? "node_label_italic" : "";
+                return this.name ? 'node_label_italic' : '';
             },
-            oneditprepare: function() {
-                $.getJSON('watson-language-translator-identify/vcap/')
-                  .done(function (service) {
-                    $('.credentials').toggle(!service);
-                  })
-                  .fail(function () {
-                    $('.credentials').show();
-                  }).always(function () {
-                    $('#credentials-check').hide();
-                  })
-            }
+            oneditprepare: li2oneditprepare
         });
     })();
 </script>

@@ -15,17 +15,18 @@
  **/
 
 module.exports = function (RED) {
-  var cfenv = require('cfenv');
-  var fs = require('fs');
-  var temp = require('temp');
-  var qs = require('qs');
-  var request = require('request');
-  var fileType = require('file-type');
-  var watson = require('watson-developer-cloud');
-  temp.track();
+  var pkg = require('../../package.json'),
+    cfenv = require('cfenv'),
+    fs = require('fs'),
+    temp = require('temp'),
+    qs = require('qs'),
+    request = require('request'),
+    fileType = require('file-type'),
+    watson = require('watson-developer-cloud'),
+    username, password,
+    service = cfenv.getAppEnv().getServiceCreds(/retrieve and rank/i);
 
-  var username, password;
-  var service = cfenv.getAppEnv().getServiceCreds(/retrieve and rank/i);
+  temp.track();
 
   if (service) {
     username = service.username;
@@ -378,7 +379,7 @@ module.exports = function (RED) {
         (config.clusterid !== '') ? clusterid = config.clusterid : clusterid = msg.cluster_id;
         var collectionname;
         (config.collectionname !== '') ? collectionname = config.collectionname : collectionname = msg.collection_name;
-        
+
         var params = {
           cluster_id: clusterid,
           collection_name: collectionname
@@ -523,7 +524,10 @@ module.exports = function (RED) {
     var retrieve_and_rank = watson.retrieve_and_rank({
       username: username,
       password: password,
-      version: 'v1'
+      version: 'v1',
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     callback(retrieve_and_rank);

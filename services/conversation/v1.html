@@ -20,6 +20,12 @@
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
         </div>
     </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
         <input type="text" id="node-input-username" placeholder="Username">
@@ -28,10 +34,17 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
     </div>
+    <div class="form-row">
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/conversation/api">
+    </div>
+
     <div class="form-row">
         <label for="node-input-workspaceid"><i class="fa fa-tag"></i> Workspace ID</label>
         <input type="text" id="node-input-workspaceid" placeholder="WorkspaceID">
@@ -71,6 +84,7 @@
     <br/>
     <li><code>msg.params.username</code> : If provided will be used as the username credential for the Conversation service.</li>
     <li><code>msg.params.password</code> : If provided will be used as the password credential for the Conversation service.</li>
+    <li><code>msg.params.endpoint</code> : If provided will be used as the url for the Conversation service.</li>
     </ul>
     <p>See <a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">Conversation API documentation</a> for details.</p>
     <p>All Results will made available at <code>msg.payload</code> in JSON format. Check the  <a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">documentation</a> for details.</p>
@@ -85,7 +99,6 @@
     </ul>
 </script>
 
-
 <script type="text/javascript">
     var oneditprepare = function() {
         $('input#node-input-context').change(function () {
@@ -98,6 +111,15 @@
                 $('#conversation-form-tips').hide();
             }
         });
+        $('input#node-input-default-endpoint').change(function () {
+            var checked = $('input#node-input-default-endpoint').prop('checked')
+            if (checked) {
+                $('#node-input-service-endpoint').parent().hide();
+            } else {
+                $('#node-input-service-endpoint').parent().show();
+            }
+        });
+
         $.getJSON('watson-conversation/vcap/')
             .done(function (service) {
               $('.credentials').toggle(!service);
@@ -114,25 +136,27 @@
         RED.nodes.registerType('watson-conversation-v1', {
             category: 'IBM Watson',
             defaults: {
-              name: {value: ""},
-              workspaceid: {value: ""},
+              name: {value: ''},
+              workspaceid: {value: ''},
               multiuser: {value: false},
-              context: {value: true}
+              context: {value: true},
+              'default-endpoint' :{value: true},
+              'service-endpoint' :{value: 'https://gateway.watsonplatform.net/conversation/api'}
             },
             credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
+              username: {type:'text'},
+              password: {type:'password'}
             },
             color: 'rgb(84,149,230)',
             inputs: 1,
             outputs: 1,
-            icon: "conversation-v1-25x25.png",
-            paletteLabel: "conversation",
+            icon: 'conversation-v1-25x25.png',
+            paletteLabel: 'conversation',
             label: function() {
-                return this.name || "conversation";
+                return this.name || 'conversation';
             },
             labelStyle: function() {
-                return this.name ? "node_label_italic" : "";
+                return this.name ? 'node_label_italic' : '';
             },
             oneditprepare: oneditprepare
         });

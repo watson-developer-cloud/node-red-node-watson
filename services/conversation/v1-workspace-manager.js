@@ -16,13 +16,15 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'conversation';
-  var temp = require('temp'),
+  var pkg = require('../../package.json'),
+    temp = require('temp'),
     fs = require('fs'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     ConversationV1 = require('watson-developer-cloud/conversation/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = '', password = '', sUsername = '', sPassword = '';
+    username = '', password = '', sUsername = '', sPassword = '',
+    endpoint = '', sEndpoint = '';
 
   temp.track();
 
@@ -39,122 +41,424 @@ module.exports = function (RED) {
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
 
   function executeListWorkspaces(node, conv, params, msg) {
-    conv.listWorkspaces(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['workspaces'] = response.workspaces ?
-                                      response.workspaces: response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      conv.listWorkspaces(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['workspaces'] = response.workspaces ?
+                                        response.workspaces: response;
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
   function executeGetWorkspace(node, conv, params, msg) {
-    conv.getWorkspace(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['workspace'] = response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getWorkspace(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['workspace'] = response;
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
   function executeCreateWorkspace(node, conv, params, msg) {
-    conv.createWorkspace(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['workspace'] = response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createWorkspace(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['workspace'] = response;
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
   function executeUpdateWorkspace(node, conv, params, msg) {
-    conv.updateWorkspace(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['workspace'] = response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      conv.updateWorkspace(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['workspace'] = response;
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
   function executeDeleteWorkspace(node, conv, params, msg) {
-    conv.deleteWorkspace(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['workspace'] = response;
-      }
-      node.send(msg);
+    var p = new Promise(function resolver(resolve, reject){
+      conv.deleteWorkspace(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['workspace'] = response;
+          resolve();
+        }
+      });
     });
+    return p;
   }
 
+  function executeListIntents(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getIntents(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['intents'] = response.intents ?
+                                        response.intents: response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeGetIntent(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getIntent(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          // returning the whole response even though response.intent has
+          // the intent, but the details with export = true
+          // are provided as response.examples
+          msg['intent'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeCreateIntent(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createIntent(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['intent'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeUpdateIntent(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.updateIntent(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['intent'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeDeleteIntent(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.deleteIntent(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['intent'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  // For now we are not doing anything with the pagination
+  // response
+  function executeListExamples(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getExamples(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['examples'] = response.examples ?
+                                        response.examples: response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeCreateExample(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createExample(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['example'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeDeleteExample(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.deleteExample(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['example'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeListCounterExamples(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getCounterExamples(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['counterexamples'] = response.counterexamples ?
+                                        response.counterexamples: response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeCreateCounterExample(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createCounterExample(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['counterexample'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeDeleteCounterExample(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.deleteCounterExample(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['counterexample'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+
   function executeUnknownMethod(node, conv, params, msg) {
-    payloadutils.reportError(node, msg, 'Unknown Mode');
-    msg.error = 'Unable to process as unknown mode has been specified';
-    node.send(msg);
+    return Promise.reject('Unable to process as unknown mode has been specified');
   }
 
   function executeMethod(node, method, params, msg) {
-    var conv = new ConversationV1({
-      username: username,
-      password: password,
-      version_date: '2017-02-03'
-    });
+    var conv = null,
+      serviceSettings = {
+        username: username,
+        password: password,
+        version_date: '2017-02-03',
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
+      };
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    conv = new ConversationV1(serviceSettings);
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
 
+    var p = null;
+
     switch (method) {
     case 'listWorkspaces':
-      executeListWorkspaces(node, conv, params, msg);
+      p = executeListWorkspaces(node, conv, params, msg);
       break;
     case 'getWorkspace':
-      executeGetWorkspace(node, conv, params, msg);
+      p = executeGetWorkspace(node, conv, params, msg);
       break;
     case 'createWorkspace':
-      executeCreateWorkspace(node, conv, params, msg);
+      p = executeCreateWorkspace(node, conv, params, msg);
       break;
     case 'updateWorkspace':
-      executeUpdateWorkspace(node, conv, params, msg);
+      p = executeUpdateWorkspace(node, conv, params, msg);
       break;
     case 'deleteWorkspace':
-      executeDeleteWorkspace(node, conv, params, msg);
+      p = executeDeleteWorkspace(node, conv, params, msg);
+      break;
+    case 'listIntents':
+      p = executeListIntents(node, conv, params, msg);
+      break;
+    case 'getIntent':
+      p = executeGetIntent(node, conv, params, msg);
+      break;
+    case 'createIntent':
+      p = executeCreateIntent(node, conv, params, msg);
+      break;
+    case 'updateIntent':
+      p = executeUpdateIntent(node, conv, params, msg);
+      break;
+    case 'deleteIntent':
+      p = executeDeleteIntent(node, conv, params, msg);
+      break;
+    case 'listExamples':
+      p = executeListExamples(node, conv, params, msg);
+      break;
+    case 'createExample':
+      p = executeCreateExample(node, conv, params, msg);
+      break;
+    case 'deleteExample':
+      p = executeDeleteExample(node, conv, params, msg);
+      break;
+    case 'listCounterExamples':
+      p = executeListCounterExamples(node, conv, params, msg);
+      break;
+    case 'createCounterExample':
+      p = executeCreateCounterExample(node, conv, params, msg);
+      break;
+    case 'deleteCounterExample':
+      p = executeDeleteCounterExample(node, conv, params, msg);
       break;
     default:
-      executeUnknownMethod(node, conv, params, msg);
+      p = executeUnknownMethod(node, conv, params, msg);
       break;
     }
+
+    return p;
   }
 
-  function buildParams(msg, method, config) {
-    var params = {};
-
+  function buildWorkspaceParams(method, config, params) {
+    var message = '';
     switch (method) {
+    case 'getIntent':
+    case 'updateIntent':
     case 'getWorkspace':
-      params['export'] = config['cwm-export-content'];
-      // Deliberate no break as want workspace ID also;
+    case 'listIntents':
     case 'updateWorkspace':
     case 'deleteWorkspace':
+    case 'createIntent':
+    case 'deleteIntent':
+    case 'listExamples':
+    case 'createExample':
+    case 'deleteExample':
+    case 'listCounterExamples':
+    case 'createCounterExample':
+    case 'deleteCounterExample':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
+      } else {
+        message = 'Workspace ID is required';
+      }
+      break;
+    }
+    return message;
+  }
+
+  function buildIntentParams(method, config, params) {
+    var message = '';
+    var field = 'intent';
+
+    switch (method) {
+    case 'updateIntent':
+      field = 'old_intent';
+      // deliberate no break
+    case 'getIntent':
+    case 'deleteIntent':
+    case 'listExamples':
+    case 'createExample':
+    case 'deleteExample':
+      if (config['cwm-intent']) {
+        params[field] = config['cwm-intent'];
+      } else {
+        message = 'a value for Intent is required';
       }
       break;
     }
 
-    return params;
+    return message;
+  }
+
+  function buildExampleParams(method, config, params) {
+    var message = '';
+
+    switch (method) {
+    case 'createExample':
+    case 'deleteExample':
+    case 'createCounterExample':
+    case 'deleteCounterExample':
+      if (config['cwm-example']) {
+        params['text'] = config['cwm-example'];
+      } else {
+        message = 'Example Input is required';
+      }
+      break;
+    }
+    return message;
+  }
+
+
+  function buildExportParams(method, config, params) {
+    switch (method) {
+    case 'getIntent':
+    case 'getWorkspace':
+    case 'listIntents':
+      params['export'] = config['cwm-export-content'];
+      break;
+    }
+  }
+
+
+  // Copy over the appropriate parameters for the required
+  // method from the node configuration
+  function buildParams(msg, method, config, params) {
+    var message = '';
+
+    message = buildWorkspaceParams(method, config, params);
+    if (! message) {
+      message = buildIntentParams(method, config, params);
+    }
+    if (! message) {
+      message = buildExampleParams(method, config, params);
+    }
+
+    if (message) {
+      return Promise.reject(message);
+    }
+    buildExportParams(method, config, params);
+    return Promise.resolve();
   }
 
   // No need to have complicated processing here Looking
@@ -166,71 +470,141 @@ module.exports = function (RED) {
   //  'name', 'language', 'entities', 'intents',
   // 'dialog_nodes', 'metadata', 'description',
   // 'counterexamples'
+  // So will work for intent as is, for
+  // 'intent', 'description', 'examples'
+  // Just need to add the workspace id back in. For intent
+  // updates the old_intent will have already been set.
   function setWorkspaceParams(method, params, workspaceObject) {
     var workspace_id = null;
-    if ('updateWorkspace' === method && params['workspace_id']) {
-      workspace_id = params['workspace_id'];
+    var stash = {};
+
+    if ('object' !== typeof workspaceObject) {
+      return Promise.reject('json content expected as input on payload');
     }
+
+    switch(method) {
+    case 'updateIntent':
+      if (params['old_intent']) {
+        stash['old_intent'] = params['old_intent'];
+      }
+    //deliberate no break
+    case 'updateWorkspace':
+    case 'createIntent':
+      if (params['workspace_id']) {
+        stash['workspace_id'] = params['workspace_id'];
+      }
+      break;
+    }
+
     if (workspaceObject) {
       params = workspaceObject;
     }
-    if (workspace_id) {
-      params['workspace_id'] = workspace_id;
+
+    if (stash) {
+      for (var k in stash) {
+        params[k] = stash[k];
+      }
     }
-    return params;
+
+    return Promise.resolve(params);
   }
 
-  function loadFile(node, method, params, msg) {
-    temp.open({
-      suffix: '.txt'
-    }, function(err, info) {
-      if (err) {
-        node.status({
-          fill: 'red',
-          shape: 'dot',
-          text: 'Error receiving the data buffer'
-        });
-        throw err;
-      }
 
-      // Syncing up the asynchronous nature of the stream
-      // so that the full file can be sent to the API.
-      fs.writeFile(info.path, msg.payload, function(err) {
+  function openTheFile() {
+    var p = new Promise(function resolver(resolve, reject){
+      temp.open({
+        suffix: '.txt'
+      }, function(err, info) {
         if (err) {
-          node.status({
-            fill: 'red',
-            shape: 'dot',
-            text: 'Error processing data buffer'
-          });
-          throw err;
+          reject('Error receiving the data buffer');
+        } else {
+          resolve(info);
         }
-
-        var workspaceObject = null;
-
-        switch (method) {
-        case 'createWorkspace':
-        case 'updateWorkspace':
-          try {
-            workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
-          } catch (err) {
-            workspaceObject = fs.createReadStream(info.path);
-          }
-        }
-
-        params = setWorkspaceParams(method, params, workspaceObject);
-        executeMethod(node, method, params, msg);
-        temp.cleanup();
       });
     });
+    return p;
   }
 
+  function syncTheFile(info, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      fs.writeFile(info.path, msg.payload, function(err) {
+        if (err) {
+          reject('Error processing data buffer');
+        }
+        resolve();
+      });
+    });
+    return p;
+  }
+
+
+  // I know this says workspace, but its actually a json
+  // object that works both for workspace and intent.
+  function processFileForWorkspace(info, method) {
+    var workspaceObject = null;
+
+    switch (method) {
+    case 'createWorkspace':
+    case 'updateWorkspace':
+    case 'createIntent':
+    case 'updateIntent':
+      try {
+        workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
+      } catch (err) {
+        workspaceObject = fs.createReadStream(info.path);
+      }
+    }
+
+    return Promise.resolve(workspaceObject);
+  }
+
+
+  // We are expecting a file on payload.
+  // Some of the functions used here are async, so this
+  // function is returning a consolidated promise,
+  // compromising of all the promises from the async and
+  // sync functions.
+  function loadFile(node, method, params, msg) {
+    var fileInfo = null;
+    var p = openTheFile()
+      .then(function(info){
+        fileInfo = info;
+        return syncTheFile(fileInfo, msg);
+      })
+      .then(function(){
+        return processFileForWorkspace(fileInfo, method);
+      })
+      .then(function(workspaceObject){
+        return setWorkspaceParams(method, params, workspaceObject);
+      });
+
+    return p;
+  }
+
+
+  // For certain methods a file input is expected on the payload
   function checkForFile(method) {
     switch (method) {
     case 'createWorkspace':
     case 'updateWorkspace':
-      return true;
+    case 'createIntent':
+    case 'updateIntent':
+      return Promise.resolve(true);
     }
-    return false;
+    return Promise.resolve(false);
+  }
+
+  function initialCheck(u, p, m) {
+    var message = '';
+    if (!u || !p) {
+      message = 'Missing Conversation service credentials';
+    } else if (!m || '' === m) {
+      message = 'Required mode has not been specified';
+    }
+    if (message){
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
   }
 
 
@@ -244,7 +618,7 @@ module.exports = function (RED) {
   });
 
 
-  // This is the Speech to Text V1 Query Builder Node
+  // This is the Conversation Workspace Manager Node
   function Node (config) {
     RED.nodes.createNode(this, config);
     var node = this;
@@ -257,30 +631,45 @@ module.exports = function (RED) {
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
 
-      if (!username || !password) {
-        message = 'Missing Conversation service credentials';
-      } else if (!method || '' === method) {
-        message = 'Required mode has not been specified';
-      } else {
-        params = buildParams(msg, method, config);
+      endpoint = sEndpoint;
+      if ((!config['cwm-default-endpoint']) && config['cwm-service-endpoint']) {
+        endpoint = config['cwm-service-endpoint'];
       }
 
-      if (message) {
-        payloadutils.reportError(node, msg, message);
-        return;
-      }
+      node.status({});
+      initialCheck(username, password, method)
+        .then(function(){
+          return buildParams(msg, method, config, params);
+        })
+        .then(function(){
+          return checkForFile(method);
+        })
+        .then(function(fileNeeded){
+          if (fileNeeded) {
+            if (msg.payload instanceof Buffer) {
+              return loadFile(node, method, params, msg);
+            }
+            // If the data is a json object then it will not
+            // have been detected as a buffer.
+            return setWorkspaceParams(method, params, msg.payload);
+          }
+          return Promise.resolve(params);
+        })
+        .then(function(p){
+          params = p;
+          node.status({fill:'blue', shape:'dot', text:'executing'});
+          return executeMethod(node, method, params, msg);
+        })
+        .then(function(){
+          temp.cleanup();
+          node.status({});
+          node.send(msg);
+        })
+        .catch(function(err){
+          temp.cleanup();
+          payloadutils.reportError(node,msg,err);
+        });
 
-      if (checkForFile(method)) {
-        if (msg.payload instanceof Buffer) {
-          loadFile(node, method, params, msg);
-          return;
-        }
-        // If the data is a json object then it will not
-        // have been detected as a buffer.
-        params = setWorkspaceParams(method, params, msg.payload);
-      }
-
-      executeMethod(node, method, params, msg);
     });
   }
 

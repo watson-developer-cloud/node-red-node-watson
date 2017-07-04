@@ -16,8 +16,8 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'text-to-speech';
-  var request = require('request'),
-    cfenv = require('cfenv'),
+  var pkg = require('../../package.json'),
+    request = require('request'),
     url = require('url'),
     temp = require('temp'),
     fs = require('fs'),
@@ -26,6 +26,8 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     TextToSpeechV1 = require('watson-developer-cloud/text-to-speech/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
+    endpoint = '',
+    sEndpoint = 'https://stream.watsonplatform.net/text-to-speech/api',
     username = '', password = '', sUsername = '', sPassword = '';
 
   temp.track();
@@ -43,17 +45,8 @@ module.exports = function (RED) {
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
-
-/*
-  function reportError (node, msg, message) {
-    var messageTxt = message.error ? message.error : message;
-    msg.watsonerror = messageTxt;
-
-    node.status({fill:'red', shape:'dot', text: messageTxt});
-    node.error(messageTxt, msg);
-  }
-*/
 
   function executeCreateCustomisation(node, tts, params, msg) {
     tts.createCustomization(params, function (err, response) {
@@ -149,10 +142,20 @@ module.exports = function (RED) {
   }
 
   function executeMethod(node, method, params, msg) {
-    var tts = new TextToSpeechV1({
-      username: username,
-      password: password
-    });
+    var tts = null,
+      serviceSettings = {
+        username: username,
+        password: password,
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
+      };
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    tts = new TextToSpeechV1(serviceSettings);
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
 
@@ -317,9 +320,14 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available voices
   RED.httpAdmin.get('/watson-text-to-speech-v1-query-builder/voices', function (req, res) {
+    endpoint = req.query.e ? req.query.e : sEndpoint;
     var tts = new TextToSpeechV1({
       username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd
+      password: sPassword ? sPassword : req.query.pwd,
+      url: endpoint,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     tts.voices({}, function(err, voices){
@@ -346,6 +354,11 @@ module.exports = function (RED) {
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
+
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
 
       if (!username || !password) {
         message = 'Missing Watson Text to Speech service credentials';

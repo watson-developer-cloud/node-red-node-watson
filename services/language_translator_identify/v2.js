@@ -16,20 +16,68 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'language-translator';
-  var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
-    //cfenv = require('cfenv'),
+  var pkg = require('../../package.json'),
+    LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
+    payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
-    //service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
     sUsername = null,
     sPassword = null,
-    endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
+    endpoint = '', sEndpoint = '';
+    //endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
+  }
+
+  function initialCheck(u, p) {
+    if (!u || !p) {
+      return Promise.reject('Missing Watson Language Translator service credentials');
+    }
+    return Promise.resolve();
+  }
+
+  function payloadCheck(msg) {
+    if (!msg.payload) {
+      return Promise.reject('Missing property: msg.payload');
+    }
+    return Promise.resolve();
+  }
+
+  function execute(node, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      var language_translator = null,
+        serviceSettings = {
+          username: username,
+          password: password,
+          version: 'v2',
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
+        };
+
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
+
+      language_translator = new LanguageTranslatorV2(serviceSettings);
+
+      language_translator.identify({text: msg.payload}, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.languages = response.languages
+          msg.lang = response.languages[0];
+          resolve();
+        }
+      });
+
+    });
+    return p;
   }
 
   RED.httpAdmin.get('/watson-language-translator-identify/vcap', function (req, res) {
@@ -41,39 +89,30 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
 
     this.on('input', function (msg) {
-      if (!msg.payload) {
-        var message = 'Missing property: msg.payload';
-        node.error(message, msg);
-        return;
-      }
-
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
 
-      if (!username || !password) {
-        var message = 'Missing Watson Language Translator service credentials';
-        node.error(message, msg);
-        return;
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
       }
 
-      var language_translator = new LanguageTranslatorV2({
-        username: username,
-        password: password,
-        version: 'v2',
-        url: endpointUrl
-      });
-
-      node.status({fill:'blue', shape:'dot', text:'requesting'});
-      language_translator.identify({text: msg.payload}, function (err, response) {
-        node.status({})
-        if (err) {
-          node.error(err, msg);
-        } else {
-          msg.languages = response.languages
-          msg.lang = response.languages[0];
-        }
-        node.send(msg);
-      });
+      node.status({});
+      initialCheck(username, password)
+        .then(function(){
+          return payloadCheck(msg);
+        })
+        .then(function(){
+          node.status({fill:'blue', shape:'dot', text:'requesting'});
+          return execute(node, msg);
+        })
+        .then(function(){
+          node.status({});
+          node.send(msg);
+        })
+        .catch(function(err){
+          payloadutils.reportError(node,msg,err);
+        });
     });
   }
   RED.nodes.registerType('watson-language-translator-identify', Node, {

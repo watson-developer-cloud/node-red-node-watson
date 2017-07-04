@@ -14,11 +14,14 @@
  * limitations under the License.
  **/
 
-module.exports = function (RED) {
+module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'conversation';
-  var ConversationV1 = require('watson-developer-cloud/conversation/v1'),
+  var pkg = require('../../package.json'),
+    ConversationV1 = require('watson-developer-cloud/conversation/v1'),
     serviceutils = require('../../utilities/service-utils'),
-    service = null, sUsername = null, sPassword = null;
+    service = null,
+    sUsername = null,
+    sPassword = null;
 
   service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
@@ -27,13 +30,19 @@ module.exports = function (RED) {
     sPassword = service.password;
   }
 
-  RED.httpAdmin.get('/watson-conversation/vcap', function (req, res) {
-    res.json(service ? {bound_service: true} : null);
+  RED.httpAdmin.get('/watson-conversation/vcap', function(req, res) {
+    res.json(service ? {
+      bound_service: true
+    } : null);
   });
 
   function verifyPayload(node, msg) {
     if (!msg.payload) {
-      node.status({fill:'red', shape:'ring', text:'missing payload'});
+      node.status({
+        fill: 'red',
+        shape: 'ring',
+        text: 'missing payload'
+      });
       node.error('Missing property: msg.payload', msg);
       return false;
     }
@@ -56,11 +65,13 @@ module.exports = function (RED) {
 
   function verifyInputs(node, msg, config, params) {
     if (!config.workspaceid && !msg.params.workspace_id) {
-      node.error('Missing workspace_id. check node documentation.',msg);
+      node.error('Missing workspace_id. check node documentation.', msg);
       return false;
     }
     // mandatory message
-    params.input = {text:msg.payload};
+    params.input = {
+      text: msg.payload
+    };
     var prop = null;
 
     if (config.context) {
@@ -90,7 +101,7 @@ module.exports = function (RED) {
 
     // workspaceid can be either configured in the node,
     // or sent into msg.params.workspace_id
-    if (config.workspaceid && config.workspaceid) {
+    if (config.workspaceid) {
       params.workspace_id = config.workspaceid;
     }
     if (msg.params && msg.params.workspace_id) {
@@ -118,17 +129,29 @@ module.exports = function (RED) {
   }
 
 
-  function verifyServiceCredentials(node, msg) {
+  function verifyServiceCredentials(node, msg, config) {
     // If it is present the newly provided user entered key
     // takes precedence over the existing one.
     // If msg.params contain credentials then these will Overridde
     // the bound or configured credentials.
-    var userName = sUsername || node.credentials.username,
-      passWord = sPassword || node.credentials.password;
+    const serviceSettings = {
+      version_date: '2017-05-26',
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
+    };
 
-    if ( !(userName || msg.params.username) ||
-           !(passWord || msg.params.password) ) {
-      node.status({fill:'red', shape:'ring', text:'missing credentials'});
+    var userName = sUsername || node.credentials.username,
+      passWord = sPassword || node.credentials.password,
+      endpoint = '';
+
+    if (!(userName || msg.params.username) ||
+      !(passWord || msg.params.password)) {
+      node.status({
+        fill: 'red',
+        shape: 'ring',
+        text: 'missing credentials'
+      });
       node.error('Missing Watson Conversation API service credentials', msg);
       return false;
     }
@@ -142,19 +165,35 @@ module.exports = function (RED) {
       }
     }
 
-    node.service = new ConversationV1({
-      username: userName,
-      password: passWord,
-      version_date: '2017-02-03'
-    });
+    if (service) {
+      endpoint = service.url;
+    }
+    if (!config['default-endpoint'] && config['service-endpoint']) {
+      endpoint = config['service-endpoint'];
+    }
+    if (msg.params && msg.params.endpoint) {
+      endpoint = msg.params.endpoint;
+    }
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    serviceSettings.username = userName;
+    serviceSettings.password = passWord;
+
+    node.service = new ConversationV1(serviceSettings);
     return true;
   }
 
   function processResponse(err, body, node, msg, config) {
     if (err !== null && body === null) {
       node.error(err);
-      node.status({fill:'red', shape:'ring',
-        text:'call to watson conversation service failed'});
+      node.status({
+        fill: 'red',
+        shape: 'ring',
+        text: 'call to watson conversation service failed'
+      });
       return;
     }
     msg.payload = body;
@@ -175,7 +214,11 @@ module.exports = function (RED) {
   }
 
   function execute(params, node, msg, config) {
-    node.status({fill:'blue', shape:'dot' , text:'Calling Conversation service ...'});
+    node.status({
+      fill: 'blue',
+      shape: 'dot',
+      text: 'Calling Conversation service ...'
+    });
     // call POST /message through SDK
     node.service.message(params, function(err, body) {
       processResponse(err, body, node, msg, config);
@@ -183,12 +226,13 @@ module.exports = function (RED) {
   }
 
   // This is the Watson Conversation V1 (GA) Node
-  function WatsonConversationV1Node (config) {
-    var node = this, b = false;
+  function WatsonConversationV1Node(config) {
+    var node = this,
+      b = false;
 
     RED.nodes.createNode(this, config);
 
-    node.on('input', function (msg) {
+    node.on('input', function(msg) {
       var params = {};
 
       node.status({});
@@ -201,7 +245,7 @@ module.exports = function (RED) {
       if (!b) {
         return;
       }
-      b = verifyServiceCredentials(node, msg);
+      b = verifyServiceCredentials(node, msg, config);
       if (!b) {
         return;
       }
@@ -211,8 +255,12 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-conversation-v1', WatsonConversationV1Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'}
+      username: {
+        type: 'text'
+      },
+      password: {
+        type: 'password'
+      }
     }
   });
 };

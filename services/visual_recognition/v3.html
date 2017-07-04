@@ -90,6 +90,7 @@
     <p>This feature should be provided in input : </p>
     <ul>
     <li><code>msg.payload</code> : the URL or the Node.js Buffer of an image. Redirects are followed, so you can use shortened URLs. (Required)</li>
+    <li><code>msg.params["detect_mode"]</code> : A setting of "classify", "faces" or "text" indicating the visual recognition feature required. "Default" is "classify" (string) (Optional)</li>
     <li><code>msg.params["classifier_ids"]</code> : A comma-separated list of the classifier IDs used to classify the images. "Default" is the classifier_id of the built-in classifier. (string) (Optional)</li>
     <li><code>msg.params["owners"]</code> : A comma-separated list with the value(s) "IBM" and/or "me" to specify which classifiers to run. (string) (Optional)</li>
     <li><code>msg.params["threshold"]</code> : A floating value (in string format) that specifies the minimum score a class must have to be displayed in the response (Optional)</li>
@@ -176,7 +177,7 @@
               // which is confusing our users
               var currfeature = $('#node-input-image-feature').val();
               if (!currfeature) {
-                $("#node-input-image-feature option[value='classifyImage']").prop('selected', true);  
+                $("#node-input-image-feature option[value='classifyImage']").prop('selected', true);
               }
 
               // update list of ruleset for the selected service when the service changes
