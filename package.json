@@ -10,7 +10,7 @@
     "request": "~2.53.0",
     "temp": "^0.8.3",
     "qs": "6.x",
-	  "image-type": "^2.0.2",
+    "image-type": "^2.0.2",
     "watson-developer-cloud": "^2.32.1",
     "kuromoji": "^0.0.5",
     "is-docx": "^0.0.3",
@@ -27,9 +27,9 @@
     "watson"
   ],
   "contributors": [ {
-      "name": "Soheel Chughtai",
-      "email": "soheel_chughtai@uk.ibm.com"
-    }
+    "name": "Soheel Chughtai",
+    "email": "soheel_chughtai@uk.ibm.com"
+  }
   ],
   "node-red": {
     "nodes": {
