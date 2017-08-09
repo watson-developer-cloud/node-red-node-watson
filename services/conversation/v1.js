@@ -143,7 +143,8 @@ module.exports = function(RED) {
 
     var userName = sUsername || node.credentials.username,
       passWord = sPassword || node.credentials.password,
-      endpoint = '';
+      endpoint = '',
+      proxy = '';
 
     if (!(userName || msg.params.username) ||
       !(passWord || msg.params.password)) {
@@ -171,12 +172,19 @@ module.exports = function(RED) {
     if (!config['default-endpoint'] && config['service-endpoint']) {
       endpoint = config['service-endpoint'];
     }
+    if (config['use-proxy'] && config['proxy']) {
+      proxy = config['proxy'];
+    }
     if (msg.params && msg.params.endpoint) {
       endpoint = msg.params.endpoint;
     }
 
     if (endpoint) {
       serviceSettings.url = endpoint;
+    }
+
+    if (proxy) {
+      serviceSettings.proxy = proxy;
     }
 
     serviceSettings.username = userName;
