@@ -14,7 +14,7 @@
     "watson-developer-cloud": "^2.32.1",
     "kuromoji": "^0.0.5",
     "is-docx": "^0.0.3",
-    "stream-to-array": "^2.3.0"
+    "stream-to-array" : "^2.3.0"
   },
   "repository": {
     "type": "git",
@@ -26,18 +26,17 @@
     "bluemix",
     "watson"
   ],
-  "contributors": [
-    {
-      "name": "Soheel Chughtai",
-      "email": "soheel_chughtai@uk.ibm.com"
-    }
+  "contributors": [ {
+    "name": "Soheel Chughtai",
+    "email": "soheel_chughtai@uk.ibm.com"
+  }
   ],
   "node-red": {
     "nodes": {
-      "watson-conversation-v1": "services/conversation/v1.js",
-      "watson-conversation-workspace-manager-v1": "services/conversation/v1-workspace-manager.js",
-      "watson-discovery-v1": "services/discovery/v1.js",
-      "watson-discovery-v1-query-builder": "services/discovery/v1-query-builder.js",
+      "watson-conversation-v1":"services/conversation/v1.js",
+      "watson-conversation-workspace-manager-v1":"services/conversation/v1-workspace-manager.js",
+      "watson-discovery-v1":"services/discovery/v1.js",
+      "watson-discovery-v1-query-builder":"services/discovery/v1-query-builder.js",
       "watson-document-conversion-v1": "services/document_conversion/v1.js",
       "watson-concept-insights-v2": "services/concept_insights/v2.js",
       "alchemy-date-extraction": "services/alchemy_date_extraction/v1.js",
@@ -64,9 +63,5 @@
   },
   "engines": {
     "node": ">=4.5.0"
-  },
-  "devDependencies": {
-    "eslint-config-airbnb-base": "^11.3.1",
-    "eslint-plugin-import": "^2.7.0"
   }
 }
