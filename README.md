@@ -7,6 +7,14 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.12
+- Fix to Personality Insights Node when running in Japanese mode.
+- Bump Interface version to Discovery service to '2017-08-01'.
+- Japanese supported by Translation service.
+- Speech to Text service now reports UK English as 'en-GB'.
+- Add button to allow model cache for STT node to be flushed.
+- Added more of the supported audio formats for the TTS node.
+
 ### New in version 0.5.11
 - Add support for NLP Query in Discovery and Discovery Query Builder Nodes.
 
