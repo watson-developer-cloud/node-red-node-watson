@@ -10,7 +10,9 @@ Node-RED Watson Nodes for IBM Bluemix
 ### New in version 0.5.12
 - Fix to Personality Insights Node when running in Japanese mode.
 - Bump Interface version to Discovery service to '2017-08-01'
-- Japanese supported by Translation service 
+- Japanese supported by Translation service
+- Speech to Text service now reports UK English as 'en-GB'
+- Add button to allow model cache for STT node to be flushed
 
 ### New in version 0.5.11
 - Add support for NLP Query in Discovery and Discovery Query Builder Nodes.
