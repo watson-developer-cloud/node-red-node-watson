@@ -93,6 +93,12 @@
         <label for="node-input-payload-response" style="width: 70%;"> Place output on msg.payload</label>
     </div>
 
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="button" id="node-input-flushcache" value="Flush Config Cache"
+                 style="display: inline-block; width: auto; vertical-align: top;">
+    </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-speech-to-text">
@@ -141,6 +147,7 @@
   stt.LANGUAGES = { 'en-US': 'US English',
                     'pt-BR': 'Portuguese Braziilian',
                     'en-UK': 'UK English' ,
+                    'en-GB': 'UK English' ,
                     'fr-FR': 'French',
                     'zh-CN': 'Mandarin',
                     'es-ES': 'Spanish',
@@ -288,6 +295,14 @@
 
   }
 
+  stt.flushCache = function () {
+    stt.models = null;
+    stt.languages = null;
+    stt.customisations = null;
+    stt.bands = null;
+    sttoneditprepare();
+  }
+
   // Register the handlers for the fields
   stt.handlersUI = function () {
     $('#node-input-username').change(function(val){
@@ -320,6 +335,11 @@
         $('#node-input-service-endpoint').parent().show();
       }
     });
+
+    $('#node-input-flushcache').click(function () {
+      stt.flushCache();
+    });
+
   }
 
   // Function to fetch the customisations, should only be done once
