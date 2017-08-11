@@ -32,7 +32,7 @@ The main steps are :
 
 Note : this procedure have been tested on OS X Yosemite
 
-## Pre-requisites: 
+## Pre-requisites:
 
 Install a Node version manager if not already done :
 - Linux/OS X : use [nvm](https://github.com/creationix/nvm)
@@ -40,13 +40,13 @@ Example :
 ```
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.0/install.sh | bash
 ```
-Using npm, install Node 4 :
+Using npm, install Node 4.5 :
 ```
-nvm install 4.0
+nvm install 4.5
 ```
 - and use it :
 ```
-nvm use 4.0
+nvm use 4.5
 ```
 Notice : npm is provided along with Node.js
 

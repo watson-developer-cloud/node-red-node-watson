@@ -41,7 +41,7 @@ module.exports = function(RED) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
-      version_date: '2017-04-27',
+      version_date: '2017-08-01',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -61,7 +61,7 @@ module.exports = function(RED) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
-      version_date: '2017-04-27',
+      version_date: '2017-08-01',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -85,7 +85,7 @@ module.exports = function(RED) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
-      version_date: '2017-04-27',
+      version_date: '2017-08-01',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
