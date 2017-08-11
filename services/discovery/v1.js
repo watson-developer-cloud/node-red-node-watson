@@ -221,7 +221,7 @@ module.exports = function (RED) {
     const discovery = new DiscoveryV1({
       username: username,
       password: password,
-      version_date: '2017-04-27',
+      version_date: '2017-08-01',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }

@@ -38,7 +38,7 @@ DiscoveryUtils.prototype = {
     var sourceField = 'query',
       targetField = 'query';
 
-    if (config.nlp_query || msg.discoveryparams.nlp_query) {
+    if (config.nlp_query || (msg.discoveryparams && msg.discoveryparams.nlp_query)) {
       targetField = 'natural_language_query';
     }
     if (msg.discoveryparams && msg.discoveryparams[sourceField]) {
