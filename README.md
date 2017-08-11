@@ -14,6 +14,7 @@ Node-RED Watson Nodes for IBM Bluemix
 - Speech to Text service now reports UK English as 'en-GB'.
 - Add button to allow model cache for STT node to be flushed.
 - Added more of the supported audio formats for the TTS node.
+- Retrieve and Rank node update to return document body.
 
 ### New in version 0.5.11
 - Add support for NLP Query in Discovery and Discovery Query Builder Nodes.
