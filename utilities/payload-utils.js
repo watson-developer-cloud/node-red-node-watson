@@ -120,7 +120,7 @@ PayloadUtils.prototype = {
         // default
         return cb(txt.split(' ').length);
       },
-      dic_path = '/../node_modules/kuromoji/dict',
+      dic_path = '/../../kuromoji/dict',
       dic_dir = path.normalize(__dirname + dic_path),
       tokenizer = null;
 
