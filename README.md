@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.14
+- Bump to latest version of watson-developer-cloud node.js sdk
+
 ### New in version 0.5.13
 - Personality Insights on Bluemix needed new path to node_modules
 
