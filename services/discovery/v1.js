@@ -232,9 +232,9 @@ module.exports = function (RED) {
       };
 
     if (endpoint) {
-        serviceSettings.url = endpoint;
+      serviceSettings.url = endpoint;
     }
-        
+
     discovery = new DiscoveryV1(serviceSettings);
 
     switch (method) {

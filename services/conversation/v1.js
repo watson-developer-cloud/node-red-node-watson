@@ -188,7 +188,7 @@ module.exports = function(RED) {
 
   function processResponse(err, body, node, msg, config) {
     if (err !== null && body === null) {
-      node.error(err);
+      node.error(err, msg);
       node.status({
         fill: 'red',
         shape: 'ring',

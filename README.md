@@ -12,6 +12,7 @@ Node-RED Watson Nodes for IBM Bluemix
 - Allow empty input into converse for Conversation Node
 - Endpoint can now be specified in Natural Language Understanding, Discovery and Discover Query Builder Nodes
 - Full Promises implementation for on input processing for Natural Language Understanding Node
+- Fix to node.error invocation in Conversation node.
 
 ### New in version 0.5.13
 - Personality Insights on Bluemix needed new path to node_modules

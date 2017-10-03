@@ -253,7 +253,7 @@ module.exports = function (RED) {
         })
         .then(function(){
           node.status({fill:'blue', shape:'dot', text:'requesting'});
-          return invokeService(options)
+          return invokeService(options);
         })
         .then(function(data){
           msg.features = data;
@@ -263,7 +263,7 @@ module.exports = function (RED) {
         .catch(function(err){
           reportError(node,msg,err);
         });
-        
+
     });
   }
 
