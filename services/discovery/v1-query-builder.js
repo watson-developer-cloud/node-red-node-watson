@@ -22,14 +22,15 @@ module.exports = function(RED) {
     DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
     serviceutils = require('../../utilities/service-utils'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = null,
-    password = null,
     sUsername = null,
-    sPassword = null;
+    sPassword = null,
+    sEndpoint = 'https://gateway.watsonplatform.net/discovery/api';
+
 
   if (dservice) {
     sUsername = dservice.username;
     sPassword = dservice.password;
+    sEndpoint = dservice.url;
   }
 
   RED.httpAdmin.get('/watson-discovery-v1-query-builder/vcap', function(req, res) {
@@ -41,16 +42,20 @@ module.exports = function(RED) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
+      url: req.query.endpoint ? req.query.endpoint : sEndpoint,
       version_date: '2017-08-01',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
     });
 
+    console.log('Getting Discovery Environments');
     discovery.getEnvironments({}, function(err, response) {
       if (err) {
+        console.log(err);
         res.json(err);
       } else {
+        console.log('Returning Envrionments');
         res.json(response.environments ? response.environments : response);
       }
     });
@@ -61,6 +66,7 @@ module.exports = function(RED) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
+      url: req.query.endpoint ? req.query.endpoint : sEndpoint,
       version_date: '2017-08-01',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
@@ -85,6 +91,7 @@ module.exports = function(RED) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
+      url: req.query.endpoint ? req.query.endpoint : sEndpoint,      
       version_date: '2017-08-01',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version

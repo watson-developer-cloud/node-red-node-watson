@@ -26,7 +26,10 @@ module.exports = function (RED) {
     username = null,
     password = null,
     sUsername = null,
-    sPassword = null;
+    sPassword = null,
+    endpoint = '',
+    sEndpoint = 'https://gateway.watsonplatform.net/discovery/api';
+
 
   function checkParams(method, params){
     var response = '';
@@ -218,16 +221,21 @@ module.exports = function (RED) {
   }
 
   function executeMethod(node, method, params, msg) {
-    const discovery = new DiscoveryV1({
-      username: username,
-      password: password,
-      version_date: '2017-08-01',
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
-      }
-    });
+    var discovery = null, p = null,
+      serviceSettings = {
+        username: username,
+        password: password,
+        version_date: '2017-08-01',
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
+      };
 
-    var p = null;
+    if (endpoint) {
+        serviceSettings.url = endpoint;
+    }
+        
+    discovery = new DiscoveryV1(serviceSettings);
 
     switch (method) {
     case 'createEnvrionment':
@@ -284,6 +292,7 @@ module.exports = function (RED) {
   if (dservice) {
     sUsername = dservice.username;
     sPassword = dservice.password;
+    sEndpoint = dservice.url;
   }
 
   RED.httpAdmin.get('/watson-discovery/vcap', function (req, res) {
@@ -302,6 +311,11 @@ module.exports = function (RED) {
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
+
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
 
       node.status({});
       initialCheck(username, password, method)
