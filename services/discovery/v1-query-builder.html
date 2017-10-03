@@ -49,6 +49,16 @@
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
 
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/discovery/api">
+    </div>
+
     <div class="form-row">
         <label for="node-input-environment"><i class="fa fa-book"></i> Environment</label>
         <select type="text" id="node-input-environment" style="display: inline-block; vertical-align:middle; width: 70%;">
@@ -257,6 +267,15 @@
           }
       });
 
+      $('input#node-input-default-endpoint').change(function () {
+          var checked = $('input#node-input-default-endpoint').prop('checked')
+          if (checked) {
+              $('#node-input-service-endpoint').parent().hide();
+          } else {
+              $('#node-input-service-endpoint').parent().show();
+          }
+      });
+
     }
 
     // The dialog is about to be shown.
@@ -429,8 +448,13 @@
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
 
-      $.getJSON('watson-discovery-v1-query-builder/environments',
-                 {un: u, pwd: p}
+      var creds = {un: u, pwd: p};
+      var eChecked = $('input#node-input-default-endpoint').prop('checked')
+      if (!eChecked) {
+        creds.endpoint = $('#node-input-service-endpoint').val();
+      }
+
+      $.getJSON('watson-discovery-v1-query-builder/environments', creds
       ).done(function (data) {
         $('#something-went-wrong').hide();
         if (data.error) {
@@ -461,9 +485,14 @@
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
 
-      $.getJSON('watson-discovery-v1-query-builder/collections',
-                 {un: u, pwd: p,
-                  environment_id: disQB.environment_selected}
+      var creds = {un: u, pwd: p};
+      var eChecked = $('input#node-input-default-endpoint').prop('checked')
+      if (!eChecked) {
+        creds.endpoint = $('#node-input-service-endpoint').val();
+      }
+      creds.environment_id = disQB.environment_selected;
+
+      $.getJSON('watson-discovery-v1-query-builder/collections', creds
       ).done(function (data) {
         $('#something-went-wrong').hide();
         if (data.error) {
@@ -492,11 +521,15 @@
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
 
-      $.getJSON('watson-discovery-v1-query-builder/schemas',
-                 {un: u, pwd: p,
-                  environment_id: disQB.environment_selected,
-                  collection_id: disQB.collection_selected
-                 }
+      var creds = {un: u, pwd: p};
+      var eChecked = $('input#node-input-default-endpoint').prop('checked')
+      if (!eChecked) {
+        creds.endpoint = $('#node-input-service-endpoint').val();
+      }
+      creds.environment_id = disQB.environment_selected;
+      creds.collection_id = disQB.collection_selected;
+
+      $.getJSON('watson-discovery-v1-query-builder/schemas', creds
       ).done(function (data) {
         $('#something-went-wrong').hide();
         if (data.error) {
@@ -683,7 +716,10 @@
                 queryvalue3: {value: ''},
                 queryvalue3hidden: {value: ''},
                 passages: {value: false},
-                passageshidden: {value: false}
+                passageshidden: {value: false},
+                'default-endpoint' :{value: true},
+                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/discovery/api'}
+
             },
             credentials: {
               username: {type:"text"} //,

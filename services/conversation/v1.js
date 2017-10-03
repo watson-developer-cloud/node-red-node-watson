@@ -36,8 +36,8 @@ module.exports = function(RED) {
     } : null);
   });
 
-  function verifyPayload(node, msg) {
-    if (!msg.payload) {
+  function verifyPayload(node, msg, config) {
+    if (!(msg.payload || config['empty-payload'])) {
       node.status({
         fill: 'red',
         shape: 'ring',
@@ -188,7 +188,7 @@ module.exports = function(RED) {
 
   function processResponse(err, body, node, msg, config) {
     if (err !== null && body === null) {
-      node.error(err);
+      node.error(err, msg);
       node.status({
         fill: 'red',
         shape: 'ring',
@@ -237,7 +237,7 @@ module.exports = function(RED) {
 
       node.status({});
 
-      b = verifyPayload(node, msg);
+      b = verifyPayload(node, msg, config);
       if (!b) {
         return;
       }

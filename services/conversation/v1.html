@@ -59,6 +59,12 @@
         <input type="checkbox" id="node-input-multiuser" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-multiuser" style="width: 70%;"> Multiple Users</label>
     </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-empty-payload" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-empty-payload" style="width: 70%;"> Permit empty payload</label>
+    </div>
+
     <div class="form-tips" id="conversation-form-tips">
       <strong>Note:</strong> When using with multiple users, <code>msg.user</code> must be set.<br>
       See info box for details.
@@ -140,6 +146,7 @@
               workspaceid: {value: ''},
               multiuser: {value: false},
               context: {value: true},
+              'empty-payload': {value: false},
               'default-endpoint' :{value: true},
               'service-endpoint' :{value: 'https://gateway.watsonplatform.net/conversation/api'}
             },

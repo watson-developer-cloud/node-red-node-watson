@@ -33,6 +33,16 @@
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
 
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/discovery/api">
+    </div>
+
     <div class="form-row">
         <label for="node-input-discovery-method"><i class="fa fa-book"></i> Method: </label>
         <select type="text" id="node-input-discovery-method" style="display: inline-block; width: 70%;">
@@ -357,6 +367,15 @@
         var method = $('#node-input-discovery-method').val();
         disV1.processSelectedMethod(method);
       });
+
+      $('input#node-input-default-endpoint').change(function () {
+          var checked = $('input#node-input-default-endpoint').prop('checked')
+          if (checked) {
+              $('#node-input-service-endpoint').parent().hide();
+          } else {
+              $('#node-input-service-endpoint').parent().show();
+          }
+      });
     }
 
     disV1.checkForPrepare = function () {
@@ -398,7 +417,9 @@
                 return: {value: ''},
                 description: {value: ''},
                 size: {value: 0},
-                'discovery-method': {value:'listEnvrionments'}
+                'discovery-method': {value:'listEnvrionments'},
+                'default-endpoint' :{value: true},
+                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/discovery/api'}
             },
             credentials: {
               username: {type:'text'},

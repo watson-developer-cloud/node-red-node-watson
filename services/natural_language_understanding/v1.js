@@ -37,7 +37,9 @@ module.exports = function (RED) {
     username = null,
     password = null,
     sUsername = null,
-    sPassword = null;
+    sPassword = null,
+    endpoint = '',
+    sEndpoint = 'https://gateway.watsonplatform.net/natural-language-understanding/api';
 
   function reportError(node, msg, message) {
     var messageTxt = message.error ? message.error : message;
@@ -45,7 +47,14 @@ module.exports = function (RED) {
     node.error(message, msg);
   }
 
-  function checkPayload(msg, options) {
+  function initialCheck(u, p) {
+    if (!u || !p) {
+      return Promise.reject('Missing Watson Natural Language Understanding service credentials');
+    }
+    return Promise.resolve();
+  }
+
+  function payloadCheck(msg, options) {
     var message = '';
     if (!msg.payload) {
       message = 'Missing property: msg.payload';
@@ -54,13 +63,18 @@ module.exports = function (RED) {
     } else {
       options['text'] = msg.payload;
     }
-    return message;
+    if (message) {
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
   }
+
 
   function checkAdditonalMsgOptions(msg, options) {
     if (msg.nlu_options && msg.nlu_options.language) {
       options['language'] = msg.nlu_options.language;
     }
+    return Promise.resolve();
   }
 
   function checkFeatureRequest(config, options) {
@@ -79,7 +93,10 @@ module.exports = function (RED) {
         options.features[NLU_FEATURES[enabled_features[f]]] = {};
       }
     }
-    return message;
+    if (message) {
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
   }
 
   function processConceptsOptions(config, features) {
@@ -158,17 +175,25 @@ module.exports = function (RED) {
       processKeywordsOptions(config, options.features);
       processSemanticRolesOptions(config, options.features);
     }
+    return Promise.resolve();
   }
 
   function invokeService(options) {
-    const nlu = new NaturalLanguageUnderstandingV1({
-      username: username,
-      password: password,
-      version_date: NaturalLanguageUnderstandingV1.VERSION_DATE_2017_02_27,
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
-      }
-    });
+    var nlu = null,
+      serviceSettings = {
+        username: username,
+        password: password,
+        version_date: NaturalLanguageUnderstandingV1.VERSION_DATE_2017_02_27,
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
+      };
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    nlu = new NaturalLanguageUnderstandingV1(serviceSettings);
 
     var p = new Promise(function resolver(resolve, reject){
       nlu.analyze(options, function(err, data) {
@@ -185,6 +210,7 @@ module.exports = function (RED) {
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
 
   RED.httpAdmin.get('/natural-language-understanding/vcap', function (req, res) {
@@ -207,34 +233,36 @@ module.exports = function (RED) {
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
 
-      if (!username || !password) {
-        message = 'Missing Watson Natural Language Understanding service credentials';
-      } else {
-        message = checkPayload(msg, options);
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
       }
 
-      if (!message) {
-        checkAdditonalMsgOptions(msg, options);
-        message = checkFeatureRequest(config, options);
-      }
-
-      if (!message) {
-        checkFeatureOptions(msg, config, options);
-        node.status({fill:'blue', shape:'dot', text:'requesting'});
-        invokeService(options)
-          .then(function(data){
-            msg.features = data;
-            node.send(msg);
-            node.status({});
-          })
-          .catch(function(err){
-            reportError(node,msg,err);
-          });
-      }
-
-      if (message) {
-        reportError(node,msg,message);
-      }
+      initialCheck(username, password)
+        .then(function(){
+          return payloadCheck(msg, options);
+        })
+        .then(function(){
+          return checkAdditonalMsgOptions(msg, options);
+        })
+        .then(function(){
+          return checkFeatureRequest(config, options);
+        })
+        .then(function(){
+          return checkFeatureOptions(msg, config, options);
+        })
+        .then(function(){
+          node.status({fill:'blue', shape:'dot', text:'requesting'});
+          return invokeService(options);
+        })
+        .then(function(data){
+          msg.features = data;
+          node.send(msg);
+          node.status({});
+        })
+        .catch(function(err){
+          reportError(node,msg,err);
+        });
 
     });
   }
