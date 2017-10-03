@@ -249,10 +249,13 @@
     }
   };
 
-  nluV1.CreateIListener = function(listen, action) {
+  nluV1.CreateIListener = function(listen, action, opp=false) {
     listen.change(function(val){
       var isSet = listen.prop('checked');
-      nluV1.setVisibility(action, listen.prop('checked'));
+      if (opp) {
+        isSet = !isSet;
+      }
+      nluV1.setVisibility(action, isSet);
     });
   }
 
@@ -283,7 +286,7 @@
 
 
     nluV1.CreateIListener($('#node-input-default-endpoint'),
-                                $('#nnode-input-service-endpoint'));
+                                $('#node-input-service-endpoint'), true);
 
   }
 
