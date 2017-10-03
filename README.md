@@ -7,6 +7,13 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.14
+- Bump to latest version of watson-developer-cloud node.js sdk
+- Allow empty input into converse for Conversation Node
+- Endpoint can now be specified in Natural Language Understanding, Discovery and Discover Query Builder Nodes
+- Full Promises implementation for on input processing for Natural Language Understanding Node
+- Fix to node.error invocation in Conversation node.
+
 ### New in version 0.5.13
 - Personality Insights on Bluemix needed new path to node_modules
 
