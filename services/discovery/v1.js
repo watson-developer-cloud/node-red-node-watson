@@ -144,6 +144,19 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeDeleteEnvironment(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.deleteEnvironment(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.environment = response.environment ? response.environment : response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
 
   function executeListCollections(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
@@ -280,6 +293,9 @@ module.exports = function (RED) {
       break;
     case 'getConfigurationDetails':
       p = executeGetConfigurationDetails(node, discovery, params, msg);
+      break;
+    case 'deleteEnvironment':
+      p = executeDeleteEnvironment(node, discovery, params, msg);
       break;
     case 'query':
       p = executeQuery(node, discovery, params, msg);

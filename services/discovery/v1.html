@@ -50,6 +50,7 @@
             <option value="createEnvrionment">Create new environment</option>
             <option value="listEnvrionments">List existing environments</option>
             <option value="getEnvironmentDetails">Retrieve environment details</option>
+            <option value="deleteEnvironment">Delete environment</option>
             <option value="createCollection">Create new collection</option>
             <option value="listCollections">List existing collections</option>
             <option value="getCollectionDetails">Retrieve collection details</option>
@@ -370,6 +371,7 @@
         case 'createConfiguration':
         case 'getEnvironmentDetails':
         case 'listCollections':
+        case 'deleteEnvironment':
           fields.push('#node-input-environment_id');
           break;
         case 'getCollectionDetails':

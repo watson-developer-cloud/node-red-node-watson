@@ -9,7 +9,7 @@ Node-RED Watson Nodes for IBM Bluemix
 
 ### New in version 0.5.15
 - Allow language code to be specified on create collection in Discovery Node.
-- Implement delete collection in Discovery Node.
+- Implement delete collection, delete environment in Discovery Node.
 
 ### New in version 0.5.14
 - Bump to latest version of watson-developer-cloud node.js sdk
