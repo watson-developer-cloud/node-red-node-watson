@@ -118,7 +118,6 @@ module.exports = function (RED) {
       //  //delete params[f];
       //});
 
-      //console.log('about to create collection with params : ', params);
       discovery.createCollection(params, function (err, response) {
         if (err) {
           reject(err);
@@ -131,6 +130,33 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeDeleteCollection(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.deleteCollection(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.collection = response.collection ? response.collection : response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeDeleteEnvironment(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.deleteEnvironment(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.environment = response.environment ? response.environment : response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
 
   function executeListCollections(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
@@ -225,7 +251,7 @@ module.exports = function (RED) {
       serviceSettings = {
         username: username,
         password: password,
-        version_date: '2017-08-01',
+        version_date: '2017-09-01',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
@@ -256,6 +282,9 @@ module.exports = function (RED) {
     case 'getCollectionDetails':
       p = executeGetCollectionDetails(node, discovery, params, msg);
       break;
+    case 'deleteCollection':
+      p = executeDeleteCollection(node, discovery, params, msg);
+      break;
     case 'createConfiguration':
       p = executeCreateConfiguration(node, discovery, params, msg);
       break;
@@ -264,6 +293,9 @@ module.exports = function (RED) {
       break;
     case 'getConfigurationDetails':
       p = executeGetConfigurationDetails(node, discovery, params, msg);
+      break;
+    case 'deleteEnvironment':
+      p = executeDeleteEnvironment(node, discovery, params, msg);
       break;
     case 'query':
       p = executeQuery(node, discovery, params, msg);

@@ -87,6 +87,23 @@ ToneUtils.prototype = {
     }
 
     return options;
+  },
+
+  // function to splice in language options into header
+  parseLanguage: function(msg, config, options) {
+    var inputlang = config.inputlang ? config.inputlang : 'en';
+    //outputlang = config.outputlang ? config.outputlang : 'en';
+
+    // The SDK is currently ignoring this, but this is how it should be done.
+    // If you need it, then Personality Insights as full set of accept-language
+    //options.headers = {
+    //  'content-language': inputlang,
+    //  'accept-language': outputlang
+    //}
+
+    // This is how it is currently working.
+    options.language = inputlang;
+    return options;
   }
 
 };
