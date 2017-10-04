@@ -94,7 +94,7 @@ module.exports = function (RED) {
     var serviceSettings = {
       'username': settings.username,
       'password': settings.password,
-      version_date: '2016-05-19',
+      version_date: '2017-09-21',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -109,6 +109,10 @@ module.exports = function (RED) {
       serviceSettings.url = endpoint;
     }
 
+    if (config['interface-version']) {
+      serviceSettings.version_date = config['interface-version'];
+    }
+
     const tone_analyzer = new ToneAnalyzerV3(serviceSettings);
 
     var p = new Promise(function resolver(resolve, reject){
@@ -120,6 +124,7 @@ module.exports = function (RED) {
         m = 'tone_chat';
         break;
       }
+
       tone_analyzer[m](options, function (err, response) {
         if (err) {
           reject(err);
@@ -138,6 +143,7 @@ module.exports = function (RED) {
     checkConfiguration(msg, node)
       .then(function(settings) {
         var options = toneutils.parseOptions(msg, config);
+        options = toneutils.parseLanguage(msg, config, options);
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         return invokeService(config, options, settings);
       })
