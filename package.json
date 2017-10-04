@@ -1,6 +1,6 @@
 {
   "name": "node-red-node-watson",
-  "version": "0.5.14",
+  "version": "0.5.15",
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
     "alchemy-api": "^1.3.0",
@@ -11,7 +11,7 @@
     "temp": "^0.8.3",
     "qs": "6.x",
 	  "image-type": "^2.0.2",
-    "watson-developer-cloud": "^2.39.2",
+    "watson-developer-cloud": "^2.40.0",
     "kuromoji": "^0.1.1",
     "is-docx": "^0.0.3",
     "stream-to-array" : "^2.3.0"

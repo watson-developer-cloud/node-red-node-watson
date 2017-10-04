@@ -52,6 +52,14 @@
     </div>
 
     <div class="form-row">
+        <label for="node-input-interface-version"><i class="fa fa-history"></i> version_date: </label>
+        <select type="text" id="node-input-interface-version" style="display: inline-block; width: 70%;">
+            <option value="2016-05-19">Multiple Tones</option>
+            <option value="2017-09-21">Dominant Tone</option>
+        </select>
+    </div>
+
+    <div class="form-row">
         <label for="node-input-tones"><i class="fa fa-comments-o"></i> Tones</label>
         <select type="text" id="node-input-tones" style="display: inline-block; width: 70%;" >
             <option value="all">All</option>
@@ -72,6 +80,14 @@
         <select type="text" id="node-input-contentType" style="display: inline-block; width: 70%;" >
             <option value="false">Text</option>
             <option value="true">HTML</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-inputlang"><i class="fa fa-language"></i> Input Text Language</label>
+        <select type="text" id="node-input-inputlang" style="display: inline-block; width: 70%;" >
+            <option value="en">English</option>
+            <option value="fr">French</option>
         </select>
     </div>
 
@@ -115,6 +131,7 @@
     fields.push('#node-input-tones');
     fields.push('#node-input-sentences');
     fields.push('#node-input-contentType');
+    fields.push('#node-input-inputlang');
     ToneV3.hideSelectedFields(fields);
   };
 
@@ -126,16 +143,35 @@
         fields.push('#node-input-tones');
         fields.push('#node-input-sentences');
         fields.push('#node-input-contentType');
+        fields.push('#node-input-inputlang');        
         break;
     }
     ToneV3.showSelectedFields(fields);
   }
 
+  ToneV3.processSelectedVersion = function(method, version) {
+    if ('generalTone' == method)
+    {
+      fields = [];
+      fields.push('#node-input-tones');
+      if  ('2016-05-19' == version) {
+        ToneV3.showSelectedFields(fields);
+      } else {
+        ToneV3.hideSelectedFields(fields);
+      }
+    }
+  }
 
   ToneV3.UIListeners = function () {
     $('#node-input-tone-method').change(function(val){
       var method = $('#node-input-tone-method').val();
       ToneV3.processSelectedMethod(method);
+    });
+
+    $('#node-input-interface-version').change(function(val){
+      var version = $('#node-input-interface-version').val();
+      var method = $('#node-input-tone-method').val();
+      ToneV3.processSelectedVersion(method, version);
     });
 
     $('#node-input-default-endpoint').change(function () {
@@ -176,6 +212,9 @@
                 sentences: {value: "true"},
                 contentType: {value: "false"},
                 "tone-method": {value:"generalTone"},
+                "interface-version": {value:"generalTone"},
+                name: {value: ""},
+                inputlang: {value: "en"},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://gateway.watsonplatform.net/tone-analyzer/api'}
             },

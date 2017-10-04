@@ -50,9 +50,11 @@
             <option value="createEnvrionment">Create new environment</option>
             <option value="listEnvrionments">List existing environments</option>
             <option value="getEnvironmentDetails">Retrieve environment details</option>
+            <option value="deleteEnvironment">Delete environment</option>
             <option value="createCollection">Create new collection</option>
             <option value="listCollections">List existing collections</option>
             <option value="getCollectionDetails">Retrieve collection details</option>
+            <option value="deleteCollection">Delete collection</option>
             <option value="createConfiguration">Create new configuration</option>
             <option value="listConfigurations">List existing configurations</option>
             <option value="getConfigurationDetails">Retrieve configuration details</option>
@@ -83,6 +85,21 @@
         <label for="node-input-configuration_id"><i class="fa fa-tag"></i> Configuration ID</label>
         <input type="text" id="node-input-configuration_id" placeholder="">
     </div>
+
+    <div class="form-row">
+        <label for="node-input-language_code"><i class="fa fa-language"></i> Language: </label>
+        <select type="text" id="node-input-language_code" style="display: inline-block; width: 70%;">
+            <option value="en">English</option>
+            <option value="de">German</option>
+            <option value="es">Spanish</option>
+            <option value="ar">Arabic</option>
+            <option value="fr">French</option>
+            <option value="it">Italian</option>
+            <option value="ja">Japanese</option>
+            <option value="pt-br">Brazilian Portuguese</option>
+        </select>
+    </div>
+
     <div class="form-row">
         <label for="node-input-count"><i class="fa fa-tag"></i> Number of documents</label>
         <input type="text" id="node-input-count" placeholder="">
@@ -178,6 +195,25 @@
             <p>Node output : </p>
               <ul>
                 <li><code>msg.environment_details</code> : Details of the requested environment.</li>
+              </ul>
+        </li>
+        <li>
+            <p><b>Create New Collection</b><p>
+            <p>For this method the node needs an Environment ID, Collection Name,
+            Description, Configuration ID and Language Code as input.
+            </p>
+            <p>The fields can be overridden by specifying
+              in <code>msg.discoveryparams.environment_id</code>
+              , <code>msg.discoveryparams.collection_name</code>
+              , <code>msg.discoveryparams.description</code>
+              , <code>msg.discoveryparams.configuration_id</code>
+              and <code>msg.discoveryparams.language_code</code>
+            </p>
+
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.collection</code> : Information about the
+                newly created collection.</li>
               </ul>
         </li>
         <br/>
@@ -295,6 +331,7 @@
       $('#node-input-collection_id').parent().hide();
       $('#node-input-configurationname').parent().hide();
       $('#node-input-configuration_id').parent().hide();
+      $('#node-input-language_code').parent().hide();
       $('#node-input-count').parent().hide();
       $('#node-input-passages').parent().hide();
       $('#node-input-nlp_query').parent().hide();
@@ -327,15 +364,18 @@
         case 'createCollection':
           fields.push('#node-input-environment_id'
                           + ', #node-input-configuration_id'
+                          + ', #node-input-language_code'
                           + ', #node-input-collection_name'
                           + ', #node-input-description');
           break;
         case 'createConfiguration':
         case 'getEnvironmentDetails':
         case 'listCollections':
+        case 'deleteEnvironment':
           fields.push('#node-input-environment_id');
           break;
         case 'getCollectionDetails':
+        case 'deleteCollection':
           fields.push('#node-input-environment_id'
                           + ', #node-input-collection_id');
           break;
@@ -407,6 +447,7 @@
                 collection_id: {value: ''},
                 configurationname: {value: ''},
                 configuration_id: {value: ''},
+                language_code: {value: 'en'},
                 collection_name: {value: ''},
                 count: {value: '1'},
                 passages: {value: 'false'},

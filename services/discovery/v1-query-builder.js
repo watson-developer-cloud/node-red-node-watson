@@ -43,7 +43,7 @@ module.exports = function(RED) {
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
       url: req.query.endpoint ? req.query.endpoint : sEndpoint,
-      version_date: '2017-08-01',
+      version_date: '2017-09-01',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -67,7 +67,7 @@ module.exports = function(RED) {
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
       url: req.query.endpoint ? req.query.endpoint : sEndpoint,
-      version_date: '2017-08-01',
+      version_date: '2017-09-01',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -91,8 +91,8 @@ module.exports = function(RED) {
     var discovery = new DiscoveryV1({
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
-      url: req.query.endpoint ? req.query.endpoint : sEndpoint,      
-      version_date: '2017-08-01',
+      url: req.query.endpoint ? req.query.endpoint : sEndpoint,
+      version_date: '2017-09-01',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
