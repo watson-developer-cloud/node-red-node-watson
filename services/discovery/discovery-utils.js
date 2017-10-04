@@ -86,7 +86,7 @@ DiscoveryUtils.prototype = {
     params = me.buildParamsForQuery(msg, config, params);
 
     ['environment_id', 'collection_id', 'configuration_id',
-      'collection_name',
+      'collection_name', 'language_code',
       'passages', 'description', 'size'
     ].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);

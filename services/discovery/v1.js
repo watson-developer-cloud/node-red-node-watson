@@ -118,8 +118,21 @@ module.exports = function (RED) {
       //  //delete params[f];
       //});
 
-      //console.log('about to create collection with params : ', params);
       discovery.createCollection(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.collection = response.collection ? response.collection : response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeDeleteCollection(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.deleteCollection(params, function (err, response) {
         if (err) {
           reject(err);
         } else {
@@ -225,7 +238,7 @@ module.exports = function (RED) {
       serviceSettings = {
         username: username,
         password: password,
-        version_date: '2017-08-01',
+        version_date: '2017-09-01',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
@@ -255,6 +268,9 @@ module.exports = function (RED) {
       break;
     case 'getCollectionDetails':
       p = executeGetCollectionDetails(node, discovery, params, msg);
+      break;
+    case 'deleteCollection':
+      p = executeDeleteCollection(node, discovery, params, msg);
       break;
     case 'createConfiguration':
       p = executeCreateConfiguration(node, discovery, params, msg);
