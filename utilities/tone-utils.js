@@ -91,7 +91,7 @@ ToneUtils.prototype = {
 
   // function to splice in language options into header
   parseLanguage: function(msg, config, options) {
-    inputlang = config.inputlang ? config.inputlang : 'en',
+    var inputlang = config.inputlang ? config.inputlang : 'en',
     //outputlang = config.outputlang ? config.outputlang : 'en';
 
     // The SDK is currently ignoring this, but this is how it should be done.
