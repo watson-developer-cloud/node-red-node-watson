@@ -323,6 +323,19 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeUpdateEntity(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.updateEntity(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['entity'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
 
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
@@ -407,6 +420,9 @@ module.exports = function (RED) {
     case 'createEntity':
       p = executeCreateEntity(node, conv, params, msg);
       break;
+    case 'updateEntity':
+      p = executeUpdateEntity(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -435,6 +451,7 @@ module.exports = function (RED) {
     case 'getEntity':
     case 'listEntities':
     case 'createEntity':
+    case 'updateEntity':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -480,6 +497,9 @@ module.exports = function (RED) {
     var field = 'entity';
 
     switch (method) {
+    case 'updateEntity':
+      field = 'old_entity';
+      // deliberate no break
     case 'getEntity':
       if (config['cwm-entity']) {
         params[field] = config['cwm-entity'];
@@ -576,10 +596,20 @@ module.exports = function (RED) {
       if (params['old_intent']) {
         stash['old_intent'] = params['old_intent'];
       }
-    //deliberate no break
+      break;
+    case 'updateEntity':
+      if (params['old_entity']) {
+        stash['old_entity'] = params['old_entity'];
+      }
+      break;
+    }
+
+    switch(method) {
     case 'updateWorkspace':
     case 'createIntent':
+    case 'updateIntent':
     case 'createEntity':
+    case 'updateEntity':
       if (params['workspace_id']) {
         stash['workspace_id'] = params['workspace_id'];
       }
@@ -639,6 +669,7 @@ module.exports = function (RED) {
     case 'createIntent':
     case 'updateIntent':
     case 'createEntity':
+    case 'updateEntity':
       try {
         workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
       } catch (err) {
@@ -681,6 +712,7 @@ module.exports = function (RED) {
     case 'createIntent':
     case 'updateIntent':
     case 'createEntity':
+    case 'updateEntity':
       return Promise.resolve(true);
     }
     return Promise.resolve(false);

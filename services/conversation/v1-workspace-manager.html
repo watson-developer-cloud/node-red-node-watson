@@ -74,6 +74,7 @@
             <option value="listEntities">List Entities</option>
             <option value="getEntity">Get Entity Details</option>
             <option value="createEntity">Create Entity</option>
+            <option value="updateEntity">Update Entity</option>
         </select>
     </div>
 
@@ -235,7 +236,18 @@
         as <code>msg.payload</code>
       </p>
     </li>
-
+    <li>Update Entity
+      <p>In this mode, the specified entity is updated. The input json structure
+        defining the content of the updates
+        should be passed in
+        as <code>msg.payload</code>. Only the elements need to be included
+        in the json. Any included element will override the existing setting
+        for the element. ie. Any existing elements will
+        be overridden. ie. If any element is not mentioned in the json, then it
+        will be deleted.
+        You can use this mode to rename an entity.
+      </p>
+    </li>
     </ul>
 
     <p>For more information about the conversation service,
@@ -320,6 +332,10 @@
         fields.push('#node-input-cwm-workspace-id'
                         + ', #node-input-cwm-entity'
                         + ', #node-input-cwm-export-content');
+        break;
+      case 'updateEntity':
+        fields.push('#node-input-cwm-workspace-id'
+                       + ', #node-input-cwm-entity');
         break;
       case 'deleteWorkspace':
       case 'updateWorkspace':
