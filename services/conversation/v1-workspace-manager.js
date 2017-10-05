@@ -130,6 +130,21 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeListEntities(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getEntities(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['entities'] = response.entities ?
+                                        response.entities: response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeGetIntent(node, conv, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
       conv.getIntent(params, function (err, response) {
@@ -287,7 +302,7 @@ module.exports = function (RED) {
       serviceSettings = {
         username: username,
         password: password,
-        version_date: '2017-02-03',
+        version_date: '2017-05-26',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
@@ -352,6 +367,9 @@ module.exports = function (RED) {
     case 'deleteCounterExample':
       p = executeDeleteCounterExample(node, conv, params, msg);
       break;
+    case 'listEntities':
+      p = executeListEntities(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -377,6 +395,7 @@ module.exports = function (RED) {
     case 'listCounterExamples':
     case 'createCounterExample':
     case 'deleteCounterExample':
+    case 'listEntities':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -384,7 +403,10 @@ module.exports = function (RED) {
       }
       break;
     }
-    return message;
+    if (message) {
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
   }
 
   function buildIntentParams(method, config, params) {
@@ -407,8 +429,10 @@ module.exports = function (RED) {
       }
       break;
     }
-
-    return message;
+    if (message) {
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
   }
 
   function buildExampleParams(method, config, params) {
@@ -426,7 +450,10 @@ module.exports = function (RED) {
       }
       break;
     }
-    return message;
+    if (message) {
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
   }
 
 
@@ -435,30 +462,27 @@ module.exports = function (RED) {
     case 'getIntent':
     case 'getWorkspace':
     case 'listIntents':
+    case 'listEntities':
       params['export'] = config['cwm-export-content'];
       break;
     }
+    return Promise.resolve();
   }
 
 
   // Copy over the appropriate parameters for the required
   // method from the node configuration
   function buildParams(msg, method, config, params) {
-    var message = '';
-
-    message = buildWorkspaceParams(method, config, params);
-    if (! message) {
-      message = buildIntentParams(method, config, params);
-    }
-    if (! message) {
-      message = buildExampleParams(method, config, params);
-    }
-
-    if (message) {
-      return Promise.reject(message);
-    }
-    buildExportParams(method, config, params);
-    return Promise.resolve();
+    buildWorkspaceParams(method, config, params)
+    .then(function(){
+      return buildIntentParams(method, config, params);
+    })
+    .then(function(){
+      return buildExampleParams(method, config, params);
+    })
+    .then(function(){
+      return buildExportParams(method, config, params);
+    })      
   }
 
   // No need to have complicated processing here Looking

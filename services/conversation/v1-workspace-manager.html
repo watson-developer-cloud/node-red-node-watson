@@ -70,6 +70,8 @@
             <option value="listCounterExamples">List Counter Examples</option>
             <option value="createCounterExample">Create Counter Example</option>
             <option value="deleteCounterExample">Delete Counter Example</option>
+            <option disabled>______________</option>
+            <option value="listEntities">List Entities</option>
         </select>
     </div>
 
@@ -206,6 +208,12 @@
         specified conversation workspace.
       </p>
     </li>
+    <li>list Entities
+      <p>In this mode a list of all entities for the specified conversation
+        workspace are returned on
+        <code>msg.entities</code>
+      </p>
+    </li>
 
     </ul>
 
@@ -260,6 +268,7 @@
     switch (method) {
       case 'getWorkspace':
       case 'listIntents':
+      case 'listEntities':
         fields.push('#node-input-cwm-workspace-id'
                        + ', #node-input-cwm-export-content');
         break;

@@ -9,6 +9,7 @@ Node-RED Watson Nodes for IBM Bluemix
 
 ### New in version 0.5.16
 - Create Collection Language fix in Discovery Node.
+- Similarity Search Nodes moved into deprecated category.
 
 ### New in version 0.5.15
 - Allow language code to be specified on create collection in Discovery Node.
