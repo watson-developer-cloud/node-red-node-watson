@@ -8,6 +8,7 @@ Node-RED Watson Nodes for IBM Bluemix
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 ### New in version 0.5.16
+- Implement methods to manage Entities in Conversation workspace Manager node.
 - Create Collection Language fix in Discovery Node.
 - Similarity Search Nodes moved into deprecated category.
 

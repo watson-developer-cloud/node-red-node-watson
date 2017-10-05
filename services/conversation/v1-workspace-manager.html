@@ -75,6 +75,7 @@
             <option value="getEntity">Get Entity Details</option>
             <option value="createEntity">Create Entity</option>
             <option value="updateEntity">Update Entity</option>
+            <option value="deleteEntity">Delete Entity</option>
         </select>
     </div>
 
@@ -248,6 +249,11 @@
         You can use this mode to rename an entity.
       </p>
     </li>
+    <li>Delete Entity
+      <p>In this mode the selected entity is removed from the worskpace.
+      </p>
+    </li>
+
     </ul>
 
     <p>For more information about the conversation service,
@@ -334,6 +340,7 @@
                         + ', #node-input-cwm-export-content');
         break;
       case 'updateEntity':
+      case 'deleteEntity':
         fields.push('#node-input-cwm-workspace-id'
                        + ', #node-input-cwm-entity');
         break;

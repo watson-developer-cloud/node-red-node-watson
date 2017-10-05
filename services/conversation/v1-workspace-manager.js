@@ -337,6 +337,20 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeDeleteEntity(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.deleteEntity(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['entity'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -423,6 +437,9 @@ module.exports = function (RED) {
     case 'updateEntity':
       p = executeUpdateEntity(node, conv, params, msg);
       break;
+    case 'deleteEntity':
+      p = executeDeleteEntity(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -452,6 +469,7 @@ module.exports = function (RED) {
     case 'listEntities':
     case 'createEntity':
     case 'updateEntity':
+    case 'deleteEntity':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -501,6 +519,7 @@ module.exports = function (RED) {
       field = 'old_entity';
       // deliberate no break
     case 'getEntity':
+    case 'deleteEntity':
       if (config['cwm-entity']) {
         params[field] = config['cwm-entity'];
       } else {
