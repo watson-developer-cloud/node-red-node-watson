@@ -78,6 +78,15 @@ DiscoveryUtils.prototype = {
     return params;
   },
 
+  // The field to create a new language collection is language, but
+  // the SDK creates a language_code field which it defaults to 'en-us'
+  languageCodeFix: function(params) {
+    if (params.language_code) {
+      params.language = params.language_code;
+    }
+    return params;
+  },
+
   buildParams: function(msg, config) {
     var params = {},
       me = this;
@@ -95,6 +104,8 @@ DiscoveryUtils.prototype = {
     ['count', 'filter', 'aggregation', 'return'].forEach(function(f) {
       params = me.buildParamsFromConfig(config, params, f);
     });
+
+    params = me.languageCodeFix(params);
 
     params = this.buildParamsForPayload(msg, config, params);
 

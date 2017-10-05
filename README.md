@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.16
+- Create Collection Language fix in Discovery Node.
+
 ### New in version 0.5.15
 - Allow language code to be specified on create collection in Discovery Node.
 - Implement delete collection, delete environment in Discovery Node.
