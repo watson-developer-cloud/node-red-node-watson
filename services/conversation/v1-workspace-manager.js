@@ -130,21 +130,6 @@ module.exports = function (RED) {
     return p;
   }
 
-  function executeListEntities(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.getEntities(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['entities'] = response.entities ?
-                                        response.entities: response;
-          resolve();
-        }
-      });
-    });
-    return p;
-  }
-
   function executeGetIntent(node, conv, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
       conv.getIntent(params, function (err, response) {
@@ -292,6 +277,52 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeListEntities(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getEntities(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['entities'] = response.entities ?
+                                        response.entities: response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeGetEntity(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getEntity(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          // returning the whole response even though response.intent has
+          // the intent, but the details with export = true
+          // are provided as response.examples
+          msg['entity'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeCreateEntity(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createEntity(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['entity'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
 
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
@@ -370,6 +401,12 @@ module.exports = function (RED) {
     case 'listEntities':
       p = executeListEntities(node, conv, params, msg);
       break;
+    case 'getEntity':
+      p = executeGetEntity(node, conv, params, msg);
+      break;
+    case 'createEntity':
+      p = executeCreateEntity(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -395,7 +432,9 @@ module.exports = function (RED) {
     case 'listCounterExamples':
     case 'createCounterExample':
     case 'deleteCounterExample':
+    case 'getEntity':
     case 'listEntities':
+    case 'createEntity':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -435,6 +474,26 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
+
+  function buildEntityParams(method, config, params) {
+    var message = '';
+    var field = 'entity';
+
+    switch (method) {
+    case 'getEntity':
+      if (config['cwm-entity']) {
+        params[field] = config['cwm-entity'];
+      } else {
+        message = 'a value for Entity is required';
+      }
+      break;
+    }
+    if (message) {
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
+  }
+
   function buildExampleParams(method, config, params) {
     var message = '';
 
@@ -463,6 +522,7 @@ module.exports = function (RED) {
     case 'getWorkspace':
     case 'listIntents':
     case 'listEntities':
+    case 'getEntity':
       params['export'] = config['cwm-export-content'];
       break;
     }
@@ -473,7 +533,7 @@ module.exports = function (RED) {
   // Copy over the appropriate parameters for the required
   // method from the node configuration
   function buildParams(msg, method, config, params) {
-    buildWorkspaceParams(method, config, params)
+    var p = buildWorkspaceParams(method, config, params)
     .then(function(){
       return buildIntentParams(method, config, params);
     })
@@ -481,8 +541,13 @@ module.exports = function (RED) {
       return buildExampleParams(method, config, params);
     })
     .then(function(){
+      return buildEntityParams(method, config, params);
+    })
+    .then(function(){
       return buildExportParams(method, config, params);
-    })      
+    })
+
+    return p;
   }
 
   // No need to have complicated processing here Looking
@@ -514,6 +579,7 @@ module.exports = function (RED) {
     //deliberate no break
     case 'updateWorkspace':
     case 'createIntent':
+    case 'createEntity':
       if (params['workspace_id']) {
         stash['workspace_id'] = params['workspace_id'];
       }
@@ -563,7 +629,7 @@ module.exports = function (RED) {
 
 
   // I know this says workspace, but its actually a json
-  // object that works both for workspace and intent.
+  // object that works both for workspace, intent and entity
   function processFileForWorkspace(info, method) {
     var workspaceObject = null;
 
@@ -572,6 +638,7 @@ module.exports = function (RED) {
     case 'updateWorkspace':
     case 'createIntent':
     case 'updateIntent':
+    case 'createEntity':
       try {
         workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
       } catch (err) {
@@ -613,6 +680,7 @@ module.exports = function (RED) {
     case 'updateWorkspace':
     case 'createIntent':
     case 'updateIntent':
+    case 'createEntity':
       return Promise.resolve(true);
     }
     return Promise.resolve(false);

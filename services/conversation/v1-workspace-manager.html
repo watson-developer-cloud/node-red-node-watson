@@ -72,6 +72,8 @@
             <option value="deleteCounterExample">Delete Counter Example</option>
             <option disabled>______________</option>
             <option value="listEntities">List Entities</option>
+            <option value="getEntity">Get Entity Details</option>
+            <option value="createEntity">Create Entity</option>
         </select>
     </div>
 
@@ -88,6 +90,11 @@
     <div class="form-row">
         <label for="node-input-cwm-example"><i class="fa fa-book"></i> Example Input</label>
         <input type="text" id="node-input-cwm-example" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-entity"><i class="fa fa-book"></i> Entity</label>
+        <input type="text" id="node-input-cwm-entity" placeholder="">
     </div>
 
     <div class="form-row">
@@ -214,6 +221,20 @@
         <code>msg.entities</code>
       </p>
     </li>
+    <li>Get Entity
+      <p>In this mode all information about the specified entity
+        is retrieved. The information is returned on
+        <code>msg.entity</code>
+      </p>
+    </li>
+    <li>Create Entity
+      <p>In this mode, a new entity is created in the specified workspace.
+        The input json structure
+        defining the content of the new entity
+        should be passed in
+        as <code>msg.payload</code>
+      </p>
+    </li>
 
     </ul>
 
@@ -254,6 +275,7 @@
     fields.push('#node-input-cwm-workspace-id'
                      + ', #node-input-cwm-intent'
                      + ', #node-input-cwm-example'
+                     + ', #node-input-cwm-entity'
                      + ', #node-input-cwm-export-content'
                      + ', #node-input-cwm-service-endpoint');
 
@@ -294,9 +316,15 @@
         fields.push('#node-input-cwm-workspace-id'
                       + ', #node-input-cwm-example');
         break;
+      case 'getEntity':
+        fields.push('#node-input-cwm-workspace-id'
+                        + ', #node-input-cwm-entity'
+                        + ', #node-input-cwm-export-content');
+        break;
       case 'deleteWorkspace':
       case 'updateWorkspace':
       case 'createIntent':
+      case 'createEntity':
       case 'listCounterExamples':
         fields.push('#node-input-cwm-workspace-id');
         break;
@@ -354,6 +382,7 @@
                 'cwm-workspace-id': {value:""},
                 'cwm-intent': {value:""},
                 'cwm-example': {value:""},
+                'cwm-entity': {value:""},
                 'cwm-export-content': {value:false},
                 'cwm-default-endpoint' :{value: true},
                 'cwm-service-endpoint' :{value: 'https://gateway.watsonplatform.net/conversation/api'}
