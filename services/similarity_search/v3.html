@@ -27,7 +27,7 @@
     <div class="form-row">
         <label for="node-input-image-feature"><i class="fa fa-book"></i> Detect: </label>
         <select type="text" id="node-input-image-feature" style="display: inline-block; width: 70%;">
-            <option value="findSimilar">Find similar images</option>          
+            <option value="findSimilar">Find similar images</option>
         </select>
     </div>
     <div class="form-row">
@@ -82,6 +82,12 @@
 
     <div id="msg-options">
         <div class="node-input-msg-options form-tips" id="watson-ss-createCollection">
+        <p><b>NB:</b> The Similarity Search service that this node
+        uses has been deprecated and will be switched off. When this
+        happens this node will no longer work.
+        The node will be removed from the palette in a
+        future release.
+        </p>
             <p><b>Create a Collection</b></p>
             <p>this feature takes these inputs : </p>
             <ul>
@@ -181,12 +187,17 @@
 </script>
 
 <script type="text/x-red" data-help-name="similarity-search-v3">
-    <p><b><i>Warning: this node is still in beta</i></b></p>
+<p><b>NB:</b> The Similarity Search service that this node
+uses has been deprecated and will be switched off. When this
+happens this node will no longer work.
+The node will be removed from the palette in a
+future release.
+</p>
 	<p>With this node you can use the Similarity Search from the Watson Visual Recognition service to find similar images within your custom collections. To set up and manage your collections use the Similarity Search Util node.</p>
 
     <p>Important : Maximum image size is 2 MB</p>
     <br/>
-    
+
     <p>Check the sample Flow for this node on  <a href="https://github.com/watson-developer-cloud/node-red-bluemix-starter">Watson Node-RED Starter</a></p>
 
 
@@ -229,9 +240,9 @@
 
 // Need to simulate a namespace, as some of the variables had started to leak across nodes
   function SIMILARITYSEARCHV3 () {
-  }  
+  }
 
-  // This is the namespace for similaritysearchv3. Currently only contains models, but more vars and functions may need to be 
+  // This is the namespace for similaritysearchv3. Currently only contains models, but more vars and functions may need to be
   // moved in if there is a clash with other nodes.
   var similaritysearchv3 = new SIMILARITYSEARCHV3();
 
@@ -240,7 +251,7 @@
 
     (function() {
         RED.nodes.registerType('similarity-search-v3', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
               name: {value: ""},
               apikey: {value: ""},
@@ -279,7 +290,7 @@
 
 
         RED.nodes.registerType('similarity-search-util-v3', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
               name: {value: ""},
               apikey: {value: ""},
