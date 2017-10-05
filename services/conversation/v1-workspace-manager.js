@@ -283,8 +283,7 @@ module.exports = function (RED) {
         if (err) {
           reject(err);
         } else {
-          msg['entities'] = response.entities ?
-                                        response.entities: response;
+          msg['entities'] = response.entities ? response.entities: response;
           resolve();
         }
       });
@@ -511,8 +510,8 @@ module.exports = function (RED) {
 
 
   function buildEntityParams(method, config, params) {
-    var message = '';
-    var field = 'entity';
+    var message = '',
+      field = 'entity';
 
     switch (method) {
     case 'updateEntity':
@@ -573,18 +572,18 @@ module.exports = function (RED) {
   // method from the node configuration
   function buildParams(msg, method, config, params) {
     var p = buildWorkspaceParams(method, config, params)
-    .then(function(){
-      return buildIntentParams(method, config, params);
-    })
-    .then(function(){
-      return buildExampleParams(method, config, params);
-    })
-    .then(function(){
-      return buildEntityParams(method, config, params);
-    })
-    .then(function(){
-      return buildExportParams(method, config, params);
-    })
+      .then(function(){
+        return buildIntentParams(method, config, params);
+      })
+      .then(function(){
+        return buildExampleParams(method, config, params);
+      })
+      .then(function(){
+        return buildEntityParams(method, config, params);
+      })
+      .then(function(){
+        return buildExportParams(method, config, params);
+      });
 
     return p;
   }
