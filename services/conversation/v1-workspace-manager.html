@@ -78,6 +78,7 @@
             <option value="deleteEntity">Delete Entity</option>
             <option disabled>______________</option>
             <option value="listEntityValues">List Entity Values</option>
+            <option value="getEntityValue">Get Entity Value Details</option>
         </select>
     </div>
 
@@ -99,6 +100,11 @@
     <div class="form-row">
         <label for="node-input-cwm-entity"><i class="fa fa-book"></i> Entity</label>
         <input type="text" id="node-input-cwm-entity" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-entity-value"><i class="fa fa-book"></i> Entity Value</label>
+        <input type="text" id="node-input-cwm-entity-value" placeholder="">
     </div>
 
     <div class="form-row">
@@ -261,6 +267,12 @@
         <code>msg.values</code>
       </p>
     </li>
+    <li>Get Entity Value
+      <p>In this mode all information about the specified entity value
+        is retrieved. The information is returned on
+        <code>msg.value</code>
+      </p>
+    </li>
 
     </ul>
 
@@ -302,6 +314,7 @@
                      + ', #node-input-cwm-intent'
                      + ', #node-input-cwm-example'
                      + ', #node-input-cwm-entity'
+                     + ', #node-input-cwm-entity-value'
                      + ', #node-input-cwm-export-content'
                      + ', #node-input-cwm-service-endpoint');
 
@@ -346,6 +359,12 @@
       case 'listEntityValues':
         fields.push('#node-input-cwm-workspace-id'
                         + ', #node-input-cwm-entity'
+                        + ', #node-input-cwm-export-content');
+        break;
+      case 'getEntityValue':
+        fields.push('#node-input-cwm-workspace-id'
+                        + ', #node-input-cwm-entity'
+                        + ', #node-input-cwm-entity-value'
                         + ', #node-input-cwm-export-content');
         break;
       case 'updateEntity':
@@ -415,6 +434,7 @@
                 'cwm-intent': {value:""},
                 'cwm-example': {value:""},
                 'cwm-entity': {value:""},
+                'cwm-entity-value': {value:""},
                 'cwm-export-content': {value:false},
                 'cwm-default-endpoint' :{value: true},
                 'cwm-service-endpoint' :{value: 'https://gateway.watsonplatform.net/conversation/api'}
