@@ -434,6 +434,20 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeGetDialogNode(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getDialogNode(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['dialog_node'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -541,6 +555,9 @@ module.exports = function (RED) {
     case 'listDialogNodes':
       p = executeListDialogNodes(node, conv, params, msg);
       break;
+    case 'getDialogNode':
+      p = executeGetDialogNode(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -577,6 +594,7 @@ module.exports = function (RED) {
     case 'updateEntityValue':
     case 'deleteEntityValue':
     case 'listDialogNodes':
+    case 'getDialogNode':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -668,6 +686,25 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
+  function buildDialogParams(method, config, params) {
+    var message = '',
+      field = 'dialog_node';
+
+    switch (method) {
+    case 'getDialogNode':
+      if (config['cwm-dialog-node']) {
+        params[field] = config['cwm-dialog-node'];
+      } else {
+        message = 'a value for Dialog Node ID is required';
+      }
+      break;
+    }
+    if (message) {
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
+  }
+
 
   function buildExampleParams(method, config, params) {
     var message = '';
@@ -722,6 +759,9 @@ module.exports = function (RED) {
       })
       .then(function(){
         return buildEntityValueParams(method, config, params);
+      })
+      .then(function(){
+        return buildDialogParams(method, config, params);
       })
       .then(function(){
         return buildExportParams(method, config, params);

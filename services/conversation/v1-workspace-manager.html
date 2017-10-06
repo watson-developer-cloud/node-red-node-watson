@@ -84,6 +84,7 @@
             <option value="deleteEntityValue">Delete Entity Value</option>
             <option disabled>______________</option>
             <option value="listDialogNodes">List Dialog Nodes</option>
+            <option value="getDialogNode">Get Dialog Node Details</option>
         </select>
     </div>
 
@@ -110,6 +111,11 @@
     <div class="form-row">
         <label for="node-input-cwm-entity-value"><i class="fa fa-book"></i> Entity Value</label>
         <input type="text" id="node-input-cwm-entity-value" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-dialog-node"><i class="fa fa-book"></i> Dialog Node ID</label>
+        <input type="text" id="node-input-cwm-dialog-node" placeholder="">
     </div>
 
     <div class="form-row">
@@ -309,7 +315,12 @@
         <code>msg.dialog_nodes</code>
       </p>
     </li>
-
+    <li>Get Dialog Node
+      <p>In this mode all information about the dialog node
+        is retrieved. The information is returned on
+        <code>msg.dialog_node</code>
+      </p>
+    </li>
     </ul>
 
     <p>For more information about the conversation service,
@@ -351,6 +362,7 @@
                      + ', #node-input-cwm-example'
                      + ', #node-input-cwm-entity'
                      + ', #node-input-cwm-entity-value'
+                     + ', #node-input-cwm-dialog-node'
                      + ', #node-input-cwm-export-content'
                      + ', #node-input-cwm-service-endpoint');
 
@@ -407,6 +419,10 @@
       case 'deleteEntity':
         fields.push('#node-input-cwm-workspace-id'
                        + ', #node-input-cwm-entity');
+        break;
+      case 'getDialogNode':
+        fields.push('#node-input-cwm-workspace-id'
+                       + ', #node-input-cwm-dialog-node');
         break;
       case 'addEntityValue':
       case 'updateEntityValue':
@@ -479,6 +495,7 @@
                 'cwm-example': {value:""},
                 'cwm-entity': {value:""},
                 'cwm-entity-value': {value:""},
+                'cwm-dialog-node': {value:""},
                 'cwm-export-content': {value:false},
                 'cwm-default-endpoint' :{value: true},
                 'cwm-service-endpoint' :{value: 'https://gateway.watsonplatform.net/conversation/api'}
