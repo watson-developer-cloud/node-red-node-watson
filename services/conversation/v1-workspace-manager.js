@@ -350,6 +350,20 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeListEntityValues(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getValues(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['values'] = response.values ? response.values: response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -439,6 +453,9 @@ module.exports = function (RED) {
     case 'deleteEntity':
       p = executeDeleteEntity(node, conv, params, msg);
       break;
+    case 'listEntityValues':
+      p = executeListEntityValues(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -469,6 +486,7 @@ module.exports = function (RED) {
     case 'createEntity':
     case 'updateEntity':
     case 'deleteEntity':
+    case 'listEntityValues':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -519,6 +537,7 @@ module.exports = function (RED) {
       // deliberate no break
     case 'getEntity':
     case 'deleteEntity':
+    case 'listEntityValues':
       if (config['cwm-entity']) {
         params[field] = config['cwm-entity'];
       } else {
@@ -561,6 +580,7 @@ module.exports = function (RED) {
     case 'listIntents':
     case 'listEntities':
     case 'getEntity':
+    case 'listEntityValues':
       params['export'] = config['cwm-export-content'];
       break;
     }

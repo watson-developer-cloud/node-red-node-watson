@@ -76,6 +76,8 @@
             <option value="createEntity">Create Entity</option>
             <option value="updateEntity">Update Entity</option>
             <option value="deleteEntity">Delete Entity</option>
+            <option disabled>______________</option>
+            <option value="listEntityValues">List Entity Values</option>
         </select>
     </div>
 
@@ -253,6 +255,12 @@
       <p>In this mode the selected entity is removed from the worskpace.
       </p>
     </li>
+    <li>list Entity Values
+      <p>In this mode a list of all values for an entitu for the specified conversation
+        workspace are returned on
+        <code>msg.values</code>
+      </p>
+    </li>
 
     </ul>
 
@@ -335,6 +343,7 @@
                       + ', #node-input-cwm-example');
         break;
       case 'getEntity':
+      case 'listEntityValues':
         fields.push('#node-input-cwm-workspace-id'
                         + ', #node-input-cwm-entity'
                         + ', #node-input-cwm-export-content');
