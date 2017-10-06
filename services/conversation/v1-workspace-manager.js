@@ -420,6 +420,20 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeListDialogNodes(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getDialogNodes(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['dialog_nodes'] = response.dialog_nodes ? response.dialog_nodes: response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -524,6 +538,9 @@ module.exports = function (RED) {
     case 'deleteEntityValue':
       p = executeDeleteEntityValue(node, conv, params, msg);
       break;
+    case 'listDialogNodes':
+      p = executeListDialogNodes(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -559,6 +576,7 @@ module.exports = function (RED) {
     case 'addEntityValue':
     case 'updateEntityValue':
     case 'deleteEntityValue':
+    case 'listDialogNodes':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -636,7 +654,7 @@ module.exports = function (RED) {
       // deliberate no break
     case 'getEntityValue':
     case 'addEntityValue':
-    case 'deleteEntityValue':     
+    case 'deleteEntityValue':
       if (config['cwm-entity-value']) {
         params[field] = config['cwm-entity-value'];
       } else {
