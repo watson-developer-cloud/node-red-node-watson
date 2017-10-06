@@ -448,6 +448,20 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeUpdateDialogNode(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.updateDialogNode(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['dialog_node'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -558,6 +572,9 @@ module.exports = function (RED) {
     case 'getDialogNode':
       p = executeGetDialogNode(node, conv, params, msg);
       break;
+    case 'updateDialogNode':
+      p = executeUpdateDialogNode(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -595,6 +612,7 @@ module.exports = function (RED) {
     case 'deleteEntityValue':
     case 'listDialogNodes':
     case 'getDialogNode':
+    case 'updateDialogNode':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -691,6 +709,9 @@ module.exports = function (RED) {
       field = 'dialog_node';
 
     switch (method) {
+    case 'updateDialogNode':
+      field = 'old_dialog_node';
+      // deliberate no break
     case 'getDialogNode':
       if (config['cwm-dialog-node']) {
         params[field] = config['cwm-dialog-node'];
@@ -810,6 +831,11 @@ module.exports = function (RED) {
         stash['entity'] = params['entity'];
       }
       break;
+    case 'updateDialogNode':
+      if (params['old_dialog_node']) {
+        stash['old_dialog_node'] = params['old_dialog_node'];
+      }
+      break;
     }
 
     switch(method) {
@@ -819,6 +845,7 @@ module.exports = function (RED) {
     case 'createEntity':
     case 'updateEntity':
     case 'updateEntityValue':
+    case 'updateDialogNode':
       if (params['workspace_id']) {
         stash['workspace_id'] = params['workspace_id'];
       }
@@ -880,6 +907,7 @@ module.exports = function (RED) {
     case 'createEntity':
     case 'updateEntity':
     case 'updateEntityValue':
+    case 'updateDialogNode':
       try {
         workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
       } catch (err) {
@@ -924,6 +952,7 @@ module.exports = function (RED) {
     case 'createEntity':
     case 'updateEntity':
     case 'updateEntityValue':
+    case 'updateDialogNode':
       return Promise.resolve(true);
     }
     return Promise.resolve(false);
