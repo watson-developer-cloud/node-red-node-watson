@@ -81,6 +81,7 @@
             <option value="getEntityValue">Get Entity Value Details</option>
             <option value="addEntityValue">Add Entity Value</option>
             <option value="updateEntityValue">Update Entity Value</option>
+            <option value="deleteEntityValue">Delete Entity Value</option>
         </select>
     </div>
 
@@ -296,6 +297,10 @@
         You can use this mode to rename an entity value.
       </p>
     </li>
+    <li>Delete Entity Value
+      <p>In this mode the selected entity value is removed from the worskpace.
+      </p>
+    </li>
 
     </ul>
 
@@ -397,6 +402,7 @@
         break;
       case 'addEntityValue':
       case 'updateEntityValue':
+      case 'deleteEntityValue':
         fields.push('#node-input-cwm-workspace-id'
                         + ', #node-input-cwm-entity'
                         + ', #node-input-cwm-entity-value');
