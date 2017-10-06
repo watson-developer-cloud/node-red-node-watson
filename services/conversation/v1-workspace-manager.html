@@ -87,6 +87,7 @@
             <option value="getDialogNode">Get Dialog Node Details</option>
             <option value="createDialogNode">Create Dialog Node</option>
             <option value="updateDialogNode">Update Dialog Node</option>
+            <option value="deleteDialogNode">Delete Dialog Node</option>
         </select>
     </div>
 
@@ -337,6 +338,10 @@
         as <code>msg.payload</code>.
       </p>
     </li>
+    <li>Delete Dialog Node
+      <p>In this mode the selected dialog node is removed from the worskpace.
+      </p>
+    </li>
 
     </ul>
 
@@ -439,6 +444,7 @@
         break;
       case 'getDialogNode':
       case 'updateDialogNode':
+      case 'deleteDialogNode':
         fields.push('#node-input-cwm-workspace-id'
                        + ', #node-input-cwm-dialog-node');
         break;
