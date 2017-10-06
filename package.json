@@ -7,7 +7,7 @@
     "async": "^1.5.2",
     "cfenv": "~1.0.0",
     "file-type": "^2.7.0",
-    "request": "~2.53.0",
+    "request": "~2.83.0",
     "temp": "^0.8.3",
     "qs": "6.x",
 	  "image-type": "^2.0.2",
