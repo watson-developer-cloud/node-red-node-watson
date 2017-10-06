@@ -79,6 +79,7 @@
             <option disabled>______________</option>
             <option value="listEntityValues">List Entity Values</option>
             <option value="getEntityValue">Get Entity Value Details</option>
+            <option value="addEntityValue">Add Entity Value</option>
         </select>
     </div>
 
@@ -273,6 +274,14 @@
         <code>msg.value</code>
       </p>
     </li>
+    <li>Add Entity Value
+      <p>In this mode, a new entity value is created in the specified workspace.
+        The input json structure
+        defining the content of the new entity value
+        should be passed in
+        as <code>msg.value</code>
+      </p>
+    </li>
 
     </ul>
 
@@ -371,6 +380,11 @@
       case 'deleteEntity':
         fields.push('#node-input-cwm-workspace-id'
                        + ', #node-input-cwm-entity');
+        break;
+      case 'addEntityValue':
+        fields.push('#node-input-cwm-workspace-id'
+                        + ', #node-input-cwm-entity'
+                        + ', #node-input-cwm-entity-value');
         break;
       case 'deleteWorkspace':
       case 'updateWorkspace':
