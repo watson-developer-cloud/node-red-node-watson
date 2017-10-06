@@ -448,6 +448,20 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeCreateDialogNode(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createDialogNode(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['dialog_node'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUpdateDialogNode(node, conv, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
       conv.updateDialogNode(params, function (err, response) {
@@ -575,6 +589,9 @@ module.exports = function (RED) {
     case 'updateDialogNode':
       p = executeUpdateDialogNode(node, conv, params, msg);
       break;
+    case 'createDialogNode':
+      p = executeCreateDialogNode(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -612,6 +629,7 @@ module.exports = function (RED) {
     case 'deleteEntityValue':
     case 'listDialogNodes':
     case 'getDialogNode':
+    case 'createDialogNode':
     case 'updateDialogNode':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
@@ -845,6 +863,7 @@ module.exports = function (RED) {
     case 'createEntity':
     case 'updateEntity':
     case 'updateEntityValue':
+    case 'createDialogNode':
     case 'updateDialogNode':
       if (params['workspace_id']) {
         stash['workspace_id'] = params['workspace_id'];
@@ -907,6 +926,7 @@ module.exports = function (RED) {
     case 'createEntity':
     case 'updateEntity':
     case 'updateEntityValue':
+    case 'createDialogNode':
     case 'updateDialogNode':
       try {
         workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
@@ -952,6 +972,7 @@ module.exports = function (RED) {
     case 'createEntity':
     case 'updateEntity':
     case 'updateEntityValue':
+    case 'createDialogNode':
     case 'updateDialogNode':
       return Promise.resolve(true);
     }

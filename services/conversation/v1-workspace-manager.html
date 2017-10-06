@@ -85,6 +85,7 @@
             <option disabled>______________</option>
             <option value="listDialogNodes">List Dialog Nodes</option>
             <option value="getDialogNode">Get Dialog Node Details</option>
+            <option value="createDialogNode">Create Dialog Node</option>
             <option value="updateDialogNode">Update Dialog Node</option>
         </select>
     </div>
@@ -322,11 +323,18 @@
         <code>msg.dialog_node</code>
       </p>
     </li>
+    <li>Create Dialog Node
+      <p>In this mode, a new dialog node is created. The input json structure
+        defining the content of the node
+        should be passed in
+        as <code>msg.payload</code>.
+      </p>
+    </li>
     <li>Update Dialog Node
       <p>In this mode, the specified dialog node is updated. The input json structure
         defining the content of the updates
         should be passed in
-        as <code>msg.payload</code>. 
+        as <code>msg.payload</code>.
       </p>
     </li>
 
@@ -447,6 +455,7 @@
       case 'createEntity':
       case 'listCounterExamples':
       case 'listDialogNodes':
+      case 'createDialogNode':
         fields.push('#node-input-cwm-workspace-id');
         break;
       case 'listWorkspaces':
