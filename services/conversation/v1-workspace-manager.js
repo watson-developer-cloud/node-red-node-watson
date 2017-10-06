@@ -392,6 +392,20 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeUpdateEntityValue(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.updateValue(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['value'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -490,6 +504,9 @@ module.exports = function (RED) {
     case 'addEntityValue':
       p = executeAddEntityValue(node, conv, params, msg);
       break;
+    case 'updateEntityValue':
+      p = executeUpdateEntityValue(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -523,6 +540,7 @@ module.exports = function (RED) {
     case 'listEntityValues':
     case 'getEntityValue':
     case 'addEntityValue':
+    case 'updateEntityValue':
       if (config['cwm-workspace-id']) {
         params['workspace_id'] = config['cwm-workspace-id'];
       } else {
@@ -575,6 +593,7 @@ module.exports = function (RED) {
     case 'listEntityValues':
     case 'getEntityValue':
     case 'addEntityValue':
+    case 'updateEntityValue':
       if (config['cwm-entity']) {
         params[field] = config['cwm-entity'];
       } else {
@@ -593,6 +612,9 @@ module.exports = function (RED) {
       field = 'value';
 
     switch (method) {
+    case 'updateEntityValue':
+      field = 'old_value';
+      // deliberate no break
     case 'getEntityValue':
     case 'addEntityValue':
       if (config['cwm-entity-value']) {
@@ -702,6 +724,14 @@ module.exports = function (RED) {
         stash['old_entity'] = params['old_entity'];
       }
       break;
+    case 'updateEntityValue':
+      if (params['old_value']) {
+        stash['old_value'] = params['old_value'];
+      }
+      if (params['entity']) {
+        stash['entity'] = params['entity'];
+      }
+      break;
     }
 
     switch(method) {
@@ -710,6 +740,7 @@ module.exports = function (RED) {
     case 'updateIntent':
     case 'createEntity':
     case 'updateEntity':
+    case 'updateEntityValue':
       if (params['workspace_id']) {
         stash['workspace_id'] = params['workspace_id'];
       }
@@ -770,6 +801,7 @@ module.exports = function (RED) {
     case 'updateIntent':
     case 'createEntity':
     case 'updateEntity':
+    case 'updateEntityValue':
       try {
         workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
       } catch (err) {
@@ -813,6 +845,7 @@ module.exports = function (RED) {
     case 'updateIntent':
     case 'createEntity':
     case 'updateEntity':
+    case 'updateEntityValue':
       return Promise.resolve(true);
     }
     return Promise.resolve(false);

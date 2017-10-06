@@ -80,6 +80,7 @@
             <option value="listEntityValues">List Entity Values</option>
             <option value="getEntityValue">Get Entity Value Details</option>
             <option value="addEntityValue">Add Entity Value</option>
+            <option value="updateEntityValue">Update Entity Value</option>
         </select>
     </div>
 
@@ -282,6 +283,19 @@
         as <code>msg.value</code>
       </p>
     </li>
+    <li>Update Entity Value
+      <p>In this mode, the specified entity value is updated. The input json
+        structure
+        defining the content of the updates
+        should be passed in
+        as <code>msg.payload</code>. Only the elements need to be included
+        in the json. Any included element will override the existing setting
+        for the element. ie. Any existing elements will
+        be overridden. ie. If any element is not mentioned in the json, then it
+        will be deleted.
+        You can use this mode to rename an entity value.
+      </p>
+    </li>
 
     </ul>
 
@@ -382,6 +396,7 @@
                        + ', #node-input-cwm-entity');
         break;
       case 'addEntityValue':
+      case 'updateEntityValue':
         fields.push('#node-input-cwm-workspace-id'
                         + ', #node-input-cwm-entity'
                         + ', #node-input-cwm-entity-value');
