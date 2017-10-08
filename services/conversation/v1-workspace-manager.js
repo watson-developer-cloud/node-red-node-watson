@@ -735,9 +735,10 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
-  function buildEntityValueParams(method, config, params) {
+  function buildEntityValueParams(msg, method, config, params) {
     var message = '',
-      field = 'value';
+      field = 'value',
+      entityValue = '';
 
     switch (method) {
     case 'updateEntityValue':
@@ -746,8 +747,13 @@ module.exports = function (RED) {
     case 'getEntityValue':
     case 'addEntityValue':
     case 'deleteEntityValue':
-      if (config['cwm-entity-value']) {
-        params[field] = config['cwm-entity-value'];
+      if (msg.params && msg.params.entity_value) {
+        entityValue = msg.params.entity_value;
+      } else if (config['cwm-entity-value']) {
+        entityValue = config['cwm-entity-value'];
+      }
+      if (entityValue) {
+        params[field] = entityValue;
       } else {
         message = 'a value for Entity value is required';
       }
@@ -840,7 +846,7 @@ module.exports = function (RED) {
         return buildEntityParams(msg, method, config, params);
       })
       .then(function(){
-        return buildEntityValueParams(method, config, params);
+        return buildEntityValueParams(msg, method, config, params);
       })
       .then(function(){
         return buildDialogParams(method, config, params);
