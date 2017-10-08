@@ -701,9 +701,10 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
-  function buildEntityParams(method, config, params) {
+  function buildEntityParams(msg, method, config, params) {
     var message = '',
-      field = 'entity';
+      field = 'entity',
+      entity = '';
 
     switch (method) {
     case 'updateEntity':
@@ -716,8 +717,13 @@ module.exports = function (RED) {
     case 'addEntityValue':
     case 'updateEntityValue':
     case 'deleteEntityValue':
-      if (config['cwm-entity']) {
-        params[field] = config['cwm-entity'];
+      if (msg.params && msg.params.entity) {
+        entity = msg.params.entity;
+      } else if (config['cwm-entity']) {
+        Entity = config['cwm-entity'];
+      }
+      if (entity) {
+        params[field] = entity;
       } else {
         message = 'a value for Entity is required';
       }
@@ -831,7 +837,7 @@ module.exports = function (RED) {
         return buildExampleParams(msg, method, config, params);
       })
       .then(function(){
-        return buildEntityParams(method, config, params);
+        return buildEntityParams(msg, method, config, params);
       })
       .then(function(){
         return buildEntityValueParams(method, config, params);
