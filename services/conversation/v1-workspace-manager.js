@@ -1069,7 +1069,7 @@ module.exports = function (RED) {
 
       // All method to be overridden
       if (msg.params && msg.params.method) {
-        method = msg.params.method
+        method = msg.params.method;
       }
 
       username = sUsername || this.credentials.username;
