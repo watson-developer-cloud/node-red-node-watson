@@ -767,7 +767,7 @@ module.exports = function (RED) {
 
   function buildDialogParams(msg, method, config, params) {
     var message = '',
-      field = 'dialog_node'
+      field = 'dialog_node',
       dialogID = '';
 
     switch (method) {
