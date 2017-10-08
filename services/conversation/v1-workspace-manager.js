@@ -777,16 +777,22 @@ module.exports = function (RED) {
   }
 
 
-  function buildExampleParams(method, config, params) {
-    var message = '';
+  function buildExampleParams(msg, method, config, params) {
+    var message = '',
+      example = '';
 
     switch (method) {
     case 'createExample':
     case 'deleteExample':
     case 'createCounterExample':
     case 'deleteCounterExample':
-      if (config['cwm-example']) {
-        params['text'] = config['cwm-example'];
+      if (msg.params && msg.params.example) {
+        example = msg.params.example;
+      } else if (config['cwm-example']) {
+        example = config['cwm-example'];
+      }
+      if (example) {
+        params['text'] = example;
       } else {
         message = 'Example Input is required';
       }
@@ -797,7 +803,6 @@ module.exports = function (RED) {
     }
     return Promise.resolve();
   }
-
 
   function buildExportParams(method, config, params) {
     switch (method) {
@@ -823,7 +828,7 @@ module.exports = function (RED) {
         return buildIntentParams(msg, method, config, params);
       })
       .then(function(){
-        return buildExampleParams(method, config, params);
+        return buildExampleParams(msg, method, config, params);
       })
       .then(function(){
         return buildEntityParams(method, config, params);
