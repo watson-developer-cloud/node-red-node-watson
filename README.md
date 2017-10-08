@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.18
+- Allow Conversation Workspace Manager node to be dynamically configured.
+
 ### New in version 0.5.17
 - CRUD methods for Entity Values and Dialog Nodes in Conversation Workspace Manager node.
 
