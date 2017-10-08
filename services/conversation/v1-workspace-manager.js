@@ -720,7 +720,7 @@ module.exports = function (RED) {
       if (msg.params && msg.params.entity) {
         entity = msg.params.entity;
       } else if (config['cwm-entity']) {
-        Entity = config['cwm-entity'];
+        entity = config['cwm-entity'];
       }
       if (entity) {
         params[field] = entity;
@@ -765,9 +765,10 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
-  function buildDialogParams(method, config, params) {
+  function buildDialogParams(msg, method, config, params) {
     var message = '',
-      field = 'dialog_node';
+      field = 'dialog_node'
+      dialogID = '';
 
     switch (method) {
     case 'updateDialogNode':
@@ -775,8 +776,13 @@ module.exports = function (RED) {
       // deliberate no break
     case 'getDialogNode':
     case 'deleteDialogNode':
-      if (config['cwm-dialog-node']) {
-        params[field] = config['cwm-dialog-node'];
+      if (msg.params && msg.params.dialog_node) {
+        dialogID = msg.params.dialog_node;
+      } else if (config['cwm-dialog-node']) {
+        dialogID = config['cwm-dialog-node'];
+      }
+      if (dialogID) {
+        params[field] = dialogID;
       } else {
         message = 'a value for Dialog Node ID is required';
       }
@@ -787,7 +793,6 @@ module.exports = function (RED) {
     }
     return Promise.resolve();
   }
-
 
   function buildExampleParams(msg, method, config, params) {
     var message = '',
@@ -849,7 +854,7 @@ module.exports = function (RED) {
         return buildEntityValueParams(msg, method, config, params);
       })
       .then(function(){
-        return buildDialogParams(method, config, params);
+        return buildDialogParams(msg, method, config, params);
       })
       .then(function(){
         return buildExportParams(method, config, params);
