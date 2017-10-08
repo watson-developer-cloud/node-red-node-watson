@@ -342,8 +342,71 @@
       <p>In this mode the selected dialog node is removed from the worskpace.
       </p>
     </li>
-
     </ul>
+
+    <p>The node configurations can be overridden by setting
+    <ul>
+      <li>
+        <code>msg.params.workspace_id</code>
+      </li>
+      <li>
+        <code>msg.params.intent</code>
+      </li>
+      <li>
+        <code>msg.params.example</code>
+      </li>
+      <li>
+        <code>msg.params.entity</code>
+      </li>
+      <li>
+        <code>msg.params.entity_value</code>
+      </li>
+      <li>
+        <code>msg.params.dialog_node</code>
+      </li>
+
+      <li>
+        <code>msg.params.method</code>
+        <p>to one of the following values:
+        <select>
+        <option> listWorkspaces </option>
+        <option> getWorkspace </option>
+        <option> createWorkspace </option>
+        <option> updateWorkspace </option>
+        <option> deleteWorkspace </option>
+        <option> listIntents </option>
+        <option> getIntent </option>
+        <option> createIntent </option>
+        <option> updateIntent </option>
+        <option> deleteIntent </option>
+        <option> listExamples </option>
+        <option> createExample </option>
+        <option> deleteExample </option>
+        <option> listCounterExamples </option>
+        <option> createCounterExample</option>
+        <option> deleteCounterExample </option>
+        <option> listEntities </option>
+        <option> getEntity </option>
+        <option> createEntity </option>
+        <option> updateEntity </option>
+        <option> deleteEntity </option>
+        <option> listEntityValues </option>
+        <option> getEntityValue </option>
+        <option> addEntityValue </option>
+        <option> vupdateEntityValue </option>
+        <option> deleteEntityValue </option>
+        <option> listDialogNodes </option>
+        <option> getDialogNode </option>
+        <option> createDialogNode </option>
+        <option> updateDialogNode </option>
+        <option> deleteDialogNode </option>
+        </select>
+        </p>
+
+
+      </li>
+    </ul>
+    </p>
 
     <p>For more information about the conversation service,
     read the <a href="https://www.ibm.com/watson/developercloud/doc/conversation/index.html">

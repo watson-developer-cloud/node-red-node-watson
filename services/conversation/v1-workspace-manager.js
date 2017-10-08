@@ -617,8 +617,10 @@ module.exports = function (RED) {
     return p;
   }
 
-  function buildWorkspaceParams(method, config, params) {
-    var message = '';
+  function buildWorkspaceParams(msg, method, config, params) {
+    var message = '',
+      workspace_id = '';
+
     switch (method) {
     case 'getIntent':
     case 'updateIntent':
@@ -649,8 +651,13 @@ module.exports = function (RED) {
     case 'createDialogNode':
     case 'updateDialogNode':
     case 'deleteDialogNode':
-      if (config['cwm-workspace-id']) {
-        params['workspace_id'] = config['cwm-workspace-id'];
+      if (msg.params && msg.params.workspace_id) {
+        workspace_id = msg.params.workspace_id;
+      } else if (config['cwm-workspace-id']) {
+        workspace_id = config['cwm-workspace-id'];
+      }
+      if (workspace_id) {
+        params['workspace_id'] = workspace_id;
       } else {
         message = 'Workspace ID is required';
       }
@@ -662,9 +669,10 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
-  function buildIntentParams(method, config, params) {
-    var message = '';
-    var field = 'intent';
+  function buildIntentParams(msg, method, config, params) {
+    var message = '',
+      intent = '',
+      field = 'intent';
 
     switch (method) {
     case 'updateIntent':
@@ -675,8 +683,13 @@ module.exports = function (RED) {
     case 'listExamples':
     case 'createExample':
     case 'deleteExample':
-      if (config['cwm-intent']) {
-        params[field] = config['cwm-intent'];
+      if (msg.params && msg.params.intent) {
+        intent = msg.params.intent;
+      } else if (config['cwm-intent']) {
+        intent = config['cwm-intent'];
+      }
+      if (intent) {
+        params[field] = intent;
       } else {
         message = 'a value for Intent is required';
       }
@@ -805,9 +818,9 @@ module.exports = function (RED) {
   // Copy over the appropriate parameters for the required
   // method from the node configuration
   function buildParams(msg, method, config, params) {
-    var p = buildWorkspaceParams(method, config, params)
+    var p = buildWorkspaceParams(msg, method, config, params)
       .then(function(){
-        return buildIntentParams(method, config, params);
+        return buildIntentParams(msg, method, config, params);
       })
       .then(function(){
         return buildExampleParams(method, config, params);
@@ -1031,6 +1044,11 @@ module.exports = function (RED) {
       var method = config['cwm-custom-mode'],
         message = '',
         params = {};
+
+      // All method to be overridden
+      if (msg.params && msg.params.method) {
+        method = msg.params.method
+      }
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
