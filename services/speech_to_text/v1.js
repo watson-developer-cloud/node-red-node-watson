@@ -162,10 +162,12 @@ module.exports = function (RED) {
         case 'wav':
         case 'flac':
         case 'ogg':
+        case 'mp3':
+        case 'mpeg':
           break;
         default:
           message
-              = 'Audio format (' + f + ') not supported, must be encoded as WAV, FLAC or OGG.';
+              = 'Audio format (' + f + ') not supported, must be encoded as WAV, MP3, FLAC or OGG.';
         }
       }
       if (message) {
