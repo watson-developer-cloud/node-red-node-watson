@@ -162,8 +162,7 @@ module.exports = function (RED) {
         case 'mpeg':
           break;
         default:
-          message
-              = 'Audio format (' + f + ') not supported, must be encoded as WAV, MP3, FLAC or OGG.';
+          message = 'Audio format (' + f + ') not supported, must be encoded as WAV, MP3, FLAC or OGG.';
         }
       }
       if (message) {
@@ -252,10 +251,9 @@ module.exports = function (RED) {
           audio: audioData.audio,
           content_type: 'audio/' + audioData.format,
           model: model,
-          max_alternatives: config['alternatives'] ?
-                                parseInt(config['alternatives']) : 1,
+          max_alternatives: config['alternatives'] ? parseInt(config['alternatives']) : 1,
           speaker_labels: config.speakerlabels ? config.speakerlabels : false,
-          smart_formatting: config.smartformatting ? config.smartformatting : false          
+          smart_formatting: config.smartformatting ? config.smartformatting : false
         };
 
         // Check the params for customisation options
@@ -284,16 +282,13 @@ module.exports = function (RED) {
           msg.fullresult = r;
         }
         msg.transcription = '';
-        if (!config['alternatives'] || 1 == parseInt(config['alternatives']))
-        {
-          console.log('processing all alternatives');
+        if (!config['alternatives'] || 1 === parseInt(config['alternatives'])) {
           r.forEach(function(a){
             a.alternatives.forEach(function(t){
               msg.transcription += t.transcript;
             });
           });
         } else if (r.length) {
-          console.log('processing single alternative');
           msg.transcription = r[0].alternatives[0].transcript;
         }
 
