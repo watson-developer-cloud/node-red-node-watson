@@ -10,7 +10,7 @@ Node-RED Watson Nodes for IBM Bluemix
 ### New in version 0.5.19
 - Update Supported audio file check in Speech to Text Node.
 - Remove Continuous flag from Speech to Text Node.
-- Add Alternatives value to Speech to Text Node.
+- Add Alternatives and Smart Formatting options to Speech to Text Node.
 
 ### New in version 0.5.18
 - Allow Conversation Workspace Manager node to be dynamically configured.

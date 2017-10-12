@@ -89,6 +89,12 @@
 
     <div class="form-row">
         <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-smartformatting"style="display: inline-block; width: auto; vertical-align: top;"></input>
+        <label for="node-input-smartformatting" style="width: 70%;"><i class="fa fa-audio-o"></i> Smart Formatting</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
         <input type="checkbox" id="node-input-payload-response" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-payload-response" style="width: 70%;"> Place output on msg.payload</label>
     </div>
@@ -167,6 +173,7 @@
       $('label#node-label-message').parent().hide();
       $('input#node-input-alternatives').parent().hide();
       $('input#node-input-speakerlabels').parent().hide();
+      $('input#node-input-smartformatting').parent().hide();
       $('select#node-input-lang').parent().hide();
       $('select#node-input-band').parent().hide();
       $('select#node-input-langcustom').parent().hide();
@@ -180,6 +187,7 @@
       $('label#node-label-message').parent().hide();
       $('input#node-input-alternatives').parent().show();
       $('input#node-input-speakerlabels').parent().show();
+      $('input#node-input-smartformatting').parent().show();
       $('select#node-input-lang').parent().show();
       //$('select#node-input-langcustom').parent().show();
       $('select#node-input-band').parent().show();
@@ -187,6 +195,7 @@
       $('label#node-label-message').parent().hide();
       $('input#node-input-alternatives').parent().hide();
       $('input#node-input-speakerlabels').parent().hide();
+      $('input#node-input-smartformatting').parent().hide();
       $('select#node-input-lang').parent().hide();
       $('select#node-input-langcustom').parent().hide();
       $('select#node-input-band').parent().hide();
@@ -502,6 +511,7 @@
                 name: {value: ''},
                 alternatives: {value: 1},
                 speakerlabels: {value: true},
+                smartformatting: {value: false},                
                 lang: {value: ''},
                 langhidden: {value: ''},
                 langcustom: {value: ''},

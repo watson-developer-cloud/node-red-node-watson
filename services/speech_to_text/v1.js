@@ -255,6 +255,7 @@ module.exports = function (RED) {
           max_alternatives: config['alternatives'] ?
                                 parseInt(config['alternatives']) : 1,
           speaker_labels: config.speakerlabels ? config.speakerlabels : false,
+          smart_formatting: config.smartformatting ? config.smartformatting : false          
         };
 
         // Check the params for customisation options
