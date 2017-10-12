@@ -126,10 +126,6 @@ module.exports = function (RED) {
         message = 'Missing audio language configuration, unable to process speech.';
       } else if (!config.band) {
         message = 'Missing audio quality configuration, unable to process speech.';
-      } else if (!config.continuous) {
-        // Has to be there, as its a checkbox, but flows switching from the old (frankly
-        // unbeliveable) select might not have it set.
-        message = 'Missing continuous details, unable to process speech.';
       }
 
       if (message) {
@@ -256,7 +252,8 @@ module.exports = function (RED) {
           audio: audioData.audio,
           content_type: 'audio/' + audioData.format,
           model: model,
-          continuous: config.continuous ? config.continuous : false,
+          max_alternatives: config['alternatives'] ?
+                                parseInt(config['alternatives']) : 1,
           speaker_labels: config.speakerlabels ? config.speakerlabels : false,
         };
 
@@ -286,11 +283,19 @@ module.exports = function (RED) {
           msg.fullresult = r;
         }
         msg.transcription = '';
-        r.forEach(function(a){
-          a.alternatives.forEach(function(t){
-            msg.transcription += t.transcript;
+        if (!config['alternatives'] || 1 == parseInt(config['alternatives']))
+        {
+          console.log('processing all alternatives');
+          r.forEach(function(a){
+            a.alternatives.forEach(function(t){
+              msg.transcription += t.transcript;
+            });
           });
-        });
+        } else if (r.length) {
+          console.log('processing single alternative');
+          msg.transcription = r[0].alternatives[0].transcript;
+        }
+
       }
       if (config['payload-response']) {
         msg.payload = msg.transcription;
