@@ -282,16 +282,12 @@ module.exports = function (RED) {
           msg.fullresult = r;
         }
         msg.transcription = '';
-        if (!config['alternatives'] || 1 === parseInt(config['alternatives'])) {
-          r.forEach(function(a){
-            a.alternatives.forEach(function(t){
-              msg.transcription += t.transcript;
-            });
-          });
-        } else if (r.length) {
-          msg.transcription = r[0].alternatives[0].transcript;
-        }
-
+        r.forEach(function(a){
+          msg.transcription += a.alternatives[0].transcript;
+          //a.alternatives.forEach(function(t){
+          //  msg.transcription += t.transcript;
+          //});
+        });
       }
       if (config['payload-response']) {
         msg.payload = msg.transcription;
