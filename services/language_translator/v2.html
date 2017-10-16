@@ -60,6 +60,12 @@
         </select>
     </div>
 
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-neural" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-neural" style="width: 70%;"> Use Experimental Neural Translation</label>
+    </div>    
+
     <div class="form-row">
         <label for="node-input-domain"><i class="fa fa-book"></i> Domains</label>
         <select type="text" id="node-input-domain" style="display: inline-block; vertical-align:middle; width: 70%;">
@@ -121,13 +127,10 @@
         <input type="text" id="node-input-trainid" placeholder="Model ID">
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
        <label for="node-input-lgparams2"><i class="fa fa-cog"></i> Parameters Scope</label>
        <input type="checkbox" id="node-input-lgparams2" style="display: inline-block; width: auto; vertical-align: top;">
        <label for="node-input-lgparams2" style="width: 70%;"> Not using translation utility</label>
-    </div>
-    <div>
-       <input type="hidden" id="node-input-ldparamshidden2"/>
     </div>
 
     <div class="form-tips" id="languagetranslation-form-tips">
@@ -218,8 +221,6 @@
   tor.srclang_selected = $('#node-input-srclanghidden').val();
   tor.destlang_selected = $('#node-input-destlanghidden').val();
   tor.base_model_selected = $('#node-input-basemodelhidden').val();
-  tor.lg_parameters_selected2 = $('#node-input-ldparamshidden2').val();
-
 
   tor.LANGUAGES = { 'ar' : 'Arabic',
                     'arz': 'Spoken Arabic',
@@ -231,6 +232,7 @@
                     'ja': 'Japanese',
                     'pt': 'Portuguese',
                     'ko': 'Korean',
+                    'nl': 'Dutch',
                     'zh': 'Chinese'
                   };
 
@@ -263,6 +265,7 @@
         $('select#node-input-filetype').parent().hide();
         $('input#node-input-trainid').parent().hide();
         $('input#node-input-lgparams2').parent().hide();
+        $('input#node-input-neural').parent().hide();
         $('#languagetranslation-form-tips').show();
     }
   }
@@ -286,6 +289,14 @@
     return self.indexOf(value) === index;
   }
 
+  // Flush the cache
+  tor.flushModelCache = function () {
+    tor.models = null;
+    tor.domains = null;
+    tor.basemodels = null;
+    tor.custommodels = null;
+    tor.checkModels();
+  }
 
   // Retrieve the available models from the server, if data is returned, then
   // can enable the dynamic selection fields.
@@ -294,6 +305,10 @@
     var p = $('#node-input-password').val();
     var e = $('#node-input-service-endpoint').val();
     var creds = {un: u, pwd: p};
+
+    if ($('#node-input-neural').prop('checked')) {
+      creds.n = 'Y';
+    }
 
     if (! $('#node-input-default-endpoint').prop('checked')) {
       creds.e = e;
@@ -467,6 +482,7 @@
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
           $('input#node-input-trainid').parent('').hide();
           $('input#node-input-lgparams2').parent().show();
+          $('input#node-input-neural').parent().show();
           $('#languagetranslation-form-tips').show();
           break;
         case 'custom':
@@ -476,6 +492,7 @@
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
           $('input#node-input-trainid').parent('').hide();
           $('input#node-input-lgparams2').parent().show();
+          $('input#node-input-neural').parent().hide();
           $('#languagetranslation-form-tips').show();
           break;
         case 'train':
@@ -485,6 +502,7 @@
           $('select#node-input-basemodel, select#node-input-filetype').parent('').show();
           $('input#node-input-trainid').parent('').hide();
           $('input#node-input-lgparams2').parent().show();
+          $('input#node-input-neural').parent().hide();
           $('#languagetranslation-form-tips').show();
           break;
         case 'getstatus':
@@ -495,6 +513,7 @@
           $('select#node-input-domain').parent().hide();
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
           $('input#node-input-lgparams2').parent().show();
+          $('input#node-input-neural').parent().hide();
           $('#languagetranslation-form-tips').show();
           break;
       }
@@ -604,10 +623,6 @@
       tor.base_model_selected = $('#node-input-basemodel').val();
     });
 
-    $('#node-input-lgparams2').change(function (val) {
-      lg_parameters_selected = $('#node-input-lgparams2').val();
-    });
-
     $('#node-input-default-endpoint').change(function () {
       var checked = $('#node-input-default-endpoint').prop('checked')
       if (checked) {
@@ -615,6 +630,10 @@
       } else {
         $('#node-input-service-endpoint').parent().show();
       }
+    });
+
+    $('#node-input-neural').change(function () {
+      tor.flushModelCache();
     });
 
   }
@@ -636,9 +655,6 @@
     $('select#node-input-basemodel').val(tor.base_model_selected);
     tor.custom_selected = $('#node-input-customhidden').val();
     $('select#node-input-custom').val(tor.custom_selected);
-
-
-    tor.lg_parameters_selected2 = $('input#node-input-lgparams2').prop('checked');
 
   }
 
@@ -693,7 +709,6 @@
     $('#node-input-destlanghidden').val(tor.destlang_selected);
     $('#node-input-basemodelhidden').val(tor.base_model_selected);
     $('#node-input-customhidden').val(tor.custom_selected);
-    $('#node-input-ldparamshidden2').val(tor.lg_parameters_selected2);
   }
 
   // Define and run the function to register this node.
@@ -717,7 +732,7 @@
                 filetype: {value: 'forcedglossary'},
                 trainid: {value: ''},
                 lgparams2: {value: 'lparams'},
-                ldparamshidden2: {value: ''},
+                neural: {value: false},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://gateway.watsonplatform.net/language-translator/api'}
             },
