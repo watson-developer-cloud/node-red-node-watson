@@ -379,6 +379,10 @@ module.exports = function (RED) {
         serviceSettings.url = endpoint;
       }
 
+      if (config.neural && 'translate' === action) {
+        serviceSettings.headers['X-Watson-Technology-Preview'] = '2017-07-01';
+      }
+
       language_translator = new LanguageTranslatorV2(serviceSettings);
 
       // We have credentials, and know the mode. Further required fields checks

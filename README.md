@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.20
+- Added experimental neural translation as a config option to translation node.
+
 ### New in version 0.5.19
 - Update Supported audio file check in Speech to Text Node.
 - Remove Continuous flag from Speech to Text Node.
