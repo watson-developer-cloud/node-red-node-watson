@@ -64,14 +64,14 @@ module.exports = function (RED) {
     var lt = null,
       neural = req.query.n ? true : false,
       serviceSettings = {
-      username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd,
-      version: 'v2',
-      url: endpoint,
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
-      }
-    };
+        username: sUsername ? sUsername : req.query.un,
+        password: sPassword ? sPassword : req.query.pwd,
+        version: 'v2',
+        url: endpoint,
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
+      };
 
     if (neural) {
       serviceSettings.headers['X-Watson-Technology-Preview'] = '2017-07-01';
