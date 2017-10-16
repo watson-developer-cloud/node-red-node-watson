@@ -61,8 +61,8 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/watson-translator/models', function (req, res) {
     //endpoint = sEndpoint ? sEndpoint : req.query.e;
     endpoint = req.query.e ? req.query.e : sEndpoint;
-
-    var lt = new LanguageTranslatorV2({
+    var neural = req.query.n ? true : false,
+      serviceSettings = {
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
       version: 'v2',
@@ -70,7 +70,13 @@ module.exports = function (RED) {
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
-    });
+    }
+
+    if (neural) {
+      serviceSettings.headers['X-Watson-Technology-Preview'] = '2017-07-01';
+    }
+
+    var lt = new LanguageTranslatorV2(serviceSettings);
 
     lt.getModels({}, function (err, models) {
       if (err) {
