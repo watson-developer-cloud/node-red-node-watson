@@ -60,6 +60,12 @@
         </select>
     </div>
 
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-neural" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-neural" style="width: 70%;"> Use Experimental Neural Translation</label>
+    </div>    
+
     <div class="form-row">
         <label for="node-input-domain"><i class="fa fa-book"></i> Domains</label>
         <select type="text" id="node-input-domain" style="display: inline-block; vertical-align:middle; width: 70%;">
@@ -119,12 +125,6 @@
     <div class="form-row">
         <label for="node-input-trainid"><i class="fa fa-tag"></i> Model ID</label>
         <input type="text" id="node-input-trainid" placeholder="Model ID">
-    </div>
-
-    <div class="form-row credentials">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-neural" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-neural" style="width: 70%;"> Use Experimental Neural Translation</label>
     </div>
 
     <div class="form-row">
@@ -232,6 +232,7 @@
                     'ja': 'Japanese',
                     'pt': 'Portuguese',
                     'ko': 'Korean',
+                    'nl': 'Dutch',
                     'zh': 'Chinese'
                   };
 
@@ -288,6 +289,14 @@
     return self.indexOf(value) === index;
   }
 
+  // Flush the cache
+  tor.flushModelCache = function () {
+    tor.models = null;
+    tor.domains = null;
+    tor.basemodels = null;
+    tor.custommodels = null;
+    tor.checkModels();
+  }
 
   // Retrieve the available models from the server, if data is returned, then
   // can enable the dynamic selection fields.
@@ -296,6 +305,10 @@
     var p = $('#node-input-password').val();
     var e = $('#node-input-service-endpoint').val();
     var creds = {un: u, pwd: p};
+
+    if ($('#node-input-neural').prop('checked')) {
+      creds.n = 'Y';
+    }
 
     if (! $('#node-input-default-endpoint').prop('checked')) {
       creds.e = e;
@@ -617,6 +630,10 @@
       } else {
         $('#node-input-service-endpoint').parent().show();
       }
+    });
+
+    $('#node-input-neural').change(function () {
+      tor.flushModelCache();
     });
 
   }
