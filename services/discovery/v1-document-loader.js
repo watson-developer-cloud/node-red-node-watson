@@ -19,6 +19,8 @@ module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'discovery';
   var fs = require('fs'),
     temp = require('temp'),
+    fileType = require('file-type'),
+    isDocx = require('is-docx'),
     pkg = require('../../package.json'),
     discoveryutils = require('./discovery-utils'),
     DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
@@ -59,16 +61,33 @@ module.exports = function (RED) {
     if (!msg.payload) {
       return Promise.reject('Missing property: msg.payload');
     } else if (msg.payload instanceof Buffer) {
-            return Promise.resolve();
+      return Promise.resolve();
     } else {
       return Promise.reject('msg.payload should be a data buffer');
     }
   }
 
-  function openTheFile() {
+  function determinSuffix(msg) {
+    var ext = '';
+      ft = fileType(msg.payload);
+
+    if (ft && ft.ext) {
+      ext = '.' + ft.ext;
+    }
+    if (isDocx(msg.payload)) {
+      ext = '.docx';
+    }
+
+    return Promise.resolve(ext);
+  }
+
+  function openTheFile(suffix) {
     var p = new Promise(function resolver(resolve, reject){
-      temp.open({
-      }, function(err, info) {
+      var options = {};
+      if (suffix) {
+        options.suffix = suffix;
+      }
+      temp.open(options, function(err, info) {
         if (err) {
           reject('Error receiving the data buffer');
         } else {
@@ -92,13 +111,38 @@ module.exports = function (RED) {
   }
 
   function createStream(info) {
-    var theStream = fs.createReadStream(info.path, 'utf8');
+    //var theStream = fs.createReadStream(info.path, 'utf8');
+    var theStream = fs.readFileSync(info.path, 'utf8');
     return Promise.resolve(theStream);
   }
 
-  function execute(node, params, msg) {
+  function execute(params, msg) {
     var p = new Promise(function resolver(resolve, reject) {
-      reject('execute not yet implemented');
+      var discovery = null, p = null,
+        serviceSettings = {
+          username: username,
+          password: password,
+          version_date: '2017-09-01',
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
+        };
+
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
+
+      discovery = new DiscoveryV1(serviceSettings);
+
+      discovery.addDocument(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.document = response.document ? response.document : response;
+          resolve();
+        }
+      });
+
     });
     return p;
   }
@@ -139,9 +183,12 @@ module.exports = function (RED) {
           params = discoveryutils.buildParams(msg, config);
           return checkParams(params);
         })
-        .then(function() {
+        .then(function(){
+          return determinSuffix(msg);
+        })
+        .then(function(suffix) {
           node.status({ fill: 'blue', shape: 'dot', text: 'reading' });
-          return openTheFile();
+          return openTheFile(suffix);
         })
         .then(function(info){
           fileInfo = info;
@@ -152,8 +199,9 @@ module.exports = function (RED) {
         })
         .then(function(theStream){
           params.file = theStream;
+          params.metadata = {'content-type': 'application/msword'}
           node.status({ fill: 'blue', shape: 'dot', text: 'processing' });
-          return execute(node, params, msg);
+          return execute(params, msg);
         })
         .then(function(){
           temp.cleanup();
