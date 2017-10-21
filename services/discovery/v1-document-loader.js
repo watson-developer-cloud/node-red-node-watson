@@ -67,9 +67,9 @@ module.exports = function (RED) {
     }
   }
 
-  function determinSuffix(msg) {
+  function determineSuffix(msg) {
     // Let's assume that if we can't determine the suffix that
-    // its a word doc. 
+    // its a word doc.
     var ext = '.doc';
       ft = fileType(msg.payload);
 
@@ -187,7 +187,7 @@ module.exports = function (RED) {
           return checkParams(params);
         })
         .then(function(){
-          return determinSuffix(msg);
+          return determineSuffix(msg);
         })
         .then(function(suffix) {
           fileSuffix = suffix;

@@ -56,7 +56,16 @@
 
 <script type="text/x-red" data-help-name="watson-discovery-v1-document-loader">
     <p>This is the document loader Node for the V1 Watson Discovery service.</p>
-
+    <p>The node needs an Environment ID and Collection ID as input.
+    </p>
+    <p>The collection being written to can be overridden by specifying the
+    search ids in
+    <code>msg.discoveryparams.environment_id</code>
+    and <code>msg.discoveryparams.collection_id</code>
+    </p>
+    <p>The document to be added should be passed in as a data buffer
+    in <code>msg.payload</code>  
+    </p>
 
     <p>For more information about the Discovery service,
     read the service <a href="https://www.ibm.com/watson/developercloud/doc/discovery/">documentation</a>.</p>
