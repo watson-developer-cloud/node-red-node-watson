@@ -89,7 +89,7 @@
     // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
     function oneditprepare() {
       disV1.checkForPrepare();
-      $.getJSON('watson-discovery/vcap/')
+      $.getJSON('watson-discovery-docs/vcap/')
         .done(function (service) {
           $('.credentials').toggle(!service);
         })

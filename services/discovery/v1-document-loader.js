@@ -17,12 +17,13 @@
 module.exports = function (RED) {
 
   const SERVICE_IDENTIFIER = 'discovery';
-  var pkg = require('../../package.json'),
+  var fs = require('fs'),
+    temp = require('temp'),
+    pkg = require('../../package.json'),
     discoveryutils = require('./discovery-utils'),
     DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
-    temp = require('temp'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
@@ -42,6 +43,16 @@ module.exports = function (RED) {
       return Promise.reject(message);
     }
     return Promise.resolve();
+  }
+
+  function checkParams(params){
+    var response = discoveryutils.paramEnvCheck(params) +
+           discoveryutils.paramCollectionCheck(params);
+    if (response) {
+      return Promise.reject(response);
+    } else {
+      return Promise.resolve();
+    }
   }
 
   function verifyPayload(msg) {
@@ -68,6 +79,18 @@ module.exports = function (RED) {
     return p;
   }
 
+  function syncTheFile(info, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      fs.writeFile(info.path, msg.payload, function(err) {
+        if (err) {
+          reject('Error processing pdf buffer');
+        }
+        resolve();
+      });
+    });
+    return p;
+  }
+
   function doSomething() {
     var p = new Promise(function resolver(resolve, reject) {
       reject('nothing yet implemented');
@@ -81,7 +104,7 @@ module.exports = function (RED) {
     sEndpoint = dservice.url;
   }
 
-  RED.httpAdmin.get('/watson-discovery/vcap', function (req, res) {
+  RED.httpAdmin.get('/watson-discovery-docs/vcap', function (req, res) {
     res.json(serviceutils.checkServiceBound(SERVICE_IDENTIFIER));
   });
 
@@ -107,8 +130,16 @@ module.exports = function (RED) {
         .then(function(){
           return verifyPayload(msg);
         })
+        .then(function(){
+          params = discoveryutils.buildParams(msg, config);
+          return checkParams(params);
+        })
         .then(function() {
           return openTheFile();
+        })
+        .then(function(info){
+          fileInfo = info;
+          return syncTheFile(fileInfo, msg);
         })
         .then(function(){
           return doSomething();
