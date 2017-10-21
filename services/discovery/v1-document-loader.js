@@ -68,7 +68,9 @@ module.exports = function (RED) {
   }
 
   function determinSuffix(msg) {
-    var ext = '';
+    // Let's assume that if we can't determine the suffix that
+    // its a word doc. 
+    var ext = '.doc';
       ft = fileType(msg.payload);
 
     if (ft && ft.ext) {
@@ -164,6 +166,7 @@ module.exports = function (RED) {
 
     this.on('input', function (msg) {
       var message = '',
+        fileSuffix = '',
         params = {};
 
       username = sUsername || this.credentials.username;
@@ -187,6 +190,7 @@ module.exports = function (RED) {
           return determinSuffix(msg);
         })
         .then(function(suffix) {
+          fileSuffix = suffix;
           node.status({ fill: 'blue', shape: 'dot', text: 'reading' });
           return openTheFile(suffix);
         })
@@ -198,8 +202,16 @@ module.exports = function (RED) {
           return createStream(fileInfo);
         })
         .then(function(theStream){
-          params.file = theStream;
-          params.metadata = {'content-type': 'application/msword'}
+          //params.file = theStream;
+          var fname = 'temp' + fileSuffix;
+          params.file = {
+            value: theStream,
+            options: {
+            filename: fname
+            }
+          };
+
+          //params.metadata = {'content-type': 'application/msword'}
           node.status({ fill: 'blue', shape: 'dot', text: 'processing' });
           return execute(params, msg);
         })
