@@ -91,9 +91,14 @@ module.exports = function (RED) {
     return p;
   }
 
-  function doSomething() {
+  function createStream(info) {
+    var theStream = fs.createReadStream(info.path, 'utf8');
+    return Promise.resolve(theStream);
+  }
+
+  function execute(node, params, msg) {
     var p = new Promise(function resolver(resolve, reject) {
-      reject('nothing yet implemented');
+      reject('execute not yet implemented');
     });
     return p;
   }
@@ -135,6 +140,7 @@ module.exports = function (RED) {
           return checkParams(params);
         })
         .then(function() {
+          node.status({ fill: 'blue', shape: 'dot', text: 'reading' });
           return openTheFile();
         })
         .then(function(info){
@@ -142,7 +148,12 @@ module.exports = function (RED) {
           return syncTheFile(fileInfo, msg);
         })
         .then(function(){
-          return doSomething();
+          return createStream(fileInfo);
+        })
+        .then(function(theStream){
+          params.file = theStream;
+          node.status({ fill: 'blue', shape: 'dot', text: 'processing' });
+          return execute(node, params, msg);
         })
         .then(function(){
           temp.cleanup();
