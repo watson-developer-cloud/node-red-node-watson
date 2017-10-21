@@ -22,6 +22,7 @@ module.exports = function (RED) {
     DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
+    temp = require('temp'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
@@ -30,6 +31,7 @@ module.exports = function (RED) {
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/discovery/api';
 
+  temp.track();
 
   function initialCheck(u, p) {
     var message = '';
@@ -40,6 +42,30 @@ module.exports = function (RED) {
       return Promise.reject(message);
     }
     return Promise.resolve();
+  }
+
+  function verifyPayload(msg) {
+    if (!msg.payload) {
+      return Promise.reject('Missing property: msg.payload');
+    } else if (msg.payload instanceof Buffer) {
+            return Promise.resolve();
+    } else {
+      return Promise.reject('msg.payload should be a data buffer');
+    }
+  }
+
+  function openTheFile() {
+    var p = new Promise(function resolver(resolve, reject){
+      temp.open({
+      }, function(err, info) {
+        if (err) {
+          reject('Error receiving the data buffer');
+        } else {
+          resolve(info);
+        }
+      });
+    });
+    return p;
   }
 
   function doSomething() {
@@ -79,14 +105,21 @@ module.exports = function (RED) {
       node.status({});
       initialCheck(username, password)
         .then(function(){
+          return verifyPayload(msg);
+        })
+        .then(function() {
+          return openTheFile();
+        })
+        .then(function(){
           return doSomething();
         })
         .then(function(){
+          temp.cleanup();
           node.status({});
           node.send(msg);
         })
         .catch(function(err){
-          //discoveryutils.reportError(node,msg,err);
+          temp.cleanup();
           payloadutils.reportError(node,msg,err);
           node.send(msg);
         });
