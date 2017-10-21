@@ -9,6 +9,7 @@ Node-RED Watson Nodes for IBM Bluemix
 
 ### New in version 0.5.21
 - New node for Add Document for Discovery.
+- Natural Language Understanding Node fix for credentials check. 
 
 ### New in version 0.5.20
 - Added experimental neural translation as a config option to translation node.

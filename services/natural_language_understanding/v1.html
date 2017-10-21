@@ -299,7 +299,7 @@
   //invoked everytime the dialog is shown.
   function nluoneditprepare() {
     nluV1.checkForPrepare();
-    $.getJSON('watson-discovery/vcap/')
+    $.getJSON('natural-language-understanding/vcap/')
       .done(function (service) {
         $('.credentials').toggle(!service);
       })
