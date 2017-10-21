@@ -52,9 +52,8 @@ module.exports = function (RED) {
            discoveryutils.paramCollectionCheck(params);
     if (response) {
       return Promise.reject(response);
-    } else {
-      return Promise.resolve();
     }
+    return Promise.resolve();
   }
 
   function verifyPayload(msg) {
@@ -70,7 +69,7 @@ module.exports = function (RED) {
   function determineSuffix(msg) {
     // Let's assume that if we can't determine the suffix that
     // its a word doc.
-    var ext = '.doc';
+    var ext = '.doc',
       ft = fileType(msg.payload);
 
     if (ft && ft.ext) {
@@ -166,6 +165,7 @@ module.exports = function (RED) {
 
     this.on('input', function (msg) {
       var message = '',
+        fileInfo = '',
         fileSuffix = '',
         params = {};
 
@@ -207,7 +207,7 @@ module.exports = function (RED) {
           params.file = {
             value: theStream,
             options: {
-            filename: fname
+              filename: fname
             }
           };
 
