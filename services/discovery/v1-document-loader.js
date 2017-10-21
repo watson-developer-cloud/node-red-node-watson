@@ -61,9 +61,8 @@ module.exports = function (RED) {
       return Promise.reject('Missing property: msg.payload');
     } else if (msg.payload instanceof Buffer) {
       return Promise.resolve();
-    } else {
-      return Promise.reject('msg.payload should be a data buffer');
     }
+    return Promise.reject('msg.payload should be a data buffer');
   }
 
   function determineSuffix(msg) {
