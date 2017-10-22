@@ -59,10 +59,11 @@ module.exports = function (RED) {
   function verifyPayload(msg) {
     if (!msg.payload) {
       return Promise.reject('Missing property: msg.payload');
-    } else if (msg.payload instanceof Buffer) {
+    } else if ( (msg.payload instanceof Buffer) ||
+        (discoveryutils.isJsonObject(msg.payload)) ) {
       return Promise.resolve();
     }
-    return Promise.reject('msg.payload should be a data buffer');
+    return Promise.reject('msg.payload should be a data buffer or json object');
   }
 
   function determineSuffix(msg) {

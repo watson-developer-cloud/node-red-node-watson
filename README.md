@@ -7,9 +7,12 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.5.22
+- Allow payload as json for Add Document node.
+
 ### New in version 0.5.21
 - New node for Add Document for Discovery.
-- Natural Language Understanding Node fix for credentials check. 
+- Natural Language Understanding Node fix for credentials check.
 
 ### New in version 0.5.20
 - Added experimental neural translation as a config option to translation node.
