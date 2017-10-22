@@ -47,14 +47,17 @@
         <label for="node-input-discovery-method"><i class="fa fa-book"></i> Method: </label>
         <select type="text" id="node-input-discovery-method" style="display: inline-block; width: 70%;">
             <option value="query">Search in collection</option>
+            <option disabled>______________</option>
             <option value="createEnvrionment">Create new environment</option>
             <option value="listEnvrionments">List existing environments</option>
             <option value="getEnvironmentDetails">Retrieve environment details</option>
             <option value="deleteEnvironment">Delete environment</option>
+            <option disabled>______________</option>
             <option value="createCollection">Create new collection</option>
             <option value="listCollections">List existing collections</option>
             <option value="getCollectionDetails">Retrieve collection details</option>
             <option value="deleteCollection">Delete collection</option>
+            <option disabled>______________</option>
             <option value="createConfiguration">Create new configuration</option>
             <option value="listConfigurations">List existing configurations</option>
             <option value="getConfigurationDetails">Retrieve configuration details</option>
@@ -458,7 +461,7 @@
                 return: {value: ''},
                 description: {value: ''},
                 size: {value: 0},
-                'discovery-method': {value:'listEnvrionments'},
+                'discovery-method': {value:'query'},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://gateway.watsonplatform.net/discovery/api'}
             },

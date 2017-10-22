@@ -107,7 +107,7 @@ DiscoveryUtils.prototype = {
 
     params = me.languageCodeFix(params);
 
-    params = this.buildParamsForPayload(msg, config, params);
+    params = me.buildParamsForPayload(msg, config, params);
 
     return params;
   },
@@ -172,6 +172,14 @@ DiscoveryUtils.prototype = {
     var response = '';
     if (!params.file) {
       response = 'Missing JSON file on payload';
+    }
+    return response;
+  },
+
+  paramDocumentCheck: function(params) {
+    var response = '';
+    if (!params.file) {
+      response = 'Missing document file on payload';
     }
     return response;
   },
