@@ -64,7 +64,7 @@
     and <code>msg.discoveryparams.collection_id</code>
     </p>
     <p>The document to be added should be passed in as a data buffer
-    in <code>msg.payload</code>  
+    in <code>msg.payload</code>
     </p>
 
     <p>For more information about the Discovery service,
@@ -78,9 +78,9 @@
     function DiscoveryDocLoaderV1 () {}
 
     // This is the namespace for this version of this Node.
-    var disV1 = new DiscoveryDocLoaderV1();
+    var disdocV1 = new DiscoveryDocLoaderV1();
 
-    disV1.UIListeners = function () {
+    disdocV1.UIListeners = function () {
       $('input#node-input-default-endpoint').change(function () {
           var checked = $('input#node-input-default-endpoint').prop('checked')
           if (checked) {
@@ -91,13 +91,13 @@
       });
     }
 
-    disV1.checkForPrepare = function () {
-      disV1.UIListeners();
+    disdocV1.checkForPrepare = function () {
+      disdocV1.UIListeners();
     };
 
     // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
     function oneditprepare() {
-      disV1.checkForPrepare();
+      disdocV1.checkForPrepare();
       $.getJSON('watson-discovery-docs/vcap/')
         .done(function (service) {
           $('.credentials').toggle(!service);
