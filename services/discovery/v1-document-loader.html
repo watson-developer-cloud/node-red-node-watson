@@ -51,6 +51,10 @@
         <label for="node-input-collection_id"><i class="fa fa-tag"></i> Collection ID</label>
         <input type="text" id="node-input-collection_id" placeholder="">
     </div>
+    <div class="form-row">
+        <label for="node-input-filename"><i class="fa fa-tag"></i> Filename</label>
+        <input type="text" id="node-input-filename" placeholder="">
+    </div>
 
 </script>
 
@@ -58,10 +62,12 @@
     <p>This is the document loader Node for the V1 Watson Discovery service.</p>
     <p>The node needs an Environment ID and Collection ID as input.
     </p>
+    <p>If a filename is not provided then one is automatically generated</p>
     <p>The collection being written to can be overridden by specifying the
     search ids in
     <code>msg.discoveryparams.environment_id</code>
-    and <code>msg.discoveryparams.collection_id</code>
+    , <code>msg.discoveryparams.collection_id</code>
+    and <code>msg.discoveryparams.filename</code>
     </p>
     <p>The document to be added should be passed in as a data buffer
     in <code>msg.payload</code>
@@ -116,6 +122,7 @@
                 name: {value: ''},
                 environment_id: {value: ''},
                 collection_id: {value: ''},
+                filename: {value: ''},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://gateway.watsonplatform.net/discovery/api'}
             },
