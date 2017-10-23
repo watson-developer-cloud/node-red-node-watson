@@ -69,7 +69,7 @@ module.exports = function (RED) {
   function determineSuffix(msg) {
     // Let's assume that if we can't determine the suffix that
     // its a word doc.
-    var ext = '.doc',
+    var ext = '.json',
       ft = fileType(msg.payload);
 
     if (ft && ft.ext) {
@@ -117,9 +117,16 @@ module.exports = function (RED) {
     return Promise.resolve(theStream);
   }
 
-  function execute(params, msg) {
+  function whatName(params, suffix){
+    if (params.filename) {
+      return params.filename;
+    }
+    return 'Doc ' + (new Date()).toString() + suffix;
+  }
+
+  function execute(params, msg, suffix) {
     var p = new Promise(function resolver(resolve, reject) {
-      var discovery = null, p = null,
+      var discovery = null, p = null, method = null,
         serviceSettings = {
           username: username,
           password: password,
@@ -135,7 +142,13 @@ module.exports = function (RED) {
 
       discovery = new DiscoveryV1(serviceSettings);
 
-      discovery.addDocument(params, function (err, response) {
+      if ('.json' === suffix) {
+        method = 'addJsonDocument';
+      } else {
+        method = 'addDocument';
+      }
+
+      discovery[method](params, function (err, response) {
         if (err) {
           reject(err);
         } else {
@@ -203,7 +216,8 @@ module.exports = function (RED) {
         })
         .then(function(theStream){
           //params.file = theStream;
-          var fname = 'temp' + fileSuffix;
+          //var fname = 'temp' + fileSuffix;
+          var fname = whatName(params, fileSuffix);
           params.file = {
             value: theStream,
             options: {
@@ -211,9 +225,9 @@ module.exports = function (RED) {
             }
           };
 
-          //params.metadata = {'content-type': 'application/msword'}
           node.status({ fill: 'blue', shape: 'dot', text: 'processing' });
-          return execute(params, msg);
+          //return Promise.reject('temp disabled');
+          return execute(params, msg, fileSuffix);
         })
         .then(function(){
           temp.cleanup();
