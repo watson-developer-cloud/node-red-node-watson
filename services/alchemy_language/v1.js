@@ -33,11 +33,15 @@ var FEATURES = {
 };
 
 module.exports = function (RED) {
+  const SERVICE_IDENTIFIER = 'gateway-a.watsonplatform.net';
 
-  var cfenv = require('cfenv');
   var watson = require('watson-developer-cloud');
 
-  var payloadutils = require('../../utilities/payload-utils');
+  var payloadutils = require('../../utilities/payload-utils'),
+    serviceutils = require('../../utilities/service-utils'),
+    apikey, s_apikey,
+    service = serviceutils.getServiceCredsAlchemy(SERVICE_IDENTIFIER);
+
 
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then the api key is stored in the variable s_apikey.
@@ -48,14 +52,6 @@ module.exports = function (RED) {
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
 
-  // Taking this line out as codacy was complaining about it.
-  // var services = cfenv.getAppEnv().services;
-  var service;
-
-  var apikey, s_apikey;
-
-  var service = cfenv.getAppEnv().getServiceCreds(/alchemy/i);
-
   if (service) {
     s_apikey = service.apikey;
   }
@@ -64,6 +60,27 @@ module.exports = function (RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
+
+  function buildParams(wanted_features, config, msg) {
+    // The watson node-SDK expects the features as a single string.
+
+    var params = { extract: wanted_features.join(',') };
+
+    if (config['entity-sentiment']) {
+      params.sentiment = '1';
+    }
+    if (config['entity-emotion']) {
+      params.emotion = '1';
+    }
+
+    if (payloadutils.urlCheck(msg.payload)) {
+      params['url'] = msg.payload;
+    } else {
+      params['text'] = msg.payload;
+    }
+
+    return params;
+  }
 
   // This is the Alchemy Data Node
 
@@ -106,19 +123,7 @@ module.exports = function (RED) {
         return;
       }
 
-      // The watson node-SDK expects the features as a single string.
-      var extract = "" ;
-      extract = enabled_features.join(",");
-
-      //console.log("Will be looking for ", extract)
-      //var params = { text: msg.payload, extract: extract };
-      var params = { extract: extract };
-
-      if (payloadutils.urlCheck(msg.payload)) {
-        params['url'] = msg.payload;
-      } else {
-        params['text'] = msg.payload;
-      }
+      var params = buildParams(enabled_features, config, msg);
 
       // Splice in the additional options from msg.alchemy_options
       // eg. The user may have entered msg.alchemy_options = {maxRetrieve: 2};

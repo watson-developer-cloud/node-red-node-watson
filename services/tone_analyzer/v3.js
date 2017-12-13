@@ -15,29 +15,32 @@
  **/
 
 module.exports = function (RED) {
-  var watson = require('watson-developer-cloud');  
-  var cfenv = require('cfenv');
-  var toneutils = require('../../utilities/tone-utils');
+  const SERVICE_IDENTIFIER = 'tone-analyzer';
+  var pkg = require('../../package.json'),
+    ToneAnalyzerV3 = require('watson-developer-cloud/tone-analyzer/v3'),
+    serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
+    toneutils = require('../../utilities/tone-utils'),
+    username = '', password = '', sUsername = '', sPassword = '',
+    endpoint = '',
+    sEndpoint = 'https://gateway.watsonplatform.net/tone-analyzer/api',
+    service = null;
 
-  // Require the Cloud Foundry Module to pull credentials from bound service 
-  // If they are found then they are stored in sUsername and sPassword, as the 
-  // service credentials. This separation from sUsername and username to allow 
+  // Require the Cloud Foundry Module to pull credentials from bound service
+  // If they are found then they are stored in sUsername and sPassword, as the
+  // service credentials. This separation from sUsername and username to allow
   // the end user to modify the node credentials when the service is not bound.
   // Otherwise, once set username would never get reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
 
-  // Not ever used, and codeacy complains about it.
-
-  var username, password, sUsername, sPassword;
-
-  var service = cfenv.getAppEnv().getServiceCreds(/tone analyzer/i)
+  service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
-
 
   // Node RED Admin - fetch and set vcap services
   RED.httpAdmin.get('/watson-tone-analyzer/vcap', function (req, res) {
@@ -51,7 +54,7 @@ module.exports = function (RED) {
     var taSettings = null;
 
     username = sUsername || credentials.username;
-    password = sPassword || credentials.password;      
+    password = sPassword || credentials.password;
 
     if (username && password) {
       taSettings = {};
@@ -65,9 +68,9 @@ module.exports = function (RED) {
 
   // Function that checks the configuration to make sure that credentials,
   // payload and options have been provied in the correct format.
-  var checkConfiguration = function(msg, node, cb) {
-    var message = null;      
-    var taSettings = null;
+  var checkConfiguration = function(msg, node) {
+    var message = null,
+      taSettings = null;
 
     taSettings = checkCreds(node.credentials);
 
@@ -79,58 +82,94 @@ module.exports = function (RED) {
       message = 'Missing property: msg.payload';
     }
 
-    if (cb) {
-      cb(message, taSettings);
+    if (message) {
+      return Promise.reject(message);
+    } else {
+      return Promise.resolve(taSettings);
     }
   };
 
 
-  // function when the node recieves input inside a flow. 
-  // Configuration is first checked before the service is invoked.
-  var processOnInput = function(msg, config, node) {
-    checkConfiguration (msg, node, function(err, settings){
-      if (err) {
-        node.status({fill:'red', shape:'dot', text:err}); 
-        node.error(err, msg);
-        return;
-      } else {
-        var tone_analyzer = watson.tone_analyzer({
-          'username': settings.username,
-          'password': settings.password,
-          'version': 'v3',
-          'version_date': '2016-05-19'
-        });
-
-        var options = toneutils.parseOptions(msg, config);
-    
-        node.status({fill:'blue', shape:'dot', text:'requesting'});
-        tone_analyzer.tone(options, function (err, response) {
-          node.status({})
-          if (err) {
-            node.error(err, msg);
-          } else {
-            msg.response = response;
-          }
-          node.send(msg);
-        });
-
+  function invokeService(config, options, settings) {
+    var serviceSettings = {
+      'username': settings.username,
+      'password': settings.password,
+      version_date: '2017-09-21',
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
       }
+    };
+
+    endpoint = sEndpoint;
+    if ((!config['default-endpoint']) && config['service-endpoint']) {
+      endpoint = config['service-endpoint'];
+    }
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    if (config['interface-version']) {
+      serviceSettings.version_date = config['interface-version'];
+    }
+
+    const tone_analyzer = new ToneAnalyzerV3(serviceSettings);
+
+    var p = new Promise(function resolver(resolve, reject){
+      var m = 'tone';
+      switch (config['tone-method']) {
+      case 'generalTone' :
+        break;
+      case 'customerEngagementTone' :
+        m = 'tone_chat';
+        break;
+      }
+
+      tone_analyzer[m](options, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(response);
+        }
+      });
     });
 
-  };
+    return p;
+  }
+
+  // function when the node recieves input inside a flow.
+  // Configuration is first checked before the service is invoked.
+  var processOnInput = function(msg, config, node) {
+    checkConfiguration(msg, node)
+      .then(function(settings) {
+        var options = toneutils.parseOptions(msg, config);
+        options = toneutils.parseLanguage(msg, config, options);
+        node.status({fill:'blue', shape:'dot', text:'requesting'});
+        return invokeService(config, options, settings);
+      })
+      .then(function(data){
+        node.status({})
+        msg.response = data;
+        node.send(msg);
+        node.status({});
+      })
+      .catch(function(err){
+        payloadutils.reportError(node,msg,err);
+        node.send(msg);
+      });
+  }
 
 
-  // This is the Tone Analyzer Node. 
+  // This is the Tone Analyzer Node.
   function Node (config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    // Invoked whenb the node has received an input as part of a flow.
+    // Invoked when the node has received an input as part of a flow.
     this.on('input', function (msg) {
       processOnInput(msg, config, node);
     });
   }
-
 
   RED.nodes.registerType('watson-tone-analyzer-v3', Node, {
     credentials: {

@@ -1,0 +1,577 @@
+<!--
+  Copyright 2017 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-text-to-speech-v1-query-builder">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+
+    <div>
+        <label id="node-label-message"><i class="fa fa-exclamation-triangle"></i></label>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name"></input>
+    </div>
+
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username"></input>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password"></input>
+    </div>
+
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://stream.watsonplatform.net/text-to-speech/api">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tts-custom-mode"><i class="fa fa-book"></i> Detect: </label>
+        <select type="text" id="node-input-tts-custom-mode" style="display: inline-block; width: 70%;">
+            <option value="createCustomisation">Create a custom language model</option>
+            <option value="listCustomisations">List Customizations</option>
+            <option value="getCustomisation">Get Customization</option>
+            <option value="getPronounce">Get Pronouncation</option>
+            <option value="addWords">Add Words</option>
+            <option value="getWords">Get Words</option>
+            <option value="deleteWord">Delete Word</option>
+          </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tts-custom-format"><i class="fa fa-book"></i> Format: </label>
+        <select type="text" id="node-input-tts-custom-format" style="display: inline-block; width: 70%;">
+            <option value="ipa">International Phonetic Alphabet</option>
+            <option value="spr">IBM Symbolic Phonetic Representation</option>
+          </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tts-voice-or-custom"><i class="fa fa-book"></i> Get Pronounciation: </label>
+        <select type="text" id="node-input-tts-voice-or-custom" style="display: inline-block; width: 70%;">
+            <option value="voice">by voice</option>
+            <option value="custom">by customization</option>
+          </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tts-lang"><i class="fa fa-language"></i> Language</label>
+        <select type="text" id="node-input-tts-lang" style="display: inline-block; width: 70%;" >
+
+        </select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-tts-langhidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-voice"><i class="fa fa-comment"></i> Voice</label>
+        <select type="text" id="node-input-tts-voice" style="display: inline-block; width: 70%;">
+         </select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-tts-voicehidden"/>
+    </div>
+
+
+    <div class="form-row">
+        <label for="node-input-tts-custom-model-name"><i class="fa fa-book"></i> Custom Model Name</label>
+        <input type="text" id="node-input-tts-custom-model-name" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tts-custom-model-description"><i class="fa fa-book"></i> Custom Model Description</label>
+        <input type="text" id="node-input-tts-custom-model-description" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tts-custom-id"><i class="fa fa-book"></i> Customization ID</label>
+        <input type="text" id="node-input-tts-custom-id" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tts-custom-word"><i class="fa fa-book"></i> Word</label>
+        <input type="text" id="node-input-tts-custom-word" placeholder="">
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="watson-text-to-speech-v1-query-builder">
+    <p>The Speech To Text Custom Builder is used to create customisations
+    for Speech to Text. It supports the following modes </p>
+    <ul>
+
+    <li>Create Custom Language Model
+      <p>In this mode, a new empty custom model is created. The
+        new customization id is returned on
+        <code>msg.customization_id</code>
+      </p>
+    </li>
+
+    <li>List Customizations
+      <p> Use this mode to list customizations such as the name and description
+        for all custom voice models that you own for all languages.
+        Data is returned on <code>msg.customizations</code>
+      </p>
+    </li>
+
+    <li>Get Customization
+      <p> Use this mode to list all information about a specifid
+        custom voice model. The response includes the words in the model
+        and their translations as defined in the model.
+        Data is returned on <code>msg.customization</code>
+      </p>
+    </li>
+
+    <li>Get Pronounciation
+      <p> Use this mode to show the phonetic pronounciation of words
+        for voices or customizations.
+        Data is returned on <code>msg.pronunciation</code>
+      </p>
+    </li>
+
+    <li>Add Words
+      <p> Adds one or more words and their translations to the
+        specified custom voice model. The input corpus content should be
+        provided as buffer or JSoN Array of Words on
+        <code>msg.payload</code>
+      </p>
+    </li>
+
+    <li>Get Words
+      <p> Lists all of the words and their translations for the specified
+      custom voice model.
+      Data is returned on <code>msg.words</code>
+      </p>
+    </li>
+
+    <li>Delete Word
+      <p> Deletes a single word from the specified custom voice model.
+      </p>
+    </li>
+
+    </ul>
+
+    <p>For more information about Speech To Text customisation,
+    read the <a href="https://www.ibm.com/watson/developercloud/doc/text-to-speech/custom-using.shtml#customUsing">
+    documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+
+  // Need to simulate a namespace, as some of the variables had started to leak across nodes
+  function TTSV1QBB () {
+  }
+
+
+  // This is the namespace for ttsv1qbb. Currently only contains models, but more vars and functions may need to be
+  // moved in if there is a clash with other nodes.
+  var ttsv1qbb = new TTSV1QBB();
+  ttsv1qbb.LANGUAGES = { 'en-US': 'US English',
+                    'en-GB': 'UK English',
+                    'pt-BR': 'Portuguese Brazilian',
+                    'fr-FR': 'French',
+                    'it-IT': 'Italian',
+                    'de-DE': 'German',
+                    'zh-CN': 'Mandarin',
+                    'es-ES': 'Spanish',
+                    'es-LA': 'Latin American Spanish',
+                    'es-US': 'US Spanish',
+                    'ar-AR': 'Arablic',
+                    'ja-JP': 'Japanese'
+                  };
+
+  ttsv1qbb.voices = null;
+  ttsv1qbb.languages = null;
+  ttsv1qbb.language_selected = '';
+  ttsv1qbb.voice_selected = '';
+  ttsv1qbb.mode_selected = null;
+  ttsv1qbb.voicenames = null;
+
+  // sorting functions
+  ttsv1qbb.onlyUnique = function (value, index, self) {
+    return self.indexOf(value) === index;
+  }
+
+  // Simple check that is only invoked if the service is not bound into bluemix. In this case the
+  // user has to provide credentials. Once there are credentials, then the
+  // ttsv1qbb.??? are retrieved.
+  ttsv1qbb.checkCredentials = function () {
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+
+    if (u && u.length && p) {
+      if (!ttsv1qbb.voices) {
+        ttsv1qbb.getVoices();
+      }
+    }
+  }
+
+  ttsv1qbb.showSelectedFields = function(fields) {
+    for (i = 0; i < fields.length; i++) {
+      $(fields[i]).parent().show();
+    }
+  }
+
+  ttsv1qbb.hideSelectedFields = function(fields) {
+    for (i = 0; i < fields.length; i++) {
+      $(fields[i]).parent().hide();
+    }
+  }
+
+
+  ttsv1qbb.processPronounceSetting = function () {
+    var vorc = $('#node-input-tts-voice-or-custom').val();
+    var showfields = [];
+    var hidefields = [];
+    if ('custom' == vorc) {
+      showfields.push('#node-input-tts-custom-id');
+      hidefields.push('#node-input-tts-lang');
+      hidefields.push('#node-input-tts-voice');
+    } else {
+      showfields.push('#node-input-tts-lang');
+      showfields.push('#node-input-tts-voice');
+      hidefields.push('#node-input-tts-custom-id');
+    }
+    ttsv1qbb.showSelectedFields(showfields);
+    ttsv1qbb.hideSelectedFields(hidefields);
+  }
+
+
+  ttsv1qbb.processSelectedMethod = function(method) {
+    ttsv1qbb.hideEverything();
+    var fields = [];
+    switch (method) {
+      case 'createCustomisation':
+        fields.push('#node-input-tts-custom-model-name'
+                        + ', #node-input-tts-lang'
+                        + ', #node-input-tts-custom-model-description');
+        break;
+      case 'deleteWord':
+        fields.push('#node-input-tts-custom-word'
+                        + ', #node-input-tts-custom-id');
+        break;
+      case 'getCustomisation':
+      case 'addWords':
+      case 'getWords':
+        fields.push('#node-input-tts-custom-id');
+        break;
+      case 'getPronounce':
+        fields.push('#node-input-tts-custom-word'
+                        + ', #node-input-tts-custom-format'
+                        + ', #node-input-tts-voice-or-custom');
+        ttsv1qbb.processPronounceSetting();
+        break;
+    }
+    ttsv1qbb.showSelectedFields(fields);
+  }
+
+
+  // Populate the Voices selection field
+  ttsv1qbb.populateVoices = function () {
+    if (!ttsv1qbb.voicenames && ttsv1qbb.voices) {
+      ttsv1qbb.voicenames = ttsv1qbb.voices.map(function(m) {
+        //return m.name.split('_')[1];
+        return m.name;
+      });
+      var unique_voices = ttsv1qbb.voicenames.filter(ttsv1qbb.onlyUnique);
+      ttsv1qbb.voicenames = unique_voices;
+    }
+    if (!ttsv1qbb.voicedata && ttsv1qbb.voicenames){
+      ttsv1qbb.voicedata = [];
+      ttsv1qbb.voicenames.forEach(function(a){
+        var element = {};
+        var bits = a.split('_');
+        element.full = a;
+        element.language = bits[0];
+        element.person = bits[1].replace('Voice','');;
+        ttsv1qbb.voicedata.push(element);
+      });
+    }
+
+    if (ttsv1qbb.voicedata) {
+      $('select#node-input-tts-voice').empty();
+
+      ttsv1qbb.voicedata.forEach(function(b) {
+        var selectedText = '';
+        if (ttsv1qbb.voice_selected === b.full) {
+          selectedText = 'selected="selected"';
+        }
+        if (ttsv1qbb.language_selected === b.language) {
+          $('select#node-input-tts-voice')
+            .append('<option value='
+                          + '"' + b.full + '"'
+                          + selectedText
+                          + '>'
+                          + b.person
+                          + '</option>');
+        }
+      });
+    }
+  }
+
+
+  // Register the handlers for the fields
+  ttsv1qbb.handlersUI = function () {
+    $('#node-input-username').change(function(val){
+      ttsv1qbb.checkCredentials();
+    });
+    $('#node-input-password').change(function(val){
+      ttsv1qbb.checkCredentials();
+    });
+
+    $('#node-input-tts-custom-mode').change(function() {
+      ttsv1qbb.mode_selected = $('#node-input-tts-custom-mode').val();
+      ttsv1qbb.processSelectedMethod(ttsv1qbb.mode_selected);
+    });
+
+    $('#node-input-tts-lang').change(function () {
+      $('#node-input-tts-langhidden').val(ttsv1qbb.language_selected);
+      ttsv1qbb.language_selected = $('#node-input-tts-lang').val();
+
+      //tts.checkLanguage();
+      ttsv1qbb.populateVoices();
+    });
+
+    $('#node-input-tts-voice').change(function () {
+      $('#node-input-tts-voicehidden').val(ttsv1qbb.voice_selected);
+      ttsv1qbb.voice_selected = $('#node-input-tts-voice').val();
+    });
+
+
+    $('#node-input-tts-voice-or-custom').change(function() {
+      console.log('voice or custom option is set to ', $('#node-input-tts-voice-or-custom').val());
+      if ('getPronounce' == ttsv1qbb.mode_selected) {
+        ttsv1qbb.processPronounceSetting();
+      }
+    });
+
+    $('#node-input-default-endpoint').change(function () {
+      var checked = $('#node-input-default-endpoint').prop('checked')
+      if (checked) {
+        $('#node-input-service-endpoint').parent().hide();
+      } else {
+        $('#node-input-service-endpoint').parent().show();
+      }
+    });
+  }
+
+  // The dynamic nature of the selection fields in this node has caused problems.
+  // Whenever there is a fetch for the models, on a page refresh or applicaiton
+  // restart, the settings for the dynamic fields are lost.
+  // So hidden (text) fields are being used to squirrel away the values, so that
+  // they can be restored.
+  ttsv1qbb.restoreFromHidden = function () {
+    //ttsv1qbb.model_selected = $('#node-input-base-model-hidden').val();
+    //$('select#node-input-tts-base-model').val(tts.model_selected);
+    ttsv1qbb.language_selected = $('#node-input-tts-langhidden').val();
+    $('select#node-input-tts-lang').val(ttsv1qbb.language_selected);
+
+    ttsv1qbb.voice_selected = $('#node-input-tts-voicehidden').val();
+    $('select#node-input-tts-voice').val(ttsv1qbb.voice_selected);
+  }
+
+  // Function to be used at the start, as don't want to expose any fields, unless the models are
+  // available. The models can only be fetched if the credentials are available.
+  ttsv1qbb.hideEverything = function () {
+    var hidefields = [];
+
+    if (!ttsv1qbb.voices) {
+      $('#credentials-not-found').show();
+      hidefields.push('#node-label-message');
+    }
+    hidefields.push('#node-input-tts-lang');
+    hidefields.push('#node-input-tts-custom-model-name');
+    hidefields.push('#node-input-tts-custom-model-description');
+    hidefields.push('#node-input-tts-custom-id');
+    hidefields.push('#node-input-tts-custom-word');
+    hidefields.push('#node-input-tts-custom-format');
+    hidefields.push('#node-input-tts-voice-or-custom');
+    hidefields.push('#node-input-tts-voice');
+
+    ttsv1qbb.hideSelectedFields(hidefields);
+  }
+
+  // Called to complete the languages selection table
+  ttsv1qbb.processLanguages = function () {
+    if (!ttsv1qbb.languages && ttsv1qbb.voices) {
+      ttsv1qbb.languages = ttsv1qbb.voices.map(function(m) {
+        return m.language;
+      });
+    }
+    if (ttsv1qbb.languages) {
+      $('select#node-input-tts-lang').empty();
+      var unique_langs = ttsv1qbb.languages.filter(ttsv1qbb.onlyUnique);
+
+      unique_langs.forEach(function(l) {
+        var selectedText = '';
+        if (ttsv1qbb.language_selected === l) {
+          selectedText = 'selected="selected"';
+        }
+        $('select#node-input-tts-lang')
+          .append('<option value='
+                        + '"' + l + '"'
+                        + selectedText
+                         + '>'
+                        + (ttsv1qbb.LANGUAGES[l] ? ttsv1qbb.LANGUAGES[l] : l)
+                        + '</option>');
+      });
+    }
+  }
+
+  // Called to work through the voices, completing the dyanmic selection fields.
+  ttsv1qbb.processVoices = function () {
+    if (ttsv1qbb.voices) {
+      ttsv1qbb.processLanguages();
+      ttsv1qbb.populateVoices();
+    }
+  }
+
+  ttsv1qbb.visibilityCheck = function ()
+  {
+    if (ttsv1qbb.voices) {
+      $('label#node-label-message').parent().hide();
+      //$('select#node-input-tts-lang').parent().show();
+    } else {
+      $('label#node-label-message').parent().hide();
+      $('select#node-input-tts-lang').parent().hide();
+    }
+  }
+
+  // Function called when either when the voices have been retrieved, or
+  // on dialog load, if the voices has already been retrieved
+  ttsv1qbb.postVoiceCheck = function (){
+    ttsv1qbb.processVoices();
+    ttsv1qbb.visibilityCheck();
+  }
+
+  ttsv1qbb.restoreFromHidden = function () {
+    ttsv1qbb.language_selected = $('#node-input-tts-langhidden').val();
+    $('select#node-input-tts-lang').val(ttsv1qbb.language_selected);
+  }
+
+
+  // Retrieve the available voices from the server, if data is returned, then
+  // can enable the dynamic selection fields.
+  ttsv1qbb.getVoices = function (){
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+    var e = $('#node-input-service-endpoint').val();
+    var creds = {un: u, pwd: p};
+
+    if (! $('#node-input-default-endpoint').prop('checked')) {
+      creds.e = e;
+    }
+    $.getJSON('watson-text-to-speech-v1-query-builder/voices/',creds)
+    .done(function (data) {
+      if (data.error) {
+        $('label#node-label-message').parent().show();
+        $('label#node-label-message').text(data.error);
+      } else if (data.voices) {
+        ttsv1qbb.voices = data.voices;
+        ttsv1qbb.postVoiceCheck();
+      }
+    }).fail(function (err) {
+      $('label#node-label-message').parent().show();
+      $('label#node-label-message').text('Error trying to determine available service voices');
+
+    }).always(function () {});
+  }
+
+
+  // This is the on edit prepare function, which will be invoked everytime the dialog
+  // is shown.
+  function ttsv1qbboneditprepare() {
+    ttsv1qbb.hideEverything();
+    ttsv1qbb.restoreFromHidden();
+    ttsv1qbb.handlersUI();
+
+    $.getJSON('watson-text-to-speech-v1-query-builder/vcap/')
+      // for some reason the getJSON resets the vars so need to restoreFromHidden again
+      // so again.
+      .done(function (service) {
+        ttsv1qbb.restoreFromHidden();
+        $('.credentials').toggle(!service);
+        //if (!sttv1qbb.models) {sttv1qbb.getModels(service);}
+        //else {sttv1qbb.postModelCheck();}
+        if (!ttsv1qbb.voices) {ttsv1qbb.getVoices();}
+        else {ttsv1qbb.postVoiceCheck();}
+      })
+      .fail(function () {
+        $('.credentials').show();
+      }).always(function () {
+        $('#credentials-check').hide();
+     });
+  }
+
+  // Save the values in the dyanmic lists to the hidden fields.
+  function ttsv1qbboneditsave(){
+    $('#node-input-tts-langhidden').val(ttsv1qbb.language_selected);
+    $('#node-input-tts-voicehidden').val(ttsv1qbb.voice_selected);
+  }
+
+    (function() {
+        RED.nodes.registerType('watson-text-to-speech-v1-query-builder', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ''},
+                password: {value: ''},
+                'tts-lang': {value: ""},
+                'tts-langhidden': {value: ""},
+                'tts-custom-mode': {value:"createCustomisation"},
+                'tts-custom-model-name' : {value: ''},
+                'tts-custom-model-description' : {value: ''},
+                'tts-custom-id' : {value: ''},
+                'tts-custom-word' : {value: ''},
+                'tts-custom-format' : {value: ''},
+                'tts-voice-or-custom' : {value: ''},
+                'tts-voice': {value: ""},
+                'tts-voicehidden': {value: ""},
+                'default-endpoint' :{value: true},
+                'service-endpoint' :{value: 'https://stream.watsonplatform.net/text-to-speech/api'}                
+            },
+            credentials: {
+              username: {type:'text'} //,
+              // password: {type: 'password'}   - // Taken out because, was not being restored on dialog open.
+            },
+            color: 'rgb(100, 120, 50)',
+            inputs: 1,
+            outputs: 1,
+            icon: 'text_to_speech.png',
+            paletteLabel: 'text to speech custom builder',
+            label: function() {
+                return this.name || 'text to speech custom builder';
+            },
+            labelStyle: function() {
+                return this.name ? 'node_label_italic' : '';
+            },
+            oneditprepare: ttsv1qbboneditprepare,
+            oneditsave: ttsv1qbboneditsave
+        });
+    })();
+
+</script>

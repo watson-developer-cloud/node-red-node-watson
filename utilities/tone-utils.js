@@ -17,28 +17,36 @@
 function ToneUtils () {
 }
 
-
 ToneUtils.prototype = {
   check: function () {
     return '"IBM Watson Node-RED Utilities for Tone Analyser';
   },
 
+  isJsonString: function(str) {
+    try {
+      JSON.parse(str);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  },
+
+  isJsonObject: function(str) {
+    if (str instanceof Array || str instanceof Object) {
+      return true;
+    }
+    return false;
+  },
+
   // Function that checks the payload and determines
   // whether it is JSON or a Buffer
   checkPayload: function(payload) {
-    var message = null;
-    var isBuffer = false;
+    var message = null,
+      isJSON = this.isJsonString(payload) || this.isJsonObject(payload);
 
-    var hasJSONmethod = (typeof payload.toJSON === 'function') ;
-
-    if (hasJSONmethod === true) {
-      if (payload.toJSON().type === 'Buffer') {
-        isBuffer = true;
-      }      
-    }      
     // Payload (text to be analysed) must be a string (content is either raw string or Buffer)
-    if (typeof payload !== 'string' &&  isBuffer !== true) {
-      message = 'The payload must be either a string or a Buffer';
+    if (typeof payload !== 'string' && isJSON !== true) {
+      message = 'The payload must be either a string, JSON or a Buffer';
     }
 
     return message;
@@ -50,22 +58,53 @@ ToneUtils.prototype = {
   parseToneOption: function(msg, config) {
     var tones = msg.tones || config.tones;
 
-    return (tones === 'all' ? '' : tones);  	
+    return (tones === 'all' ? '' : tones);
   },
 
   // function to parse through the options in preparation
   // for the sevice call.
   parseOptions: function(msg, config) {
-    var options = {
-      'text': msg.payload,
-      'sentences': msg.sentences || config.sentences,   
-      'isHTML': msg.contentType || config.contentType    
-    };
+    var options = {};
 
-    options.tones = this.parseToneOption(msg, config);
+    if (!config['tone-method']) {
+      config['tone-method'] = 'generalTone';
+    }
+
+    switch (config['tone-method']) {
+    case 'generalTone' :
+      options.sentences = msg.sentences || config.sentences;
+      options.isHTML = msg.contentType || config.contentType;
+      options.tones = this.parseToneOption(msg, config);
+      options.text = this.isJsonObject(msg.payload) ?
+                            JSON.stringify(msg.payload) :
+                            msg.payload;
+      break;
+    case 'customerEngagementTone' :
+      options.utterances = this.isJsonString(msg.payload) ?
+                                      JSON.parse(msg.payload) :
+                                      msg.payload;
+      break;
+    }
+
+    return options;
+  },
+
+  // function to splice in language options into header
+  parseLanguage: function(msg, config, options) {
+    var inputlang = config.inputlang ? config.inputlang : 'en';
+    //outputlang = config.outputlang ? config.outputlang : 'en';
+
+    // The SDK is currently ignoring this, but this is how it should be done.
+    // If you need it, then Personality Insights as full set of accept-language
+    //options.headers = {
+    //  'content-language': inputlang,
+    //  'accept-language': outputlang
+    //}
+
+    // This is how it is currently working.
+    options.language = inputlang;
     return options;
   }
-
 
 };
 

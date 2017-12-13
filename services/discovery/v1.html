@@ -1,0 +1,486 @@
+<!--
+  Copyright 2016 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-discovery-v1">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/discovery/api">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-discovery-method"><i class="fa fa-book"></i> Method: </label>
+        <select type="text" id="node-input-discovery-method" style="display: inline-block; width: 70%;">
+            <option value="query">Search in collection</option>
+            <option disabled>______________</option>
+            <option value="createEnvrionment">Create new environment</option>
+            <option value="listEnvrionments">List existing environments</option>
+            <option value="getEnvironmentDetails">Retrieve environment details</option>
+            <option value="deleteEnvironment">Delete environment</option>
+            <option disabled>______________</option>
+            <option value="createCollection">Create new collection</option>
+            <option value="listCollections">List existing collections</option>
+            <option value="getCollectionDetails">Retrieve collection details</option>
+            <option value="deleteCollection">Delete collection</option>
+            <option disabled>______________</option>
+            <option value="createConfiguration">Create new configuration</option>
+            <option value="listConfigurations">List existing configurations</option>
+            <option value="getConfigurationDetails">Retrieve configuration details</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-environmentname"><i class="fa fa-tag"></i> Environment Name</label>
+        <input type="text" id="node-input-environmentname" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-environment_id"><i class="fa fa-tag"></i> Environment ID</label>
+        <input type="text" id="node-input-environment_id" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-collection_name"><i class="fa fa-tag"></i> Collection Name</label>
+        <input type="text" id="node-input-collection_name" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-collection_id"><i class="fa fa-tag"></i> Collection ID</label>
+        <input type="text" id="node-input-collection_id" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-configurationname"><i class="fa fa-tag"></i> Configuration Name</label>
+        <input type="text" id="node-input-configurationname" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-configuration_id"><i class="fa fa-tag"></i> Configuration ID</label>
+        <input type="text" id="node-input-configuration_id" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-language_code"><i class="fa fa-language"></i> Language: </label>
+        <select type="text" id="node-input-language_code" style="display: inline-block; width: 70%;">
+            <option value="en">English</option>
+            <option value="de">German</option>
+            <option value="es">Spanish</option>
+            <option value="ar">Arabic</option>
+            <option value="fr">French</option>
+            <option value="it">Italian</option>
+            <option value="ja">Japanese</option>
+            <option value="pt-br">Brazilian Portuguese</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-count"><i class="fa fa-tag"></i> Number of documents</label>
+        <input type="text" id="node-input-count" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-passages" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-passages" style="width: 70%;"> Passages</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-nlp_query" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-nlp_query" style="width: 70%;"> Query in Plain Language</label>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-query"><i class="fa fa-tag"></i> Query for Search</label>
+        <input type="text" id="node-input-query" placeholder="">
+    </div>
+
+
+    <div class="form-row">
+        <label for="node-input-filter"><i class="fa fa-tag"></i> Filter for Search</label>
+        <input type="text" id="node-input-filter" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-aggregation"><i class="fa fa-tag"></i> Aggregation for Search</label>
+        <input type="text" id="node-input-aggregation" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-return"><i class="fa fa-tag"></i> List of sections to return</label>
+        <input type="text" id="node-input-return" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-description"><i class="fa fa-tag"></i> Description</label>
+        <input type="text" id="node-input-description" placeholder="Name">
+    </div>
+    <div class="form-row">
+      <label for="node-input-size">Envrionment Size</label>
+      <input type="number" min="0" max="4"
+             id="node-input-size" />
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="watson-discovery-v1">
+    <p>This is the Node for the V1 Watson Discovery service.</p>
+    <p>The following methods are available:</p>
+    <ul>
+    <li>
+        <p><b>Create New Environment</b><p>
+        <p>For this method the node needs an Environment Name,
+        Description and Environment Size as input.
+        </p>
+        <p>The name and description can be overridden by specifying
+          in <code>msg.discoveryparams.environmentname</code>
+          , <code>msg.discoveryparams.description</code>
+          and <code>msg.discoveryparams.size</code>
+        </p>
+        <p>Node output : </p>
+          <ul>
+            <li><code>msg.environment</code> : Information about the
+            newly created envrionment.</li>
+          </ul>
+    </li>
+    <br/>
+        <li>
+            <p><b>List Existing Environments</b><p>
+            <p>For this method the node does not need any input. If the envrionment name field is left blank
+      it will list all envrionments created for the instance of the Discovery service.
+      If the envrionment name is specified, then only the details for
+      the Discovery envrionment with the specified name will be returned.
+            </p>
+            <p>The environment being requested can be overridden by specifying the search name
+      in <code>msg.discoveryparams.environmentname</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.environments</code> : A list of the envrionments created under
+              the Discovery service instance.</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
+            <p><b>Get Envrionment Details</b><p>
+            <p>For this method the node needs an Environment ID as input.
+            </p>
+            <p>The environment being requested can be overridden by specifying the search id
+      in <code>msg.discoveryparams.environment_id</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.environment_details</code> : Details of the requested environment.</li>
+              </ul>
+        </li>
+        <li>
+            <p><b>Create New Collection</b><p>
+            <p>For this method the node needs an Environment ID, Collection Name,
+            Description, Configuration ID and Language Code as input.
+            </p>
+            <p>The fields can be overridden by specifying
+              in <code>msg.discoveryparams.environment_id</code>
+              , <code>msg.discoveryparams.collection_name</code>
+              , <code>msg.discoveryparams.description</code>
+              , <code>msg.discoveryparams.configuration_id</code>
+              and <code>msg.discoveryparams.language_code</code>
+            </p>
+
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.collection</code> : Information about the
+                newly created collection.</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
+            <p><b>List Existing Collections</b><p>
+            <p>For this method the node needs an Environment ID as input.</p>
+            <p>The Environment ID for the collection list being requested can be overridden by specifying the search id
+      in <code>msg.discoveryparams.environment_id</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.collections</code> : A list of the collections created under
+              the environment in the Discovery service instance.</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
+            <p><b>Get Collections Details</b><p>
+            <p>For this methond the node needs an Environment ID and Collection ID as input.
+            </p>
+            <p>The collection being requested can be overridden by specifying the
+            search ids in
+            <code>msg.discoveryparams.environment_id</code>
+            and <code>msg.discoveryparams.collection_id</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.collection_details</code> : Details of the requested collection.</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
+            <p><b>List Existing Configurations</b><p>
+            <p>For this method the node needs an Environment ID as input.</p>
+            <p>and an optional Configuration name to show only the
+               configuration with the given name.</p>
+            <p>The Environment ID for the configuration list being requested can be
+               overridden by specifying the environment id in
+               <code>msg.discoveryparams.environment_id</code>
+               The configuration name can be overridden by specifying the name inspect
+               <code>msg.discoveryparams.configuration_name</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.configurations</code> : A list of the configurations
+                  created under
+                  the environment in the Discovery service instance.</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
+            <p><b>Get Configuration Details</b><p>
+            <p>For this method node needs an Environment ID and Configuration ID as input.</p>
+            <p>The Environment and Configuration IDs for the configuration being
+               requested can be
+               overridden by specifying the environment id in
+               <code>msg.discoveryparams.environment_id</code>
+               and the configuration id in
+               <code>msg.discoveryparams.configuration_id</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.configuration_details</code> : Details the
+                  requested configuration.</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
+            <p><b>Search in Collection</b><p>
+            <p>For this method the node needs an Environment ID and Collection ID as input.
+            </p>
+            <p>The collection being requested can be overridden by specifying the
+            search ids in
+            <code>msg.discoveryparams.environment_id</code>
+            and <code>msg.discoveryparams.collection_id</code>
+            </p>
+            <p>Optionally you can specify the number of documents to retrieve, a
+               query to find the most relevant search results, whether to
+               retrieve the most relevant passages,
+               to limit the search results, an aggregation to return an
+               exact result, and a comma separated list of the sections of the
+               documents to return.</p>
+            <p>The query being submitted can be overridden by specifying the
+            query in <code>msg.discoveryparams.query</code>.
+            </p>
+            <p>The passages parameter can be overridden by specifying
+            <code>msg.discoveryparams.passages</code>.
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.search_results</code> : Details of the requested collection.</li>
+              </ul>
+        </li>
+
+    </ul>
+
+    <p>For more information about the Discovery service,
+    read the service <a href="https://www.ibm.com/watson/developercloud/doc/discovery/">documentation</a>.</p>
+
+</script>
+
+<script type="text/javascript">
+
+    // Need to simulate a namespace, so that some of the variables don't leak across nodes
+    function DiscoveryExperimentalV1 () {}
+
+    // This is the namespace for this version of this Node.
+    var disV1 = new DiscoveryExperimentalV1();
+
+    //disV1.abc = 'abc';
+    disV1.hideAll = function() {
+      $('#node-input-environmentname').parent().hide();
+      $('#node-input-environment_id').parent().hide();
+      $('#node-input-collection_name').parent().hide();
+      $('#node-input-collection_id').parent().hide();
+      $('#node-input-configurationname').parent().hide();
+      $('#node-input-configuration_id').parent().hide();
+      $('#node-input-language_code').parent().hide();
+      $('#node-input-count').parent().hide();
+      $('#node-input-passages').parent().hide();
+      $('#node-input-nlp_query').parent().hide();
+      $('#node-input-query').parent().hide();
+      $('#node-input-filter').parent().hide();
+      $('#node-input-aggregation').parent().hide();
+      $('#node-input-return').parent().hide();
+      $('#node-input-description').parent().hide();
+      $('#node-input-size').parent().hide();
+    };
+
+    disV1.showSelectedFields = function(fields) {
+      for (i = 0; i < fields.length; i++) {
+        $(fields[i]).parent().show();
+      }
+    }
+
+    disV1.processSelectedMethod = function(method) {
+      disV1.hideAll();
+      fields = [];
+      switch (method) {
+        case 'createEnvrionment':
+          fields.push('#node-input-environmentname'
+                          + ', #node-input-size'
+                          + ', #node-input-description');
+          break;
+        case 'listEnvrionments':
+          fields.push('#node-input-environmentname');
+          break;
+        case 'createCollection':
+          fields.push('#node-input-environment_id'
+                          + ', #node-input-configuration_id'
+                          + ', #node-input-language_code'
+                          + ', #node-input-collection_name'
+                          + ', #node-input-description');
+          break;
+        case 'createConfiguration':
+        case 'getEnvironmentDetails':
+        case 'listCollections':
+        case 'deleteEnvironment':
+          fields.push('#node-input-environment_id');
+          break;
+        case 'getCollectionDetails':
+        case 'deleteCollection':
+          fields.push('#node-input-environment_id'
+                          + ', #node-input-collection_id');
+          break;
+        case 'listConfigurations':
+          fields.push('#node-input-environment_id'
+                          + ', #node-input-configurationname');
+          break;
+        case 'getConfigurationDetails':
+          fields.push('#node-input-environment_id'
+                         + ', #node-input-configuration_id');
+          break;
+        case 'query':
+          fields.push('#node-input-environment_id'
+                         + ', #node-input-collection_id'
+                         + ', #node-input-count'
+                         + ', #node-input-passages'
+                         + ', #node-input-nlp_query'
+                         + ', #node-input-query'
+                         + ', #node-input-filter'
+                         + ', #node-input-aggregation'
+                         + ', #node-input-return');
+          break;
+      }
+      disV1.showSelectedFields(fields);
+    }
+
+    disV1.UIListeners = function () {
+      $('#node-input-discovery-method').change(function(val){
+        var method = $('#node-input-discovery-method').val();
+        disV1.processSelectedMethod(method);
+      });
+
+      $('input#node-input-default-endpoint').change(function () {
+          var checked = $('input#node-input-default-endpoint').prop('checked')
+          if (checked) {
+              $('#node-input-service-endpoint').parent().hide();
+          } else {
+              $('#node-input-service-endpoint').parent().show();
+          }
+      });
+    }
+
+    disV1.checkForPrepare = function () {
+      disV1.hideAll();
+      disV1.UIListeners();
+    };
+
+    // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
+    function oneditprepare() {
+      disV1.checkForPrepare();
+      $.getJSON('watson-discovery/vcap/')
+        .done(function (service) {
+          $('.credentials').toggle(!service);
+        })
+        .fail(function () {
+          $('.credentials').show();
+        }).always(function () {
+          $('#credentials-check').hide();
+        })
+    }
+
+    (function() {
+        RED.nodes.registerType('watson-discovery-v1', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ''},
+                environmentname: {value: ''},
+                environment_id: {value: ''},
+                collection_id: {value: ''},
+                configurationname: {value: ''},
+                configuration_id: {value: ''},
+                language_code: {value: 'en'},
+                collection_name: {value: ''},
+                count: {value: '1'},
+                passages: {value: 'false'},
+                nlp_query: {value: 'false'},
+                query: {value: ''},
+                filter: {value: ''},
+                aggregation: {value: ''},
+                return: {value: ''},
+                description: {value: ''},
+                size: {value: 0},
+                'discovery-method': {value:'query'},
+                'default-endpoint' :{value: true},
+                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/discovery/api'}
+            },
+            credentials: {
+              username: {type:'text'},
+              password: {type:'password'}
+            },
+            color: 'rgb(230,140,80)',
+            inputs: 1,
+            outputs: 1,
+            icon: 'discovery.png',
+            paletteLabel: 'discovery',
+            label: function() {
+                return this.name || 'discovery';
+            },
+            labelStyle: function() {
+                return this.name ? 'node_label_italic' : '';
+            },
+            oneditprepare: oneditprepare
+        });
+    })();
+</script>

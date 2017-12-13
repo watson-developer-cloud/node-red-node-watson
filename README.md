@@ -7,46 +7,135 @@ Node-RED Watson Nodes for IBM Bluemix
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
-### New in version 0.4.8
-- Fixed document conversion node when filetype is not recognized
-- Moved functions to utility module
+### New in version 0.5.23
+- Allow file name to be configured in Add Document node.
 
-### New in version 0.4.7
-- Oops! fix to Conversation V1 node
+### New in version 0.5.22
+- Allow payload as json for Add Document node.
 
-### New in version 0.4.6
-- New Conversation V1 node
-- Bugfixes to Feature Extract node
-- Bugfixes to Visual Recognition node
-- Added in Japanese and Arabic support to Personality Insights node
-- Updated dependency to watson-developer-cloud node-SDK 1.12.2
+### New in version 0.5.21
+- New node for Add Document for Discovery.
+- Natural Language Understanding Node fix for credentials check.
 
-### New in version 0.4.5
-- New Conversation experimental node.
-- Visual Recognition v3 : added a Delete All Classifiers feature in the util node. Added corresponding Flow in Starter.
+### New in version 0.5.20
+- Added experimental neural translation as a config option to translation node.
 
-### New in version 0.4.4
-- New palette category for deprecated Nodes, that are being retained for backward compatibity.
-- Bugfixes to Speech to Text.
+### New in version 0.5.19
+- Update Supported audio file check in Speech to Text Node.
+- Remove Continuous flag from Speech to Text Node.
+- Add Alternatives and Smart Formatting options to Speech to Text Node.
 
-### New in version 0.4.3
-- New Visual Recognition V3 node to support the V3 GA API. This incorporates the features that were previously
-available as part of AlchemyAPI Vision.
+### New in version 0.5.18
+- Allow Conversation Workspace Manager node to be dynamically configured.
 
-### New in version 0.4.2
-- The transcription returned for the Speech to Text node now returns full (untruncated) transcription. The
-alternatives are returned in msg.fullresult. The dialog now loads available models dynamically. This will
-allow new speech models to be identified without requiring a further code change.
-- The Retrieve and Rank node nows stores credentials in a configuration node, allowing the credentials to be
-shared acrosss a flow with multiple Retrieve and Rank nodes.
-- New Tone Analyzer V3 node to support the V3 GA API.
+### New in version 0.5.17
+- CRUD methods for Entity Values and Dialog Nodes in Conversation Workspace Manager node.
 
-### New in version 0.4.1
-- AlchemyAPI Image Analysis and Language nodes migrated from old Alchemy SDK to current
-Watson Developer Cloud SDK for Node.js
-- The dialog for the Language Translation service now loads available models dynamically. This allows
-new translation models to be identified without requiring a further code change. This version
-allows customised translations models to be selected.
+### New in version 0.5.16
+- Implement methods to manage Entities in Conversation workspace Manager node.
+- Create Collection Language fix in Discovery Node.
+- Similarity Search Nodes moved into deprecated category.
+
+### New in version 0.5.15
+- Allow language code to be specified on create collection in Discovery Node.
+- Implement delete collection, delete environment in Discovery Node.
+- Allow multiple interface versions for Tone Analyzer Node.
+- Enable Content, en or fr, in Tone Analyzer Node.
+
+### New in version 0.5.14
+- Bump to latest version of watson-developer-cloud node.js sdk
+- Allow empty input into converse for Conversation Node
+- Endpoint can now be specified in Natural Language Understanding, Discovery and Discover Query Builder Nodes
+- Full Promises implementation for on input processing for Natural Language Understanding Node
+- Fix to node.error invocation in Conversation node.
+
+### New in version 0.5.13
+- Personality Insights on Bluemix needed new path to node_modules
+
+### New in version 0.5.12
+- Fix to Personality Insights Node when running in Japanese mode.
+- Bump Interface version to Discovery service to '2017-08-01'.
+- Japanese supported by Translation service.
+- Speech to Text service now reports UK English as 'en-GB'.
+- Add button to allow model cache for STT node to be flushed.
+- Added more of the supported audio formats for the TTS node.
+- Retrieve and Rank node update to return document body.
+
+### New in version 0.5.11
+- Add support for NLP Query in Discovery and Discovery Query Builder Nodes.
+
+### New in version 0.5.10
+- Allowed detect_mode for Visual Recognition node to be set in msg.params
+
+### New in version 0.5.9
+- Text to Speech speech on msg.payload option.
+- Speech to Text transcription on msg.payload option
+- Endpoint can now be specified in Conversation,
+Conversation Workspace Manager Language Identify, Language Translator,
+Speech to Text, STT Corpus Builder, Text to Speech, TTS Corpus Builder,
+Personality Insights and Tone Analyzer nodes.
+
+### New in version 0.5.8
+- Visual Reconition Node, now accepts readstream on msg.payload
+- Add passages parameter to Discovery Node
+
+### New in version 0.5.7
+- Fix to Tone Analyzer to allow JSON as input
+- Enabled Conversation Tone method to Tone Analyzer Node
+- Discovery Node now supports: Create Environment, Create Configuration,
+Create Collection
+
+### New in version 0.5.6
+- User Agent added to following nodes: Conversation, Conversation Workspace Manager,
+Discovery, Discovery Query Builder, Document Conversion, Language Translator,
+Language Translator Utility, Language Indentify, Natural Language Classifier,
+Natural Language Understanding, Personality Insights, Retrieve and Rank,
+Similarity Search, Speech to Text, STT Corpus Builder, Text to Speech,
+TTS Corpus Builder, Tone Analyzer, Visual Recognition
+
+### New in version 0.5.5
+- Discovery Query Builder was not picking up searchable fields.
+- Personality Insights Node reset to use '2016-10-20' version
+- Natural Language Classifier Node migrated to use url based services utility to detect bound service.
+- Natural Language Classifier Node Migrated to use Promises.
+- Natural Language Classifier now able to use File Inject as input for create mode.
+- Natural Language Classifier Node allows Classifier ID to be set dynamically in classify, list and remove modes.
+- Natural Language Understanding Node now allows language and model overrides on
+msg.nlu_options.language, msg.nlu_options.entity_model and msg.nlu_options.relations_model.
+- Trade-off Analytics Node moved to the deprecated list.
+- Migrated Visual Recognition and Visual Recognition Util nodes to use promises, and
+ensure that all error responses are reported.
+
+### New in version 0.5.4
+- Fix for Service / Name conflicts in Document Conversion Node
+
+### New in version 0.5.3
+- Implement methods to manage Counter Examples in
+Conversation workspace Manager node.
+- Removed V1 Personality Insights node.
+- Removed V1 Language Indentification node.
+- Removed V1 Language Translation node.
+- Removed V1 Language Translation Utility node.
+
+### New in version 0.5.2
+- Visual Recognition was overwriting msg.payload with 'look at msg.results'. Fixed
+so that msg.payload is left as is.
+
+### New in version 0.5.1
+- Implement methods to manage for Intent and Example Input for Intent, in
+Conversation workspace Manager node.
+- Deprecated Alchemy Nodes.
+- Removed Conversation experimental node.
+- Removed Discovery experimental node.
+- Removed Tone Analyzer beta node.
+- Removed Relationship Extraction node.
+- Removed the V1 Visual Recognition node.
+
+### New in version 0.5.0
+- New node for Natural Language Understanding
+- watson-developer-cloud dependency forces node engine >= 4.5
+- Nodes deprecated in 0.4.x will be removed in 0.5.x releases
+
 
 ### Watson Nodes for Node-RED
 A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](http://bluemix.net).
@@ -57,9 +146,13 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
     - Use concept graphs to tag and explore information and documents.
 - Conversation
     - Add conversational capabilities into applications.
+- Date Extraction
+    - Uses AlchemyAPI Date Extraction to detect natural language date/time expressions from text
 - Dialog
     - Automate branching conversation between a user and your application.
     - Use natural language to automatically respond to user questions, cross-sell and up-sell, walk users through processes or applications, or even hand-hold users through difficult tasks.
+- Discovery
+    - List environments created for the Discovery service
 - Document Conversion
     - Prepare documents for the Retrieve and Rank service.
 - Feature Extract
@@ -75,14 +168,16 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
     - Translates text from one language to another    
 - Natural Language Classifier
     - Uses machine learning algorithms to return the top matching predefined classes for short text inputs.
+- Natural Language Understanding
+    - Analyze text to extract meta-data from content such as concepts, entities, keywords ...
 - News
     - Searches news and blog content    
 - Personality Insights
     - Use linguistic analytics to infer cognitive and social characteristics from text
-- Relationship Extraction
-    - Extract entities and their relationships from unstructured text
 - Retrieve and Rank
-    - Creates a trainable search engine for your data    
+    - Creates a trainable search engine for your data  
+- Similarity search
+    - Create and search against image collections  
 - Speech To Text
     - Convert audio containing speech to text
 - Text To Speech
@@ -94,6 +189,8 @@ A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](
 - Visual Recognition
     - Analyze visual appearance of images to understand their contents
 
+### Usage
+Example usage flows can be found here [node-red-labs](https://github.com/watson-developer-cloud/node-red-labs)
 
 ### Contributing
 

@@ -16,7 +16,9 @@
 var url = require('url'),
   fs = require('fs'),
   fileType = require('file-type'),
-  request = require('request');
+  request = require('request'),
+  path = require('path'),
+  stream = require('stream');
 
 function PayloadUtils() {}
 
@@ -32,18 +34,19 @@ PayloadUtils.prototype = {
   },
 
   // Function that is syncing up the asynchronous nature of the stream
-  // so that the full file can be sent to the API. 
+  // so that the full file can be sent to the API.
   stream_buffer: function(file, contents, cb) {
     fs.writeFile(file, contents, function(err) {
       if (err) {
         throw err;
       }
-      cb(fileType(contents).ext);
+      var ft = fileType(contents);
+      cb(ft ? ft.ext : 'tmp');
     });
   },
 
   // Function that is syncing up the asynchronous nature of the stream
-  // so that the full file can be sent to the API. 
+  // so that the full file can be sent to the API.
   stream_url: function(file, url, cb) {
     var wstream = fs.createWriteStream(file);
 
@@ -64,6 +67,75 @@ PayloadUtils.prototype = {
       });
     });
     request(url).pipe(wstream);
+  },
+
+  // Function that matches the buffer streaming so that they can be used together.
+  stream_url_format: function(file, url, cb) {
+    var wstream = fs.createWriteStream(file);
+
+    wstream.on('finish', function() {
+      fs.readFile(file, function(err, buf) {
+        var fmt = null,
+          error = null;
+
+        if (err) {
+          throw err;
+        }
+        if (fileType(buf)) {
+          fmt = fileType(buf).ext;
+        }
+        cb(fmt);
+      });
+    });
+    request(url).pipe(wstream);
+  },
+
+  reportError: function (node, msg, err) {
+    var messageTxt = err;
+
+    if (err.error) {
+      messageTxt = err.error;
+    } else if (err.description) {
+      messageTxt = err.description;
+    } else if (err.message) {
+      messageTxt = err.message;
+    }
+
+    msg.watsonerror = messageTxt;
+    node.status({fill:'red', shape:'dot', text: messageTxt});
+    node.error(messageTxt, msg);
+  },
+
+  isReadableStream : function (obj) {
+    return obj instanceof stream.Stream &&
+        typeof (obj._read === 'function') &&
+        typeof (obj._readableState === 'object');
+  },
+
+  // Function that is returns a function to count
+  // the characters in each language.
+  word_count: function(ct) {
+    var kuromoji = require('kuromoji'),
+      fn = function(txt, cb) {
+        // default
+        return cb(txt.split(' ').length);
+      },
+      dic_path = '/../../kuromoji/dict',
+      dic_dir = path.normalize(__dirname + dic_path),
+      tokenizer = null;
+
+    if (ct === 'ja') {
+      fn = function(txt, cb) {
+        kuromoji.builder({dicPath: dic_dir}).build(function(err, tknz) {
+          if (err) {
+            throw err;
+          }
+          tokenizer = tknz;
+          return cb(tokenizer.tokenize(txt).length);
+        });
+      };
+    }
+    return fn;
   }
 };
 

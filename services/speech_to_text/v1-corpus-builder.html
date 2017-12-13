@@ -1,0 +1,447 @@
+<!--
+  Copyright 2017 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-speech-to-text-v1-query-builder">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+
+    <div>
+        <label id="node-label-message"><i class="fa fa-exclamation-triangle"></i></label>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name"></input>
+    </div>
+
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username"></input>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password"></input>
+    </div>
+
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://stream.watsonplatform.net/speech-to-text/api">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stt-custom-mode"><i class="fa fa-book"></i> Detect: </label>
+        <select type="text" id="node-input-stt-custom-mode" style="display: inline-block; width: 70%;">
+            <option value="createCustomisation">Create a custom language model</option>
+            <option value="listCustomisations">List Customizations</option>
+            <option value="getCustomisation">Get Customization</option>
+            <option value="deleteCustomisation">Delete Customization</option>
+            <option value="addCorpus">Add Corpus</option>
+            <option value="getCorpora">Get Corpora</option>
+            <option value="train">Train</option>
+            <option value="listCustomWords">List Custom Words</option>
+            <option value="addWords">Add Words</option>
+            <option value="deleteCorpus">Delete Corpus</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stt-custom-model-name"><i class="fa fa-book"></i> Custom Model Name</label>
+        <input type="text" id="node-input-stt-custom-model-name" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stt-base-model"><i class="fa fa-language"></i> Base Model</label>
+        <select type="text" id="node-input-stt-base-model" style="display: inline-block; width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-base-model-hidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stt-custom-model-description"><i class="fa fa-book"></i> Custom Model Description</label>
+        <input type="text" id="node-input-stt-custom-model-description" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stt-custom-id"><i class="fa fa-book"></i> Customization ID</label>
+        <input type="text" id="node-input-stt-custom-id" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stt-corpus-name"><i class="fa fa-book"></i> Corpus Name</label>
+        <input type="text" id="node-input-stt-corpus-name" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stt-allow-overwrite"><i class="fa fa-book"></i> Allow Overwrite</label>
+        <input type="checkbox" id="node-input-stt-allow-overwrite" placeholder="">
+    </div>
+
+
+</script>
+
+<script type="text/x-red" data-help-name="watson-speech-to-text-v1-query-builder">
+    <p>The Speech To Text Custom Builder is used to create customisations
+    for Speech to Text. It supports the following modes </p>
+    <ul>
+    <li>Create Custom Language Model
+      <p>In this mode, a new empty custom model is created. The
+        new customization id is returned on
+        <code>msg.customization_id</code>
+      </p>
+    </li>
+    <li>List Customizations
+      <p>In this mode, a list of all customizations that you have
+        created in returned on
+        <code>msg.customizations</code>
+      </p>
+    </li>
+    <li>Get Customization
+      <p>In this mode, details for the specified customization
+        is returned on
+        <code>msg.customization</code>
+      </p>
+    </li>
+    <li>Delete Customization
+      <p>In this mode, the specified customization is deleted.
+      </p>
+    </li>
+    <li>Add Corpus
+      <p>In this mode, the specified customization content is
+        created. The input corpus content should be provided as buffer
+        on
+        <code>msg.payload</code>
+      </p>
+    </li>
+    <li>Get Corpora
+      <p>In this mode, a list of all the corpora created for
+        the specified customization
+        is returned on
+        <code>msg.corpora</code>
+      </p>
+    </li>
+    <li>Train
+      <p>In this mode, the custom model is prepared for use
+        by the speech to text service.
+      </p>
+    </li>
+    <li>List Custom Words
+      <p>In this mode, a list of all the words from a custom model are
+        retrieved.
+      </p>
+    </li>
+    <li>Add Words
+      <p>In this mode, the specified custom words are added to the
+        customization. The input array of words should be passed in
+        as <code>msg.payload</code> in form of
+        <code>[{word: String, sounds_like: [String, ...], display_as: String}, ...]</code>
+        <br/>EG.
+        <code>
+          [ {"word": "HHonors", "sounds_like": ["hilton honors", "h honors"],
+                                "display_as": "HHonors"},
+            {"word": "IEEE", "sounds_like": ["i triple e"]}
+          ]
+        </code>
+      </p>
+    </li>
+    <li>Delete Corpus
+      <p>In this mode, the specified corpus is deleted.
+      </p>
+    </li>
+    </ul>
+
+    <p>For more information about Speech To Text customisation,
+    read the <a href="https://www.ibm.com/watson/developercloud/doc/speech-to-text/custom.shtml#custom">
+    documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+
+  // Need to simulate a namespace, as some of the variables had started to leak across nodes
+  function STTV1QBB () {
+  }
+
+
+  // This is the namespace for sttv1qbb. Currently only contains models, but more vars and functions may need to be
+  // moved in if there is a clash with other nodes.
+  var sttv1qbb = new STTV1QBB();
+  sttv1qbb.models = null;
+  sttv1qbb.mode_selected = null;
+  sttv1qbb.model_selected = '';
+
+  // Function to be used at the start, as don't want to expose any fields, unless the models are
+  // available. The models can only be fetched if the credentials are available.
+  sttv1qbb.hideEverything = function () {
+    if (!sttv1qbb.models) {
+      $('#credentials-not-found').show();
+      $('label#node-label-message').parent().hide();
+    }
+    $('input#node-input-stt-custom-model-name').parent().hide();
+    $('select#node-input-stt-base-model').parent().hide();
+    $('input#node-input-stt-custom-model-description').parent().hide();
+    $('input#node-input-stt-custom-id').parent().hide();
+    $('input#node-input-stt-corpus-name').parent().hide();
+    $('input#node-input-stt-allow-overwrite').parent().hide();
+  }
+
+  sttv1qbb.showSelectedFields = function(fields) {
+    for (i = 0; i < fields.length; i++) {
+      $(fields[i]).parent().show();
+    }
+  }
+
+  // The dynamic nature of the selection fields in this node has caused problems.
+  // Whenever there is a fetch for the models, on a page refresh or applicaiton
+  // restart, the settings for the dynamic fields are lost.
+  // So hidden (text) fields are being used to squirrel away the values, so that
+  // they can be restored.
+  sttv1qbb.restoreFromHidden = function () {
+    sttv1qbb.model_selected = $('#node-input-base-model-hidden').val();
+    $('select#node-input-stt-base-model').val(stt.model_selected);
+  }
+
+  sttv1qbb.processSelectedMethod = function(method) {
+    sttv1qbb.hideEverything();
+    fields = [];
+    switch (method) {
+      case 'createCustomisation':
+        fields.push('#node-input-stt-custom-model-name'
+                        + ', #node-input-stt-base-model'
+                        + ', #node-input-stt-custom-model-description');
+        break;
+      case 'getCustomisation':
+      case 'deleteCustomisation':
+      case 'getCorpora':
+      case 'train':
+      case 'listCustomWords':
+      case 'addWords':
+        fields.push('#node-input-stt-custom-id');
+        break;
+      case 'addCorpus':
+        fields.push('#node-input-stt-custom-id'
+                     + ', #node-input-stt-corpus-name'
+                     + ', #node-input-stt-allow-overwrite');
+        break;
+      case 'deleteCorpus':
+          fields.push('#node-input-stt-custom-id'
+                         + ', #node-input-stt-corpus-name');
+          break;
+    }
+    sttv1qbb.showSelectedFields(fields);
+  }
+
+
+
+  // Check if there is a model then can show the fields.
+  // available. The models can only be fetched if the credentials are available.
+  sttv1qbb.VisibilityCheck = function () {
+    if (sttv1qbb.models) {
+      $('label#node-label-message').parent().hide();
+    } else {
+      $('label#node-label-message').parent().hide();
+    }
+  }
+
+
+  // Simple check that is only invoked if the service is not bound into bluemix. In this case the
+  // user has to provide credentials. Once there are credentials, then the sttv1qbb.models are retrieved.
+  sttv1qbb.checkCredentials = function () {
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+
+    if (u && u.length && p) {
+      if (!sttv1qbb.models) {
+        sttv1qbb.getModels();
+      }
+    }
+  }
+
+
+  // Register the handlers for the fields
+  sttv1qbb.handlersUI = function () {
+    $('#node-input-username').change(function(val){
+      sttv1qbb.checkCredentials();
+    });
+    $('#node-input-password').change(function(val){
+      sttv1qbb.checkCredentials();
+    });
+
+    $('#node-input-stt-custom-mode').change(function() {
+      sttv1qbb.mode_selected = $('#node-input-stt-custom-mode').val();
+      sttv1qbb.processSelectedMethod(sttv1qbb.mode_selected);
+    });
+
+    $('#node-input-stt-base-model').change(function (val) {
+      sttv1qbb.model_selected = $('#node-input-stt-base-model').val();
+    });
+
+    $('#node-input-default-endpoint').change(function () {
+      var checked = $('#node-input-default-endpoint').prop('checked')
+      if (checked) {
+        $('#node-input-service-endpoint').parent().hide();
+      } else {
+        $('#node-input-service-endpoint').parent().show();
+      }
+    });
+  }
+
+  // Called to complete the models table
+  sttv1qbb.populateModels = function () {
+
+    // node-input-stt-base-model
+    if (sttv1qbb.models) {
+      $('select#node-input-stt-base-model').empty();
+      //var unique_langs = stt.languages.filter(stt.onlyUnique);
+
+      sttv1qbb.models.forEach(function(m) {
+        var selectedText = '';
+
+        if (sttv1qbb.model_selected === m.name) {
+          selectedText = ' selected="selected" ';
+        }
+
+        $('select#node-input-stt-base-model')
+          .append('<option value='
+                        + m.name
+                        + selectedText
+                        + '>'
+                        + m.description
+                        + '</option>');
+      });
+    }
+
+  }
+
+
+  // Called to work through the models, completing the dyanmic selection fields.
+  sttv1qbb.processModels = function () {
+    if (sttv1qbb.models) {
+      sttv1qbb.populateModels();
+    }
+  }
+
+
+  // Function called when either when the models have been retrieved, or
+  // on dialog load, if the model has already been retrieved
+  sttv1qbb.postModelCheck = function () {
+    sttv1qbb.processModels();
+    sttv1qbb.VisibilityCheck();
+  }
+
+  // Retrieve the available models from the server, if data is returned, then
+  // can enable the dynamic selection fields.
+  sttv1qbb.getModels = function (haveCredentials) {
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+    var e = $('#node-input-service-endpoint').val();
+    var creds = {un: u, pwd: p};
+
+    if (! $('#node-input-default-endpoint').prop('checked')) {
+      creds.e = e;
+    }
+    $.getJSON('watson-speech-to-text-v1-query-builder/models/', creds)
+    .done(function (data) {
+      if (data.error) {
+        $('label#node-label-message').parent().show();
+        $('label#node-label-message').text(data.error);
+      } else if (data.models) {
+        sttv1qbb.models = data.models;
+        //have_credentials = true;
+        sttv1qbb.postModelCheck();
+      }
+    }).fail(function (err) {
+      $('label#node-label-message').parent().show();
+      $('label#node-label-message').text('Error trying to determine available service models');
+
+    }).always(function () {});
+  }
+
+
+  // This is the on edit prepare function, which will be invoked everytime the dialog
+  // is shown.
+  function sttv1qbboneditprepare() {
+    sttv1qbb.hideEverything();
+    sttv1qbb.restoreFromHidden();
+    sttv1qbb.handlersUI();
+
+    $.getJSON('watson-speech-to-text-v1-query-builder/vcap/')
+      // for some reason the getJSON resets the vars so need to restoreFromHidden again
+      // so again.
+      .done(function (service) {
+        sttv1qbb.restoreFromHidden();
+        $('.credentials').toggle(!service);
+        if (!sttv1qbb.models) {sttv1qbb.getModels(service);}
+        else {sttv1qbb.postModelCheck();}
+      })
+      .fail(function () {
+        $('.credentials').show();
+      }).always(function () {
+        $('#credentials-check').hide();
+     });
+  }
+
+  // Save the values in the dyanmic lists to the hidden fields.
+  function sttv1qbboneditsave(){
+    $('#node-input-base-model-hidden').val(sttv1qbb.model_selected);
+  }
+
+    (function() {
+        RED.nodes.registerType('watson-speech-to-text-v1-query-builder', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ''},
+                password: {value: ''},
+                'stt-custom-mode': {value:"createCustomisation"},
+                'stt-custom-model-name' : {value: ''},
+                'stt-base-model' : {value: ''},
+                'base-model-hidden' : {value: ''},
+                'stt-custom-model-description' : {value: ''},
+                'stt-custom-id' : {value: ''},
+                'stt-corpus-name' : {value: ''},
+                'stt-allow-overwrite' : {value: false},
+                'default-endpoint' :{value: true},
+                'service-endpoint' :{value: 'https://stream.watsonplatform.net/speech-to-text/api'}
+            },
+            credentials: {
+              username: {type:'text'} //,
+              // password: {type: 'password'}   - // Taken out because, was not being restored on dialog open.
+            },
+            color: 'rgb(100, 120, 50)',
+            inputs: 1,
+            outputs: 1,
+            icon: 'speech_to_text.png',
+            paletteLabel: 'speech to text custom builder',
+            label: function() {
+                return this.name || 'speech to text custom builder';
+            },
+            labelStyle: function() {
+                return this.name ? 'node_label_italic' : '';
+            },
+            oneditprepare: sttv1qbboneditprepare,
+            oneditsave: sttv1qbboneditsave
+        });
+    })();
+
+</script>

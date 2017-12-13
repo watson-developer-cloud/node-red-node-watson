@@ -1,27 +1,20 @@
 /**
  * Copyright 2013,2016 IBM Corp.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
 
 module.exports = function (RED) {
-  var watson = require('watson-developer-cloud');
-  var cfenv = require('cfenv');
-  var fs = require('fs');
-  var temp = require('temp');
-
-  temp.track();
-
   // Require the Cloud Foundry Module to pull credentials from bound service
   // If they are found then they are stored in sUsername and sPassword, as the
   // service credentials. This separation from sUsername and username to allow
@@ -29,13 +22,19 @@ module.exports = function (RED) {
   // Otherwise, once set username would never get reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
+  var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
+    cfenv = require('cfenv'),
+    fs = require('fs'),
+    temp = require('temp'),
+    username = null,
+    password = null,
+    sUsername = null,
+    sPassword = null,
+    service = cfenv.getAppEnv().getServiceCreds(/language translation/i);
+    endpointUrl = 'https://gateway.watsonplatform.net/language-translation/api';
 
-  // Not ever used, and codeacy complains about it.
-  // var services = cfenv.getAppEnv().services;
 
-  var username, password, sUsername, sPassword;
-
-  var service = cfenv.getAppEnv().getServiceCreds(/language translation/i)
+  temp.track();
 
   if (service) {
     sUsername = service.username;
@@ -53,21 +52,13 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-translate/models', function (req, res) {
-    var lt = null;
+    var lt = new LanguageTranslatorV2({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd,
+      version: 'v2',
+      url: endpointUrl
+    });
 
-    if(!username && !password) {
-      lt = watson.language_translator({
-        username: req.query.un,
-        password: req.query.pwd,
-        version: 'v2'
-      });
-    } else {
-      lt = watson.language_translator({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
-    }
     lt.getModels({}, function (err, models) {
       if (err) {
         res.json(err);
@@ -93,27 +84,29 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    // this does nothing, but am keeping it with a commented out signature, as
-    // it might come in handy in the future.
-    this.on('close', function() {
-    });
+    // The dynamic nature of this node has caused problems with the password field. it is
+    // hidden but not a credential. If it is treated as a credential, it gets lost when there
+    // is a request to refresh the model list.
+    // Credentials are needed for each of the modes.
 
+    username = sUsername || this.credentials.username;
+    password = sPassword || this.credentials.password || config.password;
 
     // The node has received an input as part of a flow, need to determine
     // what the request is for, and based on that if the required fields
     // have been provided.
     this.on('input', function (msg) {
-
-      var message = '';
-
-      // The dynamic nature of this node has caused problems with the password field. it is
-      // hidden but not a credential. If it is treated as a credential, it gets lost when there
-      // is a request to refresh the model list.
-      //
-      // Credentials are needed for each of the modes.
-
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
+      var message = '',
+        action = msg.action || config.action,
+        globalContext = this.context().global,
+        tmpmodel_id = globalContext.get('g_model_id'),
+        result = '',
+        language_translation = new LanguageTranslatorV2({
+          username: username,
+          password: password,
+          version: 'v2',
+          url: endpointUrl
+        });
 
       if (!username || !password) {
         message = 'Missing Language Translation service credentials';
@@ -121,21 +114,29 @@ module.exports = function (RED) {
         return;
       }
 
-      var action = msg.action || config.action;
-
       if (!action) {
         node.warn('Missing action, please select one');
         node.send(msg);
         return;
       }
 
-      // This declaration put here, as codeacy wants it before it is used
-      // in the do functions below.
-      var language_translation = watson.language_translator({
-        username: username,
-        password: password,
-        version: 'v2'
-      });
+      // checkbox option
+      if (config.lgparams2 === false) {
+        if (tmpmodel_id.length > 1) {
+          result = tmpmodel_id.split('-');
+          msg.model_id = tmpmodel_id;
+          msg.srclang = result[0];
+          msg.destlang = result[1];
+        } else {
+          msg.model_id = config.domain;
+          msg.srclang = config.srclang;
+          msg.destlang = config.destlang;
+        }
+      } else {
+        msg.model_id = config.domain;
+        msg.srclang = config.srclang;
+        msg.destlang = config.destlang;
+      }
 
       // These are var functions that have been initialised here, so that
       // they are available for the instance of this node to use.
@@ -160,12 +161,12 @@ module.exports = function (RED) {
           model_id: model_id
         },
         function (err, response) {
-          node.status({})
+          node.status({});
           if (err) {
             node.error(err, msg);
           } else {
             msg.translation = {};
-            msg.translation['response'] = response;
+            msg.translation.response = response;
             msg.payload = response.translations[0].translation;
           }
           node.send(msg);
@@ -174,21 +175,48 @@ module.exports = function (RED) {
 
       // If training is requested then the glossary will be a file input. We are using temp
       // to sync up the fetch of the file input stream, before invoking the train service.
+      // If the file comes from a file-inject then the file will not have a filename assoicated
+      // with it. In this case a temporary filename is given to the file. The file name submitted
+      // to the service cannot have a '.' else it will throw a 400 error.
       var doTrain = function(msg, model_id, filetype){
         node.status({
           fill: 'blue',
           shape: 'dot',
-          text: 'requesting training'
+          text: 'processing data buffer for training request'
         });
 
         temp.open({
           suffix: '.xml'
-        }, function(err, info){
-          if (!err) {
-            fs.write(info.fd, msg.payload);
+        }, function(err, info) {
+          if (err) {
+            node.status({
+              fill: 'red',
+              shape: 'dot',
+              text: 'Error receiving the data buffer for training'
+            });
+            throw err;
+          }
+
+          // Syncing up the asynchronous nature of the stream
+          // so that the full file can be sent to the API.
+          fs.writeFile(info.path, msg.payload, function(err) {
+            if (err) {
+              node.status({
+                fill: 'red',
+                shape: 'dot',
+                text: 'Error processing data buffer for training'
+              });
+              throw err;
+            }
+
             var params = {};
+
             // only letters and numbers allowed in the submitted file name
-            params.name = msg.filename.replace(/[^0-9a-z]/gi, '');
+            // Default the name to a string representing now
+            params.name = (new Date()).toString().replace(/[^0-9a-z]/gi, '');
+            if (msg.filename) {
+              params.name = msg.filename.replace(/[^0-9a-z]/gi, '');
+            }
             params.base_model_id = model_id;
             switch (filetype) {
             case 'forcedglossary':
@@ -204,7 +232,7 @@ module.exports = function (RED) {
 
             language_translation.createModel(params,
               function (err, model) {
-                node.status({})
+                node.status({});
                 if (err) {
                   node.status({
                     fill: 'red',
@@ -221,13 +249,14 @@ module.exports = function (RED) {
                   msg.payload = 'Model ' + model.name + ' successfully sent for training with id: ' + model.model_id;
                   msg.trained_model_id = model.model_id;
                   node.send(msg);
+                  node.status({});
                 }
               }
             );
-          }
+          });
         });
-        node.status({ });
       };
+
 
       // Fetch the status of the trained model. It can only be used if the model is available. This
       // will also return any training errors. The full error reason is returned in msg.translation
@@ -258,9 +287,8 @@ module.exports = function (RED) {
             }
           }
         );
-        node.status({ });
+        node.status({});
       };
-
 
       // This removes the trained corpus
       var doDelete = function (msg, trainid) {
@@ -289,7 +317,7 @@ module.exports = function (RED) {
             }
           }
         );
-        node.status({ });
+        node.status({});
       };
 
       // Now that the do functions have been defined, can now determine what action this node
@@ -306,6 +334,7 @@ module.exports = function (RED) {
       // The required fields are checked, before the relevant function is invoked.
       switch (action) {
       case 'translate':
+
         var domain = msg.domain || config.domain;
 
         if (!domain) {
@@ -390,7 +419,6 @@ module.exports = function (RED) {
       }
     });
   }
-
 
   RED.nodes.registerType('watson-translate', SMTNode, {
     credentials: {

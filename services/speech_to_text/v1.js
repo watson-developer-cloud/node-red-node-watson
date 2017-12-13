@@ -15,55 +15,62 @@
  **/
 
 module.exports = function (RED) {
-  var request = require('request');
-  var cfenv = require('cfenv');
-  var temp = require('temp');
-  var url = require('url');
-  var fs = require('fs');  
-  var fileType = require('file-type');
-  var watson = require('watson-developer-cloud');
+  const SERVICE_IDENTIFIER = 'speech-to-text';
+  var pkg = require('../../package.json'),
+    request = require('request'),
+    cfenv = require('cfenv'),
+    temp = require('temp'),
+    url = require('url'),
+    fs = require('fs'),
+    fileType = require('file-type'),
+    serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
+    sttV1 = require('watson-developer-cloud/speech-to-text/v1'),
+    username = '', password = '', sUsername = '', sPassword = '',
+    endpoint = '',
+    sEndpoint = 'https://stream.watsonplatform.net/speech-to-text/api',
+    service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
-  var service = cfenv.getAppEnv().getServiceCreds(/speech to text/i);
-
-  // Require the Cloud Foundry Module to pull credentials from bound service 
-  // If they are found then the username and password will be stored in 
-  // the variables sUsername and sPassword. 
+  // Require the Cloud Foundry Module to pull credentials from bound service
+  // If they are found then the username and password will be stored in
+  // the variables sUsername and sPassword.
   //
-  // This separation between sUsername and username is to allow 
+  // This separation between sUsername and username is to allow
   // the end user to modify the credentials when the service is not bound.
   // Otherwise, once set credentials are never reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
 
-  var username, password, sUsername, sPassword;
-
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
 
-
-  // temp is being used for file streaming to allow the file to arrive so it can be processed. 
+  // temp is being used for file streaming to allow the file to arrive so it can be processed.
   temp.track();
 
-
   // These are APIs that the node has created to allow it to dynamically fetch Bluemix
-  // credentials, and also translation models. This allows the node to keep up to 
-  // date with new tranlations, without the need for a code update of this node. 
+  // credentials, and also translation models. This allows the node to keep up to
+  // date with new tranlations, without the need for a code update of this node.
 
   // Node RED Admin - fetch and set vcap services
   RED.httpAdmin.get('/watson-speech-to-text/vcap', function (req, res) {
     res.json(service ? {bound_service: true} : null);
   });
 
-
-   // API used by widget to fetch available models
+  // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-speech-to-text/models', function (req, res) {
-    var stt = watson.speech_to_text({
-      username: username ? username : req.query.un,   
-      password: password ? password : req.query.pwd, 
-      version: 'v1',
-      url: 'https://stream.watsonplatform.net/speech-to-text/api'
+    //endpoint = sEndpoint ? sEndpoint : req.query.e;
+    endpoint = req.query.e ? req.query.e : sEndpoint;
+
+    var stt = new sttV1({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd,
+      url: endpoint,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
     stt.getModels({}, function(err, models){
@@ -72,50 +79,32 @@ module.exports = function (RED) {
       } else {
         res.json(models);
       }
-    });          
+    });
   });
 
-  // Utility function to perform a URL validation check
-  function urlCheck(str) {
-    var parsed = url.parse(str);
+  // API used by widget to fetch available customisations
+  RED.httpAdmin.get('/watson-speech-to-text/customs', function (req, res) {
+    //endpoint = sEndpoint ? sEndpoint : req.query.e;
+    endpoint = req.query.e ? req.query.e : sEndpoint;
 
-    return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
-  }
-
-  // Function that is syncing up the asynchronous nature of the stream
-  // so that the full file can be sent to the API. 
-  var stream_buffer = function(file, contents, cb) {
-    fs.writeFile(file, contents, function (err) {
-      if (err) throw err;
-      cb(fileType(contents).ext);
-    });
-  };
-
-
-  // Function that is syncing up the asynchronous nature of the stream
-  // so that the full file can be sent to the API. 
-  var stream_url = function(file, url, cb) {
-    var wstream = fs.createWriteStream(file);
-
-    wstream.on('finish', function () {
-      fs.readFile(file, function (err, buf) {
-        var fmt = null;
-        var error = null;
-
-        if (err) {
-          error = err;
-        }
-        if (fileType(buf)) {
-          fmt = fileType(buf).ext;
-        } else {
-          error = 'Unrecognised file format';
-        }
-        cb(error, fmt);
-      });
+    var stt = new sttV1({
+      username: sUsername ? sUsername : req.query.un,
+      password: sPassword ? sPassword : req.query.pwd,
+      url: endpoint,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
     });
 
-    request(url).pipe(wstream);
-  };
+    stt.getCustomizations({}, function(err, customs){
+      if (err) {
+        res.json(err);
+      } else {
+        res.json(customs);
+      }
+    });
+  });
+
 
   // This is the Speech to Text Node
 
@@ -123,210 +112,233 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg) {
-
-      // This section is for var functions that will be called, in context with
-      // msg, when the input stream has been received.  
-
-      // This is the callback after the call to the speech to text service.    
-      // Set up as a var within this scope, so it has access to node, msg etc.       
-      var actionComplete = function(err, data) {
-        if (err || data.status === 'ERROR') {
-          node.status({fill:'red', shape:'ring', text:'call to speech to text service failed'}); 
-          node.error(err, msg);
-        } else {
-          var r = data.results; 
-
-          msg.transcription = '';
-          if (r) {
-            if (r.length && r[0].alternatives.length) {
-              msg.fullresult = r;
-            } 
-            msg.transcription = '';
-            r.forEach(function(a){
-              // console.log(a.alternatives);
-              a.alternatives.forEach(function(t){
-                msg.transcription += t.transcript;
-              });
-            });   
-          }
-          node.send(msg); 
-        }        
-      };  
-
-
-      // Utility function that performs the speech to text service call. 
-      // the cleanup removes the temp storage, and I am not sure whether 
-      // it should be called here or after the service returns and passed
-      // control back to cbdone.
-      function performAction(audio, format, cbdone, cbcleanup) {
-        var speech_to_text = watson.speech_to_text({
-          username: username,
-          password: password,
-          version: 'v1',
-          url: 'https://stream.watsonplatform.net/speech-to-text/api'
-        });    
-
-        // If we get to here then the audio is in one of the supported formats. 
-        if (format === 'ogg') { 
-          format += ';codecs=opus';
-        }
-
-        var model = config.lang + '_' + config.band;
-
-        var params = {
-          audio: audio,
-          content_type: 'audio/' + format,
-          model: model,
-          continuous: config.continuous
-        };
-
-        node.status({fill:'blue', shape:'dot', text:'requesting'});
-
-        // Everything is now in place to invoke the service 
-        speech_to_text.recognize(params, function (err, res) {
-          node.status({});
-          cbdone(err,res);
-          if (cbcleanup) {
-            cbcleanup();
-          }
-        });
-
-        if (cbcleanup) {
-          cbcleanup();
-        }
+    function initialCheck(username, password) {
+      if (!username || !password) {
+        return Promise.reject('Missing Speech To Text service credentials');
       }
+      return Promise.resolve();
+    }
 
-
-      // The functions have now been defined, and will be within the context
-      // of the config.
-      // Now perform checks on the input and parameters, to make sure that all
-      // is in place before the service is invoked.
-
+    function configCheck() {
       var message = '';
 
-      // Credentials are needed for the service. They will either be bound or
-      // specified by the user in the dialog. 
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password; 
-
-      if (!username || !password) {
-        var message_err_credentials = 'Missing Speech To Text service credentials';
-
-        node.error(message_err_credentials, msg);
-        return;
-      }  
-
       if (!config.lang) {
-        var message_err_lang = 'Missing audio language configuration, unable to process speech.';
-
-        node.error(message_err_lang, msg);
-        return;
+        message = 'Missing audio language configuration, unable to process speech.';
+      } else if (!config.band) {
+        message = 'Missing audio quality configuration, unable to process speech.';
       }
 
-      if (!config.band) {
-        var message_err_band = 'Missing audio quality configuration, unable to process speech.';
+      if (message) {
+        return Promise.reject(message);
+      }
+      return Promise.resolve();
+    }
 
-        node.error(message_err_band, msg);
-        return;
-      }  
-
-      // Has to be there, as its a checkbox, but flows switching from the old (frankly 
-      // unbeliveable) select might not have it set.
-      if (!config.continuous) {
-        var message_err_continuous = 'Missing continuous details, unable to process speech.';
-
-        node.error(message_err_continuous, msg);
-        return;
-      }  
-
-      // The input comes in on msg.payload, and can either be an audio file or a string 
-      // representing a URL.  
+    function payloadCheck(msg) {
+      var message = '';
+      // The input comes in on msg.payload, and can either be an audio file or a string
+      // representing a URL.
       if (!msg.payload instanceof Buffer || !typeof msg.payload === 'string') {
         message = 'Invalid property: msg.payload, can only be a URL or a Buffer.';
-
-        node.error(message, msg);
-        return;
-      }
-
-      // This check is repeated just before the call to the service, but 
-      // its also performed here as a double check. 
-      if (!(msg.payload instanceof Buffer)) {
-        if (typeof msg.payload === 'string' && !urlCheck(msg.payload)) {
+      } else if (!(msg.payload instanceof Buffer)) {
+        // This check is repeated just before the call to the service, but
+        // its also performed here as a double check.
+        if (typeof msg.payload === 'string' && !payloadutils.urlCheck(msg.payload)) {
           message = 'Invalid URL.';
-
-          node.error(message, msg)
-          return;
         }
       } else {
-        var f = fileType(msg.payload).ext;
+        var f = 'txt', ft = '';
+
+        ft = fileType(msg.payload);
+        if (ft) {
+          f = ft.ext;
+        }
 
         switch (f) {
         case 'wav':
         case 'flac':
         case 'ogg':
+        case 'mp3':
+        case 'mpeg':
           break;
         default:
-          var message_err_format 
-              = 'Audio format (' + f + ') not supported, must be encoded as WAV, FLAC or OGG.';
-
-          node.error(message_err_format, msg);
-          return;  
+          message = 'Audio format (' + f + ') not supported, must be encoded as WAV, MP3, FLAC or OGG.';
         }
-      }  
+      }
+      if (message) {
+        return Promise.reject(message);
+      }
+      return Promise.resolve();
+    }
 
-      // We are now ready to process the input data 
-      // If its a buffer then need to read it all before invoking the service 
-      if (msg.payload instanceof Buffer) {
+    function processInputBuffer(msg) {
+      var p = new Promise(function resolver(resolve, reject){
         temp.open({suffix: '.' + fileType(msg.payload).ext}, function (err, info) {
           if (err) {
-            node.status({fill:'red', shape:'ring', text:'unable to open audio stream'});          
-            message = 'Node has been unable to open the audio stream'; 
+            reject(err);
+          }
+          payloadutils.stream_buffer(info.path, msg.payload, function (format) {
+            var audioData = {},
+              audio = fs.createReadStream(info.path);
 
-            node.error(message, msg);
-            return;        
-          }  
-
-          stream_buffer(info.path, msg.payload, function (format) {
-            var audio = fs.createReadStream(info.path);
-
-            performAction(audio, format, actionComplete, temp.cleanup);        
+            audioData.audio = audio;
+            audioData.format = format;
+            resolve(audioData);
           });
         });
-      } else if (urlCheck(msg.payload)) {
+      });
+      return p;
+    }
+
+    function processInputURL(msg) {
+      var p = new Promise(function resolver(resolve, reject){
         temp.open({suffix: '.audio'}, function(err, info){
           if (err) {
-            node.status({fill:'red', shape:'ring', 
-              text:'unable to open url audio stream'});          
-            message = 'Node has been unable to open the url audio stream'; 
-
-            node.error(message, msg);
-            return;        
-          }  
-
-          stream_url(info.path, msg.payload, function (err, format) {
+            reject(err);
+          }
+          payloadutils.stream_url(info.path, msg.payload, function (err, format) {
             if (err) {
-              node.status({fill:'red', shape:'ring', 
-                text:'url stream not recognised as audio'});          
-                message = 'Node did not recognise the url audio stream as audio'; 
+              reject(err);
+            }
+            var audioData = {},
+              audio = fs.createReadStream(info.path);
 
-              node.error(message, msg);
-              return;        
-            }  
-            var audio = fs.createReadStream(info.path);
-
-            performAction(audio, format, actionComplete, temp.cleanup);        
+            audioData.audio = audio;
+            audioData.format = format;
+            resolve(audioData);
           });
         });
-      } else {
-        node.status({fill:'red', shape:'ring', text:'payload is invalid'});          
-        message = 'Payload must be either an audio buffer or a string representing a url'; 
-        node.error(message, msg);
-        return;        
+      });
+      return p;
+    }
+
+    function processInput(msg) {
+      // We are now ready to process the input data
+      // If its a buffer then need to read it all before invoking the service
+      if (msg.payload instanceof Buffer) {
+        return processInputBuffer(msg);
+      } else if (payloadutils.urlCheck(msg.payload)) {
+        return processInputURL(msg);
+      }
+      return Promise.reject('Payload must be either an audio buffer or a string representing a url');
+    }
+
+    function performSTT(audioData) {
+      var p = new Promise(function resolver(resolve, reject){
+        var model = config.lang + '_' + config.band,
+          params = {},
+          speech_to_text = null,
+          serviceSettings = {
+            username: username,
+            password: password,
+            headers: {
+              'User-Agent': pkg.name + '-' + pkg.version
+            }
+          };
+
+        if (endpoint) {
+          serviceSettings.url = endpoint;
+        }
+
+        speech_to_text = new sttV1(serviceSettings);
+
+        // If we get to here then the audio is in one of the supported formats.
+        if (audioData.format === 'ogg') {
+          audioData.format += ';codecs=opus';
+        }
+
+        params = {
+          audio: audioData.audio,
+          content_type: 'audio/' + audioData.format,
+          model: model,
+          max_alternatives: config['alternatives'] ? parseInt(config['alternatives']) : 1,
+          speaker_labels: config.speakerlabels ? config.speakerlabels : false,
+          smart_formatting: config.smartformatting ? config.smartformatting : false
+        };
+
+        // Check the params for customisation options
+        if (config.langcustom && 'NoCustomisationSetting' !== config.langcustom) {
+          params.customization_id = config.langcustom;
+        }
+
+        // Everything is now in place to invoke the service
+        speech_to_text.recognize(params, function (err, res) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(res);
+          }
+        });
+      });
+      return p;
+    }
+
+    function processResponse(msg, data) {
+      var r = data.results;
+
+      msg.transcription = '';
+      if (r) {
+        if (r.length && r[0].alternatives.length) {
+          msg.fullresult = r;
+        }
+        msg.transcription = '';
+        r.forEach(function(a){
+          msg.transcription += a.alternatives[0].transcript;
+          //a.alternatives.forEach(function(t){
+          //  msg.transcription += t.transcript;
+          //});
+        });
+      }
+      if (config['payload-response']) {
+        msg.payload = msg.transcription;
       }
 
+      return Promise.resolve();
+    }
 
-    });  
+    this.on('input', function (msg) {
+      // Credentials are needed for the service. They will either be bound or
+      // specified by the user in the dialog.
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password || config.password;
+
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
+
+      node.status({});
+
+      // Now perform checks on the input and parameters, to make sure that all
+      // is in place before the service is invoked.
+      initialCheck(username, password)
+      .then(function(){
+        return configCheck();
+      })
+      .then(function(){
+        return payloadCheck(msg);
+      })
+      .then(function(){
+        return processInput(msg);
+      })
+      .then(function(audioData){
+        node.status({fill:'blue', shape:'dot', text:'requesting'});
+        return performSTT(audioData);
+      })
+      .then(function(data){
+        return processResponse(msg, data);
+      })
+      .then(function(){
+        temp.cleanup();
+        node.status({});
+        node.send(msg);
+      })
+      .catch(function(err){
+        temp.cleanup();
+        payloadutils.reportError(node,msg,err);
+      });
+
+    });
   }
 
   RED.nodes.registerType('watson-speech-to-text', Node, {

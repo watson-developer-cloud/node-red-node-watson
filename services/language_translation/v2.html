@@ -25,6 +25,8 @@
             <i class="fa fa-question-circle"></i><b> Could not bind to service. </b> This node can not be further configured without a valid service. Try entering valid credentials?
         </div>
     </div>
+    <div id="id-error-getting-models" class="form-row">
+    </div>
 
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -68,7 +70,7 @@
 
     <div>
         <input type="hidden" id="node-input-customhidden"/>
-    </div>    
+    </div>
 
     <div class="form-row">
         <label for="node-input-srclang"><i class="fa fa-comments-o"></i> Source</label>
@@ -111,9 +113,27 @@
         <input type="text" id="node-input-trainid" placeholder="Model ID">
     </div>
 
+    <div class="form-row">
+       <label for="node-input-lgparams2"><i class="fa fa-cog"></i> Parameters Scope</label>
+       <input type="checkbox" id="node-input-lgparams2" style="display: inline-block; width: auto; vertical-align: top;">
+       <label for="node-input-lgparams2" style="width: 70%;"> Use Local Parameters</label>
+    </div>
+    <div>
+       <input type="hidden" id="node-input-ldparamshidden2"/>
+    </div>
+
+    <div class="form-tips" id="languagetranslation-form-tips">
+      <strong>Note:</strong> When using with the language translation utility, 'Use Local Parameters' must be unchecked.<br>
+    </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-translate">
+    <p><b>NB:</b> The Watson Language Translation service has been deprecated in favor of the new Watson Translator service. Once the service
+      has been switched off this node will no longer work. The node will be removed from the palette in a
+      future release. </p>
+    <br/>
+    <p>Packaged in with release 0.4.25 of node-red-node-watson</p>
     <p>The Language Translation service enables you to translate text from one language to another and to add your own translation models.</p>
     <p></p>
     <p><b>Translation Mode</b>.</p>
@@ -125,12 +145,12 @@
     the documentation linked below for the currently supported source and destination language codes.</p>
     <p></p>
     <p><b>Customised Translation Mode</b>.</p>
-    <p>In this mode you can select a translation model that you have customised through 
+    <p>In this mode you can select a translation model that you have customised through
     the training options.</p>
     <p>The text to translate should be passed in on <code>msg.payload</code>.</p>
     <p>The translated text will be returned on <code>msg.payload</code>.</p>
     <p>The full response from the service will be returned on <code>msg.translation</code></p>
-    <p></p>    
+    <p></p>
     <p><b>Training Mode</b>.</p>
     <p>This mode enables you to add your own customized model to the Watson translation service. </p>
     <p>In the Dropbox node, you must specify one ore more of the following file options to customize the training:</p>
@@ -150,99 +170,123 @@
     <p><b>Delete Mode</b>.</p>
     <p></p>
     <p>This mode allows you to delete a model by providing its ID</p>
+    <p><b>Parameters Scope</b>.</p>
+    <p>This parameter makes the language translation node to toogle using incoming parameters form the dashboard DropDown list or locally.</p>
+    <p>Values can be the followings:</p>
+    <p><b>Local</b>  -  Local parametres if the node is used by its own (default value).</p>
+    <p><b>Global</b> -  Global parametres if the node is used with the 'language translation util' and 'dropdonw' node.
+    Global parameters are set when <b>local in unchecked</b>.</p>
     <p>For more information about the Language Translation service, read the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/language-translation.html">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
-  var models = null;
-  var domains = null;
-  var basemodels = null;
-  var custommodels = null;
-  var domain_type;
-  var first_launch = true;
-  var have_credentials = false;
-  var using_local_credentials = false;
+  // Need to simulate a namespace, so that some of the variables don't leak across nodes
+  function Translation () {
+  }
 
-  var action = $('#node-input-action').val();
-  var domain_selected = $('#node-input-domainhidden').val();
-  var custom_selected = $('#node-input-customhidden').val();
-  var srclang_selected = $('#node-input-srclanghidden').val();
-  var destlang_selected = $('#node-input-destlanghidden').val();
-  var base_model_selected = $('#node-input-basemodelhidden').val();
+  // This is the namespace for tts.
+  var txn = new Translation();
 
-  var LANGUAGES = { 'ar' : 'Arabic', 
-                    'arz': 'Spoken Arabic', 
-                    'en': 'English' , 
-                    'es': 'Spanish', 
-                    'fr': 'French', 
-                    'it': 'Italian', 
+  txn.models = null;
+  txn.domains = null;
+  txn.basemodels = null;
+  txn.custommodels = null;
+  txn.domain_type;
+  txn.have_credentials = false;
+  txn.using_local_credentials = false;
+  txn.using_local_parameters2 = false;
+  txn.using_global_parameters2 = false;
+
+  txn.action = $('#node-input-action').val();
+  txn.domain_selected = $('#node-input-domainhidden').val();
+  txn.custom_selected = $('#node-input-customhidden').val();
+  txn.srclang_selected = $('#node-input-srclanghidden').val();
+  txn.destlang_selected = $('#node-input-destlanghidden').val();
+  txn.base_model_selected = $('#node-input-basemodelhidden').val();
+  txn.lg_parameters_selected2 = $('#node-input-ldparamshidden2').val();
+
+
+  txn.LANGUAGES = { 'ar' : 'Arabic',
+                    'arz': 'Spoken Arabic',
+                    'en': 'English' ,
+                    'es': 'Spanish',
+                    'fr': 'French',
+                    'it': 'Italian',
+                    'de': 'German',
                     'pt': 'Portuguese',
                     'ko': 'Korean',
                     'zh': 'Chinese'
                   };
 
-  // convert an id in the form it-ko into Italian - Korean for display 
-  function changeIdToText(id) {
+  // convert an id in the form it-ko into Italian - Korean for display
+  txn.changeIdToText = function (id) {
     var txt = "";
     var langs = id.split('-');
     var first = true;
-    
+
     langs.forEach(function(language){
-      txt += (LANGUAGES[language] ? LANGUAGES[language] : language); 
+      txt += (txn.LANGUAGES[language] ? txn.LANGUAGES[language] : language);
       if (first) {
         txt += ' - ';
         first = false;
       }
-    }) 
+    })
     return txt;
   }
 
-  // Function to be used at the start, as don't want to expose any fields, unless the model is 
-  // available. The model it self can only be fetched if the credentials are available. 
-  function hideAll() {
-    if (!models) {
-      $('#credentials-not-found').show();
-      $('#node-input-action').parent().hide();  
-      $('select#node-input-srclang, select#node-input-destlang').parent().hide();  
-      $('select#node-input-domain').parent().hide();
-      $('select#node-input-custom').parent().hide();
-      $('select#node-input-basemodel').parent().hide();
-      $('select#node-input-filetype').parent().hide();
-      $('input#node-input-trainid').parent().hide();
-    } 
+  // Function to be used at the start, as don't want to expose any fields, unless the model is
+  // available. The model it self can only be fetched if the credentials are available.
+  txn.hideAll = function () {
+    $('#id-error-getting-models').hide();
+    if (!txn.models) {
+        $('#credentials-not-found').show();
+        $('#node-input-action').parent().hide();
+        $('select#node-input-srclang, select#node-input-destlang').parent().hide();
+        $('select#node-input-domain').parent().hide();
+        $('select#node-input-custom').parent().hide();
+        $('select#node-input-basemodel').parent().hide();
+        $('select#node-input-filetype').parent().hide();
+        $('input#node-input-trainid').parent().hide();
+        $('input#node-input-lgparams2').parent().hide();
+        $('#languagetranslation-form-tips').show();
+    }
   }
 
   // If we have models, then certain fields can be shown.
-  // this is invoked in the process tha obtains the models, which may be 
-  // after the dialog is shown. 
+  // this is invoked in the process tha obtains the models, which may be
+  // after the dialog is shown.
   // ie. all the fields are initially hidden, but once the credentials are valid and
-  // the model has been retrieved then this function is invoked to update what fields 
-  // are shown without the user having to close the dialog. 
-  // Problem is that the onchange is only invoked when the user tabs to another field. 
-  function checkVisibility() {
-    if (models) {
-      $('#node-input-action').parent().show();  
-      checkActionSelected();         
-    } 
+  // the model has been retrieved then this function is invoked to update what fields
+  // are shown without the user having to close the dialog.
+  // Problem is that the onchange is only invoked when the user tabs to another field.
+  txn.checkVisibility = function () {
+    if (txn.models) {
+      $('#node-input-action').parent().show();
+      txn.checkActionSelected();
+    }
   }
 
   // sorting functions
-  function checkUnique(value, index, self) {
+  txn.checkUnique = function (value, index, self) {
     return self.indexOf(value) === index;
   }
 
 
-  // Retrieve the available models from the server, if data is returned, then 
-  // can enable the dynamic selection fields. 
-  function checkModels() {
+  // Retrieve the available models from the server, if data is returned, then
+  // can enable the dynamic selection fields.
+  txn.checkModels = function () {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
     $.getJSON('watson-translate/models/', {un: u, pwd: p}).done(function (data) {
       if (data.models) {
-        models = data.models;
-        have_credentials = true;  
-        checkVisibility();      
+        $('#id-error-getting-models').hide();
+        txn.models = data.models;
+        txn.have_credentials = true;
+        txn.checkVisibility();
+      } else if (data.error){
+        $('#id-error-getting-models').show();
+        $('#id-error-getting-models').text(data.error);
       }
     }).fail(function (err) {
       console.log(err);
@@ -250,42 +294,42 @@
   }
 
   // Simple check that is only invoked if the service is not bound into bluemix. In this case the
-  // user has to provide credentials. Once there are credentials, then the models are retrieved. 
-  function getCredentials() {
+  // user has to provide credentials. Once there are credentials, then the models are retrieved.
+  txn.getCredentials = function () {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
 
-    if (u && u.length && p) {      
-      if (!models) {
-        checkModels();
-        if (models) {$('#node-input-action').parent().show(); }
-      } 
-    } else if (!models) {
-      $('#node-input-action').parent().hide();  
+    if (u && u.length && p) {
+      if (!txn.models) {
+        txn.checkModels();
+        if (txn.models) {$('#node-input-action').parent().show(); }
+      }
+    } else if (!txn.models) {
+      $('#node-input-action').parent().hide();
     }
   }
 
-  // function that is called when the domain or the source language is changed. In this case the 
-  // destination language selection field is dynamically repopulated, and reselected if the 
+  // function that is called when the domain or the source language is changed. In this case the
+  // destination language selection field is dynamically repopulated, and reselected if the
   // previously selection is still in the new list.
-  function langDestAvailable() {
-    if (!domain_type) { return; }
+  txn.langDestAvailable = function() {
+    if (!txn.domain_type) { return; }
 
-    var pair_lang = domain_type.map(function (a) {
+    var pair_lang = txn.domain_type.map(function (a) {
       return a.model_id;
     });
 
     // need to do an exact source language match to allow for variations
     // like ar and arz. if the input is ar, then don't want it to match with arz
     var available_destlang = pair_lang.filter(function (model_id) {
-      return model_id.match('^' + srclang_selected + '-');
+      return model_id.match('^' + txn.srclang_selected + '-');
     });
 
     available_destlang.forEach(function (val) {
       var lang = val.split('-')[1];
 
       var selectedText = '';
-      if (destlang_selected === lang) {
+      if (txn.destlang_selected === lang) {
         selectedText = 'selected="selected"';
       }
       $('select#node-input-destlang')
@@ -293,27 +337,27 @@
                       + '"' + lang + '"'
                       + selectedText
                       + '>'
-                      + (LANGUAGES[lang] ? LANGUAGES[lang] : lang)
-                      + '</option>');               
+                      + (txn.LANGUAGES[lang] ? txn.LANGUAGES[lang] : lang)
+                      + '</option>');
     });
-    destlang_selected = $('#node-input-destlang').val();
+    txn.destlang_selected = $('#node-input-destlang').val();
   }
 
-  // Populates the domains selection field. 
-  // If domains have already been retrieved then no need to refetch them. 
-  function checkDomains() {
-    if (!domains) {
-      domains = models.map(function (a) {
+  // Populates the domains selection field.
+  // If domains have already been retrieved then no need to refetch them.
+  txn.checkDomains = function () {
+    if (!txn.domains) {
+      txn.domains = txn.models.map(function (a) {
         return a.domain;
-      });     
+      });
     }
-    if (domains && domains.length) {
+    if (txn.domains && txn.domains.length) {
       $('select#node-input-domain').empty();
-      var unique_domains = domains.filter(checkUnique);
+      var unique_domains = txn.domains.filter(txn.checkUnique);
 
       unique_domains.forEach(function(domain) {
         var selectedText = '';
-        if (domain_selected === domain) {
+        if (txn.domain_selected === domain) {
           selectedText = 'selected="selected"';
         }
         $('select#node-input-domain')
@@ -321,86 +365,88 @@
                         + '"' + domain + '"'
                         + selectedText
                         + '>'
-                        + domain.charAt(0).toUpperCase() 
-                        + domain.slice(1) 
-                        + '</option>');               
+                        + domain.charAt(0).toUpperCase()
+                        + domain.slice(1)
+                        + '</option>');
       });
 
-    checkDomainSelected();
-    }  
+    txn.checkDomainSelected();
+    }
   }
 
-  // Populates the base model field. These are the models that are available to be customised. 
-  function checkBaseModels() {
-    if (!basemodels && models) {
-      basemodels = models.filter(function (model) {
+  // Populates the base model field. These are the models that are available to be customised.
+  txn.checkBaseModels = function () {
+    if (!txn.basemodels && txn.models) {
+      txn.basemodels = txn.models.filter(function (model) {
         return model.customizable === true;
       });
-    }   
-    if (basemodels) {
+    }
+    if (txn.basemodels) {
       $('select#node-input-basemodel').empty();
-      basemodels.forEach(function(base_model){
+      txn.basemodels.forEach(function(base_model){
         var selectedText = '';
-        if (base_model_selected === base_model.model_id) {
+        if (txn.base_model_selected === base_model.model_id) {
             selectedText = 'selected="selected"';
-        }  
+        }
         $('select#node-input-basemodel')
             .append('<option value='
                           + '"' + base_model.model_id + '"'
                           + selectedText
                           + '>'
-                          + changeIdToText(base_model.model_id)
+                          + txn.changeIdToText(base_model.model_id)
                           + '</option>');
-      });                   
-    }  
+      });
+    }
   }
 
   // Populates the customised models field. These are the models that have been
-  // customised. This control needs to be refreshed. Currently the only that that 
-  // will happen is by a page refresh. Need to have a trigger everytime the create 
+  // customised. This control needs to be refreshed. Currently the only that that
+  // will happen is by a page refresh. Need to have a trigger everytime the create
   // new model is triggerd, but that is a little complicated and needs to be done on
   // a clear mind.
-  function checkCustomsAvailable() {
-    if (!custommodels && models) {
-      custommodels = models.filter(function (m) {
+  txn.checkCustomsAvailable = function() {
+    if (!txn.custommodels && txn.models) {
+      txn.custommodels = txn.models.filter(function (m) {
         return (m.base_model_id && ('' != m.base_model_id));
       });
     }
-    if (custommodels) {
+    if (txn.custommodels) {
       $('select#node-input-custom').empty();
-    
-      custommodels.forEach(function(m){
+
+      txn.custommodels.forEach(function(m){
         var selectedText = '';
-        if (custom_selected === m.model_id) {
+        if (txn.custom_selected === m.model_id) {
             selectedText = 'selected="selected"';
-        }  
+        }
         $('select#node-input-custom')
             .append('<option value='
                         + '"' + m.model_id + '"'
                         + selectedText
                         + '>'
-                        + m.model_id 
+                        + m.model_id
                         + ' (' + m.domain + ' ' + m.base_model_id + ' ' + m.name + ')'
                         + '</option>');
 
-      });                   
+      });
     }
   }
 
 
-  // UI Handler for the Mode / switch. 
-  // Princliple function is to show / hide the appropriate fields.  
-  function checkActionSelected() {
-    action = $('#node-input-action').val();
-    if (models) {
+  // UI Handler for the Mode / switch.
+  // Princliple function is to show / hide the appropriate fields.
+  txn.checkActionSelected = function () {
+    txn.action = $('#node-input-action').val();
+    if (txn.models) {
       $('#credentials-not-found').hide();
-      switch (action) {
+      switch (txn.action) {
         case 'translate':
           $('select#node-input-srclang, select#node-input-destlang').parent().show();
           $('select#node-input-domain').parent().show();
           $('select#node-input-custom').parent().hide();
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
           $('input#node-input-trainid').parent('').hide();
+          $('input#node-input-lgparams2').parent().show();
+          $('#languagetranslation-form-tips').show();
           break;
         case 'custom':
           $('select#node-input-custom').parent().show();
@@ -408,53 +454,74 @@
           $('select#node-input-domain').parent().hide();
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
           $('input#node-input-trainid').parent('').hide();
-          break;          
+          $('input#node-input-lgparams2').parent().show();
+          $('#languagetranslation-form-tips').show();
+          break;
         case 'train':
-          $('select#node-input-custom').parent().hide();      
+          $('select#node-input-custom').parent().hide();
           $('select#node-input-srclang, select#node-input-destlang').parent().hide();
           $('select#node-input-domain').parent().hide();
           $('select#node-input-basemodel, select#node-input-filetype').parent('').show();
-          $('input#node-input-trainid').parent('').hide();          
+          $('input#node-input-trainid').parent('').hide();
+          $('input#node-input-lgparams2').parent().show();
+          $('#languagetranslation-form-tips').show();
           break;
         case 'getstatus':
         case 'delete':
           $('select#node-input-custom').parent().hide();
-          $('input#node-input-trainid').parent('').show();  
+          $('input#node-input-trainid').parent('').show();
           $('select#node-input-srclang, select#node-input-destlang').parent().hide();
           $('select#node-input-domain').parent().hide();
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
+          $('input#node-input-lgparams2').parent().show();
+          $('#languagetranslation-form-tips').show();
           break;
       }
-      checkDomains();
-      checkBaseModels();
-      checkCustomsAvailable();
+      txn.checkDomains();
+      txn.checkBaseModels();
+      txn.checkCustomsAvailable();
     } else {
       $('#credentials-not-found').show();
     }
   }
 
+  // Function does not appear to be used, comment out until someone complains.
+  // UI Handler for the Parameter scope switch: Local or Global
+  //txn.checkParamScopeSelected = function (){
+    // Checkbox control
+  //  txn.lg_parameters_selected2 = $('input#node-input-lgparams2').prop('checked');
+  //  if (checked) {
+  //    txn.using_global_parameters2 = true;
+  //    txn.using_local_parameters2 = false;
+  //  } else {
+  //    txn.using_global_parameters2 = false;
+  //    txn.using_local_parameters2 = true;
+  //  }
+  //}
+
+
   // UI Handler for the domain switch
   // Repopulate the source and languages based on the available translations for the domain
-  function checkDomainSelected(){
+  txn.checkDomainSelected = function(){
     $('#node-input-srclang').empty();
     $('#node-input-destlang').empty();
-    if (models && domains) {
-      domain_selected = $('#node-input-domain').val();
-      domain_type = models.filter(function (model) {
-        return model.domain === domain_selected && model.status === 'available';
+    if (txn.models && txn.domains) {
+      txn.domain_selected = $('#node-input-domain').val();
+      txn.domain_type = txn.models.filter(function (model) {
+        return model.domain === txn.domain_selected && model.status === 'available';
       });
-      var input_lang = domain_type.map(function (a) {
+      var input_lang = txn.domain_type.map(function (a) {
         return a.source;
       });
-      var output_lang = domain_type.map(function (a) {
+      var output_lang = txn.domain_type.map(function (a) {
         return a.target;
       });
-      input_lang_unique = input_lang.filter(checkUnique);
-      output_lang_unique = output_lang.filter(checkUnique);
+      input_lang_unique = input_lang.filter(txn.checkUnique);
+      output_lang_unique = output_lang.filter(txn.checkUnique);
 
       input_lang_unique.forEach(function(lang){
         var selectedText = '';
-        if (srclang_selected === lang) {
+        if (txn.srclang_selected === lang) {
           selectedText = 'selected="selected"';
         }
         $('select#node-input-srclang')
@@ -462,136 +529,145 @@
                         + '"' + lang + '"'
                         + selectedText
                         + '>'
-                        + (LANGUAGES[lang] ? LANGUAGES[lang] : lang)
-                        + '</option>');               
+                        + (txn.LANGUAGES[lang] ? txn.LANGUAGES[lang] : lang)
+                        + '</option>');
       });
       // Having repopulated the input language selection, the old selected item
       // may no longer be in the list, so refresh it.
-      srclang_selected = $('#node-input-srclang').val();
-      langDestAvailable();
+      txn.srclang_selected = $('#node-input-srclang').val();
+      txn.langDestAvailable();
     }
   }
 
 
   // Register the handlers for the fields
-  function UIListeners() {
+  txn.UIListeners = function () {
     $('#node-input-username').change(function(val){
-      getCredentials();
-      if (have_credentials) {
-        checkActionSelected();}
-    }); 
+      txn.getCredentials();
+      if (txn.have_credentials) {
+        txn.checkActionSelected();}
+    });
     $('#node-input-password').change(function(val){
-      getCredentials();
-      if (have_credentials) {
-        checkActionSelected();
+      txn.getCredentials();
+      if (txn.have_credentials) {
+        txn.checkActionSelected();
       }
-    }); 
+    });
 
     $('#node-input-action').change(function(val){
-      action = $('#node-input-action').val();
-      checkActionSelected();
+      txn.action = $('#node-input-action').val();
+      txn.checkActionSelected();
     });
 
     $('#node-input-domain').change(function (val) {
-      domain_selected = $('#node-input-domain').val();
-      checkDomainSelected();
+      txn.domain_selected = $('#node-input-domain').val();
+      txn.checkDomainSelected();
     });
 
     $('#node-input-custom').change(function () {
-      custom_selected = $('#node-input-custom').val();
-    });  
+      txn.custom_selected = $('#node-input-custom').val();
+    });
 
     $('#node-input-srclang').change(function () {
-      srclang_selected = $('#node-input-srclang').val();
-      langDestAvailable();
+      txn.srclang_selected = $('#node-input-srclang').val();
+      txn.langDestAvailable();
     });
 
     $('#node-input-destlang').change(function () {
-      destlang_selected = $('#node-input-destlang').val();
-    });  
+      txn.destlang_selected = $('#node-input-destlang').val();
+    });
 
     $('#node-input-basemodel').change(function (val) {
-      base_model_selected = $('#node-input-basemodel').val();
-    });  
+      txn.base_model_selected = $('#node-input-basemodel').val();
+    });
+
+    $('#node-input-lgparams2').change(function (val) {
+      lg_parameters_selected = $('#node-input-lgparams2').val();
+    });
+
   }
 
   // The dynamic nature of the selection fields in this node has caused problems.
-  // Whenever there is a fetch for the models, on a page refresh or applicaiton 
-  // restart, the settings for the dynamic fields are lost. 
+  // Whenever there is a fetch for the models, on a page refresh or applicaiton
+  // restart, the settings for the dynamic fields are lost.
   // So hidden (text) fields are being used to squirrel away the values, so that
   // they can be restored.
-  function restoreHidden() {
-    domain_selected = $('#node-input-domainhidden').val();    
-    $('select#node-input-domain').val(domain_selected);
-    srclang_selected = $('#node-input-srclanghidden').val();    
-    $('select#node-input-srslang').val(srclang_selected);
-    destlang_selected = $('#node-input-destlanghidden').val();    
-    $('select#node-input-destlang').val(destlang_selected);
+  txn.restoreHidden = function () {
+    txn.domain_selected = $('#node-input-domainhidden').val();
+    $('select#node-input-domain').val(txn.domain_selected);
+    txn.srclang_selected = $('#node-input-srclanghidden').val();
+    $('select#node-input-srslang').val(txn.srclang_selected);
+    txn.destlang_selected = $('#node-input-destlanghidden').val();
+    $('select#node-input-destlang').val(txn.destlang_selected);
 
-    base_model_selected = $('#node-input-basemodelhidden').val();    
-    $('select#node-input-basemodel').val(base_model_selected);
-    custom_selected = $('#node-input-customhidden').val();    
-    $('select#node-input-custom').val(custom_selected);
+    txn.base_model_selected = $('#node-input-basemodelhidden').val();
+    $('select#node-input-basemodel').val(txn.base_model_selected);
+    txn.custom_selected = $('#node-input-customhidden').val();
+    $('select#node-input-custom').val(txn.custom_selected);
+
+
+    txn.lg_parameters_selected2 = $('input#node-input-lgparams2').prop('checked');
+
   }
 
-  // This is the on edit prepare function, which will be invoked everytime the dialog
-  // is shown. 
+  // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
   function oneditprepare() {
-    hideAll();
-    restoreHidden();
- 
-    UIListeners();
-    // Look for VCAP Json file, done is called if found or not, with service indicating 
+    txn.hideAll();
+    txn.restoreHidden();
+
+    txn.UIListeners();
+    // Look for VCAP Json file, done is called if found or not, with service indicating
     // if the translation service is actually bound into this application.
-    if (!have_credentials) {
+    if (!txn.have_credentials) {
       $.getJSON('watson-translate/vcap/')
         .done(function (service) {
-          // for some reason the getJSON resets the vars so need to restoreHidden again 
+          // for some reason the getJSON resets the vars so need to restoreHidden again
           // so again.
-          restoreHidden();
+          txn.restoreHidden();
           $('.credentials').toggle(!service);
           if (!service) {
             // no bound service, so check local settings to see if they are valid
-            using_local_credentials = true;
-            getCredentials();
+            txn.using_local_credentials = true;
+            txn.getCredentials();
           } else {
             // credentials are only valid if we can get hold of the models using them
-            using_local_credentials = false;
-            if (!models) {checkModels();}
+            txn.using_local_credentials = false;
+            if (!txn.models) {txn.checkModels();}
           }
         }).fail(function () {
-          $('.credentials').show();        
+          $('.credentials').show();
         }).always(function () {
-          $('#credentials-check').hide();        
+          $('#credentials-check').hide();
         });
     }
     // credentials can be set during the oneditprepare process, so check again.
-    if (have_credentials || using_local_credentials)
+    if (txn.have_credentials || txn.using_local_credentials)
     {
-      $('#credentials-check').hide(); 
-      if (have_credentials) { 
+      $('#credentials-check').hide();
+      if (txn.have_credentials) {
         $('#credentials-not-found').hide();
       }
-      if (using_local_credentials) {
-        $('.credentials').show();  
+      if (txn.using_local_credentials) {
+        $('.credentials').show();
       }
-      checkActionSelected();      
+      txn.checkActionSelected();
     }
   }
 
   // Save the values in the dyanmic lists to the hidden fields.
   function oneditsave(){
-    $('#node-input-domainhidden').val(domain_selected); 
-    $('#node-input-srclanghidden').val(srclang_selected);  
-    $('#node-input-destlanghidden').val(destlang_selected);  
-    $('#node-input-basemodelhidden').val(base_model_selected); 
-    $('#node-input-customhidden').val(custom_selected);        
+    $('#node-input-domainhidden').val(txn.domain_selected);
+    $('#node-input-srclanghidden').val(txn.srclang_selected);
+    $('#node-input-destlanghidden').val(txn.destlang_selected);
+    $('#node-input-basemodelhidden').val(txn.base_model_selected);
+    $('#node-input-customhidden').val(txn.custom_selected);
+    $('#node-input-ldparamshidden2').val(txn.lg_parameters_selected2);
   }
 
   // Define and run the function to register this node.
   (function() {
         RED.nodes.registerType('watson-translate', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ''},
                 action: {value: 'translate'},
@@ -605,13 +681,15 @@
                 srclanghidden: {value: ''},
                 destlanghidden: {value: ''},
                 basemodelhidden: {value: ''},
-                customhidden: {value: ''},                
+                customhidden: {value: ''},
                 filetype: {value: 'forcedglossary'},
-                trainid: {value: ''}
+                trainid: {value: ''},
+                lgparams2: {value: 'lparams'},
+                ldparamshidden2: {value: ''}
             },
             credentials: {
-              username: {type: 'text'} //,
-              // password: {type: 'text'}
+              username: {type: 'text'}
+              // password: {type: 'text'} << moved to keep track of previous data
             },
             color: "rgb(140, 198, 63)",
             inputs: 1,

@@ -1,0 +1,759 @@
+<!--
+  Copyright 2013,2016 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-translator">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div id="credentials-not-found" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Could not bind to service. </b> This node can not be further configured without a valid service. Try entering valid credentials?
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name"/>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username"/>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password"/>
+    </div>
+
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/language-translator/api">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
+        <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
+            <option value="translate">Translate</option>
+            <option value="custom">Customised Translate</option>
+            <option value="train">Train</option>
+            <option value="getstatus">Get status</option>
+            <option value="delete">Delete</option>
+        </select>
+    </div>
+
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-neural" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-neural" style="width: 70%;"> Use Experimental Neural Translation</label>
+    </div>    
+
+    <div class="form-row">
+        <label for="node-input-domain"><i class="fa fa-book"></i> Domains</label>
+        <select type="text" id="node-input-domain" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+
+    <div>
+        <input type="hidden" id="node-input-domainhidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-custom"><i class="fa fa-book"></i> Customised Model</label>
+        <select type="text" id="node-input-custom" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+
+    <div>
+        <input type="hidden" id="node-input-customhidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-srclang"><i class="fa fa-comments-o"></i> Source</label>
+        <select type="text" id="node-input-srclang" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-srclanghidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-destlang"><i class="fa fa-comments-o"></i> Target</label>
+        <select type="text" id="node-input-destlang" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-destlanghidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-basemodel"><i class="fa fa-book"></i> Base model</label>
+        <select type="text" id="node-input-basemodel" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-basemodelhidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-filetype"><i class="fa fa-book"></i> File type</label>
+        <select type="text" id="node-input-filetype" style="display: inline-block; vertical-align:middle; width: 70%;">
+            <option value="forcedglossary" selected="selected">Forced glossary</option>
+            <option value="parallelcorpus">Parallel corpus</option>
+            <option value="monolingualcorpus">Monolingual corpus</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-trainid"><i class="fa fa-tag"></i> Model ID</label>
+        <input type="text" id="node-input-trainid" placeholder="Model ID">
+    </div>
+
+    <div class="form-row">
+       <label for="node-input-lgparams2"><i class="fa fa-cog"></i> Parameters Scope</label>
+       <input type="checkbox" id="node-input-lgparams2" style="display: inline-block; width: auto; vertical-align: top;">
+       <label for="node-input-lgparams2" style="width: 70%;"> Not using translation utility</label>
+    </div>
+
+    <div class="form-tips" id="languagetranslation-form-tips">
+      <strong>Note:</strong> When <strong>not</strong> using the languge translation
+      utility to set credentials then
+      'Not using translation utility' must be checked, else credentials
+      will not be found.<br>
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="watson-translator">
+    <p>The Watson Language Translator service enables you to translate text from one language to another and to add your own translation models.</p>
+    <p></p>
+    <p><b>Translation Mode</b>.</p>
+    <p>The text to translate should be passed in on <code>msg.payload</code>.</p>
+    <p>The translated text will be returned on <code>msg.payload</code>.</p>
+    <p>The full response from the service will be returned on <code>msg.translation</code></p>
+    <p>Source and destination language parameters can be configured through the editor panel or set
+    dynamically using
+    the language codes in the following properties, <code>msg.srclang</code>
+    and <code>msg.destlang</code>. Set the values to either two or five character
+    IETF language Codes,
+    eg. <code>en</code> for English or <code>pt-BR</code> for Brazilian Portuguese
+    Please see
+    the documentation linked below for the currently supported source and destination
+    languages translation permutations.</p>
+    <p></p>
+    <p><b>Customised Translation Mode</b>.</p>
+    <p>In this mode you can select a translation model that you have customised through
+    the training options.</p>
+    <p>The text to translate should be passed in on <code>msg.payload</code>.</p>
+    <p>The translated text will be returned on <code>msg.payload</code>.</p>
+    <p>The full response from the service will be returned on <code>msg.translation</code></p>
+    <p></p>
+    <p><b>Training Mode</b>.</p>
+    <p>This mode enables you to add your own customized model to the Watson Language Translator service. </p>
+    <p>In <code>msg.payload</code>, (this can be through box, dropbox or a file-inject node.
+       you must specify one of the following file options to customize the training:</p>
+    <p>forced_glossary - A UTF-8 encoded TMX file that contains pairs of matching terms in the source and target language that are seen as absolute by the system. This file completely overwrites the original domain data.</p>
+    <p>parallel_corpus - A UTF-8 encoded TMX file that contains matching phrases in the source and target language that serve as examples for Watson. Parallel corpora differ from glossaries because they do not overwrite the original domain data.</p>
+    <p>monolingual_corpus - A UTF-8 encoded plain text file that contains a body of text in the target language that is related to what you are translating. A monolingual corpus helps improve literal translations to be more fluent and human.</p>
+    <p>The Language Translator Node will return the ID of the created customized model.</p>
+    <p<b>Note:</b>As the input file is expected on msg.payload, only one file can be specified. This is
+    an enforced restriction by this Node. The service API allows more than one file to be specified.</p>
+    <p></p>
+    <p><b>Get Status Mode</b>.</p>
+    <p>This mode allows you to get the status of a model sent to training by providing its ID.</p>
+    <p>Values can be the followings:</p>
+    <p>training - Training is still in progress.</p>
+    <p>queued@<#> - Training has not yet started and the model is in the queue. The # indicates the number of your model in the queue.</p>
+    <p>error - Training did not complete because of an error. if you want to see the reason behind the error
+    this will be returned in <code>msg.translation</code></p>
+    <p>available - Training is completed, and the service is now available to use with your custom translation model.</p>
+    <p><b>Delete Mode</b>.</p>
+    <p></p>
+    <p>This mode allows you to delete a model by providing its ID</p>
+    <p><b>Parameters Scope</b>.</p>
+    <p>This parameter makes the language translation node to toogle using incoming parameters form the dashboard Dropdown list or locally.</p>
+    <p>Values can be the followings:</p>
+    <p><b>Local</b>  -  Local parametres if the node is used by its own (default value).</p>
+    <p><b>Global</b> -  Global parametres if the node is used with the 'language translator util' and 'dropdown' node.
+    Global parameters are set when <b>local in unchecked</b>.</p>
+    <p>For more information about the Language Translator service, read the <a href="https://www.ibm.com/watson/developercloud/doc/language-translator/index.html">documentation</a>.</p>
+</script>
+
+<script type="text/javascript">
+  // Need to simulate a namespace, so that some of the variables don't leak across nodes
+  function Translator () {
+  }
+
+  // This is the namespace for tts.
+  var tor = new Translator();
+
+  tor.models = null;
+  tor.domains = null;
+  tor.basemodels = null;
+  tor.custommodels = null;
+  tor.domain_type;
+  tor.have_credentials = false;
+  tor.using_local_credentials = false;
+  tor.using_local_parameters2 = false;
+  tor.using_gloabal_parameters2 = false;
+
+  tor.action = $('#node-input-action').val();
+  tor.domain_selected = $('#node-input-domainhidden').val();
+  tor.custom_selected = $('#node-input-customhidden').val();
+  tor.srclang_selected = $('#node-input-srclanghidden').val();
+  tor.destlang_selected = $('#node-input-destlanghidden').val();
+  tor.base_model_selected = $('#node-input-basemodelhidden').val();
+
+  tor.LANGUAGES = { 'ar' : 'Arabic',
+                    'arz': 'Spoken Arabic',
+                    'en': 'English' ,
+                    'es': 'Spanish',
+                    'fr': 'French',
+                    'it': 'Italian',
+                    'de': 'German',
+                    'ja': 'Japanese',
+                    'pt': 'Portuguese',
+                    'ko': 'Korean',
+                    'nl': 'Dutch',
+                    'zh': 'Chinese'
+                  };
+
+  // convert an id in the form it-ko into Italian - Korean for display
+  tor.changeIdToText = function (id) {
+    var txt = "";
+    var langs = id.split('-');
+    var first = true;
+
+    langs.forEach(function(language){
+      txt += (tor.LANGUAGES[language] ? tor.LANGUAGES[language] : language);
+      if (first) {
+        txt += ' - ';
+        first = false;
+      }
+    })
+    return txt;
+  }
+
+  // Function to be used at the start, as don't want to expose any fields, unless the model is
+  // available. The model it self can only be fetched if the credentials are available.
+  tor.hideAll = function () {
+    if (!tor.models) {
+        $('#credentials-not-found').show();
+        $('#node-input-action').parent().hide();
+        $('select#node-input-srclang, select#node-input-destlang').parent().hide();
+        $('select#node-input-domain').parent().hide();
+        $('select#node-input-custom').parent().hide();
+        $('select#node-input-basemodel').parent().hide();
+        $('select#node-input-filetype').parent().hide();
+        $('input#node-input-trainid').parent().hide();
+        $('input#node-input-lgparams2').parent().hide();
+        $('input#node-input-neural').parent().hide();
+        $('#languagetranslation-form-tips').show();
+    }
+  }
+
+  // If we have models, then certain fields can be shown.
+  // this is invoked in the process tha obtains the models, which may be
+  // after the dialog is shown.
+  // ie. all the fields are initially hidden, but once the credentials are valid and
+  // the model has been retrieved then this function is invoked to update what fields
+  // are shown without the user having to close the dialog.
+  // Problem is that the onchange is only invoked when the user tabs to another field.
+  tor.checkVisibility = function () {
+    if (tor.models) {
+      $('#node-input-action').parent().show();
+      tor.checkActionSelected();
+    }
+  }
+
+  // sorting functions
+  tor.checkUnique = function (value, index, self) {
+    return self.indexOf(value) === index;
+  }
+
+  // Flush the cache
+  tor.flushModelCache = function () {
+    tor.models = null;
+    tor.domains = null;
+    tor.basemodels = null;
+    tor.custommodels = null;
+    tor.checkModels();
+  }
+
+  // Retrieve the available models from the server, if data is returned, then
+  // can enable the dynamic selection fields.
+  tor.checkModels = function () {
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+    var e = $('#node-input-service-endpoint').val();
+    var creds = {un: u, pwd: p};
+
+    if ($('#node-input-neural').prop('checked')) {
+      creds.n = 'Y';
+    }
+
+    if (! $('#node-input-default-endpoint').prop('checked')) {
+      creds.e = e;
+    }
+
+    $.getJSON('watson-translator/models/', creds)
+    .done(function (data) {
+      if (data.models) {
+        tor.models = data.models;
+        tor.have_credentials = true;
+        tor.checkVisibility();
+      }
+    }).fail(function (err) {
+      console.log(err);
+    }).always(function () {});
+  }
+
+  // Simple check that is only invoked if the service is not bound into bluemix. In this case the
+  // user has to provide credentials. Once there are credentials, then the models are retrieved.
+  tor.getCredentials = function () {
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+
+    if (u && u.length && p) {
+      if (!tor.models) {
+        tor.checkModels();
+        if (tor.models) {$('#node-input-action').parent().show(); }
+      }
+    } else if (!tor.models) {
+      $('#node-input-action').parent().hide();
+    }
+  }
+
+  // function that is called when the domain or the source language is changed. In this case the
+  // destination language selection field is dynamically repopulated, and reselected if the
+  // previously selection is still in the new list.
+  tor.langDestAvailable = function () {
+    if (!tor.domain_type) { return; }
+
+    var pair_lang = tor.domain_type.map(function (a) {
+      return a.model_id;
+    });
+
+    // need to do an exact source language match to allow for variations
+    // like ar and arz. if the input is ar, then don't want it to match with arz
+    var available_destlang = pair_lang.filter(function (model_id) {
+      return model_id.match('^' + tor.srclang_selected + '-');
+    });
+
+    // Flush out the list first
+    $('select#node-input-destlang').empty();
+
+    available_destlang.forEach(function (val) {
+      var lang = val.split('-')[1];
+
+      var selectedText = '';
+      if (tor.destlang_selected === lang) {
+        selectedText = 'selected="selected"';
+      }
+      $('select#node-input-destlang')
+        .append('<option value='
+                      + '"' + lang + '"'
+                      + selectedText
+                      + '>'
+                      + (tor.LANGUAGES[lang] ? tor.LANGUAGES[lang] : lang)
+                      + '</option>');
+    });
+    tor.destlang_selected = $('#node-input-destlang').val();
+  }
+
+  // Populates the domains selection field.
+  // If domains have already been retrieved then no need to refetch them.
+  tor.checkDomains = function () {
+    if (!tor.domains) {
+      tor.domains = tor.models.map(function (a) {
+        return a.domain;
+      });
+    }
+    if (tor.domains && tor.domains.length) {
+      $('select#node-input-domain').empty();
+      var unique_domains = tor.domains.filter(tor.checkUnique);
+
+      unique_domains.forEach(function(domain) {
+        var selectedText = '';
+        if (tor.domain_selected === domain) {
+          selectedText = 'selected="selected"';
+        }
+        $('select#node-input-domain')
+          .append('<option value='
+                        + '"' + domain + '"'
+                        + selectedText
+                        + '>'
+                        + domain.charAt(0).toUpperCase()
+                        + domain.slice(1)
+                        + '</option>');
+      });
+
+    tor.checkDomainSelected();
+    }
+  }
+
+  // Populates the base model field. These are the models that are available to be customised.
+  tor.checkBaseModels = function () {
+    if (!tor.basemodels && tor.models) {
+      tor.basemodels = tor.models.filter(function (model) {
+        return model.customizable === true;
+      });
+    }
+    if (tor.basemodels) {
+      $('select#node-input-basemodel').empty();
+      tor.basemodels.forEach(function(base_model){
+        var selectedText = '';
+        if (tor.base_model_selected === base_model.model_id) {
+            selectedText = 'selected="selected"';
+        }
+        $('select#node-input-basemodel')
+            .append('<option value='
+                          + '"' + base_model.model_id + '"'
+                          + selectedText
+                          + '>'
+                          + tor.changeIdToText(base_model.model_id)
+                          + '</option>');
+      });
+    }
+  }
+
+  // Populates the customised models field. These are the models that have been
+  // customised. This control needs to be refreshed. Currently the only that that
+  // will happen is by a page refresh. Need to have a trigger everytime the create
+  // new model is triggerd, but that is a little complicated and needs to be done on
+  // a clear mind.
+  tor.checkCustomsAvailable = function () {
+    if (!tor.custommodels && tor.models) {
+      tor.custommodels = tor.models.filter(function (m) {
+        return (m.base_model_id && ('' != m.base_model_id));
+      });
+    }
+    if (tor.custommodels) {
+      $('select#node-input-custom').empty();
+
+      tor.custommodels.forEach(function(m){
+        var selectedText = '';
+        if (tor.custom_selected === m.model_id) {
+            selectedText = 'selected="selected"';
+        }
+        $('select#node-input-custom')
+            .append('<option value='
+                        + '"' + m.model_id + '"'
+                        + selectedText
+                        + '>'
+                        + m.model_id
+                        + ' (' + m.domain + ' ' + m.base_model_id + ' ' + m.name + ')'
+                        + '</option>');
+
+      });
+    }
+  }
+
+
+  // UI Handler for the Mode / switch.
+  // Princliple function is to show / hide the appropriate fields.
+  tor.checkActionSelected = function () {
+    tor.action = $('#node-input-action').val();
+    if (tor.models) {
+      $('#credentials-not-found').hide();
+      switch (tor.action) {
+        case 'translate':
+          $('select#node-input-srclang, select#node-input-destlang').parent().show();
+          $('select#node-input-domain').parent().show();
+          $('select#node-input-custom').parent().hide();
+          $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
+          $('input#node-input-trainid').parent('').hide();
+          $('input#node-input-lgparams2').parent().show();
+          $('input#node-input-neural').parent().show();
+          $('#languagetranslation-form-tips').show();
+          break;
+        case 'custom':
+          $('select#node-input-custom').parent().show();
+          $('select#node-input-srclang, select#node-input-destlang').parent().hide();
+          $('select#node-input-domain').parent().hide();
+          $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
+          $('input#node-input-trainid').parent('').hide();
+          $('input#node-input-lgparams2').parent().show();
+          $('input#node-input-neural').parent().hide();
+          $('#languagetranslation-form-tips').show();
+          break;
+        case 'train':
+          $('select#node-input-custom').parent().hide();
+          $('select#node-input-srclang, select#node-input-destlang').parent().hide();
+          $('select#node-input-domain').parent().hide();
+          $('select#node-input-basemodel, select#node-input-filetype').parent('').show();
+          $('input#node-input-trainid').parent('').hide();
+          $('input#node-input-lgparams2').parent().show();
+          $('input#node-input-neural').parent().hide();
+          $('#languagetranslation-form-tips').show();
+          break;
+        case 'getstatus':
+        case 'delete':
+          $('select#node-input-custom').parent().hide();
+          $('input#node-input-trainid').parent('').show();
+          $('select#node-input-srclang, select#node-input-destlang').parent().hide();
+          $('select#node-input-domain').parent().hide();
+          $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
+          $('input#node-input-lgparams2').parent().show();
+          $('input#node-input-neural').parent().hide();
+          $('#languagetranslation-form-tips').show();
+          break;
+      }
+      tor.checkDomains();
+      tor.checkBaseModels();
+      tor.checkCustomsAvailable();
+    } else {
+      $('#credentials-not-found').show();
+    }
+  }
+
+  // UI Handler for the Parameter scope switch: Local or Global
+//  tor.checkParamScopeSelected = function (){
+//    // Checkbox control
+//    tor.lg_parameters_selected2 = $('input#node-input-lgparams2').prop('checked');
+//    if (checked) {
+//      tor.using_gloabal_parameters2 = true;
+//      tor.using_local_parameters2 = false;
+//    } else {
+//      tor.using_gloabal_parameters2 = false;
+//      tor.using_local_parameters2 = true;
+//    }
+//  }
+
+
+  // UI Handler for the domain switch
+  // Repopulate the source and languages based on the available translations for the domain
+  tor.checkDomainSelected = function (){
+    $('#node-input-srclang').empty();
+    $('#node-input-destlang').empty();
+    if (tor.models && tor.domains) {
+      tor.domain_selected = $('#node-input-domain').val();
+      tor.domain_type = tor.models.filter(function (model) {
+        return model.domain === tor.domain_selected && model.status === 'available';
+      });
+      var input_lang = tor.domain_type.map(function (a) {
+        return a.source;
+      });
+      var output_lang = tor.domain_type.map(function (a) {
+        return a.target;
+      });
+      input_lang_unique = input_lang.filter(tor.checkUnique);
+      output_lang_unique = output_lang.filter(tor.checkUnique);
+
+      // Flush out the List before repopulating it.
+      $('select#node-input-srclang').empty();
+
+      input_lang_unique.forEach(function(lang){
+        var selectedText = '';
+        if (tor.srclang_selected === lang) {
+          selectedText = 'selected="selected"';
+        }
+        $('select#node-input-srclang')
+          .append('<option value='
+                        + '"' + lang + '"'
+                        + selectedText
+                        + '>'
+                        + (tor.LANGUAGES[lang] ? tor.LANGUAGES[lang] : lang)
+                        + '</option>');
+      });
+      // Having repopulated the input language selection, the old selected item
+      // may no longer be in the list, so refresh it.
+      tor.srclang_selected = $('#node-input-srclang').val();
+      tor.langDestAvailable();
+    }
+  }
+
+
+  // Register the handlers for the fields
+  tor.UIListeners = function () {
+    $('#node-input-username').change(function(val){
+      tor.getCredentials();
+      if (tor.have_credentials) {
+        tor.checkActionSelected();}
+    });
+    $('#node-input-password').change(function(val){
+      tor.getCredentials();
+      if (tor.have_credentials) {
+        tor.checkActionSelected();
+      }
+    });
+
+    $('#node-input-action').change(function(val){
+      tor.action = $('#node-input-action').val();
+      tor.checkActionSelected();
+    });
+
+    $('#node-input-domain').change(function (val) {
+      tor.domain_selected = $('#node-input-domain').val();
+      tor.checkDomainSelected();
+    });
+
+    $('#node-input-custom').change(function () {
+      tor.custom_selected = $('#node-input-custom').val();
+    });
+
+    $('#node-input-srclang').change(function () {
+      tor.srclang_selected = $('#node-input-srclang').val();
+      tor.langDestAvailable();
+    });
+
+    $('#node-input-destlang').change(function () {
+      tor.destlang_selected = $('#node-input-destlang').val();
+    });
+
+    $('#node-input-basemodel').change(function (val) {
+      tor.base_model_selected = $('#node-input-basemodel').val();
+    });
+
+    $('#node-input-default-endpoint').change(function () {
+      var checked = $('#node-input-default-endpoint').prop('checked')
+      if (checked) {
+        $('#node-input-service-endpoint').parent().hide();
+      } else {
+        $('#node-input-service-endpoint').parent().show();
+      }
+    });
+
+    $('#node-input-neural').change(function () {
+      tor.flushModelCache();
+    });
+
+  }
+
+  // The dynamic nature of the selection fields in this node has caused problems.
+  // Whenever there is a fetch for the models, on a page refresh or applicaiton
+  // restart, the settings for the dynamic fields are lost.
+  // So hidden (text) fields are being used to squirrel away the values, so that
+  // they can be restored.
+  tor.restoreHidden = function () {
+    tor.domain_selected = $('#node-input-domainhidden').val();
+    $('select#node-input-domain').val(tor.domain_selected);
+    tor.srclang_selected = $('#node-input-srclanghidden').val();
+    $('select#node-input-srslang').val(tor.srclang_selected);
+    tor.destlang_selected = $('#node-input-destlanghidden').val();
+    $('select#node-input-destlang').val(tor.destlang_selected);
+
+    tor.base_model_selected = $('#node-input-basemodelhidden').val();
+    $('select#node-input-basemodel').val(tor.base_model_selected);
+    tor.custom_selected = $('#node-input-customhidden').val();
+    $('select#node-input-custom').val(tor.custom_selected);
+
+  }
+
+  // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
+  function oneditprepare() {
+    tor.hideAll();
+    tor.restoreHidden();
+
+    tor.UIListeners();
+    // Look for VCAP Json file, done is called if found or not, with service indicating
+    // if the translation service is actually bound into this application.
+    if (!tor.have_credentials) {
+      $.getJSON('watson-translator/vcap/')
+        .done(function (service) {
+          // for some reason the getJSON resets the vars so need to restoreHidden again
+          // so again.
+          tor.restoreHidden();
+          $('.credentials').toggle(!service);
+          if (!service) {
+            // no bound service, so check local settings to see if they are valid
+            tor.using_local_credentials = true;
+            tor.getCredentials();
+          } else {
+            // credentials are only valid if we can get hold of the models using them
+            tor.using_local_credentials = false;
+            if (!tor.models) {tor.checkModels();}
+          }
+        }).fail(function () {
+          $('.credentials').show();
+        }).always(function () {
+          $('#credentials-check').hide();
+        });
+    }
+    // credentials can be set during the oneditprepare process, so check again.
+    if (tor.have_credentials || tor.using_local_credentials)
+    {
+      $('#credentials-check').hide();
+      if (tor.have_credentials) {
+        $('#credentials-not-found').hide();
+      }
+      if (tor.using_local_credentials) {
+        $('.credentials').show();
+      }
+      tor.checkActionSelected();
+    }
+  }
+
+  // Save the values in the dyanmic lists to the hidden fields.
+  function oneditsave(){
+    $('#node-input-domainhidden').val(tor.domain_selected);
+    $('#node-input-srclanghidden').val(tor.srclang_selected);
+    $('#node-input-destlanghidden').val(tor.destlang_selected);
+    $('#node-input-basemodelhidden').val(tor.base_model_selected);
+    $('#node-input-customhidden').val(tor.custom_selected);
+  }
+
+  // Define and run the function to register this node.
+  (function() {
+        RED.nodes.registerType('watson-translator', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ''},
+                action: {value: 'translate'},
+                basemodel: {value: ''},
+                domain: {value: 'news'},
+                srclang: {value: 'en'},
+                destlang: {value: 'fr'},
+                password: {value: ''},
+                custom: {value: ''},
+                domainhidden: {value: ''},
+                srclanghidden: {value: ''},
+                destlanghidden: {value: ''},
+                basemodelhidden: {value: ''},
+                customhidden: {value: ''},
+                filetype: {value: 'forcedglossary'},
+                trainid: {value: ''},
+                lgparams2: {value: 'lparams'},
+                neural: {value: false},
+                'default-endpoint' :{value: true},
+                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/language-translator/api'}
+            },
+            credentials: {
+              username: {type: 'text'}
+              // password: {type: 'text'} << moved to keep track of previous data
+            },
+            color: "rgb(84,149,230)",
+            inputs: 1,
+            outputs: 1,
+            icon: "LanguageTranslator25x25.png",
+            paletteLabel: "language translator",
+            label: function() {
+                return this.name || "language translator";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: oneditprepare,
+            oneditsave: oneditsave
+        });
+  })();
+
+</script>

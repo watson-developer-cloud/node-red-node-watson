@@ -20,10 +20,16 @@
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
         </div>
     </div>
+
+    <div>
+        <label id="node-label-message"><i class="fa fa-exclamation-triangle"></i></label>
+    </div>
+
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
         <input type="text" id="node-input-username" placeholder="Username">
@@ -32,31 +38,42 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://stream.watsonplatform.net/text-to-speech/api">
+    </div>
+
     <div class="form-row">
         <label for="node-input-lang"><i class="fa fa-language"></i> Language</label>
         <select type="text" id="node-input-lang" style="display: inline-block; width: 70%;" >
-            <option value="english">English</option>
-            <option value="german">German</option>
-            <option value="french">French</option>
-            <option value="spanish">Spanish</option>
-            <option value="italian">Italian</option>
         </select>
     </div>
     <div class="form-row">
+        <input type="hidden" id="node-input-langhidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-langcustom"><i class="fa fa-language"></i> Customization</label>
+        <select type="text" id="node-input-langcustom" style="display: inline-block; width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-langcustomhidden"/>
+    </div>
+
+    <div class="form-row">
         <label for="node-input-voice"><i class="fa fa-comment"></i> Voice</label>
         <select type="text" id="node-input-voice" style="display: inline-block; width: 70%;">
-            <option class="english" value="en-US_MichaelVoice">Michael (Male)</option>
-            <option class="english" value="en-US_LisaVoice">Lisa (Female)</option>
-            <option class="english" value="en-US_AllisonVoice">Allison (Female)</option>
-            <option class="spanish" value="es-ES_EnriqueVoice">Enrique (Male)</option>
-            <option class="spanish" value="es-ES_LauraVoice">Laura (Female)</option>
-            <option class="spanish" value="es-US_SofiaVoice">Sofia (Female)</option>
-            <option class="french" value="fr-FR_ReneeVoice">Renee(Female)</option>
-            <option class="italian" value="it-IT_FrancescaVoice">Francesca (Female)</option>
-            <option class="english" value="en-GB_KateVoice">Kate (Female)</option>
-            <option class="german" value="de-DE_DieterVoice">Dieter (Male)</option>
-            <option class="german" value="de-DE_BirgitVoice">Birgit (Female)</option>
-        </select>
+         </select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-voicehidden"/>
     </div>
     <div class="form-row">
         <label for="node-input-format"><i class="fa fa-file-audio-o"></i> Format</label>
@@ -64,21 +81,25 @@
             <option value="audio/wav">WAV</option>
             <option value="audio/flac">FLAC</option>
             <option value="audio/ogg; codecs=opus">OGG</option>
+            <option value="audio/mp3">MP3</option>
+            <option value="audio/mpeg">MPEG</option>
+            <option value="audio/webm">WEBM</option>
+            <option value="audio/basic">BASIC</option>
         </select>
     </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-payload-response" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-payload-response" style="width: 70%;"> Place output on msg.payload</label>
+    </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-text-to-speech">
     <p>The Text To Speech service understands text and natural language to generate synthesized audio output complete
     with appropriate cadence and intonation.</p>
-    <p>You can choose from eleven different voices from three languages:</b>.</p>
-    <ul>
-        <li><b>English</b> Male and Female.</li>
-        <li><b>Spanish</b> Male and Female.</li>
-        <li><b>German</b> Male and Female.</li>
-        <li><b>French</b> Female.</li>
-        <li><b>Italian</b> Female.</li>
-    </ul>
+    <p>You can choose different voices for a range of languages:</b>.</p>
     <p>The text to be converted should be passed in on <code>msg.payload</code>.</p>
     <p><b>The source text must be in the language which matches the chosen voice, i.e. you cannot choose to a Spanish
     voice with English text.</b>.</p>
@@ -87,18 +108,390 @@
 </script>
 
 <script type="text/javascript">
+
+  // Need to simulate a namespace, so that some of the variables don't leak across nodes
+  function TTS () {
+  }
+
+  // This is the namespace for tts.
+  var tts = new TTS();
+  tts.custom_selected = '';
+  tts.customisations = null;
+
+  //tts.language_selected = '';
+  //tts.voice_selected = '';
+  tts.LANGUAGES = { 'en-US': 'US English',
+                    'en-GB': 'UK English',
+                    'pt-BR': 'Portuguese Brazilian',
+                    'fr-FR': 'French',
+                    'it-IT': 'Italian',
+                    'de-DE': 'German',
+                    'zh-CN': 'Mandarin',
+                    'es-ES': 'Spanish',
+                    'es-LA': 'Latin American Spanish',
+                    'es-US': 'US Spanish',
+                    'ar-AR': 'Arablic',
+                    'ja-JP': 'Japanese'
+                  };
+
+  // sorting functions
+  tts.onlyUnique = function (value, index, self) {
+    return self.indexOf(value) === index;
+  }
+
+  // Called to complete the languages selection table
+  tts.processLanguages = function () {
+    if (!tts.languages && tts.voices) {
+      tts.languages = tts.voices.map(function(m) {
+        return m.language;
+      });
+    }
+    if (tts.languages) {
+      $('select#node-input-lang').empty();
+      var unique_langs = tts.languages.filter(tts.onlyUnique);
+
+      unique_langs.forEach(function(l) {
+        var selectedText = '';
+        if (tts.language_selected === l) {
+          selectedText = 'selected="selected"';
+        }
+        $('select#node-input-lang')
+          .append('<option value='
+                        + '"' + l + '"'
+                        + selectedText
+                         + '>'
+                        + (tts.LANGUAGES[l] ? tts.LANGUAGES[l] : l)
+                        + '</option>');
+      });
+
+    }
+  }
+
+ // Populate the Voices selection field
+ tts.populateVoices = function () {
+   if (!tts.voicenames && tts.voices) {
+     tts.voicenames = tts.voices.map(function(m) {
+       //return m.name.split('_')[1];
+       return m.name;
+     });
+     var unique_voices = tts.voicenames.filter(tts.onlyUnique);
+     tts.voicenames = unique_voices;
+   }
+   if (!tts.voicedata && tts.voicenames){
+     tts.voicedata = [];
+     tts.voicenames.forEach(function(a){
+       var element = {};
+       var bits = a.split('_');
+       element.full = a;
+       element.language = bits[0];
+       element.person = bits[1].replace('Voice','');;
+       tts.voicedata.push(element);
+     });
+   }
+
+   if (tts.voicedata) {
+     $('select#node-input-voice').empty();
+
+     tts.voicedata.forEach(function(b) {
+       var selectedText = '';
+       if (tts.voice_selected === b.full) {
+         selectedText = 'selected="selected"';
+       }
+       if (tts.language_selected === b.language) {
+         $('select#node-input-voice')
+           .append('<option value='
+                         + '"' + b.full + '"'
+                         + selectedText
+                         + '>'
+                         + b.person
+                         + '</option>');
+       }
+     });
+   }
+ }
+
+
+  // Called to work through the voices, completing the dyanmic selection fields.
+  tts.processVoices = function () {
+    if (tts.voices) {
+      tts.processLanguages();
+      tts.populateVoices();
+    }
+  }
+
+  tts.visibilityCheck = function ()
+  {
+    if (tts.voices) {
+      $('label#node-label-message').parent().hide();
+      $('select#node-input-lang').parent().show();
+      $('select#node-input-voice').parent().show();
+    } else {
+      $('label#node-label-message').parent().hide();
+      $('select#node-input-lang').parent().hide();
+      $('select#node-input-voice').parent().hide();
+      $('select#node-input-langcustom').parent().hide();
+    }
+  }
+
+  // Function to fetch the customisations, should only be done once
+  tts.fetchCustomisations = function() {
+    if (!tts.customisations) {
+      var u = $('#node-input-username').val();
+      var p = $('#node-input-password').val();
+      var e = $('#node-input-service-endpoint').val();
+      var creds = {un: u, pwd: p};
+
+      if (! $('#node-input-default-endpoint').prop('checked')) {
+        creds.e = e;
+      }
+      $.getJSON('watson-text-to-speech/customs', creds)
+      .done(function (data) {
+        $('label#node-label-message').parent().hide();
+        if (data.error) {
+          $('label#node-label-message').parent().show();
+          $('label#node-label-message').text(data.error);
+        }
+        else {
+          tts.customisations = data.customizations;
+          tts.populateCustoms();
+        }
+      }).fail(function (err) {
+        var txt = 'Got server error ';
+        if (err.status) {
+          txt += '(' + err.status + ') '
+        }
+        txt += 'when trying to retrieve available customisations';
+        $('label#node-label-message').parent().show();
+        $('label#node-label-message').text(txt);
+      }).always(function () {
+      });
+
+    }
+  }
+
+
+  // Function called when either when the voices have been retrieved, or
+  // on dialog load, if the voices has already been retrieved
+  tts.postVoiceCheck = function (){
+    tts.processVoices();
+    tts.visibilityCheck();
+    tts.fetchCustomisations();
+  }
+
+  // Retrieve the available voices from the server, if data is returned, then
+  // can enable the dynamic selection fields.
+  tts.getVoices = function (){
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+    var e = $('#node-input-service-endpoint').val();
+    var creds = {un: u, pwd: p};
+
+    if (! $('#node-input-default-endpoint').prop('checked')) {
+      creds.e = e;
+    }
+
+    $.getJSON('watson-text-to-speech/voices/', creds)
+    .done(function (data) {
+      if (data.error) {
+        $('label#node-label-message').parent().show();
+        $('label#node-label-message').text(data.error);
+      } else if (data.voices) {
+        tts.voices = data.voices;
+        tts.postVoiceCheck();
+      }
+    }).fail(function (err) {
+      $('label#node-label-message').parent().show();
+      $('label#node-label-message').text('Error trying to determine available service voices');
+
+    }).always(function () {});
+  }
+
+
+  // The dynamic nature of the selection fields in this node has caused problems.
+  // Whenever there is a fetch for the models, on a page refresh or applicaiton
+  // restart, the settings for the dynamic fields are lost.
+  // So hidden (text) fields are being used to squirrel away the values, so that
+  // they can be restored.
+  tts.restoreFromHidden = function () {
+    tts.language_selected = $('#node-input-langhidden').val();
+    $('select#node-input-lang').val(tts.language_selected);
+
+    tts.voice_selected = $('#node-input-voicehidden').val();
+    $('select#node-input-voice').val(tts.voice_selected);
+
+    tts.custom_selected = $('#node-input-langcustomhidden').val();
+    $('select#node-input-langcustom').val(tts.custom_selected);
+
+  }
+
+  // Simple check that is only invoked if the service is not bound into bluemix. In this case the
+  // user has to provide credentials. Once there are credentials, then the tts.voices are retrieved.
+  tts.checkCredentials = function () {
+    var u = $('#node-input-username').val();
+    var p = $('#node-input-password').val();
+
+    if (u && u.length && p) {
+      if (!tts.voices) {
+        tts.getVoices();
+      }
+    }
+  }
+
+  // Language Setting has changed, modofy voice options appropriately
+  tts.checkLanguage = function (){
+    //var lang = $('#node-input-lang').val();
+    //$('#node-input-voice option.' + lang).show();
+    //$('#node-input-voice option:not(.' + lang + ')').hide();
+    //var first = $('#node-input-voice option.' + lang + ':first').val();
+    //$('#node-input-voice').val(first);
+
+    tts.language_selected = $('#node-input-lang').val();
+  }
+
+  // Voice Setting has changed, modofy voice options appropriately
+  tts.checkVoice = function (){
+    tts.voice_selected = $('#node-input-voice').val();
+  }
+
+  // Populate the customisations selection field
+  // Need to check if we have customisations and if the
+  // selected language and model have an entry.
+  tts.populateCustoms = function() {
+    var showit = false;
+
+    $('select#node-input-langcustom').empty();
+    if (tts.customisations) {
+      tts.language_selected = tts.language_selected ?
+                                  tts.language_selected :
+                                  $('#node-input-langhidden').val();
+
+      tts.customisations.forEach(function(c) {
+        // Should really be checking against the cached values
+        // stt.language_selected and stt.band_selected
+        // but for some reason they are not always set.
+
+        if (tts.language_selected === c['language']) {
+          showit = true;
+          var selectedText = '';
+          if (tts.custom_selected === c['customization_id']) {
+            selectedText = ' selected="selected" ';
+          }
+          $('select#node-input-langcustom')
+            .append('<option value='
+                          + '"' + c['customization_id'] + '"'
+                          + selectedText
+                          + '>'
+                          + c['name']
+                          + '</option>');
+        }
+      });
+    }
+
+    // Add an option to not select
+    $('select#node-input-langcustom')
+      .append('<option value='
+                    + 'NoCustomisationSetting'
+                    + '' //showit ? '' : ' selected="selected" '
+                    + '>'
+                    + 'None'
+                    + '</option>');
+
+
+    if (showit) {
+      $('select#node-input-langcustom').parent().show();
+    } else {
+      $('select#node-input-langcustom').parent().hide();
+    }
+  }
+
+  // Register the onchange handlers
+  tts.registerHandlers = function () {
+    $('#node-input-username').change(function(val){
+      tts.checkCredentials();
+    });
+    $('#node-input-password').change(function(val){
+      tts.checkCredentials();
+    });
+    $('#node-input-lang').change(function () {
+      tts.checkLanguage();
+      tts.populateVoices();
+      tts.populateCustoms();
+    });
+    $('#node-input-voice').change(function () {
+      tts.checkVoice();
+    });
+    $('#node-input-langcustom').change(function (val) {
+      tts.custom_selected = $('#node-input-langcustom').val();
+    });
+    $('#node-input-default-endpoint').change(function () {
+      var checked = $('#node-input-default-endpoint').prop('checked')
+      if (checked) {
+        $('#node-input-service-endpoint').parent().hide();
+      } else {
+        $('#node-input-service-endpoint').parent().show();
+      }
+    });
+  }
+
+  // Function to be used at the start, as don't want to expose any fields, unless the models are
+  // available. The models can only be fetched if the credentials are available.
+  tts.hideEverything = function () {
+    if (!stt.models) {
+      $('label#node-label-message').parent().hide();
+      $('select#node-input-lang').parent().hide();
+      $('select#node-input-voice').parent().hide();
+      $('select#node-input-langcustom').parent().hide();
+    }
+  }
+
+  // This is the on edit prepare function, which will be invoked everytime the dialog
+  // is shown.
+  function ttsoneditprepare() {
+    tts.hideEverything();
+    tts.restoreFromHidden();
+    tts.registerHandlers();
+
+    $.getJSON('watson-text-to-speech/vcap/')
+     .done(function (service) {
+       tts.restoreFromHidden();
+        $('.credentials').toggle(!service);
+        if (!tts.voices) {tts.getVoices();}
+        else {tts.postVoiceCheck();}
+      })
+    .fail(function () {
+      $('.credentials').show();
+    }).always(function () {
+      $('#credentials-check').hide();
+    })
+  }
+
+  // Save the values in the dyanmic lists to the hidden fields.
+  function ttsoneditsave(){
+    $('#node-input-langhidden').val(tts.language_selected);
+    $('#node-input-voicehidden').val(tts.voice_selected);
+    $('#node-input-langcustomhidden').val(tts.custom_selected);
+  }
+
     (function() {
         RED.nodes.registerType('watson-text-to-speech', {
             category: 'IBM Watson',
             defaults: {
                 name: {value: ""},
-                lang: {value: "english"},
-                voice: {value: "en-US_MichaelVoice"},
-                format: {value: "audio/wav"}
+                lang: {value: ""},
+                langhidden: {value: ""},
+                langcustom: {value: ''},
+                langcustomhidden: {value: ''},
+                voice: {value: ""},
+                voicehidden: {value: ""},
+                format: {value: "audio/wav"},
+                password: {value: ''},
+                'payload-response' :{value: false},
+                'default-endpoint' :{value: true},
+                'service-endpoint' :{value: 'https://stream.watsonplatform.net/text-to-speech/api'}
             },
             credentials: {
               username: {type:"text"},
-              password: {type:"password"}
+              // password: {type:"password"}   - // Taken out because, was not being restored on dialog open.
             },
             color: "rgb(140, 198, 63)",
             inputs: 1,
@@ -111,24 +504,8 @@
             labelStyle: function() {
                 return this.name ? "node_label_italic" : "";
             },
-            oneditprepare: function() {
-              $('#node-input-lang').change(function () {
-                var lang = $('#node-input-lang').val();
-                $('#node-input-voice option.' + lang).show();
-                $('#node-input-voice option:not(.' + lang + ')').hide();
-                var first = $('#node-input-voice option.' + lang + ':first').val();
-                $('#node-input-voice').val(first);
-              })
-              $.getJSON('watson-text-to-speech/vcap/')
-               .done(function (service) {
-                  $('.credentials').toggle(!service);
-                })
-              .fail(function () {
-                $('.credentials').show();
-              }).always(function () {
-                $('#credentials-check').hide();
-              })
-            }
+            oneditsave: ttsoneditsave,
+            oneditprepare: ttsoneditprepare
         });
      })();
 </script>

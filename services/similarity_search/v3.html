@@ -1,0 +1,334 @@
+<!--
+  Copyright 2013,2015 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="similarity-search-v3">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key">
+    </div>
+    <div class="form-row">
+        <label for="node-input-image-feature"><i class="fa fa-book"></i> Detect: </label>
+        <select type="text" id="node-input-image-feature" style="display: inline-block; width: 70%;">
+            <option value="findSimilar">Find similar images</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+   <div id="msg-options">
+        <div class="node-input-msg-options form-tips" id="watson-ss-findSimilar">
+            <p><b>Find similar images</b></p>
+            <ul>
+                <li><code>msg.params["collection_id"]</code> : the ID of your collection (Required)</li>
+                <li><code>msg.params["image_file"]</code> : The image file to compare to the collection. (Required)</li>
+                <li><code>msg.params["limit"]</code> : The number of similar results you want returned, default 10, max 100. (Optional)</li>
+            </ul>
+            <p>All Results will made available at <code>msg.result</code></p>
+            <p>More information in the <a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/?curl#create_a_collection">API documentation</a>.</p>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-red" data-template-name="similarity-search-util-v3">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key">
+    </div>
+    <div class="form-row">
+        <label for="node-input-image-feature"><i class="fa fa-book"></i> Detect: </label>
+        <select type="text" id="node-input-image-feature" style="display: inline-block; width: 70%;">
+            <option value="createCollection">Create a collection</option>
+            <option value="getCollection">Retrieve collection details</option>
+            <option value="listCollections">List collections</option>
+            <option value="deleteCollection">Delete a collection</option>
+            <option value="addImage">Add image to collection</option>
+            <option value="listImages">List images in collection</option>
+            <option value="getImage">Get image details</option>
+            <option value="deleteImage">Delete image from collection</option>
+            <option value="setImageMetadata">Update image metadata</option>
+            <option value="getImageMetadata">Get image metadata</option>
+            <option value="deleteImageMetadata">Delete image metadata</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div id="msg-options">
+        <div class="node-input-msg-options form-tips" id="watson-ss-createCollection">
+        <p><b>NB:</b> The Similarity Search service that this node
+        uses has been deprecated and will be switched off. When this
+        happens this node will no longer work.
+        The node will be removed from the palette in a
+        future release.
+        </p>
+            <p><b>Create a Collection</b></p>
+            <p>this feature takes these inputs : </p>
+            <ul>
+                <li><code>msg.params["name"]</code> : a string name that will be used as prefix for the returned classifier_id (Required)</li>
+            </ul>
+            <p>All Results will made available at <code>msg.result</code></p>
+            <p>More information in the <a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/?curl#create_a_collection">API documentation</a>.</p>
+        </div>
+        <div class="node-input-msg-options form-tips" id="watson-ss-getCollection">
+            <p><b>Retrieve collection details</b></p>
+            <ul>
+                <li><code>msg.params["collection_id"]</code> : the ID of your collection (Required)</li>
+            </ul>
+            <p>All Results will made available at <code>msg.result</code></p>
+            <p>More information in the <a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/?curl#list_collections">API documentation</a>.</p>
+        </div>
+        <div class="node-input-msg-options form-tips" id="watson-ss-listCollections">
+            <p><b>List collections</b></p>
+            <p>this feature does not need input params.</p>
+            <p>All Results will made available at <code>msg.result</code></p>
+            <p>More information in the <a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/?curl#list_collection">API documentation</a>.</p>
+        </div>
+        <div class="node-input-msg-options form-tips" id="watson-ss-deleteCollection">
+            <p><b> Delete a collection </b></p>
+            <ul>
+                <li><code>msg.params["collection_id"]</code> : the ID of your collection (Required)</li>
+            </ul>
+            <p>All Results will made available at <code>msg.result</code></p>
+            <p>More information in the <a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/?curl#delete_collection">API documentation</a>.</p>
+        </div>
+        <div class="node-input-msg-options form-tips" id="watson-ss-addImage">
+            <p><b> Add image to collection </b></p>
+            <ul>
+                <li><code>msg.params["collection_id"]</code> : the ID of your collection (Required)</li>
+                <li><code>msg.params["image_file"]</code> : The image file to add to the collection. (Required)</li>
+                <li><code>msg.params["metadata"]</code> : A JSON object that adds metadata to the image (Optional)</li>
+            </ul>
+            <p>All Results will made available at <code>msg.result</code></p>
+            <p>More information in the <a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/?curl#add_images">API documentation</a>.</p>
+        </div>
+        <div class="node-input-msg-options form-tips" id="watson-ss-listImages">
+            <p><b> List images in collection </b></p>
+            <ul>
+                <li><code>msg.params["collection_id"]</code> : the ID of your collection (Required)</li>
+            </ul>
+            <p>All Results will made available at <code>msg.result</code></p>
+            <p>More information in the <a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/?curl#list_images">API documentation</a>.</p>
+        </div>
+        <div class="node-input-msg-options form-tips" id="watson-ss-getImage">
+            <p><b> Get image details </b></p>
+            <ul>
+                <li><code>msg.params["collection_id"]</code> : the ID of your collection (Required)</li>
+                <li><code>msg.params["image_id"]</code> : The image file to add to the collection. (Required)</li>
+            </ul>
+            <p>All Results will made available at <code>msg.result</code></p>
+            <p>More information in the <a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/?curl#list_image_details">API documentation</a>.</p>
+        </div>
+        <div class="node-input-msg-options form-tips" id="watson-ss-deleteImage">
+            <p><b> Delete image from collection </b></p>
+            <ul>
+                <li><code>msg.params["collection_id"]</code> : the ID of your collection (Required)</li>
+                <li><code>msg.params["image_id"]</code> : The image file to delete from the collection. (Required)</li>
+            </ul>
+            <p>All Results will made available at <code>msg.result</code></p>
+            <p>More information in the <a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/?curl#delete_image">API documentation</a>.</p>
+        </div>
+        <div class="node-input-msg-options form-tips" id="watson-ss-setImageMetadata">
+            <p><b> Update image metadata </b></p>
+            <ul>
+                <li><code>msg.params["collection_id"]</code> : the ID of your collection (Required)</li>
+                <li><code>msg.params["image_id"]</code> : The image file whose metadata to set. (Required)</li>
+                <li><code>msg.params["metadata"]</code> : JSON object of metadata to add to the image (Required)</li>
+            </ul>
+            <p>All Results will made available at <code>msg.result</code></p>
+            <p>More information in the <a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/?curl#add_metadata">API documentation</a>.</p>
+        </div>
+        <div class="node-input-msg-options form-tips" id="watson-ss-getImageMetadata">
+            <p><b> Get image metadata </b></p>
+            <ul>
+                <li><code>msg.params["collection_id"]</code> : the ID of your collection (Required)</li>
+                <li><code>msg.params["image_id"]</code> : The image file whose metadata to fetch. (Required)</li>
+            </ul>
+            <p>All Results will made available at <code>msg.result</code></p>
+            <p>More information in the <a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/?curl#list_metadata">API documentation</a>.</p>
+        </div>
+        <div class="node-input-msg-options form-tips" id="watson-ss-deleteImageMetadata">
+            <p><b> Delete image metadata </b></p>
+            <ul>
+                <li><code>msg.params["collection_id"]</code> : the ID of your collection (Required)</li>
+                <li><code>msg.params["image_id"]</code> : The image file whose metadata to delete. (Required)</li>
+            </ul>
+            <p>All Results will made available at <code>msg.result</code></p>
+            <p>More information in the <a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/?curl#delete_metadata">API documentation</a>.</p>
+        </div>
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="similarity-search-v3">
+<p><b>NB:</b> The Similarity Search service that this node
+uses has been deprecated and will be switched off. When this
+happens this node will no longer work.
+The node will be removed from the palette in a
+future release.
+</p>
+	<p>With this node you can use the Similarity Search from the Watson Visual Recognition service to find similar images within your custom collections. To set up and manage your collections use the Similarity Search Util node.</p>
+
+    <p>Important : Maximum image size is 2 MB</p>
+    <br/>
+
+    <p>Check the sample Flow for this node on  <a href="https://github.com/watson-developer-cloud/node-red-bluemix-starter">Watson Node-RED Starter</a></p>
+
+
+</script>
+
+
+<script type="text/x-red" data-help-name="similarity-search-util-v3">
+    <p><b><i>Warning: this node is still in beta</i></b></p>
+	<p> This node enables you to use the training features of the Watson Visual Recognition service V3 that aims to identify scenes, objects, faces, and text in images you upload to the service. Using this node you can create and train a custom classifier to identify subjects that suit your needs.</p>
+    <p>The following features are available :</p>
+    <ul>
+	<li><b>Create a collection</b></li>
+	<p>Create a collection of images to search. You can create a maximum of 5 collections.</p>
+	<li><b>Retrieve collection details</b></li>
+	<p>Retrieve information about a specific collection.</p>
+	<li><b>List collections</b></li>
+	<p>List all custom collections</p>
+	<li><b>Delete a collection</b></li>
+	<p>Delete a user created collection</p>
+	<li><b>Add image to collection</b></li>
+	<p>Add images to a collection. Each collection can contain 1000000 images.</p>
+	<li><b>List images in collection</b></li>
+	<p>List the first 100 images in a collection. Each collection can contain 1000000 images.</p>
+	<li><b>Get image details</b></li>
+	<p>List details about a specific image in a collection.</p>
+	<li><b>Delete image from collection</b></li>
+	<p>Delete an image from a collection.</p>
+	<li><b>Update image metadata</b></li>
+	<p>Add metadata to a specific image in a collection. Use metadata for your own reference to identify images. You cannot filter the find_similar method by metadata.</p>
+	<li><b>Get image metadata</b></li>
+	<p>View the metadata for a specific image in a collection.</p>
+	<li><b>Delete image metadata</b></li>
+	<p>Delete all metadata associated with an image.</p>
+    </ul>
+
+</script>
+
+
+<script type="text/javascript">
+
+// Need to simulate a namespace, as some of the variables had started to leak across nodes
+  function SIMILARITYSEARCHV3 () {
+  }
+
+  // This is the namespace for similaritysearchv3. Currently only contains models, but more vars and functions may need to be
+  // moved in if there is a clash with other nodes.
+  var similaritysearchv3 = new SIMILARITYSEARCHV3();
+
+  // Save the values in the dynamic lists to the hidden fields.
+  function oneditsave(){}
+
+    (function() {
+        RED.nodes.registerType('similarity-search-v3', {
+            category: 'Watson Deprecated',
+            defaults: {
+              name: {value: ""},
+              apikey: {value: ""},
+              "image-feature": {value:"findSimilar"},
+              "lang": {value: ""},
+            },
+            credentials: {
+              apikey: {type:"password"}
+            },
+            color: 'rgb(228, 189, 255)',
+            inputs: 1,
+            outputs: 1,
+            icon: "VR-v3-pink.png",
+            paletteLabel: "similarity search",
+            label: function() {
+                return this.name || "similarity search";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+              var node = this;
+              $.getJSON('watson-similarity-search/vcap/')
+                  .done(function (service) {
+                    $('.credentials').toggle(!service);
+                  })
+                  .fail(function () {
+                    $('.credentials').show();
+                  })
+                  .always(function () {
+                    $('#credentials-check').hide();
+                  });
+            },
+            oneditsave: oneditsave
+        });
+
+
+        RED.nodes.registerType('similarity-search-util-v3', {
+            category: 'Watson Deprecated',
+            defaults: {
+              name: {value: ""},
+              apikey: {value: ""},
+              "image-feature": {value: "createCollection"}
+            },
+            credentials: {
+              apikey: {type:"password"}
+            },
+            color: 'rgb(228, 189, 255)',
+            inputs: 1,
+            outputs: 1,
+            icon: "VR-v3-pink.png",
+            paletteLabel: "similarity search util",
+            label: function() {
+                return this.name || "similarity search util";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                $('.node-input-msg-options').hide()
+              // update list of ruleset for the selected service when the service changes
+              $('#node-input-image-feature').change(function() {
+                var feature = $(this).val()
+                $('.node-input-msg-options').hide()
+                $('#watson-ss-' + feature).show()
+              });
+                $.getJSON('watson-similarity-search/vcap/')
+                    .done(function (service) {
+                        $('.credentials').toggle(!service);
+                    })
+                    .fail(function () {
+                        $('.credentials').show();
+                    })
+                    .always(function () {
+                        $('#credentials-check').hide();
+                    })
+            }
+        });
+    })();
+</script>
