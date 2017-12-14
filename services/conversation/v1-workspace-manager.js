@@ -1067,8 +1067,8 @@ module.exports = function (RED) {
         message = '',
         params = {};
 
-        username = sUsername || this.credentials.username;
-        password = sPassword || this.credentials.password || config.password;  
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password || config.password;  
 
       // All method to be overridden
       if (msg.params) {
