@@ -1067,14 +1067,21 @@ module.exports = function (RED) {
         message = '',
         params = {};
 
+        username = sUsername || this.credentials.username;
+        password = sPassword || this.credentials.password || config.password;  
+
       // All method to be overridden
-      if (msg.params && msg.params.method) {
-        method = msg.params.method;
+      if (msg.params) {
+        if (msg.params.method) {
+          method = msg.params.method;          
+        }
+        if (msg.params.username) {
+          username = msg.params.username;
+        }
+        if (msg.params.password) {
+          password = msg.params.password;
+        }
       }
-
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
-
       endpoint = sEndpoint;
       if ((!config['cwm-default-endpoint']) && config['cwm-service-endpoint']) {
         endpoint = config['cwm-service-endpoint'];
