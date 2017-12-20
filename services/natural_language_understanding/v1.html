@@ -249,7 +249,8 @@
     }
   };
 
-  nluV1.CreateIListener = function(listen, action, opp=false) {
+  nluV1.CreateIListener = function(listen, action, opp) {
+    opp = typeof opp === 'undefined' ? false : opp;
     listen.change(function(val){
       var isSet = listen.prop('checked');
       if (opp) {
