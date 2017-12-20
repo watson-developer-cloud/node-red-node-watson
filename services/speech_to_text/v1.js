@@ -126,10 +126,6 @@ module.exports = function (RED) {
         message = 'Missing audio language configuration, unable to process speech.';
       } else if (!config.band) {
         message = 'Missing audio quality configuration, unable to process speech.';
-      } else if (!config.continuous) {
-        // Has to be there, as its a checkbox, but flows switching from the old (frankly
-        // unbeliveable) select might not have it set.
-        message = 'Missing continuous details, unable to process speech.';
       }
 
       if (message) {
@@ -162,10 +158,11 @@ module.exports = function (RED) {
         case 'wav':
         case 'flac':
         case 'ogg':
+        case 'mp3':
+        case 'mpeg':
           break;
         default:
-          message
-              = 'Audio format (' + f + ') not supported, must be encoded as WAV, FLAC or OGG.';
+          message = 'Audio format (' + f + ') not supported, must be encoded as WAV, MP3, FLAC or OGG.';
         }
       }
       if (message) {
@@ -254,8 +251,9 @@ module.exports = function (RED) {
           audio: audioData.audio,
           content_type: 'audio/' + audioData.format,
           model: model,
-          continuous: config.continuous ? config.continuous : false,
+          max_alternatives: config['alternatives'] ? parseInt(config['alternatives']) : 1,
           speaker_labels: config.speakerlabels ? config.speakerlabels : false,
+          smart_formatting: config.smartformatting ? config.smartformatting : false
         };
 
         // Check the params for customisation options
@@ -285,9 +283,10 @@ module.exports = function (RED) {
         }
         msg.transcription = '';
         r.forEach(function(a){
-          a.alternatives.forEach(function(t){
-            msg.transcription += t.transcript;
-          });
+          msg.transcription += a.alternatives[0].transcript;
+          //a.alternatives.forEach(function(t){
+          //  msg.transcription += t.transcript;
+          //});
         });
       }
       if (config['payload-response']) {

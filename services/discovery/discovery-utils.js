@@ -96,7 +96,7 @@ DiscoveryUtils.prototype = {
 
     ['environment_id', 'collection_id', 'configuration_id',
       'collection_name', 'language_code',
-      'passages', 'description', 'size'
+      'passages', 'description', 'size', 'filename'
     ].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);
     });
@@ -107,7 +107,7 @@ DiscoveryUtils.prototype = {
 
     params = me.languageCodeFix(params);
 
-    params = this.buildParamsForPayload(msg, config, params);
+    params = me.buildParamsForPayload(msg, config, params);
 
     return params;
   },
@@ -120,9 +120,11 @@ DiscoveryUtils.prototype = {
     if (config.collection) {
       params.collection_id = config.collection;
     }
-
     if (config.passages) {
       params.passages = config.passages;
+    }
+    if (config.collection) {
+      params.filename = config.filename;
     }
 
     params = this.buildMsgQueryOverrides(msg, config, params);
@@ -172,6 +174,14 @@ DiscoveryUtils.prototype = {
     var response = '';
     if (!params.file) {
       response = 'Missing JSON file on payload';
+    }
+    return response;
+  },
+
+  paramDocumentCheck: function(params) {
+    var response = '';
+    if (!params.file) {
+      response = 'Missing document file on payload';
     }
     return response;
   },

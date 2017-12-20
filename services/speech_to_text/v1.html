@@ -77,14 +77,20 @@
     </div>
 
     <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-continuous" style="display: inline-block; width: auto; vertical-align: top;"></input>
-        <label for="node-input-continuous" style="width: 70%;"><i class="fa fa-audio-o"></i> Continuous</label>
+      <label for="node-input-alternatives">Max Alternative Transcripts</label>
+      <input type="number" min="1" max="5" id="node-input-alternatives" />
     </div>
+
     <div class="form-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-speakerlabels"style="display: inline-block; width: auto; vertical-align: top;"></input>
         <label for="node-input-speakerlabels" style="width: 70%;"><i class="fa fa-audio-o"></i> Speaker Labels</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-smartformatting"style="display: inline-block; width: auto; vertical-align: top;"></input>
+        <label for="node-input-smartformatting" style="width: 70%;"><i class="fa fa-audio-o"></i> Smart Formatting</label>
     </div>
 
     <div class="form-row">
@@ -117,7 +123,6 @@
     <p>Along with the language, you can also configure the source audio quality. The service supports two different
     source sampling rates, <b>Narrowband (8KHz) and Broadband (16Khz)</b>. Higher sample rates will be downsampled
     automatically but the is not true in reverse.</p>
-    <p>Use the continuous property to choose whether the decoding should stop at the first pause or wait until the end of the file.</p>
     <p>Use the speaker label property to  identify which individuals spoke which words in a multi-participant exchange.
     </p>
     <p>The returned audio transcription will be returned on <code>msg.transcription</code>.</p>
@@ -166,8 +171,9 @@
     if (!stt.models) {
       $('#credentials-not-found').show();
       $('label#node-label-message').parent().hide();
-      $('input#node-input-continuous').parent().hide();
+      $('input#node-input-alternatives').parent().hide();
       $('input#node-input-speakerlabels').parent().hide();
+      $('input#node-input-smartformatting').parent().hide();
       $('select#node-input-lang').parent().hide();
       $('select#node-input-band').parent().hide();
       $('select#node-input-langcustom').parent().hide();
@@ -179,15 +185,17 @@
   stt.VisibilityCheck = function () {
     if (stt.models) {
       $('label#node-label-message').parent().hide();
-      $('input#node-input-continuous').parent().show();
+      $('input#node-input-alternatives').parent().show();
       $('input#node-input-speakerlabels').parent().show();
+      $('input#node-input-smartformatting').parent().show();
       $('select#node-input-lang').parent().show();
       //$('select#node-input-langcustom').parent().show();
       $('select#node-input-band').parent().show();
     } else {
       $('label#node-label-message').parent().hide();
-      $('input#node-input-continuous').parent().hide();
+      $('input#node-input-alternatives').parent().hide();
       $('input#node-input-speakerlabels').parent().hide();
+      $('input#node-input-smartformatting').parent().hide();
       $('select#node-input-lang').parent().hide();
       $('select#node-input-langcustom').parent().hide();
       $('select#node-input-band').parent().hide();
@@ -501,8 +509,9 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ''},
-                continuous: {value: true},
+                alternatives: {value: 1},
                 speakerlabels: {value: true},
+                smartformatting: {value: false},                
                 lang: {value: ''},
                 langhidden: {value: ''},
                 langcustom: {value: ''},

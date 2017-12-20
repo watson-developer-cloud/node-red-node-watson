@@ -350,6 +350,146 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeListEntityValues(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getValues(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['values'] = response.values ? response.values: response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeGetEntityValue(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getValue(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['value'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeAddEntityValue(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createValue(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['value'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeUpdateEntityValue(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.updateValue(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['value'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeDeleteEntityValue(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.deleteValue(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['value'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeListDialogNodes(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getDialogNodes(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['dialog_nodes'] = response.dialog_nodes ? response.dialog_nodes: response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeGetDialogNode(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.getDialogNode(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['dialog_node'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeCreateDialogNode(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.createDialogNode(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['dialog_node'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeUpdateDialogNode(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.updateDialogNode(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['dialog_node'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
+  function executeDeleteDialogNode(node, conv, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      conv.deleteDialogNode(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg['dialog_node'] = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function executeUnknownMethod(node, conv, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
@@ -439,6 +579,36 @@ module.exports = function (RED) {
     case 'deleteEntity':
       p = executeDeleteEntity(node, conv, params, msg);
       break;
+    case 'listEntityValues':
+      p = executeListEntityValues(node, conv, params, msg);
+      break;
+    case 'getEntityValue':
+      p = executeGetEntityValue(node, conv, params, msg);
+      break;
+    case 'addEntityValue':
+      p = executeAddEntityValue(node, conv, params, msg);
+      break;
+    case 'updateEntityValue':
+      p = executeUpdateEntityValue(node, conv, params, msg);
+      break;
+    case 'deleteEntityValue':
+      p = executeDeleteEntityValue(node, conv, params, msg);
+      break;
+    case 'listDialogNodes':
+      p = executeListDialogNodes(node, conv, params, msg);
+      break;
+    case 'getDialogNode':
+      p = executeGetDialogNode(node, conv, params, msg);
+      break;
+    case 'updateDialogNode':
+      p = executeUpdateDialogNode(node, conv, params, msg);
+      break;
+    case 'createDialogNode':
+      p = executeCreateDialogNode(node, conv, params, msg);
+      break;
+    case 'deleteDialogNode':
+      p = executeDeleteDialogNode(node, conv, params, msg);
+      break;
     default:
       p = executeUnknownMethod(node, conv, params, msg);
       break;
@@ -447,8 +617,10 @@ module.exports = function (RED) {
     return p;
   }
 
-  function buildWorkspaceParams(method, config, params) {
-    var message = '';
+  function buildWorkspaceParams(msg, method, config, params) {
+    var message = '',
+      workspace_id = '';
+
     switch (method) {
     case 'getIntent':
     case 'updateIntent':
@@ -469,8 +641,23 @@ module.exports = function (RED) {
     case 'createEntity':
     case 'updateEntity':
     case 'deleteEntity':
-      if (config['cwm-workspace-id']) {
-        params['workspace_id'] = config['cwm-workspace-id'];
+    case 'listEntityValues':
+    case 'getEntityValue':
+    case 'addEntityValue':
+    case 'updateEntityValue':
+    case 'deleteEntityValue':
+    case 'listDialogNodes':
+    case 'getDialogNode':
+    case 'createDialogNode':
+    case 'updateDialogNode':
+    case 'deleteDialogNode':
+      if (msg.params && msg.params.workspace_id) {
+        workspace_id = msg.params.workspace_id;
+      } else if (config['cwm-workspace-id']) {
+        workspace_id = config['cwm-workspace-id'];
+      }
+      if (workspace_id) {
+        params['workspace_id'] = workspace_id;
       } else {
         message = 'Workspace ID is required';
       }
@@ -482,9 +669,10 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
-  function buildIntentParams(method, config, params) {
-    var message = '';
-    var field = 'intent';
+  function buildIntentParams(msg, method, config, params) {
+    var message = '',
+      intent = '',
+      field = 'intent';
 
     switch (method) {
     case 'updateIntent':
@@ -495,8 +683,13 @@ module.exports = function (RED) {
     case 'listExamples':
     case 'createExample':
     case 'deleteExample':
-      if (config['cwm-intent']) {
-        params[field] = config['cwm-intent'];
+      if (msg.params && msg.params.intent) {
+        intent = msg.params.intent;
+      } else if (config['cwm-intent']) {
+        intent = config['cwm-intent'];
+      }
+      if (intent) {
+        params[field] = intent;
       } else {
         message = 'a value for Intent is required';
       }
@@ -508,10 +701,10 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
-
-  function buildEntityParams(method, config, params) {
+  function buildEntityParams(msg, method, config, params) {
     var message = '',
-      field = 'entity';
+      field = 'entity',
+      entity = '';
 
     switch (method) {
     case 'updateEntity':
@@ -519,8 +712,18 @@ module.exports = function (RED) {
       // deliberate no break
     case 'getEntity':
     case 'deleteEntity':
-      if (config['cwm-entity']) {
-        params[field] = config['cwm-entity'];
+    case 'listEntityValues':
+    case 'getEntityValue':
+    case 'addEntityValue':
+    case 'updateEntityValue':
+    case 'deleteEntityValue':
+      if (msg.params && msg.params.entity) {
+        entity = msg.params.entity;
+      } else if (config['cwm-entity']) {
+        entity = config['cwm-entity'];
+      }
+      if (entity) {
+        params[field] = entity;
       } else {
         message = 'a value for Entity is required';
       }
@@ -532,16 +735,81 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
-  function buildExampleParams(method, config, params) {
-    var message = '';
+  function buildEntityValueParams(msg, method, config, params) {
+    var message = '',
+      field = 'value',
+      entityValue = '';
+
+    switch (method) {
+    case 'updateEntityValue':
+      field = 'old_value';
+      // deliberate no break
+    case 'getEntityValue':
+    case 'addEntityValue':
+    case 'deleteEntityValue':
+      if (msg.params && msg.params.entity_value) {
+        entityValue = msg.params.entity_value;
+      } else if (config['cwm-entity-value']) {
+        entityValue = config['cwm-entity-value'];
+      }
+      if (entityValue) {
+        params[field] = entityValue;
+      } else {
+        message = 'a value for Entity value is required';
+      }
+      break;
+    }
+    if (message) {
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
+  }
+
+  function buildDialogParams(msg, method, config, params) {
+    var message = '',
+      field = 'dialog_node',
+      dialogID = '';
+
+    switch (method) {
+    case 'updateDialogNode':
+      field = 'old_dialog_node';
+      // deliberate no break
+    case 'getDialogNode':
+    case 'deleteDialogNode':
+      if (msg.params && msg.params.dialog_node) {
+        dialogID = msg.params.dialog_node;
+      } else if (config['cwm-dialog-node']) {
+        dialogID = config['cwm-dialog-node'];
+      }
+      if (dialogID) {
+        params[field] = dialogID;
+      } else {
+        message = 'a value for Dialog Node ID is required';
+      }
+      break;
+    }
+    if (message) {
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
+  }
+
+  function buildExampleParams(msg, method, config, params) {
+    var message = '',
+      example = '';
 
     switch (method) {
     case 'createExample':
     case 'deleteExample':
     case 'createCounterExample':
     case 'deleteCounterExample':
-      if (config['cwm-example']) {
-        params['text'] = config['cwm-example'];
+      if (msg.params && msg.params.example) {
+        example = msg.params.example;
+      } else if (config['cwm-example']) {
+        example = config['cwm-example'];
+      }
+      if (example) {
+        params['text'] = example;
       } else {
         message = 'Example Input is required';
       }
@@ -553,7 +821,6 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
-
   function buildExportParams(method, config, params) {
     switch (method) {
     case 'getIntent':
@@ -561,6 +828,8 @@ module.exports = function (RED) {
     case 'listIntents':
     case 'listEntities':
     case 'getEntity':
+    case 'listEntityValues':
+    case 'getEntityValue':
       params['export'] = config['cwm-export-content'];
       break;
     }
@@ -571,15 +840,21 @@ module.exports = function (RED) {
   // Copy over the appropriate parameters for the required
   // method from the node configuration
   function buildParams(msg, method, config, params) {
-    var p = buildWorkspaceParams(method, config, params)
+    var p = buildWorkspaceParams(msg, method, config, params)
       .then(function(){
-        return buildIntentParams(method, config, params);
+        return buildIntentParams(msg, method, config, params);
       })
       .then(function(){
-        return buildExampleParams(method, config, params);
+        return buildExampleParams(msg, method, config, params);
       })
       .then(function(){
-        return buildEntityParams(method, config, params);
+        return buildEntityParams(msg, method, config, params);
+      })
+      .then(function(){
+        return buildEntityValueParams(msg, method, config, params);
+      })
+      .then(function(){
+        return buildDialogParams(msg, method, config, params);
       })
       .then(function(){
         return buildExportParams(method, config, params);
@@ -620,6 +895,19 @@ module.exports = function (RED) {
         stash['old_entity'] = params['old_entity'];
       }
       break;
+    case 'updateEntityValue':
+      if (params['old_value']) {
+        stash['old_value'] = params['old_value'];
+      }
+      if (params['entity']) {
+        stash['entity'] = params['entity'];
+      }
+      break;
+    case 'updateDialogNode':
+      if (params['old_dialog_node']) {
+        stash['old_dialog_node'] = params['old_dialog_node'];
+      }
+      break;
     }
 
     switch(method) {
@@ -628,6 +916,9 @@ module.exports = function (RED) {
     case 'updateIntent':
     case 'createEntity':
     case 'updateEntity':
+    case 'updateEntityValue':
+    case 'createDialogNode':
+    case 'updateDialogNode':
       if (params['workspace_id']) {
         stash['workspace_id'] = params['workspace_id'];
       }
@@ -688,6 +979,9 @@ module.exports = function (RED) {
     case 'updateIntent':
     case 'createEntity':
     case 'updateEntity':
+    case 'updateEntityValue':
+    case 'createDialogNode':
+    case 'updateDialogNode':
       try {
         workspaceObject = JSON.parse(fs.readFileSync(info.path, 'utf8'));
       } catch (err) {
@@ -731,6 +1025,9 @@ module.exports = function (RED) {
     case 'updateIntent':
     case 'createEntity':
     case 'updateEntity':
+    case 'updateEntityValue':
+    case 'createDialogNode':
+    case 'updateDialogNode':
       return Promise.resolve(true);
     }
     return Promise.resolve(false);
@@ -771,8 +1068,20 @@ module.exports = function (RED) {
         params = {};
 
       username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
+      password = sPassword || this.credentials.password || config.password;  
 
+      // All method to be overridden
+      if (msg.params) {
+        if (msg.params.method) {
+          method = msg.params.method;          
+        }
+        if (msg.params.username) {
+          username = msg.params.username;
+        }
+        if (msg.params.password) {
+          password = msg.params.password;
+        }
+      }
       endpoint = sEndpoint;
       if ((!config['cwm-default-endpoint']) && config['cwm-service-endpoint']) {
         endpoint = config['cwm-service-endpoint'];

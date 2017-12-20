@@ -76,6 +76,18 @@
             <option value="createEntity">Create Entity</option>
             <option value="updateEntity">Update Entity</option>
             <option value="deleteEntity">Delete Entity</option>
+            <option disabled>______________</option>
+            <option value="listEntityValues">List Entity Values</option>
+            <option value="getEntityValue">Get Entity Value Details</option>
+            <option value="addEntityValue">Add Entity Value</option>
+            <option value="updateEntityValue">Update Entity Value</option>
+            <option value="deleteEntityValue">Delete Entity Value</option>
+            <option disabled>______________</option>
+            <option value="listDialogNodes">List Dialog Nodes</option>
+            <option value="getDialogNode">Get Dialog Node Details</option>
+            <option value="createDialogNode">Create Dialog Node</option>
+            <option value="updateDialogNode">Update Dialog Node</option>
+            <option value="deleteDialogNode">Delete Dialog Node</option>
         </select>
     </div>
 
@@ -97,6 +109,16 @@
     <div class="form-row">
         <label for="node-input-cwm-entity"><i class="fa fa-book"></i> Entity</label>
         <input type="text" id="node-input-cwm-entity" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-entity-value"><i class="fa fa-book"></i> Entity Value</label>
+        <input type="text" id="node-input-cwm-entity-value" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cwm-dialog-node"><i class="fa fa-book"></i> Dialog Node ID</label>
+        <input type="text" id="node-input-cwm-dialog-node" placeholder="">
     </div>
 
     <div class="form-row">
@@ -253,8 +275,144 @@
       <p>In this mode the selected entity is removed from the worskpace.
       </p>
     </li>
-
+    <li>list Entity Values
+      <p>In this mode a list of all values for an entitu for the specified conversation
+        workspace are returned on
+        <code>msg.values</code>
+      </p>
+    </li>
+    <li>Get Entity Value
+      <p>In this mode all information about the specified entity value
+        is retrieved. The information is returned on
+        <code>msg.value</code>
+      </p>
+    </li>
+    <li>Add Entity Value
+      <p>In this mode, a new entity value is created in the specified workspace.
+        The input json structure
+        defining the content of the new entity value
+        should be passed in
+        as <code>msg.value</code>
+      </p>
+    </li>
+    <li>Update Entity Value
+      <p>In this mode, the specified entity value is updated. The input json
+        structure
+        defining the content of the updates
+        should be passed in
+        as <code>msg.payload</code>. Only the elements need to be included
+        in the json. Any included element will override the existing setting
+        for the element. ie. Any existing elements will
+        be overridden. ie. If any element is not mentioned in the json, then it
+        will be deleted.
+        You can use this mode to rename an entity value.
+      </p>
+    </li>
+    <li>Delete Entity Value
+      <p>In this mode the selected entity value is removed from the worskpace.
+      </p>
+    </li>
+    <li>list Dialog Nodes
+      <p>In this mode a list of all dialog nodes for the specified conversation
+        workspace are returned on
+        <code>msg.dialog_nodes</code>
+      </p>
+    </li>
+    <li>Get Dialog Node
+      <p>In this mode all information about the dialog node
+        is retrieved. The information is returned on
+        <code>msg.dialog_node</code>
+      </p>
+    </li>
+    <li>Create Dialog Node
+      <p>In this mode, a new dialog node is created. The input json structure
+        defining the content of the node
+        should be passed in
+        as <code>msg.payload</code>.
+      </p>
+    </li>
+    <li>Update Dialog Node
+      <p>In this mode, the specified dialog node is updated. The input json structure
+        defining the content of the updates
+        should be passed in
+        as <code>msg.payload</code>.
+      </p>
+    </li>
+    <li>Delete Dialog Node
+      <p>In this mode the selected dialog node is removed from the worskpace.
+      </p>
+    </li>
     </ul>
+
+    <p>The node configurations can be overridden by setting
+    <ul>
+      <li>
+        <code>msg.params.username</code>
+      </li>
+      <li>
+        <code>msg.params.password</code>
+      </li>  
+      <li>
+        <code>msg.params.workspace_id</code>
+      </li>
+      <li>
+        <code>msg.params.intent</code>
+      </li>
+      <li>
+        <code>msg.params.example</code>
+      </li>
+      <li>
+        <code>msg.params.entity</code>
+      </li>
+      <li>
+        <code>msg.params.entity_value</code>
+      </li>
+      <li>
+        <code>msg.params.dialog_node</code>
+      </li>
+
+      <li>
+        <code>msg.params.method</code>
+        <p>to one of the following values:
+        <select>
+        <option> listWorkspaces </option>
+        <option> getWorkspace </option>
+        <option> createWorkspace </option>
+        <option> updateWorkspace </option>
+        <option> deleteWorkspace </option>
+        <option> listIntents </option>
+        <option> getIntent </option>
+        <option> createIntent </option>
+        <option> updateIntent </option>
+        <option> deleteIntent </option>
+        <option> listExamples </option>
+        <option> createExample </option>
+        <option> deleteExample </option>
+        <option> listCounterExamples </option>
+        <option> createCounterExample</option>
+        <option> deleteCounterExample </option>
+        <option> listEntities </option>
+        <option> getEntity </option>
+        <option> createEntity </option>
+        <option> updateEntity </option>
+        <option> deleteEntity </option>
+        <option> listEntityValues </option>
+        <option> getEntityValue </option>
+        <option> addEntityValue </option>
+        <option> updateEntityValue </option>
+        <option> deleteEntityValue </option>
+        <option> listDialogNodes </option>
+        <option> getDialogNode </option>
+        <option> createDialogNode </option>
+        <option> updateDialogNode </option>
+        <option> deleteDialogNode </option>
+        </select>
+        </p>
+
+
+      </li>
+    </ul>
+    </p>
 
     <p>For more information about the conversation service,
     read the <a href="https://www.ibm.com/watson/developercloud/doc/conversation/index.html">
@@ -294,6 +452,8 @@
                      + ', #node-input-cwm-intent'
                      + ', #node-input-cwm-example'
                      + ', #node-input-cwm-entity'
+                     + ', #node-input-cwm-entity-value'
+                     + ', #node-input-cwm-dialog-node'
                      + ', #node-input-cwm-export-content'
                      + ', #node-input-cwm-service-endpoint');
 
@@ -335,8 +495,15 @@
                       + ', #node-input-cwm-example');
         break;
       case 'getEntity':
+      case 'listEntityValues':
         fields.push('#node-input-cwm-workspace-id'
                         + ', #node-input-cwm-entity'
+                        + ', #node-input-cwm-export-content');
+        break;
+      case 'getEntityValue':
+        fields.push('#node-input-cwm-workspace-id'
+                        + ', #node-input-cwm-entity'
+                        + ', #node-input-cwm-entity-value'
                         + ', #node-input-cwm-export-content');
         break;
       case 'updateEntity':
@@ -344,11 +511,26 @@
         fields.push('#node-input-cwm-workspace-id'
                        + ', #node-input-cwm-entity');
         break;
+      case 'getDialogNode':
+      case 'updateDialogNode':
+      case 'deleteDialogNode':
+        fields.push('#node-input-cwm-workspace-id'
+                       + ', #node-input-cwm-dialog-node');
+        break;
+      case 'addEntityValue':
+      case 'updateEntityValue':
+      case 'deleteEntityValue':
+        fields.push('#node-input-cwm-workspace-id'
+                        + ', #node-input-cwm-entity'
+                        + ', #node-input-cwm-entity-value');
+        break;
       case 'deleteWorkspace':
       case 'updateWorkspace':
       case 'createIntent':
       case 'createEntity':
       case 'listCounterExamples':
+      case 'listDialogNodes':
+      case 'createDialogNode':
         fields.push('#node-input-cwm-workspace-id');
         break;
       case 'listWorkspaces':
@@ -406,6 +588,8 @@
                 'cwm-intent': {value:""},
                 'cwm-example': {value:""},
                 'cwm-entity': {value:""},
+                'cwm-entity-value': {value:""},
+                'cwm-dialog-node': {value:""},
                 'cwm-export-content': {value:false},
                 'cwm-default-endpoint' :{value: true},
                 'cwm-service-endpoint' :{value: 'https://gateway.watsonplatform.net/conversation/api'}
