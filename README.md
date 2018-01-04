@@ -1,4 +1,4 @@
-Node-RED Watson Nodes for IBM Bluemix
+Node-RED Watson Nodes for IBM Cloud
 =====================================
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4f98536040924add9da4ca1deecb72b4)](https://www.codacy.com/app/BetaWorks-NodeRED-Watson/node-red-node-watson?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=watson-developer-cloud/node-red-node-watson&amp;utm_campaign=Badge_Grade)
@@ -138,7 +138,7 @@ Conversation workspace Manager node.
 
 
 ### Watson Nodes for Node-RED
-A collection of nodes to interact with the IBM Watson services in [IBM Bluemix](http://bluemix.net).
+A collection of nodes to interact with the IBM Watson services in [IBM Cloud](http://bluemix.net).
 
 # Nodes
 
