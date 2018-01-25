@@ -279,7 +279,8 @@ module.exports = function (RED) {
       msg.transcription = '';
       if (r) {
         if (r.length && r[0].alternatives.length) {
-          msg.fullresult = r;
+          //msg.fullresult = r;
+          msg.fullresult = data;
         }
         msg.transcription = '';
         r.forEach(function(a){
