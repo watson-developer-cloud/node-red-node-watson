@@ -12,6 +12,7 @@ Node-RED Watson Nodes for IBM Cloud
 - Document link updates
 - IE fix
 - Option to set Conversation credentials though msg.params
+- Removed Document Conversion Node 
 - Nodes deprecated in 0.5.x will be removed in 0.5.x releases
 
 

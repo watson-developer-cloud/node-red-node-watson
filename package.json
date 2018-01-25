@@ -38,7 +38,6 @@
       "watson-discovery-v1":"services/discovery/v1.js",
       "watson-discovery-v1-document-loader":"services/discovery/v1-document-loader.js",
       "watson-discovery-v1-query-builder":"services/discovery/v1-query-builder.js",
-      "watson-document-conversion-v1": "services/document_conversion/v1.js",
       "watson-concept-insights-v2": "services/concept_insights/v2.js",
       "alchemy-date-extraction": "services/alchemy_date_extraction/v1.js",
       "watson-dialog-v1": "services/dialog/v1.js",
