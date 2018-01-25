@@ -24,26 +24,10 @@ A collection of nodes to interact with the IBM Watson services in [IBM Cloud](ht
 
 # Nodes
 
-- Concept Insights
-    - Use concept graphs to tag and explore information and documents.
 - Conversation
     - Add conversational capabilities into applications.
-- Date Extraction
-    - Uses AlchemyAPI Date Extraction to detect natural language date/time expressions from text
-- Dialog
-    - Automate branching conversation between a user and your application.
-    - Use natural language to automatically respond to user questions, cross-sell and up-sell, walk users through processes or applications, or even hand-hold users through difficult tasks.
 - Discovery
     - List environments created for the Discovery service
-- Document Conversion
-    - Prepare documents for the Retrieve and Rank service.
-- Feature Extract
-    - Analyse a single piece of text content (either public URL, HTML or raw text)
-      to extract multiple AlchemyAPI detected features, e.g. entities, keywords,
-      sentiment.           
-- Image Analysis
-    - Upload an image to detect either faces, URL text or
-      content present in the image.
 - Language Identification
     - Detects the language used in text
 - Language Translation
@@ -52,22 +36,16 @@ A collection of nodes to interact with the IBM Watson services in [IBM Cloud](ht
     - Uses machine learning algorithms to return the top matching predefined classes for short text inputs.
 - Natural Language Understanding
     - Analyze text to extract meta-data from content such as concepts, entities, keywords ...
-- News
-    - Searches news and blog content    
 - Personality Insights
     - Use linguistic analytics to infer cognitive and social characteristics from text
 - Retrieve and Rank
     - Creates a trainable search engine for your data  
-- Similarity search
-    - Create and search against image collections  
 - Speech To Text
     - Convert audio containing speech to text
 - Text To Speech
     - Convert text to audio speech
 - Tone Analyzer
     - Discover, understand, and revise the language tones in text.
-- Tradeoff Analytics
-    - Optimize decisions balance between multiple conflicting objectives.
 - Visual Recognition
     - Analyze visual appearance of images to understand their contents
 
@@ -82,4 +60,4 @@ before doing so.
 
 ### Copyright and license
 
-Copyright 2014, 2016 IBM Corp. under [the Apache 2.0 license](LICENSE).
+Copyright 2018 IBM Corp. under [the Apache 2.0 license](LICENSE).
