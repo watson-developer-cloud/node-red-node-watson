@@ -1047,7 +1047,7 @@ module.exports = function (RED) {
   }
 
 
-  // These are APIs that the node has created to allow it to dynamically fetch Bluemix
+  // These are APIs that the node has created to allow it to dynamically fetch IBM Cloud
   // credentials, and also translation models. This allows the node to keep up to
   // date with new tranlations, without the need for a code update of this node.
 
@@ -1067,14 +1067,21 @@ module.exports = function (RED) {
         message = '',
         params = {};
 
-      // All method to be overridden
-      if (msg.params && msg.params.method) {
-        method = msg.params.method;
-      }
-
       username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
+      password = sPassword || this.credentials.password || config.password;  
 
+      // All method to be overridden
+      if (msg.params) {
+        if (msg.params.method) {
+          method = msg.params.method;          
+        }
+        if (msg.params.username) {
+          username = msg.params.username;
+        }
+        if (msg.params.password) {
+          password = msg.params.password;
+        }
+      }
       endpoint = sEndpoint;
       if ((!config['cwm-default-endpoint']) && config['cwm-service-endpoint']) {
         endpoint = config['cwm-service-endpoint'];
