@@ -37,8 +37,6 @@
       "watson-discovery-v1":"services/discovery/v1.js",
       "watson-discovery-v1-document-loader":"services/discovery/v1-document-loader.js",
       "watson-discovery-v1-query-builder":"services/discovery/v1-query-builder.js",
-      "watson-concept-insights-v2": "services/concept_insights/v2.js",
-      "watson-dialog-v1": "services/dialog/v1.js",
       "watson-language-translator-v2": "services/language_translator/v2.js",
       "watson-language-translator-identify-v2": "services/language_translator_identify/v2.js",
       "watson-language-translator-util-v2": "services/language_translator_util/v2.js",
@@ -51,7 +49,6 @@
       "watson-text-to-speech-v1": "services/text_to_speech/v1.js",
       "watson-text-to-speech-corpus-builder-v1": "services/text_to_speech/v1-corpus-builder.js",
       "watson-tone-analyzer-v3": "services/tone_analyzer/v3.js",
-      "watson-tradeoff-analytics-v1": "services/tradeoff_analytics/v1.js",
       "watson-visual-recognition-v3": "services/visual_recognition/v3.js"
     }
   },
