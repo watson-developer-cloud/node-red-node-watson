@@ -12,7 +12,8 @@ Node-RED Watson Nodes for IBM Cloud
 - Document link updates
 - IE fix
 - Option to set Conversation credentials though msg.params
-- Removed Document Conversion, Alchemy, Concept Insights, Dialog, Tradeoff Analytics and Similarity Search Nodes 
+- Text Recognition option removed from Visual Recognition Node
+- Removed Document Conversion, Alchemy, Concept Insights, Dialog, Tradeoff Analytics and Similarity Search Nodes
 - Nodes deprecated in 0.5.x will be removed in 0.5.x releases
 
 
