@@ -12,7 +12,7 @@ Node-RED Watson Nodes for IBM Cloud
 - Document link updates
 - IE fix
 - Option to set Conversation credentials though msg.params
-- Speech To Text fullresult now includes speaker_labels. Breaking change to any code that used fullresult with an extra level of indirection.
+- Speech To Text fullresult now includes speaker_labels. Breaking change to any code that used fullresult due an extra level of indirection.
 - Allow Korean as an option for Personality Insights
 - Text Recognition option removed from Visual Recognition Node
 - Removed Document Conversion, Alchemy, Concept Insights, Dialog, Tradeoff Analytics and Similarity Search Nodes
