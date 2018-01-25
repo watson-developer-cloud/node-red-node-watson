@@ -115,6 +115,8 @@ PayloadUtils.prototype = {
   // Function that is returns a function to count
   // the characters in each language.
   word_count: function(ct) {
+    var count = require('word-count');
+    console.log('Looking for Word count function');
     var kuromoji = require('kuromoji'),
       fn = function(txt, cb) {
         // default
@@ -133,6 +135,10 @@ PayloadUtils.prototype = {
           tokenizer = tknz;
           return cb(tokenizer.tokenize(txt).length);
         });
+      };
+    } else if (ct == 'ko') {
+      fn = function(txt, cb) {
+        cb(count(txt));
       };
     }
     return fn;
