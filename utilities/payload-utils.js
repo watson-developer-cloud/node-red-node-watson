@@ -136,7 +136,7 @@ PayloadUtils.prototype = {
           return cb(tokenizer.tokenize(txt).length);
         });
       };
-    } else if (ct == 'ko') {
+    } else if (ct === 'ko') {
       fn = function(txt, cb) {
         cb(count(txt));
       };
