@@ -112,11 +112,43 @@ PayloadUtils.prototype = {
         typeof (obj._readableState === 'object');
   },
 
+  langTransToSTTFormat : function (code) {
+    switch (code) {
+    case 'pt':
+      code = 'pt-BR';
+      break;
+    case 'ko':
+      code = 'ko-KR';
+      break;
+    case 'fr':
+      code = 'fr-FR';
+      break;
+    case 'en':
+      code = 'en-US';
+      break;
+    case 'ja':
+      code = 'ja-JP';
+      break;
+    case 'es':
+      code = 'es-ES';
+      break
+    case 'ar':
+      code = 'ar-AR';
+      break
+    case 'ko':
+      code = 'ko-KR';
+      break
+    case 'zh':
+      code = 'zh-CN';
+      break
+    }
+    return code;
+  },
+
   // Function that is returns a function to count
   // the characters in each language.
   word_count: function(ct) {
     var count = require('word-count');
-    console.log('Looking for Word count function');
     var kuromoji = require('kuromoji'),
       fn = function(txt, cb) {
         // default
