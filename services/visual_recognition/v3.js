@@ -72,17 +72,11 @@ module.exports = function(RED) {
     }
   }
 
-// "classify", "faces" or "text"
-//             <option value="detectFaces">Detect Faces</option>
-//            <option value="recognizeText">Recognize Text</option>
-// <option selected="selected" value="classifyImage">Classify an image</option>
-
 
   function verifyFeatureMode(node, msg, config) {
     const theOptions = {
       'classify' : 'classifyImage',
-      'faces' : 'detectFaces',
-      'text' : 'recognizeText'
+      'faces' : 'detectFaces'
     };
 
     var f = config['image-feature'];
@@ -105,7 +99,6 @@ module.exports = function(RED) {
     switch (feature) {
     case 'classifyImage':
     case 'detectFaces':
-    case 'recognizeText':
       if (typeof msg.payload === 'boolean' ||
         typeof msg.payload === 'number') {
         return Promise.reject('Bad format : msg.payload must be a URL string or a Node.js Buffer');
@@ -356,15 +349,6 @@ module.exports = function(RED) {
           }
         });
         break;
-      case 'recognizeText':
-        node.service.recognizeText(params, function(err, body) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(body);
-          }
-        });
-        break;
       }
     });
     return p;
@@ -493,7 +477,7 @@ module.exports = function(RED) {
       shape: 'dot',
       text: 'Calling ' + feature + ' ...'
     });
-    if (feature === 'classifyImage' || feature === 'detectFaces' || feature === 'recognizeText') {
+    if (feature === 'classifyImage' || feature === 'detectFaces') {
       return executeService(feature, params, node, msg);
       //return Promise.resolve();
     } else {
