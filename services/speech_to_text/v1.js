@@ -134,6 +134,14 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
+    function overrideCheck(msg) {
+      if (msg.srclang){
+        var langCode = payloadutils.langTransToSTTFormat(msg.srclang);
+        config.lang = langCode;
+      }
+      return Promise.resolve();
+    }
+
     function payloadCheck(msg) {
       var message = '';
       // The input comes in on msg.payload, and can either be an audio file or a string
@@ -318,6 +326,9 @@ module.exports = function (RED) {
       })
       .then(function(){
         return payloadCheck(msg);
+      })
+      .then(function(){
+        return overrideCheck(msg);
       })
       .then(function(){
         return processInput(msg);
