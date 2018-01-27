@@ -125,6 +125,12 @@
     automatically but the is not true in reverse.</p>
     <p>Use the speaker label property to  identify which individuals spoke which words in a multi-participant exchange.
     </p>
+    <p>Source language parameters can be configured through the editor panel or set dynamically using
+    the language code in <code>msg.srclang</code> Please see
+    the documentation linked below for the currently supported language codes. You can use the
+    two character code from Language Indentification, but the language will default. eg. <code>en</code>
+    will default to <code>en-US</code></p>
+    <p></p>
     <p>The returned audio transcription will be returned on <code>msg.transcription</code>.</p>
     <p>The full response, including alternative transcriptions can be found on
     <code>msg.fullresult</code>.</p>
@@ -157,6 +163,7 @@
                     'zh-CN': 'Mandarin',
                     'es-ES': 'Spanish',
                     'ar-AR': 'Arablic',
+                    'ko-KR': 'Korean',
                     'ja-JP': 'Japanese'
                   };
 
@@ -511,7 +518,7 @@
                 name: {value: ''},
                 alternatives: {value: 1},
                 speakerlabels: {value: true},
-                smartformatting: {value: false},                
+                smartformatting: {value: false},
                 lang: {value: ''},
                 langhidden: {value: ''},
                 langcustom: {value: ''},
