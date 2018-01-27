@@ -136,7 +136,7 @@ module.exports = function (RED) {
 
     function overrideCheck(msg) {
       if (msg.srclang){
-        langCode = payloadutils.langTransToSTTFormat(msg.srclang);
+        var langCode = payloadutils.langTransToSTTFormat(msg.srclang);
         config.lang = langCode;
       }
       return Promise.resolve();

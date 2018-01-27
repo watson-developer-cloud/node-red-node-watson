@@ -131,16 +131,13 @@ PayloadUtils.prototype = {
       break;
     case 'es':
       code = 'es-ES';
-      break
+      break;
     case 'ar':
       code = 'ar-AR';
-      break
-    case 'ko':
-      code = 'ko-KR';
-      break
+      break;
     case 'zh':
       code = 'zh-CN';
-      break
+      break;
     }
     return code;
   },
