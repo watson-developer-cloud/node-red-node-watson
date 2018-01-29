@@ -142,13 +142,26 @@ module.exports = function(RED) {
       return Promise.reject('Missing Watson Visual Recognition API service credentials');
     }
 
-    node.service = new VisualRecognitionV3({
+    var serviceSettings = {
       api_key: node.apikey,
       version_date: VisualRecognitionV3.VERSION_DATE_2016_05_20,
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
-    });
+    };
+
+    // The change to watson-developer-cloud 3.0.x has resulted in a
+    // change in how the Accept-Language is specified. It now needs
+    // to go in as a header.
+
+    if (node.config != null && node.config.lang != null) {
+      serviceSettings.headers['Accept-Language'] = node.config.lang;
+    }
+    if (msg.params != null && msg.params.accept_language != null) {
+      serviceSettings.headers['Accept-Language'] = msg.params['accept_language'];
+    }
+
+    node.service = new VisualRecognitionV3(serviceSettings);
 
     return Promise.resolve();
   }
