@@ -80,7 +80,7 @@ module.exports = function (RED) {
     }
 
     if(jsonPayload){
-      ext = '.json'
+      ext = '.json';
     }
 
     return Promise.resolve(ext);
