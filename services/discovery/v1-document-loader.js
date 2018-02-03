@@ -71,11 +71,12 @@ module.exports = function (RED) {
     // its a word doc.
     var ext = '.json',
       ft = fileType(msg.payload);
-
+      console.log(ft);
     if (ft && ft.ext) {
       ext = '.' + ft.ext;
     }
     if (isDocx(msg.payload)) {
+      console.log('docx');
       ext = '.docx';
     }
 
@@ -128,7 +129,7 @@ module.exports = function (RED) {
     return 'Doc ' + (new Date()).toString() + suffix;
   }
 
-  function execute(params, msg, suffix) {
+  function execute(params, msg, suffix, jsonPayload) {
     var p = new Promise(function resolver(resolve, reject) {
       var discovery = null, p = null, method = null,
         serviceSettings = {
@@ -240,7 +241,7 @@ module.exports = function (RED) {
 
           node.status({ fill: 'blue', shape: 'dot', text: 'processing' });
           //return Promise.reject('temp disabled');
-          return execute(params, msg, fileSuffix);
+          return execute(params, msg, fileSuffix, jsonPayload);
         })
         .then(function(){
           temp.cleanup();
