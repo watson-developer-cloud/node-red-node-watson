@@ -80,7 +80,7 @@ module.exports = function (RED) {
     }
 
     if(jsonPayload){
-      ext = ".json";
+      ext = '.json';
     }
 
     return Promise.resolve(ext);
@@ -195,7 +195,7 @@ module.exports = function (RED) {
         endpoint = config['service-endpoint'];
       }
      
-      if(config["json-payload"]){
+      if(config['json-payload']){
         jsonPayload = true;
       }
 
