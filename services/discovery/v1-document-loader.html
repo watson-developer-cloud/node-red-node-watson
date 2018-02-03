@@ -52,6 +52,11 @@
         <input type="text" id="node-input-collection_id" placeholder="">
     </div>
     <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-json-payload" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-json-payload" style="width: 70%;"> Use Json from payload</label>
+    </div>
+    <div class="form-row">
         <label for="node-input-filename"><i class="fa fa-tag"></i> Filename</label>
         <input type="text" id="node-input-filename" placeholder="">
     </div>
@@ -124,7 +129,8 @@
                 collection_id: {value: ''},
                 filename: {value: ''},
                 'default-endpoint' :{value: true},
-                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/discovery/api'}
+                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/discovery/api'},
+                'json-payload' :{value: false}
             },
             credentials: {
               username: {type:'text'},

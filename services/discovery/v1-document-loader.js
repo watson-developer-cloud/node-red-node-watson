@@ -66,17 +66,22 @@ module.exports = function (RED) {
     return Promise.reject('msg.payload should be a data buffer or json object');
   }
 
-  function determineSuffix(msg) {
+  function determineSuffix(msg, jsonPayload) {
     // Let's assume that if we can't determine the suffix that
     // its a word doc.
     var ext = '.json',
       ft = fileType(msg.payload);
-
+      console.log(ft);
     if (ft && ft.ext) {
       ext = '.' + ft.ext;
     }
     if (isDocx(msg.payload)) {
+      console.log('docx');
       ext = '.docx';
+    }
+
+    if(jsonPayload){
+      ext = '.json';
     }
 
     return Promise.resolve(ext);
@@ -124,7 +129,7 @@ module.exports = function (RED) {
     return 'Doc ' + (new Date()).toString() + suffix;
   }
 
-  function execute(params, msg, suffix) {
+  function execute(params, msg, suffix, jsonPayload) {
     var p = new Promise(function resolver(resolve, reject) {
       var discovery = null, p = null, method = null,
         serviceSettings = {
@@ -142,7 +147,7 @@ module.exports = function (RED) {
 
       discovery = new DiscoveryV1(serviceSettings);
 
-      if ('.json' === suffix) {
+      if ('.json' === suffix || jsonPayload) {
         method = 'addJsonDocument';
       } else {
         method = 'addDocument';
@@ -180,6 +185,7 @@ module.exports = function (RED) {
       var message = '',
         fileInfo = '',
         fileSuffix = '',
+        jsonPayload = false,
         params = {};
 
       username = sUsername || this.credentials.username;
@@ -188,6 +194,10 @@ module.exports = function (RED) {
       endpoint = sEndpoint;
       if ((!config['default-endpoint']) && config['service-endpoint']) {
         endpoint = config['service-endpoint'];
+      }
+     
+      if(config['json-payload']){
+        jsonPayload = true;
       }
 
       node.status({});
@@ -200,7 +210,7 @@ module.exports = function (RED) {
           return checkParams(params);
         })
         .then(function(){
-          return determineSuffix(msg);
+          return determineSuffix(msg, jsonPayload);
         })
         .then(function(suffix) {
           fileSuffix = suffix;
@@ -218,16 +228,20 @@ module.exports = function (RED) {
           //params.file = theStream;
           //var fname = 'temp' + fileSuffix;
           var fname = whatName(params, fileSuffix);
-          params.file = {
-            value: theStream,
-            options: {
-              filename: fname
-            }
-          };
+          if(!jsonPayload){
+            params.file = {
+              value: theStream,
+              options: {
+                filename: fname
+              }
+            };
+          } else {
+            params.file = msg.payload;
+          }
 
           node.status({ fill: 'blue', shape: 'dot', text: 'processing' });
           //return Promise.reject('temp disabled');
-          return execute(params, msg, fileSuffix);
+          return execute(params, msg, fileSuffix, jsonPayload);
         })
         .then(function(){
           temp.cleanup();
