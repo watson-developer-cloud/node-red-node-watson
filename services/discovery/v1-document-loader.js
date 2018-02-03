@@ -184,7 +184,7 @@ module.exports = function (RED) {
       var message = '',
         fileInfo = '',
         fileSuffix = '',
-        jsonPayload = false, //new var to check the 'Use Json from payload' option.
+        jsonPayload = false,
         params = {};
 
       username = sUsername || this.credentials.username;
