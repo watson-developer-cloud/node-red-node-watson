@@ -22,10 +22,12 @@ module.exports = function (RED) {
     temp = require('temp'),
     url = require('url'),
     fs = require('fs'),
+    WebSocket = require('ws'),
     fileType = require('file-type'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     sttV1 = require('watson-developer-cloud/speech-to-text/v1'),
+    authV1 = require('watson-developer-cloud/authorization/v1'),
     username = '', password = '', sUsername = '', sPassword = '',
     endpoint = '',
     sEndpoint = 'https://stream.watsonplatform.net/speech-to-text/api',
@@ -55,12 +57,12 @@ module.exports = function (RED) {
   // date with new tranlations, without the need for a code update of this node.
 
   // Node RED Admin - fetch and set vcap services
-  RED.httpAdmin.get('/watson-speech-to-text/vcap', function (req, res) {
+  RED.httpAdmin.get('/watson-speech-to-text/vcap', (req, res) => {
     res.json(service ? {bound_service: true} : null);
   });
 
   // API used by widget to fetch available models
-  RED.httpAdmin.get('/watson-speech-to-text/models', function (req, res) {
+  RED.httpAdmin.get('/watson-speech-to-text/models', (req, res) => {
     //endpoint = sEndpoint ? sEndpoint : req.query.e;
     endpoint = req.query.e ? req.query.e : sEndpoint;
 
@@ -73,7 +75,7 @@ module.exports = function (RED) {
       }
     });
 
-    stt.getModels({}, function(err, models){
+    stt.getModels({}, (err, models) => {
       if (err) {
         res.json(err);
       } else {
@@ -83,7 +85,7 @@ module.exports = function (RED) {
   });
 
   // API used by widget to fetch available customisations
-  RED.httpAdmin.get('/watson-speech-to-text/customs', function (req, res) {
+  RED.httpAdmin.get('/watson-speech-to-text/customs', (req, res) => {
     //endpoint = sEndpoint ? sEndpoint : req.query.e;
     endpoint = req.query.e ? req.query.e : sEndpoint;
 
@@ -96,7 +98,7 @@ module.exports = function (RED) {
       }
     });
 
-    stt.getCustomizations({}, function(err, customs){
+    stt.getCustomizations({}, (err, customs) => {
       if (err) {
         res.json(err);
       } else {
@@ -110,7 +112,11 @@ module.exports = function (RED) {
 
   function Node (config) {
     RED.nodes.createNode(this, config);
-    var node = this;
+    var node = this, token = null, tokenTime = null,
+      websocket = null,
+      socketCreationInProcess = false,
+      socketListening = false;
+    const HOUR = 60 * 60;
 
     function initialCheck(username, password) {
       if (!username || !password) {
@@ -142,8 +148,9 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
-    function payloadCheck(msg) {
+    function payloadNonStreamCheck(msg) {
       var message = '';
+
       // The input comes in on msg.payload, and can either be an audio file or a string
       // representing a URL.
       if (!msg.payload instanceof Buffer || !typeof msg.payload === 'string') {
@@ -179,13 +186,21 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
+    function payloadCheck(msg) {
+      if (config['streaming-mode']) {
+        return Promise.resolve();
+      } else {
+        return payloadNonStreamCheck(msg);
+      }
+    }
+
     function processInputBuffer(msg) {
       var p = new Promise(function resolver(resolve, reject){
-        temp.open({suffix: '.' + fileType(msg.payload).ext}, function (err, info) {
+        temp.open({suffix: '.' + fileType(msg.payload).ext}, (err, info) => {
           if (err) {
             reject(err);
           }
-          payloadutils.stream_buffer(info.path, msg.payload, function (format) {
+          payloadutils.stream_buffer(info.path, msg.payload, (format) => {
             var audioData = {},
               audio = fs.createReadStream(info.path);
 
@@ -200,11 +215,11 @@ module.exports = function (RED) {
 
     function processInputURL(msg) {
       var p = new Promise(function resolver(resolve, reject){
-        temp.open({suffix: '.audio'}, function(err, info){
+        temp.open({suffix: '.audio'}, (err, info) => {
           if (err) {
             reject(err);
           }
-          payloadutils.stream_url(info.path, msg.payload, function (err, format) {
+          payloadutils.stream_url(info.path, msg.payload, (err, format) => {
             if (err) {
               reject(err);
             }
@@ -220,10 +235,24 @@ module.exports = function (RED) {
       return p;
     }
 
+    function processInputStream(msg) {
+      var tmp = msg.payload;
+
+      if ("string" === typeof msg.payload) {
+        msg.payload = JSON.parse(tmp);
+      } else {
+        msg.payload = { 'mode' : 'data', 'data' : tmp };
+      }
+
+      return Promise.resolve(msg.payload);
+    }
+
     function processInput(msg) {
       // We are now ready to process the input data
       // If its a buffer then need to read it all before invoking the service
-      if (msg.payload instanceof Buffer) {
+      if (config['streaming-mode']){
+        return processInputStream(msg);
+      } else if (msg.payload instanceof Buffer) {
         return processInputBuffer(msg);
       } else if (payloadutils.urlCheck(msg.payload)) {
         return processInputURL(msg);
@@ -231,24 +260,31 @@ module.exports = function (RED) {
       return Promise.reject('Payload must be either an audio buffer or a string representing a url');
     }
 
+    function determineService() {
+      var serviceSettings = {
+          username: username,
+          password: password,
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
+        };
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
+      return new sttV1(serviceSettings);
+    }
+
+    function determineTokenService(stt) {
+      return new authV1(stt.getCredentials());
+    }
+
     function performSTT(audioData) {
       var p = new Promise(function resolver(resolve, reject){
         var model = config.lang + '_' + config.band,
           params = {},
-          speech_to_text = null,
-          serviceSettings = {
-            username: username,
-            password: password,
-            headers: {
-              'User-Agent': pkg.name + '-' + pkg.version
-            }
-          };
+          speech_to_text = null;
 
-        if (endpoint) {
-          serviceSettings.url = endpoint;
-        }
-
-        speech_to_text = new sttV1(serviceSettings);
+        speech_to_text = determineService();
 
         // If we get to here then the audio is in one of the supported formats.
         if (audioData.format === 'ogg') {
@@ -281,6 +317,139 @@ module.exports = function (RED) {
       return p;
     }
 
+    function getToken(stt) {
+      var p = new Promise(function resolver(resolve, reject) {
+        var now = Math.floor(Date.now() / 1000);
+        var tokenService = determineTokenService(stt);
+
+        if (token && now > (HOUR + tokenTime)) {
+          return resolve();
+        } else {
+          // Everything is now in place to invoke the service
+          tokenService.getToken(function (err, res) {
+            if (err) {
+              reject(err);
+            } else {
+              tokenTime = now;
+              token = res;
+              resolve();
+            }
+          });
+        }
+      });
+      return p;
+    }
+
+    function connectToSTTSocket() {
+      var p = new Promise(function resolver(resolve, reject) {
+        var model = config.lang + '_' + config.band;
+        var wsURI = 'wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize'
+                           + '?watson-token=' + token + '&model=' + model;
+        if (!websocket && !socketCreationInProcess) {
+           socketCreationInProcess = true;
+           var ws = new WebSocket(wsURI);
+           ws.on('open', () => {
+             console.log('******************');
+             console.log('Web Socket is now open');
+
+             var message = {
+               action: 'start',
+               'content-type': 'audio/wav',
+               //'content-type': 'audio/webm',
+               'interim_results': true
+               //'max-alternatives': 3,
+               //keywords: ['colorado', 'tornado', 'tornadoes'],
+               //'keywords_threshold': 0.5
+             };
+             ws.send(JSON.stringify(message));
+             websocket = ws;
+             socketCreationInProcess = false;
+             //resolve({'status': 'ready'});
+           });
+           ws.on('message', (data) => {
+             // First message will be 'state': 'listening'
+             console.log('-----------------------');
+             console.log('Data Received from Input');
+             console.log(data);
+             socketListening = true;
+             resolve(data);
+           });
+
+           ws.on('close', () => {
+             websocket = null;
+             console.log('STT Socket disconnected');
+             //setTimeout(connectToSTTSocket, 1000);
+          });
+        } else if (socketCreationInProcess) {
+          resolve({'state': 'notready'});
+        }
+        else {
+          resolve();
+        }
+      });
+      return p;
+    }
+
+    function sendAudioSTTSocket(audioData) {
+      var p = new Promise(function resolver(resolve, reject) {
+        //console.log('Sending Audio');
+        if (audioData && audioData.mode) {
+          if ('data' === audioData.mode) {
+            console.log('Sending Audio');
+            //console.log(audioData.data);
+            websocket.send(audioData.data, (error) => {
+              if (error) {
+                console.log(error);
+                reject(error);
+              } else {
+                resolve();
+              }
+            });
+          } else {
+            var message = {
+              action: 'start',
+              'content-type': 'audio/wav',
+              //'content-type': 'audio/webm',
+              'interim_results': true
+            };
+            if (audioData.mode === 'stop') {
+              message.action = 'stop';
+            }
+            websocket.send(JSON.stringify(message));
+          }
+        }
+      });
+      return p;
+    }
+
+    function performStreamSTT(audioData) {
+      var speech_to_text = determineService();
+      var p = getToken(speech_to_text)
+        .then(() => {
+          return connectToSTTSocket();
+        })
+        .then((data) => {
+          if (data && data.state !== 'listening') {
+            return Promise.resolve();
+          } else if (data && data.state === 'listening') {
+            //return Promise.resolve();
+            //socketListening = true;
+            return Promise.resolve();
+            //return sendAudioSTTSocket(audioData);
+          } else if (socketListening) {
+            return sendAudioSTTSocket(audioData);
+          } else {
+            //for now ignore, but get ready to process.
+            //if listening then process.
+            return Promise.resolve();
+          }
+        })
+        .then(() => {
+          return Promise.resolve();
+        })
+      return p;
+    }
+
     function processResponse(msg, data) {
       var r = data.results;
 
@@ -291,7 +460,7 @@ module.exports = function (RED) {
           msg.fullresult = data;
         }
         msg.transcription = '';
-        r.forEach(function(a){
+        r.forEach((a) => {
           msg.transcription += a.alternatives[0].transcript;
           //a.alternatives.forEach(function(t){
           //  msg.transcription += t.transcript;
@@ -305,7 +474,7 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
-    this.on('input', function (msg) {
+    this.on('input', (msg) => {
       // Credentials are needed for the service. They will either be bound or
       // specified by the user in the dialog.
       username = sUsername || this.credentials.username;
@@ -321,31 +490,39 @@ module.exports = function (RED) {
       // Now perform checks on the input and parameters, to make sure that all
       // is in place before the service is invoked.
       initialCheck(username, password)
-      .then(function(){
+      .then(() => {
         return configCheck();
       })
-      .then(function(){
+      .then(() => {
         return payloadCheck(msg);
       })
-      .then(function(){
+      .then(() => {
         return overrideCheck(msg);
       })
-      .then(function(){
+      .then(() => {
         return processInput(msg);
       })
-      .then(function(audioData){
+      .then((audioData) => {
         node.status({fill:'blue', shape:'dot', text:'requesting'});
-        return performSTT(audioData);
+        if (config['streaming-mode']) {
+          return performStreamSTT(audioData);
+        } else {
+          return performSTT(audioData);
+        }
       })
-      .then(function(data){
-        return processResponse(msg, data);
+      .then((data) => {
+        if (config['streaming-mode']) {
+          return Promise.resolve();
+        } else {
+          return processResponse(msg, data);
+        }
       })
-      .then(function(){
+      .then(() => {
         temp.cleanup();
         node.status({});
         node.send(msg);
       })
-      .catch(function(err){
+      .catch((err) => {
         temp.cleanup();
         payloadutils.reportError(node,msg,err);
       });
