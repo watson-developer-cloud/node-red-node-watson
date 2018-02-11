@@ -338,7 +338,7 @@ module.exports = function (RED) {
         var tokenService = determineTokenService(stt);
 
         if (token && now > (HOUR + tokenTime)) {
-          return resolve();
+          resolve();
         } else {
           // Everything is now in place to invoke the service
           tokenService.getToken(function (err, res) {
