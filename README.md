@@ -10,7 +10,9 @@ Node-RED Watson Nodes for IBM Cloud
 ### New in version 0.6.3
 - Allow input / output from Node-RED web-sockets for Speech to Text node. To
 enable select streaming mode. No token is needed as the Node handles this. Look
-out for sample flows and templates showing how to use this feature.   
+out for sample flows and templates showing how to use this feature.
+- Three new languages for Language Translator, in Neural Translation mode.
+- Removed the code for the deprecated Language Translation Nodes.  
 
 ### New in version 0.6.2
 - Visual Recognition fix for accept-language
