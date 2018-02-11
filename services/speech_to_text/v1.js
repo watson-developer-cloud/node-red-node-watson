@@ -198,9 +198,8 @@ module.exports = function (RED) {
     function payloadCheck(msg) {
       if (config['streaming-mode']) {
         return Promise.resolve();
-      } else {
-        return payloadNonStreamCheck(msg);
       }
+      return payloadNonStreamCheck(msg);
     }
 
     function processInputBuffer(msg) {
@@ -250,7 +249,7 @@ module.exports = function (RED) {
     function processInputStream(msg) {
       var tmp = msg.payload;
 
-      if ("string" === typeof msg.payload) {
+      if ('string' === typeof msg.payload) {
         msg.payload = JSON.parse(tmp);
         if ( msg.payload.action &&
                 'start' === msg.payload.action) {
@@ -394,7 +393,7 @@ module.exports = function (RED) {
             ws.send(JSON.stringify(startPacket));
             websocket = ws;
             socketCreationInProcess = false;
-             //resolve();
+            //resolve();
           });
 
           ws.on('message', (data) => {
@@ -402,7 +401,7 @@ module.exports = function (RED) {
             console.log('-----------------------');
             console.log('Data Received from Input');
             console.log(data);
-            var d = JSON.parse(data)
+            var d = JSON.parse(data);
             var newMsg = {payload : JSON.parse(data)};
             node.send(newMsg);
             if (d && d.state && 'listening' === d.state){
@@ -469,11 +468,9 @@ module.exports = function (RED) {
                 resolve();
               }
             });
-          } else {
-            if (audioData.action === 'stop') {
-              websocket.send(JSON.stringify(audioData));
-              socketListening = false;
-            }
+          } else if (audioData.action === 'stop') {
+            websocket.send(JSON.stringify(audioData));
+            socketListening = false;
           }
         }
       });
@@ -491,6 +488,7 @@ module.exports = function (RED) {
             return processSTTSocketStart(true);
           case 'stop':
             delay = 2000;
+            // deliberate no break
           case 'data':
             // Add a Delay to allow the listening thread to kick in
             // Delays for Stop is longer, so that it doesn't get actioned
@@ -508,7 +506,7 @@ module.exports = function (RED) {
         })
         .then(() => {
           return Promise.resolve();
-        })
+        });
       return p;
     }
 
