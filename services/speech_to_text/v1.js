@@ -116,7 +116,10 @@ module.exports = function (RED) {
       websocket = null,
       socketCreationInProcess = false,
       socketListening = false,
-      contentType = null,
+      startPacket = { action: 'start',
+                       'content-type' :'audio/wav',
+                       'interim_results': true
+                    },
       audioStack =[];
     const HOUR = 60 * 60;
 
@@ -242,13 +245,12 @@ module.exports = function (RED) {
 
       if ("string" === typeof msg.payload) {
         msg.payload = JSON.parse(tmp);
-        if ( msg.payload.mode &&
-                'start' === msg.payload.mode &&
-                msg.payload.type ) {
-          contentType = msg.payload.type;
+        if ( msg.payload.action &&
+                'start' === msg.payload.action) {
+          startPacket = msg.payload;
         }
       } else {
-        msg.payload = { 'mode' : 'data', 'data' : tmp };
+        msg.payload = { 'action' : 'data', 'data' : tmp };
       }
 
       return Promise.resolve(msg.payload);
@@ -347,80 +349,85 @@ module.exports = function (RED) {
       return p;
     }
 
-    function connectIfNeeded(dataIn) {
+    function connectIfNeeded() {
+      console.log('re-establishing the connect');
+      websocket = null;
+      socketCreationInProcess = false;
+      processSTTSocketStart()
+      .then(() => {
+        return Promise.resolve();
+        //return;
+      })
     }
 
-    function connectToSTTSocket(dataIn) {
+    function processSTTSocketStart() {
       var p = new Promise(function resolver(resolve, reject) {
-        //return connectIfNeeded(audioData);
-        //resolve();
-        var audioData = dataIn;
         var model = config.lang + '_' + config.band;
-        var wsURI = 'wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize'
-                           + '?watson-token=' + token + '&model=' + model;
+        var wsURI = '';
 
-        //if (!audioData) {
-        //  audioData = {mode : 'start'};
-        //}
-
-        if (!websocket && !socketCreationInProcess &&
-               'start' === audioData.mode) {
-           socketCreationInProcess = true;
-           var ws = new WebSocket(wsURI);
-           ws.on('open', () => {
-             console.log('******************');
-             console.log('Web Socket is now open');
-
-             var message = {
-               action: 'start',
-               'content-type': contentType ? contentType :'audio/wav',
-               //'content-type': 'audio/webm',
-               'interim_results': true
-               //'max-alternatives': 3,
-               //keywords: ['colorado', 'tornado', 'tornadoes'],
-               //'keywords_threshold': 0.5
-             };
-             console.log('Signalling Start');
-             ws.send(JSON.stringify(message));
-             websocket = ws;
-             socketCreationInProcess = false;
-             //resolve();
-           });
-           (function(dIn) {
-             ws.on('message', (data) => {
-               // First message will be 'state': 'listening'
-               console.log('-----------------------');
-               console.log('Data Received from Input');
-               console.log(data);
-               socketListening = true;
-               var d = JSON.parse(data)
-               var newMsg = {payload : JSON.parse(data)};
-               node.send(newMsg);
-               if (dIn && d && d.state && 'listening' === d.state){
-                 console.log('We are now listening');
-                 //resolve(true);
-               }
-             });
-           })(dataIn);
-
-           ws.on('close', () => {
-             if (websocket) {
-               websocket.close();
-             }
-             websocket = null;
-             socketListening = false;
-             console.log('STT Socket disconnected');
-             //setTimeout(connectToSTTSocket, 1000);
-          });
+        if (endpoint) {
+          var tmp = endpoint.replace('https', 'wss');
+          wsURI = tmp + '/v1/recognize'
+                             + '?watson-token=' + token + '&model=' + model;
+          // https://stream.watsonplatform.net/speech-to-text/api
         } else {
-          if (dataIn) {
-            //resolve(false);
-          }
+          wsURI = 'wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize'
+                             + '?watson-token=' + token + '&model=' + model;
         }
-        resolve(socketListening);
+
+        if (!websocket && !socketCreationInProcess) {
+          socketCreationInProcess = true;
+          var ws = new WebSocket(wsURI);
+          ws.on('open', () => {
+            console.log('******************');
+            console.log('Web Socket is now open');
+
+            console.log('Signalling Start');
+            ws.send(JSON.stringify(startPacket));
+            websocket = ws;
+            socketCreationInProcess = false;
+             //resolve();
+          });
+
+          ws.on('message', (data) => {
+            // First message will be 'state': 'listening'
+            console.log('-----------------------');
+            console.log('Data Received from Input');
+            console.log(data);
+            var d = JSON.parse(data)
+            var newMsg = {payload : JSON.parse(data)};
+            node.send(newMsg);
+            if (d && d.state && 'listening' === d.state){
+              socketListening = true;
+              console.log('We are now listening');
+              resolve();
+            }
+          });
+
+          ws.on('close', () => {
+            //if (websocket) {
+            //   websocket.close();
+            //}
+            //websocket = null;
+            socketListening = false;
+            console.log('STT Socket disconnected');
+            setTimeout(connectIfNeeded, 1000);
+          });
+
+          ws.on('error', (err) => {
+            socketListening = false;
+            console.log('Error Detected');
+            reject(err);
+          });
+
+        } else {
+          resolve();
+        }
+
       });
       return p;
     }
+
 
     function stackAudioFile(audioData) {
       console.log('Pushing onto the stack');
@@ -433,14 +440,14 @@ module.exports = function (RED) {
       var p = new Promise(function resolver(resolve, reject) {
         console.log('Sending Audio - outer ');
         console.log(audioData);
-        if (audioData && audioData.mode) {
-          if ('data' === audioData.mode) {
+        if (audioData && audioData.action) {
+          if ('data' === audioData.action) {
             console.log('Sending Audio - inner');
 
             // send stack First
             if (audioStack && audioStack.length) {
               audioStack.forEach((a) => {
-                if (a && a.mode && 'data' === a.mode) {
+                if (a && a.action && 'data' === a.action) {
                   websocket.send(a.data);
                 }
               });
@@ -456,11 +463,11 @@ module.exports = function (RED) {
               }
             });
           } else {
-            var message = { action: 'stop' };
-            if (audioData.mode === 'stop') {
+            //var message = { action: 'stop' };
+            if (audioData.action === 'stop') {
               console.log('Signalling Stop');
-              websocket.send(JSON.stringify(message));
-              socketListening = false;
+              websocket.send(JSON.stringify(audioData));
+              //socketListening = false;
 
               // Closing as refresh doesn't appear to work
               //websocket.close();
@@ -477,13 +484,23 @@ module.exports = function (RED) {
       var speech_to_text = determineService();
       var p = getToken(speech_to_text)
         .then(() => {
-          return connectToSTTSocket(audioData);
-        })
-        .then((listening) => {
-          if (listening) {
-            return sendAudioSTTSocket(audioData);
-          } else {
-            return stackAudioFile(audioData);
+          switch (audioData.action) {
+          case 'start':
+            //return Promise.reject('Its a start');
+            return processSTTSocketStart();
+          case 'stop':
+          case 'data':
+            // Add a Delay to allow the listening thread to kick in
+            setTimeout(() => {
+              if (socketListening) {
+                return sendAudioSTTSocket(audioData);
+              } else {
+                return stackAudioFile(audioData);
+              }
+            }, 1000);
+            //return Promise.reject('Its a data or stop');
+          default:
+            return Promise.resolve();
           }
         })
         .then(() => {
