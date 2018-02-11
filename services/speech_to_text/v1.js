@@ -145,6 +145,8 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
+    // Allow the language to be overridden through msg.srclang, no check
+    // for validity
     function overrideCheck(msg) {
       if (msg.srclang){
         var langCode = payloadutils.langTransToSTTFormat(msg.srclang);
@@ -153,6 +155,8 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
+
+    // Input is a standard msg.payload
     function payloadNonStreamCheck(msg) {
       var message = '';
 
@@ -240,6 +244,9 @@ module.exports = function (RED) {
       return p;
     }
 
+    // The input is from a websocket stream in Node-RED.
+    // expect action of 'start' or 'stop' or a data blob
+    // if its a blob then its going to be audio.
     function processInputStream(msg) {
       var tmp = msg.payload;
 
@@ -349,21 +356,24 @@ module.exports = function (RED) {
       return p;
     }
 
+    // If we are going to connect to STT through websockets then its going to
+    // disconnect or timeout, so need to handle that occurrence.
     function connectIfNeeded() {
       console.log('re-establishing the connect');
       websocket = null;
       socketCreationInProcess = false;
-      processSTTSocketStart()
+      processSTTSocketStart(false)
       .then(() => {
-        return Promise.resolve();
-        //return;
+        //return Promise.resolve();
+        return;
       })
       .catch((err) => {
-        return Promise.resolve();
+        //return Promise.resolve();
+        return;
       });
     }
 
-    function processSTTSocketStart() {
+    function processSTTSocketStart(initialConnnect) {
       var p = new Promise(function resolver(resolve, reject) {
         var model = config.lang + '_' + config.band;
         var wsURI = '';
@@ -372,7 +382,6 @@ module.exports = function (RED) {
           var tmp = endpoint.replace('https', 'wss');
           wsURI = tmp + '/v1/recognize'
                              + '?watson-token=' + token + '&model=' + model;
-          // https://stream.watsonplatform.net/speech-to-text/api
         } else {
           wsURI = 'wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize'
                              + '?watson-token=' + token + '&model=' + model;
@@ -382,10 +391,6 @@ module.exports = function (RED) {
           socketCreationInProcess = true;
           var ws = new WebSocket(wsURI);
           ws.on('open', () => {
-            console.log('******************');
-            console.log('Web Socket is now open');
-
-            console.log('Signalling Start');
             ws.send(JSON.stringify(startPacket));
             websocket = ws;
             socketCreationInProcess = false;
@@ -402,7 +407,6 @@ module.exports = function (RED) {
             node.send(newMsg);
             if (d && d.state && 'listening' === d.state){
               socketListening = true;
-              console.log('We are now listening');
               resolve();
             }
           });
@@ -411,7 +415,7 @@ module.exports = function (RED) {
             //if (websocket) {
             //   websocket.close();
             //}
-            //websocket = null;
+            websocket = null;
             socketListening = false;
             console.log('STT Socket disconnected');
             setTimeout(connectIfNeeded, 1000);
@@ -420,7 +424,9 @@ module.exports = function (RED) {
           ws.on('error', (err) => {
             socketListening = false;
             console.log('Error Detected');
-            reject(err);
+            if (initialConnect) {
+              reject(err);
+            }
           });
 
         } else {
@@ -432,8 +438,9 @@ module.exports = function (RED) {
     }
 
 
+    // While we are waiting for a connection, stack the data input
+    // so it can be processed, when the connection becomes available.
     function stackAudioFile(audioData) {
-      console.log('Pushing onto the stack');
       audioStack.push(audioData);
       return Promise.resolve();
     }
@@ -442,8 +449,6 @@ module.exports = function (RED) {
       if (audioStack && audioStack.length) {
         audioStack.forEach((a) => {
           if (a && a.action && 'data' === a.action) {
-            console.log('sending data from stack');
-            console.log(a.action);
             websocket.send(a.data);
           }
         });
@@ -453,36 +458,22 @@ module.exports = function (RED) {
 
     function sendAudioSTTSocket(audioData) {
       var p = new Promise(function resolver(resolve, reject) {
-        //console.log('Sending Audio - outer ');
-        //console.log(audioData);
         // send stack First
         sendTheStack();
         if (audioData && audioData.action) {
-          console.log('action type is ', audioData.action);
           if ('data' === audioData.action) {
-            //console.log('Sending Audio - inner');
-            //console.log(audioData.data);
-            console.log('sending data from input');
             websocket.send(audioData.data, (error) => {
               if (error) {
-                console.log(error);
                 reject(error);
               } else {
                 resolve();
               }
             });
           } else {
-            //var message = { action: 'stop' };
             if (audioData.action === 'stop') {
-              console.log('Signalling Stop');
               websocket.send(JSON.stringify(audioData));
               socketListening = false;
-
-              // Closing as refresh doesn't appear to work
-              //websocket.close();
-              //websocket = null;
             }
-            //websocket.send(JSON.stringify(message));
           }
         }
       });
@@ -497,11 +488,13 @@ module.exports = function (RED) {
           switch (audioData.action) {
           case 'start':
             //return Promise.reject('Its a start');
-            return processSTTSocketStart();
+            return processSTTSocketStart(true);
           case 'stop':
             delay = 2000;
           case 'data':
             // Add a Delay to allow the listening thread to kick in
+            // Delays for Stop is longer, so that it doesn't get actioned
+            // before the audio buffers.
             setTimeout(() => {
               if (socketListening) {
                 return sendAudioSTTSocket(audioData);
@@ -509,7 +502,6 @@ module.exports = function (RED) {
                 return stackAudioFile(audioData);
               }
             }, delay);
-            //return Promise.reject('Its a data or stop');
           default:
             return Promise.resolve();
           }

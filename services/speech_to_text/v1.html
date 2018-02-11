@@ -85,7 +85,7 @@
     <div class="form-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-streaming-mode" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-streaming-mode" style="width: 70%;"> Use In Streaming Mode</label>
+        <label for="node-input-streaming-mode" style="width: 70%;"> Streaming Mode</label>
     </div>
 
     <div class="form-row">
@@ -141,6 +141,13 @@
     <p>The returned audio transcription will be returned on <code>msg.transcription</code>.</p>
     <p>The full response, including alternative transcriptions can be found on
     <code>msg.fullresult</code>.</p>
+
+    <p>When streaming mode is selected the node makes use of a websocket connection
+    to communicate with the Speech to Text service. Input to the node will be from
+    a Node-RED websocket node. Output will be from a Node-RED websocket. WebSocket input
+    is as per the WebSocket input for Speech To Text, with an action of either
+    <code>start</code> or <code>stop</code> or an audio blob. No token is needed
+    as the node takes care of that step.</p>
     <p>For more information about the Speech To Text service, read the <a href="https://www.ibm.com/watson/services/speech-to-text/">documentation</a>.</p>
 </script>
 

@@ -7,8 +7,13 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.6.3
+- Allow input / output from Node-RED web-sockets for Speech to Text node. To
+enable select streaming mode. No token is needed as the Node handles this. Look
+out for sample flows and templates showing how to use this feature.   
+
 ### New in version 0.6.2
-- Visual Recognition fix for accept-language 
+- Visual Recognition fix for accept-language
 
 ### New in version 0.6.1
 - Allow STT Language to be dyamically configurable using msg.srclang
