@@ -435,25 +435,31 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
+    function sendTheStack() {
+      if (audioStack && audioStack.length) {
+        audioStack.forEach((a) => {
+          if (a && a.action && 'data' === a.action) {
+            console.log('sending data from stack');
+            console.log(a.action);
+            websocket.send(a.data);
+          }
+        });
+        audioStack = [];
+      }
+    }
 
     function sendAudioSTTSocket(audioData) {
       var p = new Promise(function resolver(resolve, reject) {
-        console.log('Sending Audio - outer ');
-        console.log(audioData);
+        //console.log('Sending Audio - outer ');
+        //console.log(audioData);
+        // send stack First
+        sendTheStack();
         if (audioData && audioData.action) {
+          console.log('action type is ', audioData.action);
           if ('data' === audioData.action) {
-            console.log('Sending Audio - inner');
-
-            // send stack First
-            if (audioStack && audioStack.length) {
-              audioStack.forEach((a) => {
-                if (a && a.action && 'data' === a.action) {
-                  websocket.send(a.data);
-                }
-              });
-              audioStack = [];
-            }
+            //console.log('Sending Audio - inner');
             //console.log(audioData.data);
+            console.log('sending data from input');
             websocket.send(audioData.data, (error) => {
               if (error) {
                 console.log(error);
@@ -467,7 +473,7 @@ module.exports = function (RED) {
             if (audioData.action === 'stop') {
               console.log('Signalling Stop');
               websocket.send(JSON.stringify(audioData));
-              //socketListening = false;
+              socketListening = false;
 
               // Closing as refresh doesn't appear to work
               //websocket.close();
@@ -482,6 +488,7 @@ module.exports = function (RED) {
 
     function performStreamSTT(audioData) {
       var speech_to_text = determineService();
+      var delay = 1000;
       var p = getToken(speech_to_text)
         .then(() => {
           switch (audioData.action) {
@@ -489,6 +496,7 @@ module.exports = function (RED) {
             //return Promise.reject('Its a start');
             return processSTTSocketStart();
           case 'stop':
+            delay = 2000;
           case 'data':
             // Add a Delay to allow the listening thread to kick in
             setTimeout(() => {
@@ -497,7 +505,7 @@ module.exports = function (RED) {
               } else {
                 return stackAudioFile(audioData);
               }
-            }, 1000);
+            }, delay);
             //return Promise.reject('Its a data or stop');
           default:
             return Promise.resolve();
