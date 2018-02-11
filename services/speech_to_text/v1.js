@@ -361,15 +361,21 @@ module.exports = function (RED) {
       console.log('re-establishing the connect');
       websocket = null;
       socketCreationInProcess = false;
-      processSTTSocketStart(false)
-      .then(() => {
-        //return Promise.resolve();
-        return;
-      })
-      .catch((err) => {
-        //return Promise.resolve();
-        return;
-      });
+
+
+      // The token may have expired so test for it.
+      getToken(determineService())
+        .then(() => {
+          return processSTTSocketStart(false);
+        })
+        .then(() => {
+          //return Promise.resolve();
+          return;
+        })
+        .catch((err) => {
+          //return Promise.resolve();
+          return;
+        });
     }
 
     function processSTTSocketStart(initialConnect) {
