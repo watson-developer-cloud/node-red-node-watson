@@ -373,7 +373,7 @@ module.exports = function (RED) {
       });
     }
 
-    function processSTTSocketStart(initialConnnect) {
+    function processSTTSocketStart(initialConnect) {
       var p = new Promise(function resolver(resolve, reject) {
         var model = config.lang + '_' + config.band;
         var wsURI = '';
