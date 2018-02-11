@@ -115,7 +115,9 @@ module.exports = function (RED) {
     var node = this, token = null, tokenTime = null,
       websocket = null,
       socketCreationInProcess = false,
-      socketListening = false;
+      socketListening = false,
+      contentType = null,
+      audioStack =[];
     const HOUR = 60 * 60;
 
     function initialCheck(username, password) {
@@ -240,6 +242,11 @@ module.exports = function (RED) {
 
       if ("string" === typeof msg.payload) {
         msg.payload = JSON.parse(tmp);
+        if ( msg.payload.mode &&
+                'start' === msg.payload.mode &&
+                msg.payload.type ) {
+          contentType = msg.payload.type;
+        }
       } else {
         msg.payload = { 'mode' : 'data', 'data' : tmp };
       }
@@ -340,12 +347,24 @@ module.exports = function (RED) {
       return p;
     }
 
-    function connectToSTTSocket() {
+    function connectIfNeeded(dataIn) {
+    }
+
+    function connectToSTTSocket(dataIn) {
       var p = new Promise(function resolver(resolve, reject) {
+        //return connectIfNeeded(audioData);
+        //resolve();
+        var audioData = dataIn;
         var model = config.lang + '_' + config.band;
         var wsURI = 'wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize'
                            + '?watson-token=' + token + '&model=' + model;
-        if (!websocket && !socketCreationInProcess) {
+
+        //if (!audioData) {
+        //  audioData = {mode : 'start'};
+        //}
+
+        if (!websocket && !socketCreationInProcess &&
+               'start' === audioData.mode) {
            socketCreationInProcess = true;
            var ws = new WebSocket(wsURI);
            ws.on('open', () => {
@@ -354,48 +373,79 @@ module.exports = function (RED) {
 
              var message = {
                action: 'start',
-               'content-type': 'audio/wav',
+               'content-type': contentType ? contentType :'audio/wav',
                //'content-type': 'audio/webm',
                'interim_results': true
                //'max-alternatives': 3,
                //keywords: ['colorado', 'tornado', 'tornadoes'],
                //'keywords_threshold': 0.5
              };
+             console.log('Signalling Start');
              ws.send(JSON.stringify(message));
              websocket = ws;
              socketCreationInProcess = false;
-             //resolve({'status': 'ready'});
+             //resolve();
            });
-           ws.on('message', (data) => {
-             // First message will be 'state': 'listening'
-             console.log('-----------------------');
-             console.log('Data Received from Input');
-             console.log(data);
-             socketListening = true;
-             resolve(data);
-           });
+           (function(dIn) {
+             ws.on('message', (data) => {
+               // First message will be 'state': 'listening'
+               console.log('-----------------------');
+               console.log('Data Received from Input');
+               console.log(data);
+               socketListening = true;
+               var d = JSON.parse(data)
+               var newMsg = {payload : JSON.parse(data)};
+               node.send(newMsg);
+               if (dIn && d && d.state && 'listening' === d.state){
+                 console.log('We are now listening');
+                 //resolve(true);
+               }
+             });
+           })(dataIn);
 
            ws.on('close', () => {
+             if (websocket) {
+               websocket.close();
+             }
              websocket = null;
+             socketListening = false;
              console.log('STT Socket disconnected');
              //setTimeout(connectToSTTSocket, 1000);
           });
-        } else if (socketCreationInProcess) {
-          resolve({'state': 'notready'});
+        } else {
+          if (dataIn) {
+            //resolve(false);
+          }
         }
-        else {
-          resolve();
-        }
+        resolve(socketListening);
       });
       return p;
     }
 
+    function stackAudioFile(audioData) {
+      console.log('Pushing onto the stack');
+      audioStack.push(audioData);
+      return Promise.resolve();
+    }
+
+
     function sendAudioSTTSocket(audioData) {
       var p = new Promise(function resolver(resolve, reject) {
-        //console.log('Sending Audio');
+        console.log('Sending Audio - outer ');
+        console.log(audioData);
         if (audioData && audioData.mode) {
           if ('data' === audioData.mode) {
-            console.log('Sending Audio');
+            console.log('Sending Audio - inner');
+
+            // send stack First
+            if (audioStack && audioStack.length) {
+              audioStack.forEach((a) => {
+                if (a && a.mode && 'data' === a.mode) {
+                  websocket.send(a.data);
+                }
+              });
+              audioStack = [];
+            }
             //console.log(audioData.data);
             websocket.send(audioData.data, (error) => {
               if (error) {
@@ -406,16 +456,17 @@ module.exports = function (RED) {
               }
             });
           } else {
-            var message = {
-              action: 'start',
-              'content-type': 'audio/wav',
-              //'content-type': 'audio/webm',
-              'interim_results': true
-            };
+            var message = { action: 'stop' };
             if (audioData.mode === 'stop') {
-              message.action = 'stop';
+              console.log('Signalling Stop');
+              websocket.send(JSON.stringify(message));
+              socketListening = false;
+
+              // Closing as refresh doesn't appear to work
+              //websocket.close();
+              //websocket = null;
             }
-            websocket.send(JSON.stringify(message));
+            //websocket.send(JSON.stringify(message));
           }
         }
       });
@@ -426,22 +477,13 @@ module.exports = function (RED) {
       var speech_to_text = determineService();
       var p = getToken(speech_to_text)
         .then(() => {
-          return connectToSTTSocket();
+          return connectToSTTSocket(audioData);
         })
-        .then((data) => {
-          if (data && data.state !== 'listening') {
-            return Promise.resolve();
-          } else if (data && data.state === 'listening') {
-            //return Promise.resolve();
-            //socketListening = true;
-            return Promise.resolve();
-            //return sendAudioSTTSocket(audioData);
-          } else if (socketListening) {
+        .then((listening) => {
+          if (listening) {
             return sendAudioSTTSocket(audioData);
           } else {
-            //for now ignore, but get ready to process.
-            //if listening then process.
-            return Promise.resolve();
+            return stackAudioFile(audioData);
           }
         })
         .then(() => {
@@ -519,8 +561,13 @@ module.exports = function (RED) {
       })
       .then(() => {
         temp.cleanup();
-        node.status({});
-        node.send(msg);
+        if (config['streaming-mode']) {
+          node.status({fill:'blue', shape:'dot', text:'waiting for socket data'});
+        } else {
+          node.status({});
+          node.send(msg);
+        }
+
       })
       .catch((err) => {
         temp.cleanup();
