@@ -358,6 +358,9 @@ module.exports = function (RED) {
         return Promise.resolve();
         //return;
       })
+      .catch((err) => {
+        return Promise.resolve();
+      });
     }
 
     function processSTTSocketStart() {
