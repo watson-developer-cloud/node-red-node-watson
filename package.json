@@ -1,6 +1,6 @@
 {
   "name": "node-red-node-watson",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
     "async": "^1.5.2",
@@ -14,7 +14,8 @@
     "kuromoji": "^0.1.1",
     "word-count": "^0.2.2",
     "is-docx": "^0.0.3",
-    "stream-to-array" : "^2.3.0"
+    "stream-to-array" : "^2.3.0",
+    "ws" : "^4.0.0"
   },
   "repository": {
     "type": "git",
