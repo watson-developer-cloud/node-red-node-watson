@@ -355,23 +355,12 @@ module.exports = function (RED) {
       return p;
     }
 
-    // If we are going to connect to STT through websockets then its going to
-    // disconnect or timeout, so need to handle that occurrence.
-    function connectIfNeeded() {
-      console.log('re-establishing the connect');
-      websocket = null;
-      socketCreationInProcess = false;
-      processSTTSocketStart(false)
-      .then(() => {
-        //return Promise.resolve();
-        return;
-      })
-      .catch((err) => {
-        //return Promise.resolve();
-        return;
-      });
-    }
 
+    // This function generates a load of listeners, that if resolving or
+    // rejecting promises causes problems, as nothing is waiting on those
+    // promises. I had wanted to pause and socket activity until the 'open'
+    // event, which was ok initially, but on subsequent socket close / Error
+    // reopens caused problems.
     function processSTTSocketStart(initialConnect) {
       var p = new Promise(function resolver(resolve, reject) {
         var model = config.lang + '_' + config.band;
@@ -398,44 +387,71 @@ module.exports = function (RED) {
 
           ws.on('message', (data) => {
             // First message will be 'state': 'listening'
-            console.log('-----------------------');
-            console.log('Data Received from Input');
-            console.log(data);
+            // console.log('-----------------------');
+            // console.log('Data Received from Input');
+            // console.log(data);
             var d = JSON.parse(data);
             var newMsg = {payload : JSON.parse(data)};
-            node.send(newMsg);
-            if (d && d.state && 'listening' === d.state){
-              socketListening = true;
-              resolve();
+            if (d) {
+              if (d.error) {
+                // Force Expiry of Token, as that is the only Error
+                // response from the service that we have seen.
+                token = null;
+                getToken(determineService())
+                  .then(() => {
+                    return;
+                  });
+              } else if (d && d.state && 'listening' === d.state) {
+                socketListening = true;
+                //resolve();
+              } else {
+                node.send(newMsg);
+              }
             }
           });
 
           ws.on('close', () => {
-            //if (websocket) {
-            //   websocket.close();
-            //}
             websocket = null;
             socketListening = false;
-            console.log('STT Socket disconnected');
+            // console.log('STT Socket disconnected');
             setTimeout(connectIfNeeded, 1000);
           });
 
           ws.on('error', (err) => {
             socketListening = false;
-            console.log('Error Detected');
+            // console.log('Error Detected');
             if (initialConnect) {
-              reject(err);
+              //reject(err);
             }
           });
 
-        } else {
-          resolve();
         }
-
+        resolve();
       });
       return p;
     }
 
+    // If we are going to connect to STT through websockets then its going to
+    // disconnect or timeout, so need to handle that occurrence.
+    function connectIfNeeded() {
+      // console.log('re-establishing the connect');
+      websocket = null;
+      socketCreationInProcess = false;
+
+      // The token may have expired so test for it.
+      getToken(determineService())
+        .then(() => {
+          return processSTTSocketStart(false);
+        })
+        .then(() => {
+          //return Promise.resolve();
+          return;
+        })
+        .catch((err) => {
+          //return Promise.resolve();
+          return;
+        });
+    }
 
     // While we are waiting for a connection, stack the data input
     // so it can be processed, when the connection becomes available.
