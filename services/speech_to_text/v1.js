@@ -402,8 +402,8 @@ module.exports = function (RED) {
                     return;
                   });
               } else if (d && d.state && 'listening' === d.state) {
-                  socketListening = true;
-                  //resolve();
+                socketListening = true;
+                //resolve();
               } else {
                 node.send(newMsg);
               }
