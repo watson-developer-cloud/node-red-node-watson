@@ -391,11 +391,13 @@ module.exports = function (RED) {
             // console.log('Data Received from Input');
             // console.log(data);
             var d = JSON.parse(data);
-            var newMsg = {payload : JSON.parse(data)};
+            var newMsg = {payload : JSON.parse(data)};              
             if (d) {
               if (d.error) {
                 // Force Expiry of Token, as that is the only Error
                 // response from the service that we have seen.
+                // report the error for verbose testing
+                payloadutils.reportError(node,newMsg,e.error);
                 token = null;
                 getToken(determineService())
                   .then(() => {
@@ -403,6 +405,8 @@ module.exports = function (RED) {
                   });
               } else if (d && d.state && 'listening' === d.state) {
                 socketListening = true;
+                // Added for verbose testing
+                node.send(newMsg);
                 //resolve();
               } else {
                 node.send(newMsg);
