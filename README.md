@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.6.5
+- Endpoint can now be specified in Natural Language Classifier Node
+
 ### New in version 0.6.4
 - Speech to Text node now reports all errors, including disconnects when running in stream mode.
 

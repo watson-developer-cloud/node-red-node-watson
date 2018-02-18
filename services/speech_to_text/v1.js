@@ -423,6 +423,7 @@ module.exports = function (RED) {
 
           ws.on('error', (err) => {
             socketListening = false;
+            payloadutils.reportError(node,newMsg,err);
             // console.log('Error Detected');
             if (initialConnect) {
               //reject(err);
@@ -468,7 +469,13 @@ module.exports = function (RED) {
       if (audioStack && audioStack.length) {
         audioStack.forEach((a) => {
           if (a && a.action && 'data' === a.action) {
-            websocket.send(a.data);
+            //websocket.send(a.data);
+            websocket.send(a.data, (error) => {
+              if (error) {
+                payloadutils.reportError(node,{},error);
+              } else {
+              }
+            });
           }
         });
         audioStack = [];

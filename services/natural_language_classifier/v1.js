@@ -28,11 +28,14 @@ module.exports = function(RED) {
     username = null,
     password = null,
     sUsername = null,
-    sPassword = null;
+    sPassword = null,
+    endpoint = '',
+    sEndpoint = 'https://gateway.watsonplatform.net/natural-language-classifier/api';
 
   if (service) {
     sUsername = service.username;
     sPassword = service.password;
+    sEndpoint = service.url;
   }
 
   temp.track();
@@ -54,6 +57,12 @@ module.exports = function(RED) {
     node.verifyCredentials = function(msg) {
       username = sUsername || node.credentials.username;
       password = sPassword || node.credentials.password;
+
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
+
       if (!username || !password) {
         return Promise.reject('Missing Natural Language Classifier credentials');
       } else {
@@ -145,14 +154,22 @@ module.exports = function(RED) {
 
     node.performOperation = function(msg, config, params) {
       var p = new Promise(function resolver(resolve, reject) {
-        const natural_language_classifier = new NaturalLanguageClassifierV1({
-          username: username,
-          password: password,
-          version: 'v1',
-          headers: {
-            'User-Agent': pkg.name + '-' + pkg.version
-          }
-        });
+        var natural_language_classifier = null,
+          serviceSettings = {
+            username: username,
+            password: password,
+            version: 'v1',
+            headers: {
+              'User-Agent': pkg.name + '-' + pkg.version
+            }
+          };
+
+        if (endpoint) {
+          serviceSettings.url = endpoint;
+        }
+
+        natural_language_classifier = new NaturalLanguageClassifierV1(serviceSettings);
+
         natural_language_classifier[config.mode](params, function(err, response) {
           if (err) {
             reject(err);
