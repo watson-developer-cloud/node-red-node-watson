@@ -99,25 +99,30 @@
 </script>
 
 <script type="text/javascript">
+  // Need to simulate a namespace, so that some of the variables don't leak across nodes
+  function NaturalLanguageClassifierV1 () {}
 
-// This is the on edit prepare function, which will be
-//invoked everytime the dialog is shown.
-function nlconeditprepare() {
-  $('#node-input-mode').change(function () {
-    var mode = $('#node-input-mode').val();
-    $('.form-row.mode.' + mode).show();
-    $('.form-row.mode:not(.' + mode + ')').hide();
-  })
-  $.getJSON('watson-natural-language-classifier/vcap/')
-    .done(function (service) {
-      $('.credentials').toggle(!service);
+  // This is the namespace for this version of this Node.
+  var nlcV1 = new NaturalLanguageClassifierV1();
+
+  // This is the on edit prepare function, which will be
+  //invoked everytime the dialog is shown.
+  function nlconeditprepare() {
+    $('#node-input-mode').change(function () {
+      var mode = $('#node-input-mode').val();
+      $('.form-row.mode.' + mode).show();
+      $('.form-row.mode:not(.' + mode + ')').hide();
     })
-    .fail(function () {
-      $('.credentials').show();
-    }).always(function () {
-      $('#credentials-check').hide();
-    })
-}
+    $.getJSON('watson-natural-language-classifier/vcap/')
+      .done(function (service) {
+        $('.credentials').toggle(!service);
+      })
+      .fail(function () {
+        $('.credentials').show();
+      }).always(function () {
+        $('#credentials-check').hide();
+      })
+  }
 
 
     (function() {
