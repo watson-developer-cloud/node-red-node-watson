@@ -10,7 +10,7 @@
     "temp": "^0.8.3",
     "qs": "6.x",
 	  "image-type": "^2.0.2",
-    "watson-developer-cloud": "^3.0.5",
+    "watson-developer-cloud": "^3.0.6",
     "kuromoji": "^0.1.1",
     "word-count": "^0.2.2",
     "is-docx": "^0.0.3",
