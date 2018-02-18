@@ -105,14 +105,38 @@
   // This is the namespace for this version of this Node.
   var nlcV1 = new NaturalLanguageClassifierV1();
 
-  // This is the on edit prepare function, which will be
-  //invoked everytime the dialog is shown.
-  function nlconeditprepare() {
+  nlcV1.CreateIListener = function(listen, action, opp) {
+    opp = typeof opp === 'undefined' ? false : opp;
+    listen.change(function(val){
+      var isSet = listen.prop('checked');
+      if (opp) {
+        isSet = !isSet;
+      }
+      nluV1.setVisibility(action, isSet);
+    });
+  }
+
+  nlcV1.UIListeners = function () {
     $('#node-input-mode').change(function () {
       var mode = $('#node-input-mode').val();
       $('.form-row.mode.' + mode).show();
       $('.form-row.mode:not(.' + mode + ')').hide();
-    })
+    });
+
+    nlcV1.CreateIListener($('#node-input-default-endpoint'),
+                                $('#node-input-service-endpoint'), true);
+  };
+
+  nlcV1.checkForPrepare = function () {
+    nlcV1.UIListeners();
+  };
+
+  // This is the on edit prepare function, which will be
+  //invoked everytime the dialog is shown.
+  function nlconeditprepare() {
+
+
+    nlcV1.checkForPrepare();
     $.getJSON('watson-natural-language-classifier/vcap/')
       .done(function (service) {
         $('.credentials').toggle(!service);
