@@ -28,6 +28,7 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     sttV1 = require('watson-developer-cloud/speech-to-text/v1'),
     authV1 = require('watson-developer-cloud/authorization/v1'),
+    muteMode = true;
     username = '', password = '', sUsername = '', sPassword = '',
     endpoint = '',
     sEndpoint = 'https://stream.watsonplatform.net/speech-to-text/api',
@@ -132,6 +133,8 @@ module.exports = function (RED) {
 
     function configCheck() {
       var message = '';
+
+      muteMode = config['streaming-mute'];
 
       if (!config.lang) {
         message = 'Missing audio language configuration, unable to process speech.';
@@ -397,7 +400,10 @@ module.exports = function (RED) {
                 // Force Expiry of Token, as that is the only Error
                 // response from the service that we have seen.
                 // report the error for verbose testing
-                payloadutils.reportError(node,newMsg,d.error);
+                if (!muteMode) {
+                  payloadutils.reportError(node,newMsg,d.error);
+                }
+
                 token = null;
                 getToken(determineService())
                   .then(() => {
@@ -423,7 +429,9 @@ module.exports = function (RED) {
 
           ws.on('error', (err) => {
             socketListening = false;
-            payloadutils.reportError(node,newMsg,err);
+            if (!muteMode) {
+              payloadutils.reportError(node,newMsg,err);
+            }
             // console.log('Error Detected');
             if (initialConnect) {
               //reject(err);
@@ -472,8 +480,9 @@ module.exports = function (RED) {
             //websocket.send(a.data);
             websocket.send(a.data, (error) => {
               if (error) {
-                payloadutils.reportError(node,{},error);
-              } else {
+                if (!muteMode) {
+                  payloadutils.reportError(node,{},error);
+                }
               }
             });
           }

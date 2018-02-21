@@ -90,6 +90,12 @@
 
     <div class="form-row">
         <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-streaming-mute" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-streaming-mute" style="width: 70%;"> Mute in Streaming Mode</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
         <input type="checkbox" id="node-input-speakerlabels"style="display: inline-block; width: auto; vertical-align: top;"></input>
         <label for="node-input-speakerlabels" style="width: 70%;"><i class="fa fa-audio-o"></i> Speaker Labels</label>
     </div>
@@ -148,6 +154,7 @@
     is as per the WebSocket input for Speech To Text, with an action of either
     <code>start</code> or <code>stop</code> or an audio blob. No token is needed
     as the node takes care of that step.</p>
+    <p>>The Mute option allows for the supression of session timeout messages.</p>
     <p>For more information about the Speech To Text service, read the <a href="https://www.ibm.com/watson/services/speech-to-text/">documentation</a>.</p>
 </script>
 
@@ -542,6 +549,7 @@
                 password: {value: ''},
                 'payload-response' :{value: false},
                 'streaming-mode' :{value: false},
+                'streaming-mute' :{value: true},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://stream.watsonplatform.net/speech-to-text/api'}
             },
