@@ -1047,7 +1047,7 @@ module.exports = function (RED) {
   }
 
 
-  // These are APIs that the node has created to allow it to dynamically fetch Bluemix
+  // These are APIs that the node has created to allow it to dynamically fetch IBM Cloud
   // credentials, and also translation models. This allows the node to keep up to
   // date with new tranlations, without the need for a code update of this node.
 

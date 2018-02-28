@@ -32,6 +32,17 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/natural-language-classifier/api">
+    </div>
+
     <div class="form-row">
         <label for="node-input-mode"><i class="fa fa-question"></i> Mode</label>
         <select type="text" id="node-input-mode" style="display: inline-block; width: 70%;" >
@@ -73,7 +84,7 @@
     <p></p>
     <p><b>Training Mode</b>.</p>
     <p>Set the training data language in the node configuration window.</p>
-    <p>The CSV training data should be passed in on <code>msg.payload</code> as a String or String Array. For more details on the training data format, see this <a href="http://www.ibm.com/watson/developercloud/doc/natural-language-classifier/using-your-data.html">link</a></p>
+    <p>The CSV training data should be passed in on <code>msg.payload</code> as a String or String Array. For more details on the training data format, see this <a href="https://console.bluemix.net/docs/services/natural-language-classifier/using-your-data.html">link</a></p>
     <p>The returned classification training status will be returned on <code>msg.payload</code>.</p>
 	<p><b>List Mode</b>.</p>
     <p>Set the mode in the node configuration window.</p>
@@ -88,6 +99,56 @@
 </script>
 
 <script type="text/javascript">
+  // Need to simulate a namespace, so that some of the variables don't leak across nodes
+  function NaturalLanguageClassifierV1 () {}
+
+  // This is the namespace for this version of this Node.
+  var nlcV1 = new NaturalLanguageClassifierV1();
+
+  nlcV1.CreateIListener = function(listen, action, opp) {
+    opp = typeof opp === 'undefined' ? false : opp;
+    listen.change(function(val){
+      var isSet = listen.prop('checked');
+      if (opp) {
+        isSet = !isSet;
+      }
+      nluV1.setVisibility(action, isSet);
+    });
+  }
+
+  nlcV1.UIListeners = function () {
+    $('#node-input-mode').change(function () {
+      var mode = $('#node-input-mode').val();
+      $('.form-row.mode.' + mode).show();
+      $('.form-row.mode:not(.' + mode + ')').hide();
+    });
+
+    nlcV1.CreateIListener($('#node-input-default-endpoint'),
+                                $('#node-input-service-endpoint'), true);
+  };
+
+  nlcV1.checkForPrepare = function () {
+    nlcV1.UIListeners();
+  };
+
+  // This is the on edit prepare function, which will be
+  //invoked everytime the dialog is shown.
+  function nlconeditprepare() {
+
+
+    nlcV1.checkForPrepare();
+    $.getJSON('watson-natural-language-classifier/vcap/')
+      .done(function (service) {
+        $('.credentials').toggle(!service);
+      })
+      .fail(function () {
+        $('.credentials').show();
+      }).always(function () {
+        $('#credentials-check').hide();
+      })
+  }
+
+
     (function() {
         RED.nodes.registerType('watson-natural-language-classifier', {
             category: 'IBM Watson',
@@ -95,7 +156,9 @@
               name: {value: ""},
               mode: {value: "classify"},
               language: {value: "en"},
-              classifier: {value: ""}
+              classifier: {value: ""},
+              'default-endpoint' :{value: true},
+              'service-endpoint' :{value: 'https://gateway.watsonplatform.net/natural-language-classifier/api'}
             },
             credentials: {
               username: {type:"text"},
@@ -112,22 +175,7 @@
             labelStyle: function() {
                 return this.name ? "node_label_italic" : "";
             },
-            oneditprepare: function() {
-              $('#node-input-mode').change(function () {
-                var mode = $('#node-input-mode').val();
-                $('.form-row.mode.' + mode).show();
-                $('.form-row.mode:not(.' + mode + ')').hide();
-              })
-              $.getJSON('watson-natural-language-classifier/vcap/')
-                .done(function (service) {
-                  $('.credentials').toggle(!service);
-                })
-                .fail(function () {
-                  $('.credentials').show();
-                }).always(function () {
-                  $('#credentials-check').hide();
-                })
-            }
+            oneditprepare: nlconeditprepare
         });
     })();
 </script>

@@ -139,6 +139,8 @@ module.exports = function(RED) {
         }
 
         text_to_speech = new TextToSpeechV1(serviceSettings);
+        console.log('------------');
+        console.log('Running TTS with params ', params);
         text_to_speech.synthesize(params, function (err, body, response) {
           if (err) {
             reject(err);

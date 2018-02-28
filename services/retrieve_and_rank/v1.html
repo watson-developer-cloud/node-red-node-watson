@@ -78,15 +78,15 @@
 
 <script type="text/x-red" data-help-name="watson-retrieve-rank-create-cluster">
 <p>The IBM Watson™ Retrieve and Rank service combines two information retrieval components in a single service: the power of Apache Solr and a sophisticated machine learning capability. This combination provides users with more relevant results by automatically reranking them by using these machine learning algorithms.</p>
-    <p>The create cluster node provisions a Solr cluster. You can specify the <b>size</b> of the cluster in the node configuration panel. For a small free cluster for testing choose the “Free” option. For more information about cluster sizing, see <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/retrieve-rank/solr_ops.shtml#sizing">Sizing your Retrieve and Rank cluster</a>. A <b>cluster name</b> can be specified in the node configuration panel or passed in on <code>msg.payload</code>. The cluster name specified in the node configuration panel takes priority.</p>
+    <p>The create cluster node provisions a Solr cluster. You can specify the <b>size</b> of the cluster in the node configuration panel. For a small free cluster for testing choose the “Free” option. For more information about cluster sizing, see <a href="https://console.bluemix.net/docs/services/retrieve-and-rank/using-solr.html#sizingCluster">Sizing your Retrieve and Rank cluster</a>. A <b>cluster name</b> can be specified in the node configuration panel or passed in on <code>msg.payload</code>. The cluster name specified in the node configuration panel takes priority.</p>
     <p>The cluster will then be created. This takes a short while to complete. When the cluster is available, the status underneath the node will change to <b>“Cluster available”</b>.</p>
-    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/watson/services/retrieve-and-rank/">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-retrieve-rank-create-cluster', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ''},
                 servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
@@ -155,13 +155,13 @@
         <li><b>Delete Cluster </b>Delete a cluster from the service. The <code>cluster_id</code> can be passed into the node on <code>msg.cluster_id</code> or specified in the node configuration panel. The cluster id specified in the node configuration panel takes priority.</li>
     </ul>
     <p>The response from each query is returned on <code>msg.payload</code>.</p>
-    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/watson/services/retrieve-and-rank/">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-retrieve-rank-cluster-settings', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ''},
                 mode: {value: 'list'},
@@ -235,13 +235,13 @@
     The <code>cluster_id</code> can be passed into the node on <code>msg.cluster_id</code> or specified in the node configuration panel. The cluster id specified in the node configuration panel takes priority.</li>
     The <code>configuration_name</code> can be passed into the node on <code>msg.configuration_name</code> or specified in the node configuration panel. The configuration_name specified in the node configuration panel takes priority.</li>
     <p>The response from the service is returned on <code>msg.payload</code>.</p>
-    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/watson/services/retrieve-and-rank/">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-retrieve-rank-upload-solr-configuration', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ''},
                 servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
@@ -316,13 +316,13 @@
     The <code>configuration_name</code> can be passed into the node on <code>msg.configuration_name</code> or specified in the node configuration panel. The configuration_name specified in the node configuration panel takes priority.</li>
     </ul>
     <p>The response from each query is returned on <code>msg.payload</code>.</p>
-    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/watson/services/retrieve-and-rank/">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-retrieve-rank-solr-configuration-settings', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ''},
                 servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
@@ -413,13 +413,13 @@
         <li><b>Search </b>Searches the collection based on a given query specified in <b>Solr standard query syntax</b>. This should be passed in as a <b>String</b> on <code>msg.payload</code>. The <code>cluster_id</code> and <code>collection_name</code> can be passed into the node on <code>msg.cluster_id</code> and <code>msg.collection_name</code> respectively, or specified in the node configuration panel. Parameters specified in the node configuration panel take priority.</li>
     </ul>
     <p>The response from each query is returned on <code>msg.payload</code>.</p>
-    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/watson/services/retrieve-and-rank/">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-retrieve-rank-solr-collection', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ''},
                 servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
@@ -490,13 +490,13 @@
     <p>Once triggered, the ranker will then begin training. Once the ranker is available, the status underneath the node will change to <b>“Ranker Available”</b>.</p>
 
     <p>The ranker id is returned on <code>msg.payload</code>.</p>
-    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/watson/services/retrieve-and-rank/">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-retrieve-rank-create-ranker', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ''},
                 servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
@@ -566,13 +566,13 @@
     </ul>
 
     <p>The result is returned on <code>msg.payload</code>.</p>
-    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/watson/services/retrieve-and-rank/">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-retrieve-rank-ranker-settings', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ''},
                 servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
@@ -652,13 +652,13 @@
     <p>The search and rank node returns reranked results for your query, where the query matches the <a href="https://cwiki.apache.org/confluence/display/solr/The+Standard+Query+Parser">Solr Standard Query Parser</a>. The <code>cluster_id</code>, <code>collection_name</code> and <code>ranker_id</code> can be passed into the node on <code>msg.cluster_id</code>, <code>msg.collection_name</code> and <code>msg.ranker_id</code> respectively, or specified in the node configuration panel. Parameters specified in the node configuration panel take priority.</p>
     <p>The search query is passed in on  <code>msg.payload</code> starting with <code>q=</code> to match the Solr Standard Query Parser.</p>
     <p>The result is returned on <code>msg.payload</code>.</p>
-    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html">documentation</a>.</p>
+    <p>For more information about the Retrieve and Rank service, read the <a href="https://www.ibm.com/watson/services/retrieve-and-rank/">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('watson-retrieve-rank-search-and-rank', {
-            category: 'IBM Watson',
+            category: 'Watson Deprecated',
             defaults: {
                 name: {value: ''},
                 servicecreds: {value: '', type: 'watson-retrieve-rank-credentials', required: false},
