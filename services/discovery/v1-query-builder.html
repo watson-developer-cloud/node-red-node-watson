@@ -183,7 +183,7 @@
     // can be obtained from the service.
     disQB.hideAll = function() {
       $('#credentials-not-found').show();
-      cv1wm.hideSelectedFields(fields);
+      //disQB.hideSelectedFields(fields);
       $('#something-went-wrong').hide();
       $('#node-input-environment').parent().hide();
       $('#node-input-collection').parent().hide();
@@ -609,7 +609,7 @@
 
 
     // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
-    function oneditprepare() {
+    function disQBoneditprepare() {
       disQB.hideAll();
       disQB.restoreHidden();
 
@@ -620,6 +620,7 @@
             $('.credentials').toggle(!service);
             // for some reason the getJSON resets the vars so need to restoreHidden again
             // so again.
+            disQB.have_credentials = true;
             disQB.restoreHidden();
             if (!service) {
               // no bound service, so check local settings to see if they are valid
@@ -637,7 +638,7 @@
             $('#credentials-check').hide();
           })
       }
-      // credentials can be set during the oneditprepare process, so check again.
+      // credentials can be set during the disQBoneditprepare process, so check again.
       if (disQB.have_credentials || disQB.using_local_credentials)
       {
         $('#credentials-check').hide();
@@ -654,7 +655,7 @@
     }
 
     // Save the values in the dyanmic lists to the hidden fields.
-    function oneditsave(){
+    function disQoneditsave(){
       disQB.environment_selected = $('#node-input-environment').val();
       $('#node-input-environmenthidden').val(disQB.environment_selected);
 
@@ -736,8 +737,8 @@
             labelStyle: function() {
                 return this.name ? "node_label_italic" : "";
             },
-            oneditprepare: oneditprepare,
-            oneditsave: oneditsave
+            oneditprepare: disQBoneditprepare,
+            oneditsave: disQoneditsave
         });
     })();
 </script>

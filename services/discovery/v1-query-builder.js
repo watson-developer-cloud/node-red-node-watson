@@ -43,19 +43,16 @@ module.exports = function(RED) {
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
       url: req.query.endpoint ? req.query.endpoint : sEndpoint,
-      version_date: '2017-09-01',
+      version_date: '2017-11-07',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
     });
 
-    console.log('Getting Discovery Environments');
     discovery.getEnvironments({}, function(err, response) {
       if (err) {
-        console.log(err);
         res.json(err);
       } else {
-        console.log('Returning Envrionments');
         res.json(response.environments ? response.environments : response);
       }
     });
@@ -67,7 +64,7 @@ module.exports = function(RED) {
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
       url: req.query.endpoint ? req.query.endpoint : sEndpoint,
-      version_date: '2017-09-01',
+      version_date: '2017-11-07',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -92,7 +89,7 @@ module.exports = function(RED) {
       username: sUsername ? sUsername : req.query.un,
       password: sPassword ? sPassword : req.query.pwd,
       url: req.query.endpoint ? req.query.endpoint : sEndpoint,
-      version_date: '2017-09-01',
+      version_date: '2017-11-07',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -101,7 +98,9 @@ module.exports = function(RED) {
     discovery.query({
       environment_id: req.query.environment_id,
       collection_id: req.query.collection_id,
-      query: 'text:a,text:ibm',
+      //query: 'text:a,text:ibm',
+      // Need a Query that will return some data!
+      query: 'text:"Trump",text:"IBM",text:"Watson"',
       count: 1
     },
       function(err, response) {
