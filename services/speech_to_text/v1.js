@@ -412,7 +412,8 @@ module.exports = function (RED) {
               } else if (d && d.state && 'listening' === d.state) {
                 socketListening = true;
                 // Added for verbose testing
-                node.send(newMsg);
+                // SC - Web Sockect Test
+                //node.send(newMsg);
                 //resolve();
               } else {
                 node.send(newMsg);
@@ -424,6 +425,9 @@ module.exports = function (RED) {
             websocket = null;
             socketListening = false;
             // console.log('STT Socket disconnected');
+            if (!muteMode) {
+              payloadutils.reportError(node,newMsg,'STT Socket Connection closed');
+            }
             setTimeout(connectIfNeeded, 1000);
           });
 
