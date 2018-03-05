@@ -28,7 +28,7 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     sttV1 = require('watson-developer-cloud/speech-to-text/v1'),
     authV1 = require('watson-developer-cloud/authorization/v1'),
-    muteMode = true;
+    muteMode = true, discardMode = false, autoConnect = true,
     username = '', password = '', sUsername = '', sPassword = '',
     endpoint = '',
     sEndpoint = 'https://stream.watsonplatform.net/speech-to-text/api',
@@ -135,6 +135,8 @@ module.exports = function (RED) {
       var message = '';
 
       muteMode = config['streaming-mute'];
+      discardMode = config['discard-listening'];
+      autoConnect = config['auto-connect'];
 
       if (!config.lang) {
         message = 'Missing audio language configuration, unable to process speech.';
@@ -412,8 +414,9 @@ module.exports = function (RED) {
               } else if (d && d.state && 'listening' === d.state) {
                 socketListening = true;
                 // Added for verbose testing
-                // SC - Web Sockect Test
-                //node.send(newMsg);
+                if (!discardMode) {
+                  node.send(newMsg);
+                }
                 //resolve();
               } else {
                 node.send(newMsg);
@@ -426,9 +429,12 @@ module.exports = function (RED) {
             socketListening = false;
             // console.log('STT Socket disconnected');
             if (!muteMode) {
+              var newMsg = {payload : 'STT Connection Close Event'};
               payloadutils.reportError(node,newMsg,'STT Socket Connection closed');
             }
-            setTimeout(connectIfNeeded, 1000);
+            if (autoConnect) {
+              setTimeout(connectIfNeeded, 1000);
+            }
           });
 
           ws.on('error', (err) => {
