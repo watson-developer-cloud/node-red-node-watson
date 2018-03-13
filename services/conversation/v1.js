@@ -184,22 +184,22 @@ module.exports = function(RED) {
     }
 
     var optoutLearning = false;
-    if ((msg.params && msg.params["optout_learning"])){
-        optoutLearning = true;
+    if ((msg.params && msg.params['optout_learning'])){
+      optoutLearning = true;
     } else if (config['optout-learning']){
-        optoutLearning = true;
+      optoutLearning = true;
     }
 
     if (optoutLearning){
-        serviceSettings.headers = serviceSettings.headers || {};
-        serviceSettings.headers['X-Watson-Learning-Opt-Out'] = '1';
+      serviceSettings.headers = serviceSettings.headers || {};
+      serviceSettings.headers['X-Watson-Learning-Opt-Out'] = '1';
     }
 
-    if (config['timeout'] && config['timeout'] !== "0" && isFinite(config['timeout'])){
+    if (config['timeout'] && config['timeout'] !== '0' && isFinite(config['timeout'])){
       serviceSettings.timeout = parseInt(config['timeout']);
     }
 
-    if (msg.params && msg.params.timeout !== "0" && isFinite(msg.params.timeout)){
+    if (msg.params && msg.params.timeout !== '0' && isFinite(msg.params.timeout)){
       serviceSettings.timeout = parseInt(msg.params.timeout);
     }
 
