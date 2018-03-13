@@ -144,7 +144,8 @@ module.exports = function(RED) {
 
     var userName = sUsername || node.credentials.username,
       passWord = sPassword || node.credentials.password,
-      endpoint = '';
+      endpoint = '',
+      optoutLearning = false;
 
     if (!(userName || msg.params.username) ||
       !(passWord || msg.params.password)) {
@@ -183,7 +184,6 @@ module.exports = function(RED) {
       serviceSettings.url = endpoint;
     }
 
-    var optoutLearning = false;
     if ((msg.params && msg.params['optout_learning'])){
       optoutLearning = true;
     } else if (config['optout-learning']){
