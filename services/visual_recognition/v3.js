@@ -28,6 +28,7 @@ module.exports = function(RED) {
     fs = require('fs'),
     async = require('async'),
     toArray = require('stream-to-array'),
+    sURL = null,
     sAPIKey = null,
     service = null;
 
@@ -38,6 +39,7 @@ module.exports = function(RED) {
 
   if (service) {
     sAPIKey = service.api_key;
+    sURL = service.url;
   }
 
   RED.httpAdmin.get('/watson-visual-recognition/vcap', function(req, res) {
@@ -137,12 +139,14 @@ module.exports = function(RED) {
   function verifyServiceCredentials(node, msg) {
     // If it is present the newly provided user entered key
     // takes precedence over the existing one.
+    node.url = sURL || node.credentials.url;
     node.apikey = sAPIKey || node.credentials.apikey;
     if (!node.apikey) {
       return Promise.reject('Missing Watson Visual Recognition API service credentials');
     }
 
     var serviceSettings = {
+      url: node.url,
       api_key: node.apikey,
       version_date: VisualRecognitionV3.VERSION_DATE_2016_05_20,
       headers: {

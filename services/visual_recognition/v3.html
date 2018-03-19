@@ -21,6 +21,10 @@
         </div>
     </div>
     <div class="form-row credentials" style="display: none;">
+        <label for="node-input-url"><i class="fa fa-key"></i> Gateway URL</label>
+        <input type="text" id="node-input-url" placeholder="Gateway URL">
+    </div>
+    <div class="form-row credentials" style="display: none;">
         <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
         <input type="password" id="node-input-apikey" placeholder="API Key">
     </div>
@@ -55,6 +59,10 @@
         <div class="form-tips">
             <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
         </div>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-url"><i class="fa fa-key"></i> Gateway URL</label>
+        <input type="text" id="node-input-url" placeholder="Gateway URL">
     </div>
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
@@ -145,11 +153,13 @@
             category: 'IBM Watson',
             defaults: {
               name: {value: ""},
+              url: "https://gateway-a.watsonplatform.net/visual-recognition/api",
               apikey: {value: ""},
               "image-feature": {value: ""},
               "lang": {value: ""},
             },
             credentials: {
+              url: {type:"text"},
               apikey: {type:"password"}
             },
             color: 'rgb(228, 189, 255)',
@@ -213,10 +223,12 @@
             category: 'IBM Watson',
             defaults: {
               name: {value: ""},
+              url: "https://gateway-a.watsonplatform.net/visual-recognition/api",
               apikey: {value: ""},
               "image-feature": {value: ""}
             },
             credentials: {
+              url: {type:"text"},
               apikey: {type:"password"}
             },
             color: 'rgb(228, 189, 255)',
