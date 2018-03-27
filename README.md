@@ -11,7 +11,7 @@ Node-RED Watson Nodes for IBM Cloud
 - Enable Opt-out option for Conversation Node.
 - Implement time out option for response from Conversation Node.
 - Bump to v 3.2.1 of watson-developer-cloud dependency.
-
+- Fix to how API version is specified in Natural Language Understanding node. 
 
 ### New in version 0.6.6
 - Added Mute option for STT Node warning status when running in Streaming mode
