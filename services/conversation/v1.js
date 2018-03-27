@@ -124,6 +124,7 @@ module.exports = function(RED) {
     if (msg.params && msg.params.alternate_intents) {
       params.alternate_intents = msg.params.alternate_intents;
     }
+
     verifyOptionalInputs(node, msg, config, params);
     return true;
   }
@@ -143,7 +144,8 @@ module.exports = function(RED) {
 
     var userName = sUsername || node.credentials.username,
       passWord = sPassword || node.credentials.password,
-      endpoint = '';
+      endpoint = '',
+      optoutLearning = false;
 
     if (!(userName || msg.params.username) ||
       !(passWord || msg.params.password)) {
@@ -165,6 +167,9 @@ module.exports = function(RED) {
       }
     }
 
+    serviceSettings.username = userName;
+    serviceSettings.password = passWord;
+
     if (service) {
       endpoint = service.url;
     }
@@ -179,15 +184,31 @@ module.exports = function(RED) {
       serviceSettings.url = endpoint;
     }
 
-    serviceSettings.username = userName;
-    serviceSettings.password = passWord;
+    if ((msg.params && msg.params['optout_learning'])){
+      optoutLearning = true;
+    } else if (config['optout-learning']){
+      optoutLearning = true;
+    }
+
+    if (optoutLearning){
+      serviceSettings.headers = serviceSettings.headers || {};
+      serviceSettings.headers['X-Watson-Learning-Opt-Out'] = '1';
+    }
+
+    if (config['timeout'] && config['timeout'] !== '0' && isFinite(config['timeout'])){
+      serviceSettings.timeout = parseInt(config['timeout']);
+    }
+
+    if (msg.params && msg.params.timeout !== '0' && isFinite(msg.params.timeout)){
+      serviceSettings.timeout = parseInt(msg.params.timeout);
+    }
 
     node.service = new ConversationV1(serviceSettings);
     return true;
   }
 
   function processResponse(err, body, node, msg, config) {
-    if (err !== null && body === null) {
+    if (err !== null && (body === null || typeof (body) === 'undefined')) {
       node.error(err, msg);
       node.status({
         fill: 'red',

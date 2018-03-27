@@ -28,6 +28,7 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     sttV1 = require('watson-developer-cloud/speech-to-text/v1'),
     authV1 = require('watson-developer-cloud/authorization/v1'),
+    muteMode = true, discardMode = false, autoConnect = true,
     username = '', password = '', sUsername = '', sPassword = '',
     endpoint = '',
     sEndpoint = 'https://stream.watsonplatform.net/speech-to-text/api',
@@ -132,6 +133,10 @@ module.exports = function (RED) {
 
     function configCheck() {
       var message = '';
+
+      muteMode = config['streaming-mute'];
+      discardMode = config['discard-listening'];
+      autoConnect = config['auto-connect'];
 
       if (!config.lang) {
         message = 'Missing audio language configuration, unable to process speech.';
@@ -397,7 +402,10 @@ module.exports = function (RED) {
                 // Force Expiry of Token, as that is the only Error
                 // response from the service that we have seen.
                 // report the error for verbose testing
-                payloadutils.reportError(node,newMsg,d.error);
+                if (!muteMode) {
+                  payloadutils.reportError(node,newMsg,d.error);
+                }
+
                 token = null;
                 getToken(determineService())
                   .then(() => {
@@ -406,7 +414,9 @@ module.exports = function (RED) {
               } else if (d && d.state && 'listening' === d.state) {
                 socketListening = true;
                 // Added for verbose testing
-                node.send(newMsg);
+                if (!discardMode) {
+                  node.send(newMsg);
+                }
                 //resolve();
               } else {
                 node.send(newMsg);
@@ -418,12 +428,20 @@ module.exports = function (RED) {
             websocket = null;
             socketListening = false;
             // console.log('STT Socket disconnected');
-            setTimeout(connectIfNeeded, 1000);
+            if (!muteMode) {
+              var newMsg = {payload : 'STT Connection Close Event'};
+              payloadutils.reportError(node,newMsg,'STT Socket Connection closed');
+            }
+            if (autoConnect) {
+              setTimeout(connectIfNeeded, 1000);
+            }
           });
 
           ws.on('error', (err) => {
             socketListening = false;
-            payloadutils.reportError(node,newMsg,err);
+            if (!muteMode) {
+              payloadutils.reportError(node,newMsg,err);
+            }
             // console.log('Error Detected');
             if (initialConnect) {
               //reject(err);
@@ -472,8 +490,9 @@ module.exports = function (RED) {
             //websocket.send(a.data);
             websocket.send(a.data, (error) => {
               if (error) {
-                payloadutils.reportError(node,{},error);
-              } else {
+                if (!muteMode) {
+                  payloadutils.reportError(node,{},error);
+                }
               }
             });
           }

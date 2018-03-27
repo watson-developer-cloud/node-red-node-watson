@@ -90,6 +90,24 @@
 
     <div class="form-row">
         <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-streaming-mute" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-streaming-mute" style="width: 70%;"> Mute in Streaming Mode</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-discard-listening" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-discard-listening" style="width: 70%;"> Discard Listening events from STT</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-auto-connect" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-auto-connect" style="width: 70%;"> Attempt auto connect on connection close</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
         <input type="checkbox" id="node-input-speakerlabels"style="display: inline-block; width: auto; vertical-align: top;"></input>
         <label for="node-input-speakerlabels" style="width: 70%;"><i class="fa fa-audio-o"></i> Speaker Labels</label>
     </div>
@@ -148,6 +166,8 @@
     is as per the WebSocket input for Speech To Text, with an action of either
     <code>start</code> or <code>stop</code> or an audio blob. No token is needed
     as the node takes care of that step.</p>
+    <p>>The Mute option allows for the supression of session timeout messages.</p>
+    <p>>The Discard Listening option allows for listening events from STT to be discarded.</p>
     <p>For more information about the Speech To Text service, read the <a href="https://www.ibm.com/watson/services/speech-to-text/">documentation</a>.</p>
 </script>
 
@@ -186,41 +206,61 @@
     return self.indexOf(value) === index;
   }
 
+  stt.showSelectedFields = function(fields) {
+    for (i = 0; i < fields.length; i++) {
+      $(fields[i]).parent().show();
+    }
+  }
+
+  stt.hideSelectedFields = function(fields) {
+    for (i = 0; i < fields.length; i++) {
+      $(fields[i]).parent().hide();
+    }
+  }
+
+
   // Function to be used at the start, as don't want to expose any fields, unless the models are
   // available. The models can only be fetched if the credentials are available.
   stt.hideEverything = function () {
     if (!stt.models) {
+      var fields = [];
       $('#credentials-not-found').show();
-      $('label#node-label-message').parent().hide();
-      $('input#node-input-alternatives').parent().hide();
-      $('input#node-input-speakerlabels').parent().hide();
-      $('input#node-input-smartformatting').parent().hide();
-      $('select#node-input-lang').parent().hide();
-      $('select#node-input-band').parent().hide();
-      $('select#node-input-langcustom').parent().hide();
+
+      fields.push('#node-label-message'
+                     + ', #node-input-alternatives'
+                     + ', #node-input-speakerlabels'
+                     + ', #node-input-smartformatting'
+                     + ', #node-input-lang'
+                     + ', #node-input-band'
+                     + ', #node-input-langcustom');
+      stt.hideSelectedFields(fields);
     }
   }
 
   // Check if there is a model then can show the fields.
   // available. The models can only be fetched if the credentials are available.
   stt.VisibilityCheck = function () {
+    var showFields = [];
+    var hideFields = [];
     if (stt.models) {
-      $('label#node-label-message').parent().hide();
-      $('input#node-input-alternatives').parent().show();
-      $('input#node-input-speakerlabels').parent().show();
-      $('input#node-input-smartformatting').parent().show();
-      $('select#node-input-lang').parent().show();
-      //$('select#node-input-langcustom').parent().show();
-      $('select#node-input-band').parent().show();
+      showFields.push('#node-input-alternatives'
+                     + ', #node-input-speakerlabels'
+                     + ', #node-input-smartformatting'
+                     + ', #node-input-lang'
+                     + ', #node-input-band');
+
+      hideFields.push('#node-label-message');
     } else {
-      $('label#node-label-message').parent().hide();
-      $('input#node-input-alternatives').parent().hide();
-      $('input#node-input-speakerlabels').parent().hide();
-      $('input#node-input-smartformatting').parent().hide();
-      $('select#node-input-lang').parent().hide();
-      $('select#node-input-langcustom').parent().hide();
-      $('select#node-input-band').parent().hide();
+      hideFields.push('#node-label-message'
+                     + ', #node-input-alternatives'
+                     + ', #node-input-speakerlabels'
+                     + ', #node-input-smartformatting'
+                     + ', #node-input-langcustom'
+                     + ', #node-input-lang'
+                     + ', #node-input-band');
     }
+    stt.hideSelectedFields(hideFields);
+    stt.showSelectedFields(showFields);
   }
 
 
@@ -362,6 +402,20 @@
         $('#node-input-service-endpoint').parent().hide();
       } else {
         $('#node-input-service-endpoint').parent().show();
+      }
+    });
+
+    $('#node-input-streaming-mode').change(function () {
+      var fields = [];
+      fields.push('#node-input-streaming-mute'
+                     + ', #node-input-discard-listening'
+                     + ', #node-input-auto-connect');
+
+      var checked = $('#node-input-streaming-mode').prop('checked')
+      if (checked) {
+        stt.showSelectedFields(fields);
+      } else {
+        stt.hideSelectedFields(fields);
       }
     });
 
@@ -542,6 +596,8 @@
                 password: {value: ''},
                 'payload-response' :{value: false},
                 'streaming-mode' :{value: false},
+                'streaming-mute' :{value: true},
+                'discard-listening' :{value: false},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://stream.watsonplatform.net/speech-to-text/api'}
             },
