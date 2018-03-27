@@ -183,7 +183,7 @@ module.exports = function (RED) {
       serviceSettings = {
         username: username,
         password: password,
-        version_date: NaturalLanguageUnderstandingV1.VERSION_DATE_2017_02_27,
+        version: '2018-03-16',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
