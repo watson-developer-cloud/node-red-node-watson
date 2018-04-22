@@ -130,7 +130,7 @@ module.exports = function (RED) {
         serviceSettings = {
           username: username,
           password: password,
-          version_date: '2017-09-01',
+          version_date: '2017-11-07',
           headers: {
             'User-Agent': pkg.name + '-' + pkg.version
           }
@@ -141,12 +141,13 @@ module.exports = function (RED) {
       }
 
       discovery = new DiscoveryV1(serviceSettings);
-
-      if ('.json' === suffix) {
-        method = 'addJsonDocument';
-      } else {
-        method = 'addDocument';
-      }
+      // addJsonDocument is deprecated
+      //if ('.json' === suffix) {
+      //  method = 'addJsonDocument';
+      //} else {
+      //  method = 'addDocument';
+      //}
+      method = 'addDocument';
 
       discovery[method](params, function (err, response) {
         if (err) {

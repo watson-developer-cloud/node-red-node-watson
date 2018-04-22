@@ -7,6 +7,17 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.6.8
+- Move all Discovery calls to latest API version - 2017-11-07
+- Updated calls to deprecated discovery methods addJsonDocument and getCollections
+- Correct implemetation of passages related options
+- Allow highlight option to be specified in Discovery overrides - msg.discoveryparams
+- Rename Conversation Nodes to Assistant
+- Use Assistant endpoint
+- Move all Assistant calls to latest API version - 2018-02-16
+- Move all Visual Recognition calls to lates API version - 2018-03-19
+- Add French as a Visual Recognition classification response language
+
 ### New in version 0.6.7
 - Enable Opt-out option for Conversation Node.
 - Implement time out option for response from Conversation Node.

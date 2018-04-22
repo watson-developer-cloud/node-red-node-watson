@@ -15,15 +15,20 @@
  **/
 
 module.exports = function(RED) {
-  const SERVICE_IDENTIFIER = 'conversation';
+  const SERVICE_IDENTIFIER = 'assistant',
+    OLD_SERVICE_IDENTIFIER = 'conversation';
+
   var pkg = require('../../package.json'),
-    ConversationV1 = require('watson-developer-cloud/conversation/v1'),
+    AssistantV1 = require('watson-developer-cloud/assistant/v1'),
     serviceutils = require('../../utilities/service-utils'),
     service = null,
     sUsername = null,
     sPassword = null;
 
   service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
+  if (!service) {
+    service = serviceutils.getServiceCreds(OLD_SERVICE_IDENTIFIER);
+  }
 
   if (service) {
     sUsername = service.username;
@@ -136,7 +141,8 @@ module.exports = function(RED) {
     // If msg.params contain credentials then these will Overridde
     // the bound or configured credentials.
     const serviceSettings = {
-      version_date: '2017-05-26',
+      version_date: '2018-02-16',
+      version: '2018-02-16',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -203,7 +209,7 @@ module.exports = function(RED) {
       serviceSettings.timeout = parseInt(msg.params.timeout);
     }
 
-    node.service = new ConversationV1(serviceSettings);
+    node.service = new AssistantV1(serviceSettings);
     return true;
   }
 
