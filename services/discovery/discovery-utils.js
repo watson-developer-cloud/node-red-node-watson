@@ -125,7 +125,8 @@ DiscoveryUtils.prototype = {
 
     ['environment_id', 'collection_id', 'configuration_id',
       'collection_name', 'language_code',
-      'passages', 'description', 'size', 'filename'
+      'passages', 'description', 'size', 'filename',
+      'highlight'
     ].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);
     });
