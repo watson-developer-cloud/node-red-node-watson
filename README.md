@@ -15,6 +15,8 @@ Node-RED Watson Nodes for IBM Cloud
 - Rename Conversation Nodes to Assistant
 - Use Assistant endpoint
 - Move all Assistant calls to latest API version - 2018-02-16
+- Move all Visual Recognition calls to lates API version - 2018-03-19
+- Add French as a Visual Recognition classification response language
 
 ### New in version 0.6.7
 - Enable Opt-out option for Conversation Node.

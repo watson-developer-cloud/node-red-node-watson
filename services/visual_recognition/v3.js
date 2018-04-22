@@ -144,7 +144,7 @@ module.exports = function(RED) {
 
     var serviceSettings = {
       api_key: node.apikey,
-      version_date: VisualRecognitionV3.VERSION_DATE_2016_05_20,
+      version_date: '2018-03-19',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
