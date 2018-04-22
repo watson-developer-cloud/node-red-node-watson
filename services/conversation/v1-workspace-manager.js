@@ -15,8 +15,9 @@
  **/
 
 module.exports = function (RED) {
-  const SERVICE_IDENTIFIER = 'assistant';
-  const OLD_SERVICE_IDENTIFIER = 'conversation';
+  const SERVICE_IDENTIFIER = 'assistant',
+    OLD_SERVICE_IDENTIFIER = 'conversation';
+
   var pkg = require('../../package.json'),
     temp = require('temp'),
     fs = require('fs'),

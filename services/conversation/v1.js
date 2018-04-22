@@ -15,8 +15,9 @@
  **/
 
 module.exports = function(RED) {
-  const SERVICE_IDENTIFIER = 'assistant';
-  const OLD_SERVICE_IDENTIFIER = 'conversation';
+  const SERVICE_IDENTIFIER = 'assistant',
+    OLD_SERVICE_IDENTIFIER = 'conversation';
+
   var pkg = require('../../package.json'),
     AssistantV1 = require('watson-developer-cloud/assistant/v1'),
     serviceutils = require('../../utilities/service-utils'),
