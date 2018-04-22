@@ -71,6 +71,35 @@ DiscoveryUtils.prototype = {
     return params;
   },
 
+  buildParamsForPassages: function (me, msg, config, params) {
+    let passagesFound = false;
+
+    // Allow the passages parameters to be passed in two ways
+    // 1. As the API is expecting
+    ['passages.fields', 'passages.count', 'passages.characters'
+    ].forEach(function(f) {
+      params = me.buildParamsFor(msg, config, params, f);
+      passagesFound = true;
+    });
+
+    // 2. As anyone misreading the documentation might do it.
+    if (msg.discoveryparams && msg.discoveryparams.passages) {
+      passagesFound = true;
+      ['fields', 'count', 'characters'
+      ].forEach(function(f) {
+        if (msg.discoveryparams.passages[f]) {
+          params['passages.' + f] = msg.discoveryparams.passages[f];
+        }
+      });
+    }
+
+    if (passagesFound) {
+      params.passages = true;
+    }
+
+    return params;
+  },
+
   buildParamsFromConfig: function(config, params, field) {
     if (config[field]) {
       params[field] = config[field];
@@ -100,6 +129,8 @@ DiscoveryUtils.prototype = {
     ].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);
     });
+
+    params = me.buildParamsForPassages(me, msg, config, params);
 
     ['count', 'filter', 'aggregation', 'return'].forEach(function(f) {
       params = me.buildParamsFromConfig(config, params, f);

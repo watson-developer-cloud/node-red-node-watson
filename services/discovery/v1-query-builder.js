@@ -70,7 +70,7 @@ module.exports = function(RED) {
       }
     });
 
-    discovery.getCollections({
+    discovery.listCollections({
       environment_id: req.query.environment_id
     },
       function(err, response) {
