@@ -45,7 +45,7 @@
     </div>
     <div class="form-row">
         <label for="node-input-cwm-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
-        <input type="text" id="node-input-cwm-service-endpoint" placeholder="https://gateway.watsonplatform.net/conversation/api">
+        <input type="text" id="node-input-cwm-service-endpoint" placeholder="https://gateway.watsonplatform.net/assistant/api">
     </div>
 
     <div class="form-row">
@@ -351,7 +351,7 @@
       </li>
       <li>
         <code>msg.params.password</code>
-      </li>  
+      </li>
       <li>
         <code>msg.params.workspace_id</code>
       </li>
@@ -592,7 +592,7 @@
                 'cwm-dialog-node': {value:""},
                 'cwm-export-content': {value:false},
                 'cwm-default-endpoint' :{value: true},
-                'cwm-service-endpoint' :{value: 'https://gateway.watsonplatform.net/conversation/api'}
+                'cwm-service-endpoint' :{value: 'https://gateway.watsonplatform.net/assistant/api'}
             },
             credentials: {
               username: {type:'text'},
@@ -602,9 +602,9 @@
             inputs: 1,
             outputs: 1,
             icon: 'conversation-v1-25x25.png',
-            paletteLabel: 'conversation workspace manager',
+            paletteLabel: 'assistant workspace manager',
             label: function() {
-                return this.name || 'conversation workspace manager';
+                return this.name || 'assistant workspace manager';
             },
             labelStyle: function() {
                 return this.name ? 'node_label_italic' : '';

@@ -11,7 +11,10 @@ Node-RED Watson Nodes for IBM Cloud
 - Move all Discovery calls to latest API version - 2017-11-07
 - Updated calls to deprecated discovery methods addJsonDocument and getCollections
 - Correct implemetation of passages related options
-- Allow highlight option to be specified in Discovery overrides - msg.discoveryparams 
+- Allow highlight option to be specified in Discovery overrides - msg.discoveryparams
+- Rename Conversation Nodes to Assistant
+- Use Assistant endpoint
+- Move all Assistant calls to latest API version - 2018-02-16
 
 ### New in version 0.6.7
 - Enable Opt-out option for Conversation Node.
