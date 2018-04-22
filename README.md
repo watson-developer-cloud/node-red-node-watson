@@ -7,6 +7,12 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.6.7
+- Enable Opt-out option for Conversation Node.
+- Implement time out option for response from Conversation Node.
+- Bump to v 3.2.1 of watson-developer-cloud dependency.
+- Fix to how API version is specified in Natural Language Understanding Node.
+- Add Korean to list of languages in Natural Language Classifier Node.
 
 ### New in version 0.6.6
 - Added Mute option for STT Node warning status when running in Streaming mode
