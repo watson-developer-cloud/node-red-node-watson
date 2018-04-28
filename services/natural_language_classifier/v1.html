@@ -81,6 +81,17 @@
     <p>Set the classifier id in the node configuration window.</p>
     <p>The classifier can be overriden by setting msg.nlcparams.classifier_id</p>
     <p>The text to classify should be passed in on <code>msg.payload</code>.</p>
+
+    <p> If <code>msg.payload</code> contains multiple sentences then the sentences will
+    be split and the set will be classified as a collection. If there are no sentence
+    terminators then it will not be recognised as a sentence.
+    </p>
+    <p> If <code>msg.payload</code> contains an array of strings, then each string will be
+    treated as a separate sentence and the set treated as a collection. </p>
+    <p>If <code>msg.payload</code> contains an array of objects, then there is a
+    search for the <code>text</code> key in each object. Each text object will be
+    treated as part of the collection.</p>
+
     <p>The returned classification and confidence values will be returned on <code>msg.payload</code>.</p>
     <p></p>
     <p><b>Training Mode</b>.</p>
