@@ -79,6 +79,33 @@ module.exports = function(RED) {
       }
     };
 
+
+    node.payloadCollectionCheck = function(msg, config, payloadData) {
+      if ('classify' === config.mode) {
+        if ('string' === typeof msg.payload) {
+          let collection = msg.payload.match( /\(?[^\.\?\!]+[\.!\?$]\)?/g );
+          if (collection && collection.length > 1) {
+            payloadData.collection = [];
+            collection.forEach((s) => {
+              let textObject = { text : s };
+              payloadData.collection.push(textObject);
+            });
+          }
+        } else if (Array.isArray(msg.payload)){
+          payloadData.collection = [];
+          msg.payload.forEach((p) => {
+            if ('string' === typeof p) {
+              let textObject = { text : p };
+              payloadData.collection.push(textObject);
+            } else if ('object' === typeof p) {
+              payloadData.collection.push(p);
+            }
+          });
+        }
+      }
+      return Promise.resolve();
+    };
+
     // Standard temp file open
     node.openTemp = function() {
       var p = new Promise(function resolver(resolve, reject) {
@@ -118,13 +145,18 @@ module.exports = function(RED) {
       }
     };
 
-    node.buildParams = function(msg, config, info) {
+    node.buildParams = function(msg, config, info, payloadData) {
       var params = {},
         message = '';
 
       switch (config.mode) {
       case 'classify':
-        params.text = msg.payload;
+        if (payloadData && payloadData.collection) {
+          params.collection = payloadData.collection;
+        } else {
+         params.text = msg.payload;
+       }
+
         params.classifier_id = config.classifier;
         if (msg.nlcparams && msg.nlcparams.classifier_id) {
           params.classifier_id = msg.nlcparams.classifier_id;
@@ -170,14 +202,29 @@ module.exports = function(RED) {
 
         natural_language_classifier = new NaturalLanguageClassifierV1(serviceSettings);
 
-        natural_language_classifier[config.mode](params, function(err, response) {
+        let mode = config.mode;
+        if (params.collection) {
+          mode = 'classifyCollection';
+        }
+
+        natural_language_classifier[mode](params, function(err, response) {
           if (err) {
             reject(err);
           } else {
-            msg.payload = (config.mode === 'classify') ? {
-              classes: response.classes,
-              top_class: response.top_class
-            } : response;
+            console.log(response);
+            switch (mode) {
+            case 'classify':
+              msg.payload = {
+                classes: response.classes,
+                top_class: response.top_class
+              }
+            case 'classifyCollection':
+              msg.payload = {
+                collection: response.collection
+              }
+            default:
+              msg.payload = response;
+            }
             resolve();
           }
         });
@@ -189,15 +236,19 @@ module.exports = function(RED) {
 
     this.on('input', function(msg) {
       //var params = {}
+      let payloadData = {};
       node.verifyCredentials(msg)
         .then(function() {
           return node.payloadCheck(msg);
         })
         .then(function() {
+          return node.payloadCollectionCheck(msg, config, payloadData);
+        })
+        .then(function() {
           return node.checkForCreate(msg, config);
         })
         .then(function(info) {
-          return node.buildParams(msg, config, info);
+          return node.buildParams(msg, config, info, payloadData);
         })
         .then(function(params) {
           node.status({

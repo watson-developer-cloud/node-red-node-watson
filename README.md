@@ -7,6 +7,10 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.6.9
+- Implemented classify collection on Natural Language Classifier node. The collection can be
+in the form of multiple sentences, an array of strings, or an array of objects.
+
 ### New in version 0.6.8
 - Move all Discovery calls to latest API version - 2017-11-07
 - Updated calls to deprecated discovery methods addJsonDocument and getCollections
@@ -61,7 +65,7 @@ out for sample flows and templates showing how to use this feature.
 - Text Recognition option removed from Visual Recognition Node
 - Move Retrieve and Rank nodes to deprecated list
 - Removed Document Conversion, Alchemy, Concept Insights, Dialog, Tradeoff Analytics and Similarity Search Nodes
-- Nodes deprecated in 0.5.x will be removed in 0.5.x releases
+- Nodes deprecated in 0.5.x will be removed in 0.6.x releases
 
 
 ### Watson Nodes for Node-RED
