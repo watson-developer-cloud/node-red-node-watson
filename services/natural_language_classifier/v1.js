@@ -155,7 +155,7 @@ module.exports = function(RED) {
           params.collection = payloadData.collection;
         } else {
          params.text = msg.payload;
-       }
+        }
 
         params.classifier_id = config.classifier;
         if (msg.nlcparams && msg.nlcparams.classifier_id) {
