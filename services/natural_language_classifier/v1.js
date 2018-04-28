@@ -154,7 +154,7 @@ module.exports = function(RED) {
         if (payloadData && payloadData.collection) {
           params.collection = payloadData.collection;
         } else {
-         params.text = msg.payload;
+          params.text = msg.payload;
         }
 
         params.classifier_id = config.classifier;
