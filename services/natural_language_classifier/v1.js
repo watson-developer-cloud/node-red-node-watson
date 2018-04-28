@@ -217,11 +217,13 @@ module.exports = function(RED) {
               msg.payload = {
                 classes: response.classes,
                 top_class: response.top_class
-              }
+              };
+              break;
             case 'classifyCollection':
               msg.payload = {
                 collection: response.collection
-              }
+              };
+              break;
             default:
               msg.payload = response;
             }
