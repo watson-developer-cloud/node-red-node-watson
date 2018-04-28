@@ -251,7 +251,7 @@ module.exports = function (RED) {
       serviceSettings = {
         username: username,
         password: password,
-        version_date: '2017-09-01',
+        version_date: '2017-11-07',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }

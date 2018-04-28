@@ -42,7 +42,7 @@
     </div>
     <div class="form-row">
         <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
-        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/conversation/api">
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/assistant/api">
     </div>
 
     <div class="form-row">
@@ -159,7 +159,7 @@
               context: {value: true},
               'empty-payload': {value: false},
               'default-endpoint' : {value: true},
-              'service-endpoint' : {value: 'https://gateway.watsonplatform.net/conversation/api'},
+              'service-endpoint' : {value: 'https://gateway.watsonplatform.net/assistant/api'},
               timeout: {value: '', validate: RED.validators.number(true)},
               'optout-learning': {value: false}
             },
@@ -171,9 +171,9 @@
             inputs: 1,
             outputs: 1,
             icon: 'conversation-v1-25x25.png',
-            paletteLabel: 'conversation',
+            paletteLabel: 'assistant',
             label: function() {
-                return this.name || 'conversation';
+                return this.name || 'assistant';
             },
             labelStyle: function() {
                 return this.name ? 'node_label_italic' : '';

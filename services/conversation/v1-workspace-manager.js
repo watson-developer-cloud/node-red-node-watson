@@ -15,16 +15,22 @@
  **/
 
 module.exports = function (RED) {
-  const SERVICE_IDENTIFIER = 'conversation';
+  const SERVICE_IDENTIFIER = 'assistant',
+    OLD_SERVICE_IDENTIFIER = 'conversation';
+
   var pkg = require('../../package.json'),
     temp = require('temp'),
     fs = require('fs'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
-    ConversationV1 = require('watson-developer-cloud/conversation/v1'),
+    AssistantV1 = require('watson-developer-cloud/assistant/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = '', password = '', sUsername = '', sPassword = '',
     endpoint = '', sEndpoint = '';
+
+  if (!service) {
+    service = serviceutils.getServiceCreds(OLD_SERVICE_IDENTIFIER);
+  }
 
   temp.track();
 
@@ -117,7 +123,7 @@ module.exports = function (RED) {
 
   function executeListIntents(node, conv, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      conv.getIntents(params, function (err, response) {
+      conv.listIntents(params, function (err, response) {
         if (err) {
           reject(err);
         } else {
@@ -193,7 +199,7 @@ module.exports = function (RED) {
   // response
   function executeListExamples(node, conv, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      conv.getExamples(params, function (err, response) {
+      conv.listExamples(params, function (err, response) {
         if (err) {
           reject(err);
         } else {
@@ -236,7 +242,7 @@ module.exports = function (RED) {
 
   function executeListCounterExamples(node, conv, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      conv.getCounterExamples(params, function (err, response) {
+      conv.listCounterexamples(params, function (err, response) {
         if (err) {
           reject(err);
         } else {
@@ -251,7 +257,7 @@ module.exports = function (RED) {
 
   function executeCreateCounterExample(node, conv, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      conv.createCounterExample(params, function (err, response) {
+      conv.createCounterexample(params, function (err, response) {
         if (err) {
           reject(err);
         } else {
@@ -265,7 +271,7 @@ module.exports = function (RED) {
 
   function executeDeleteCounterExample(node, conv, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      conv.deleteCounterExample(params, function (err, response) {
+      conv.deleteCounterexample(params, function (err, response) {
         if (err) {
           reject(err);
         } else {
@@ -279,7 +285,7 @@ module.exports = function (RED) {
 
   function executeListEntities(node, conv, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      conv.getEntities(params, function (err, response) {
+      conv.listEntities(params, function (err, response) {
         if (err) {
           reject(err);
         } else {
@@ -352,7 +358,7 @@ module.exports = function (RED) {
 
   function executeListEntityValues(node, conv, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      conv.getValues(params, function (err, response) {
+      conv.listValues(params, function (err, response) {
         if (err) {
           reject(err);
         } else {
@@ -422,7 +428,7 @@ module.exports = function (RED) {
 
   function executeListDialogNodes(node, conv, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      conv.getDialogNodes(params, function (err, response) {
+      conv.listDialogNodes(params, function (err, response) {
         if (err) {
           reject(err);
         } else {
@@ -499,7 +505,8 @@ module.exports = function (RED) {
       serviceSettings = {
         username: username,
         password: password,
-        version_date: '2017-05-26',
+        version_date: '2018-02-16',
+        version: '2018-02-16',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
@@ -509,7 +516,7 @@ module.exports = function (RED) {
       serviceSettings.url = endpoint;
     }
 
-    conv = new ConversationV1(serviceSettings);
+    conv = new AssistantV1(serviceSettings);
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
 
@@ -1068,12 +1075,12 @@ module.exports = function (RED) {
         params = {};
 
       username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;  
+      password = sPassword || this.credentials.password || config.password;
 
       // All method to be overridden
       if (msg.params) {
         if (msg.params.method) {
-          method = msg.params.method;          
+          method = msg.params.method;
         }
         if (msg.params.username) {
           username = msg.params.username;
