@@ -141,12 +141,13 @@ module.exports = function (RED) {
       }
 
       discovery = new DiscoveryV1(serviceSettings);
-      // addJsonDocument is deprecated
-      //if ('.json' === suffix) {
-      //  method = 'addJsonDocument';
+      // modify as getting addJsonDocument will be deprecated messages
+      if ('.json' === suffix) {
+        //method = 'addJsonDocument';
+        params.file = JSON.stringify(params.file);
       //} else {
-      //  method = 'addDocument';
-      //}
+        //method = 'addDocument';
+      }
       method = 'addDocument';
 
       discovery[method](params, function (err, response) {

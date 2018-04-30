@@ -58,6 +58,7 @@ DiscoveryUtils.prototype = {
       params.file = this.isJsonObject(msg.payload) ?
         JSON.stringify(msg.payload) :
         msg.payload;
+      params.file_content_type = 'application/json';
     }
     return params;
   },
@@ -313,7 +314,8 @@ DiscoveryUtils.prototype = {
   },
 
   isJsonObject: function(str) {
-    if (str instanceof Array || str instanceof Object) {
+    if (str instanceof Array || str instanceof Object ||
+          'object' === typeof str || Array.isArray(str)) {
       return true;
     }
     return false;
