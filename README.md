@@ -9,6 +9,7 @@ Node-RED Watson Nodes for IBM Cloud
 
 ### New in version 0.6.10
 - Needed to stringify json before addDocument in Discovery node.
+- Using Node.js v 6 features, so will not run on Node.js v 4 anymore
 
 ### New in version 0.6.9
 - Implemented classify collection on Natural Language Classifier node. The collection can be
