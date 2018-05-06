@@ -11,6 +11,9 @@ Node-RED Watson Nodes for IBM Cloud
 - Fix to defaulting name for NLU Node.
 - Allow pre-check of audio format to be disabled in Speech to Text node.
 - Migrate from deprecated getModels and getCustomizations methods in Speech to Text nodes.
+- Implement update classifier in Visual Recognition Util node.
+- In Visual Recognition Util node append 'positive_' to zip name if neither 'positive' not 'negative' not already there.
+- Removed duplicated code in Visual Recognition Util node.
 
 ### New in version 0.6.10
 - Needed to stringify json before addDocument in Discovery node.

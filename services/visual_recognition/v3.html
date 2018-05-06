@@ -67,6 +67,7 @@
             <option value="createClassifier">Create a classifier</option>
             <option value="retrieveClassifiersList">Retrieve a list of classifiers</option>
             <option value="retrieveClassifierDetails">Retrieve Classifier Details</option>
+            <option value="updateClassifier">Update a classifier</option>
             <option value="deleteClassifier">Delete a classifier</option>
             <option value="deleteAllClassifiers">Delete all classifiers</option>
         </select>
@@ -94,7 +95,7 @@
     <p>This feature should be provided in input : </p>
     <ul>
     <li><code>msg.payload</code> : the URL or the Node.js Buffer of an image. Redirects are followed, so you can use shortened URLs. (Required)</li>
-    <li><code>msg.params["detect_mode"]</code> : A setting of "classify", "faces" or "text" indicating the visual recognition feature required. "Default" is "classify" (string) (Optional)</li>
+    <li><code>msg.params["detect_mode"]</code> : A setting of "classify" or "faces" indicating the visual recognition feature required. "Default" is "classify" (string) (Optional)</li>
     <li><code>msg.params["classifier_ids"]</code> : A comma-separated list of the classifier IDs used to classify the images. "Default" is the classifier_id of the built-in classifier. (string) (Optional)</li>
     <li><code>msg.params["owners"]</code> : A comma-separated list with the value(s) "IBM" and/or "me" to specify which classifiers to run. (string) (Optional)</li>
     <li><code>msg.params["threshold"]</code> : A floating value (in string format) that specifies the minimum score a class must have to be displayed in the response (Optional)</li>
