@@ -254,8 +254,12 @@ module.exports = function(RED) {
           return callback('open error on ' + k);
         }
         stream_buffer(info.path, msg.params[k], function() {
-          listParams[k] = fs.createReadStream(info.path);
-          callback(null, k);
+          let example_name = k;
+          if (! (k.includes('positive') || k.includes('negative'))) {
+            example_name = k.replace('examples', 'positive_examples');
+          }
+          listParams[example_name] = fs.createReadStream(info.path);
+          callback(null, example_name);
         });
       });
     });
