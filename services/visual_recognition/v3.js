@@ -15,8 +15,19 @@
  **/
 
 module.exports = function(RED) {
-  const SERVICE_IDENTIFIER = 'visual-recognition';
-  const VisualRecognitionV3 = require('watson-developer-cloud/visual-recognition/v3');
+  const SERVICE_IDENTIFIER = 'visual-recognition',
+    VisualRecognitionV3 = require('watson-developer-cloud/visual-recognition/v3'),
+    METHODS = {
+      CREATECLASSIFER : 'createClassifier',
+      LISTCLASSIFIERS : 'listClassifiers',
+      UPDATECLASSIFIER : 'updateClassifier',
+      GETCLASSIFIER : 'getClassifier',
+      DELETECLASSIFIER : 'deleteClassifier',
+      retrieveClassifiersList : 'listClassifiers',
+      retrieveClassifierDetails : 'getClassifier',
+      deleteClassifier : 'deleteClassifier'
+    };
+
   var pkg = require('../../package.json'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
@@ -254,8 +265,12 @@ module.exports = function(RED) {
           return callback('open error on ' + k);
         }
         stream_buffer(info.path, msg.params[k], function() {
-          listParams[k] = fs.createReadStream(info.path);
-          callback(null, k);
+          let example_name = k;
+          if (! (k.includes('positive') || k.includes('negative'))) {
+            example_name = k.replace('examples', 'positive_examples');
+          }
+          listParams[example_name] = fs.createReadStream(info.path);
+          callback(null, example_name);
         });
       });
     });
@@ -269,7 +284,7 @@ module.exports = function(RED) {
   // msg.params["negative_examples"] : a Node.js binary Buffer of the ZIP
   // that contains a minimum of 10 images.(Optional)
 
-  function prepareParamsCreateClassifier(params, node, msg) {
+  function prepareParamsClassifierFiles(params, node, msg) {
     var p = new Promise(function resolver(resolve, reject) {
       var listParams = {},
         asyncTasks = [],
@@ -378,9 +393,9 @@ module.exports = function(RED) {
     return p;
   }
 
-  function invokeCreateClassifier(node, params) {
+  function invokeClassifierMethod(node, params, method) {
     var p = new Promise(function resolver(resolve, reject) {
-      node.service.createClassifier(params, function(err, body) {
+      node.service[method](params, function(err, body) {
         if (err) {
           reject(err);
         } else {
@@ -391,53 +406,22 @@ module.exports = function(RED) {
     });
     return p;
   }
-
-  function invokeListClassifiers(node, params) {
-    var p = new Promise(function resolver(resolve, reject) {
-      node.service.listClassifiers(params, function(err, body) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(body);
-        }
-      });
-    });
-    return p;
-  }
-
-  function invokeGetClassifier(node, params, msg) {
-    var p = new Promise(function resolver(resolve, reject) {
-      params['classifier_id'] = msg.params['classifier_id'];
-      node.service.getClassifier(params, function(err, body) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(body);
-        }
-      });
-    });
-    return p;
-  }
-
-  function invokeDeleteClassifier(node, params, msg) {
-    var p = new Promise(function resolver(resolve, reject) {
-      params['classifier_id'] = msg.params['classifier_id'];
-      node.service.deleteClassifier(params, function(err, body) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(body);
-        }
-      });
-    });
-    return p;
-  }
-
 
   function executeCreateClassifier(params, node, msg) {
-    var p = prepareParamsCreateClassifier(params, node, msg)
+    var p = prepareParamsClassifierFiles(params, node, msg)
       .then(function() {
-        return invokeCreateClassifier(node, params);
+        return invokeClassifierMethod(node, params, METHODS.CREATECLASSIFER);
+      });
+
+    return p;
+  }
+
+  function executeUpdateClassifier(params, node, msg) {
+    // This is not an error, the params for create & update
+    // are essentially the same.
+    var p = prepareParamsClassifierFiles(params, node, msg)
+      .then(function() {
+        return invokeClassifierMethod(node, params, METHODS.UPDATECLASSIFIER);
       });
 
     return p;
@@ -453,22 +437,17 @@ module.exports = function(RED) {
         });
       break;
 
+    case 'updateClassifier':
+      p = executeUpdateClassifier(params, node, msg)
+        .then(function(body) {
+          return processTheResponse(body, feature, node, msg);
+        });
+      break;
+
     case 'retrieveClassifiersList':
-      p = invokeListClassifiers(node, params)
-        .then(function(body) {
-          return processTheResponse(body, feature, node, msg);
-        });
-      break;
-
     case 'retrieveClassifierDetails':
-      p = invokeGetClassifier(node, params, msg)
-        .then(function(body) {
-          return processTheResponse(body, feature, node, msg);
-        });
-      break;
-
     case 'deleteClassifier':
-      p = invokeDeleteClassifier(node, params, msg)
+      p = invokeClassifierMethod(node, params, METHODS[feature])
         .then(function(body) {
           return processTheResponse(body, feature, node, msg);
         });
@@ -494,6 +473,9 @@ module.exports = function(RED) {
       return executeService(feature, params, node, msg);
       //return Promise.resolve();
     } else {
+      if (msg.params && msg.params['classifier_id']) {
+        params['classifier_id'] = msg.params['classifier_id'];
+      }
       return executeUtilService(feature, params, node, msg);
       // return Promise.resolve();
     }
