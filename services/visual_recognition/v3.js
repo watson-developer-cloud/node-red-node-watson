@@ -15,8 +15,19 @@
  **/
 
 module.exports = function(RED) {
-  const SERVICE_IDENTIFIER = 'visual-recognition';
-  const VisualRecognitionV3 = require('watson-developer-cloud/visual-recognition/v3');
+  const SERVICE_IDENTIFIER = 'visual-recognition',
+    VisualRecognitionV3 = require('watson-developer-cloud/visual-recognition/v3'),
+    METHODS = {
+      CREATECLASSIFER : 'createClassifier',
+      LISTCLASSIFIERS : 'listClassifiers',
+      UPDATECLASSIFIER : 'updateClassifier',
+      GETCLASSIFIER : 'getClassifier',
+      DELETECLASSIFIER : 'deleteClassifier',
+      retrieveClassifiersList : 'listClassifiers',
+      retrieveClassifierDetails : 'getClassifier',
+      deleteClassifier : 'deleteClassifier'
+    };
+
   var pkg = require('../../package.json'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
@@ -382,9 +393,9 @@ module.exports = function(RED) {
     return p;
   }
 
-  function invokeCreateClassifier(node, params) {
+  function invokeClassifierMethod(node, params, method) {
     var p = new Promise(function resolver(resolve, reject) {
-      node.service.createClassifier(params, function(err, body) {
+      node.service[method](params, function(err, body) {
         if (err) {
           reject(err);
         } else {
@@ -392,62 +403,6 @@ module.exports = function(RED) {
         }
       });
 
-    });
-    return p;
-  }
-
-  function invokeUpdateClassifier(node, params, msg) {
-    var p = new Promise(function resolver(resolve, reject) {
-      params['classifier_id'] = msg.params['classifier_id'];
-      node.service.updateClassifier(params, function(err, body) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(body);
-        }
-      });
-
-    });
-    return p;
-  }
-
-  function invokeListClassifiers(node, params) {
-    var p = new Promise(function resolver(resolve, reject) {
-      node.service.listClassifiers(params, function(err, body) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(body);
-        }
-      });
-    });
-    return p;
-  }
-
-  function invokeGetClassifier(node, params, msg) {
-    var p = new Promise(function resolver(resolve, reject) {
-      params['classifier_id'] = msg.params['classifier_id'];
-      node.service.getClassifier(params, function(err, body) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(body);
-        }
-      });
-    });
-    return p;
-  }
-
-  function invokeDeleteClassifier(node, params, msg) {
-    var p = new Promise(function resolver(resolve, reject) {
-      params['classifier_id'] = msg.params['classifier_id'];
-      node.service.deleteClassifier(params, function(err, body) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(body);
-        }
-      });
     });
     return p;
   }
@@ -455,7 +410,7 @@ module.exports = function(RED) {
   function executeCreateClassifier(params, node, msg) {
     var p = prepareParamsClassifierFiles(params, node, msg)
       .then(function() {
-        return invokeCreateClassifier(node, params);
+        return invokeClassifierMethod(node, params, METHODS.CREATECLASSIFER);
       });
 
     return p;
@@ -466,7 +421,7 @@ module.exports = function(RED) {
     // are essentially the same.
     var p = prepareParamsClassifierFiles(params, node, msg)
       .then(function() {
-        return invokeUpdateClassifier(node, params, msg);
+        return invokeClassifierMethod(node, params, METHODS.UPDATECLASSIFIER);
       });
 
     return p;
@@ -490,25 +445,13 @@ module.exports = function(RED) {
       break;
 
     case 'retrieveClassifiersList':
-      p = invokeListClassifiers(node, params)
-        .then(function(body) {
-          return processTheResponse(body, feature, node, msg);
-        });
-      break;
-
     case 'retrieveClassifierDetails':
-      p = invokeGetClassifier(node, params, msg)
-        .then(function(body) {
-          return processTheResponse(body, feature, node, msg);
-        });
-      break;
-
     case 'deleteClassifier':
-      p = invokeDeleteClassifier(node, params, msg)
+      p = invokeClassifierMethod(node, params, METHODS[feature])
         .then(function(body) {
           return processTheResponse(body, feature, node, msg);
         });
-      break;
+    break;
 
     case 'deleteAllClassifiers':
       p = performDeleteAllClassifiers(params, node, msg);
@@ -530,6 +473,9 @@ module.exports = function(RED) {
       return executeService(feature, params, node, msg);
       //return Promise.resolve();
     } else {
+      if (msg.params && msg.params['classifier_id']) {
+        params['classifier_id'] = msg.params['classifier_id'];
+      }
       return executeUtilService(feature, params, node, msg);
       // return Promise.resolve();
     }
