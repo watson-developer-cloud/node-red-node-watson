@@ -62,7 +62,7 @@ module.exports = function (RED) {
   }
 
   function executeListCustomisations(node, stt, params, msg) {
-    stt.getCustomizations(params, function (err, response) {
+    stt.listLanguageModels(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -75,7 +75,7 @@ module.exports = function (RED) {
   }
 
   function executeGetCustomisation(node, stt, params, msg) {
-    stt.getCustomization(params, function (err, response) {
+    stt.getLanguageModel(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -87,7 +87,7 @@ module.exports = function (RED) {
   }
 
   function executeDeleteCustomisation(node, stt, params, msg) {
-    stt.deleteCustomization(params, function (err, response) {
+    stt.deleteLanguageModel(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -112,7 +112,7 @@ module.exports = function (RED) {
   }
 
   function executeGetCorpora(node, stt, params, msg) {
-    stt.getCorpora(params, function (err, response) {
+    stt.listCorpora(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -124,7 +124,7 @@ module.exports = function (RED) {
   }
 
   function executeTrain(node, stt, params, msg) {
-    stt.trainCustomization(params, function (err, response) {
+    stt.trainLanguageModel(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -136,7 +136,7 @@ module.exports = function (RED) {
   }
 
   function executeGetCustomWords(node, stt, params, msg) {
-    stt.getWords(params, function (err, response) {
+    stt.listWords(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -373,7 +373,7 @@ module.exports = function (RED) {
       }
     });
 
-    stt.getModels({}, function(err, models){
+    stt.listModels({}, function(err, models){
       if (err) {
         res.json(err);
       } else {
