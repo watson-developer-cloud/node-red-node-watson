@@ -273,7 +273,7 @@ module.exports = function(RED) {
   // msg.params["negative_examples"] : a Node.js binary Buffer of the ZIP
   // that contains a minimum of 10 images.(Optional)
 
-  function prepareParamsCreateClassifier(params, node, msg) {
+  function prepareParamsClassifierFiles(params, node, msg) {
     var p = new Promise(function resolver(resolve, reject) {
       var listParams = {},
         asyncTasks = [],
@@ -396,6 +396,21 @@ module.exports = function(RED) {
     return p;
   }
 
+  function invokeUpdateClassifier(node, params, msg) {
+    var p = new Promise(function resolver(resolve, reject) {
+      params['classifier_id'] = msg.params['classifier_id'];
+      node.service.updateClassifier(params, function(err, body) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(body);
+        }
+      });
+
+    });
+    return p;
+  }
+
   function invokeListClassifiers(node, params) {
     var p = new Promise(function resolver(resolve, reject) {
       node.service.listClassifiers(params, function(err, body) {
@@ -437,11 +452,21 @@ module.exports = function(RED) {
     return p;
   }
 
-
   function executeCreateClassifier(params, node, msg) {
-    var p = prepareParamsCreateClassifier(params, node, msg)
+    var p = prepareParamsClassifierFiles(params, node, msg)
       .then(function() {
         return invokeCreateClassifier(node, params);
+      });
+
+    return p;
+  }
+
+  function executeUpdateClassifier(params, node, msg) {
+    // This is not an error, the params for create & update
+    // are essentially the same.
+    var p = prepareParamsClassifierFiles(params, node, msg)
+      .then(function() {
+        return invokeUpdateClassifier(node, params, msg);
       });
 
     return p;
@@ -452,6 +477,13 @@ module.exports = function(RED) {
     switch (feature) {
     case 'createClassifier':
       p = executeCreateClassifier(params, node, msg)
+        .then(function(body) {
+          return processTheResponse(body, feature, node, msg);
+        });
+      break;
+
+    case 'updateClassifier':
+      p = executeUpdateClassifier(params, node, msg)
         .then(function(body) {
           return processTheResponse(body, feature, node, msg);
         });
