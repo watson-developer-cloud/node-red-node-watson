@@ -451,7 +451,7 @@ module.exports = function(RED) {
         .then(function(body) {
           return processTheResponse(body, feature, node, msg);
         });
-    break;
+      break;
 
     case 'deleteAllClassifiers':
       p = performDeleteAllClassifiers(params, node, msg);
