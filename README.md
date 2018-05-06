@@ -7,6 +7,11 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.6.11
+- Fix to defaulting name for NLU Node.
+- Allow pre-check of audio format to be disabled in Speech to Text node.
+- Migrate from deprecated getModels and getCustomizations methods in Speech to Text nodes.
+
 ### New in version 0.6.10
 - Needed to stringify json before addDocument in Discovery node.
 - Using Node.js v 6 features, so will not run on Node.js v 4 anymore

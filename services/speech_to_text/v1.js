@@ -76,7 +76,7 @@ module.exports = function (RED) {
       }
     });
 
-    stt.getModels({}, (err, models) => {
+    stt.listModels({}, (err, models) => {
       if (err) {
         res.json(err);
       } else {
@@ -99,7 +99,7 @@ module.exports = function (RED) {
       }
     });
 
-    stt.getCustomizations({}, (err, customs) => {
+    stt.listLanguageModels({}, (err, customs) => {
       if (err) {
         res.json(err);
       } else {
@@ -201,7 +201,7 @@ module.exports = function (RED) {
     }
 
     function payloadCheck(msg) {
-      if (config['streaming-mode']) {
+      if (config['streaming-mode'] || config['disable-precheck']) {
         return Promise.resolve();
       }
       return payloadNonStreamCheck(msg);

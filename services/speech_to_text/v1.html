@@ -126,6 +126,12 @@
 
     <div class="form-row">
         <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-disable-precheck" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-disable-precheck" style="width: 70%;"> Disable Audio format pre-check</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
         <input type="button" id="node-input-flushcache" value="Flush Config Cache"
                  style="display: inline-block; width: auto; vertical-align: top;">
     </div>
@@ -598,6 +604,7 @@
                 'streaming-mode' :{value: false},
                 'streaming-mute' :{value: true},
                 'discard-listening' :{value: false},
+                'disable-precheck' :{value: false},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://stream.watsonplatform.net/speech-to-text/api'}
             },
