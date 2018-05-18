@@ -7,6 +7,10 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.6.12
+- Fix to collection check in Natural Language Classification Node allowing for . in domain
+names.
+
 ### New in version 0.6.11
 - Fix to defaulting name for NLU Node.
 - Allow pre-check of audio format to be disabled in Speech to Text node.

@@ -83,7 +83,7 @@ module.exports = function(RED) {
     node.payloadCollectionCheck = function(msg, config, payloadData) {
       if ('classify' === config.mode) {
         if ('string' === typeof msg.payload) {
-          let collection = msg.payload.match( /\(?[^\.\?\!]+[\.!\?$]\)?/g );
+          let collection = msg.payload.match( /\(?([^.?!]|\.\w)+[.?!]\)?/g );
           if (collection && collection.length > 1) {
             payloadData.collection = [];
             collection.forEach((s) => {
