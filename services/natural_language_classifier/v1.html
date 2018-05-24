@@ -48,8 +48,8 @@
         <select type="text" id="node-input-mode" style="display: inline-block; width: 70%;" >
             <option value="classify">Classify</option>
             <option value="create">Train</option>
-			<option value="remove">Remove</option>
-		    <option value="list">List</option>
+			      <option value="remove">Remove</option>
+		        <option value="list">List</option>
         </select>
     </div>
     <div class="form-row mode classify">
@@ -70,6 +70,12 @@
             <option value="es">Spanish</option>
         </select>
     </div>
+    <div class="form-row mode classify">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-collections-off" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-collections-off" style="width: 70%;"> Do not auto detect collections</label>
+    </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-natural-language-classifier">
@@ -169,6 +175,7 @@
               mode: {value: "classify"},
               language: {value: "en"},
               classifier: {value: ""},
+              'collections-off' :{value: true},
               'default-endpoint' :{value: true},
               'service-endpoint' :{value: 'https://gateway.watsonplatform.net/natural-language-classifier/api'}
             },
