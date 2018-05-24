@@ -40,7 +40,10 @@ module.exports = function(RED) {
     async = require('async'),
     toArray = require('stream-to-array'),
     sAPIKey = null,
-    service = null;
+    iamAPIKey = false,
+    service = null,
+    endpoint = '',
+    sEndpoint = '';
 
   // temp is being used for file streaming to allow the file to arrive so it can be processed.
   temp.track();
@@ -49,6 +52,7 @@ module.exports = function(RED) {
 
   if (service) {
     sAPIKey = service.api_key;
+    sEndpoint = service.url;
   }
 
   RED.httpAdmin.get('/watson-visual-recognition/vcap', function(req, res) {
@@ -154,12 +158,22 @@ module.exports = function(RED) {
     }
 
     var serviceSettings = {
-      api_key: node.apikey,
       version_date: '2018-03-19',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
     };
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    // VR instances created post 22 May 2018, are expecting an iam API Key
+    if (iamAPIKey) {
+      serviceSettings.iam_apikey = node.apikey;
+    } else {
+      serviceSettings.api_key = node.apikey;
+    }
 
     // The change to watson-developer-cloud 3.0.x has resulted in a
     // change in how the Accept-Language is specified. It now needs
@@ -469,6 +483,7 @@ module.exports = function(RED) {
       shape: 'dot',
       text: 'Calling ' + feature + ' ...'
     });
+
     if (feature === 'classifyImage' || feature === 'detectFaces') {
       return executeService(feature, params, node, msg);
       //return Promise.resolve();
@@ -479,6 +494,22 @@ module.exports = function(RED) {
       return executeUtilService(feature, params, node, msg);
       // return Promise.resolve();
     }
+  }
+
+  function determineEndpoint(config) {
+    // Any VR instances created post 22 May 2018, have a different endpoint
+    // and mechanism for authentication. This function detemines if this
+    // new authentication mechanism is being utlised.
+    iamAPIKey = false;
+
+    endpoint = sEndpoint;
+    if (!endpoint && config['vr-service-endpoint']) {
+      endpoint = config['vr-service-endpoint'];
+    }
+    if (endpoint && 'https://gateway.watsonplatform.net/visual-recognition/api' === endpoint) {
+      iamAPIKey = true;
+    }
+    return Promise.resolve();
   }
 
   // This is the Watson Visual Recognition V3 Node
@@ -505,6 +536,9 @@ module.exports = function(RED) {
         })
         .then(function() {
           return verifyInputs(feature, msg);
+        })
+        .then(function() {
+          return determineEndpoint(config);
         })
         .then(function() {
           return verifyServiceCredentials(node, msg);
