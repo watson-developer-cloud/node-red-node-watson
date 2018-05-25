@@ -7,8 +7,11 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.6.14
+- Visual Recognition instances created post May 22 2018, have a new authentication mechanism 
+
 ### New in version 0.6.13
-- Added opt-out option for collection parsing of strings in Natural Language Classifier Node. 
+- Added opt-out option for collection parsing of strings in Natural Language Classifier Node.
 
 ### New in version 0.6.12
 - Fix to collection check in Natural Language Classification Node allowing for . in domain

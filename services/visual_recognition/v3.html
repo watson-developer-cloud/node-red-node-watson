@@ -25,6 +25,14 @@
         <input type="password" id="node-input-apikey" placeholder="API Key">
     </div>
     <div class="form-row">
+        <label for="node-input-vr-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <select type="text" id="node-input-vr-service-endpoint" style="display: inline-block; width: 70%;" >
+            <option value="https://gateway-a.watsonplatform.net/visual-recognition/api">https://gateway-a.watsonplatform.net/visual-recognition/api</option>
+            <option value="https://gateway.watsonplatform.net/visual-recognition/api">https://gateway.watsonplatform.net/visual-recognition/api</option>
+        </select>
+    </div>
+
+    <div class="form-row">
         <label for="node-input-image-feature"><i class="fa fa-book"></i> Detect: </label>
         <select type="text" id="node-input-image-feature" style="display: inline-block; width: 70%;">
             <option selected="selected" value="classifyImage">Classify an image</option>
@@ -61,6 +69,14 @@
         <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
         <input type="password" id="node-input-apikey" placeholder="API Key">
     </div>
+    <div class="form-row">
+        <label for="node-input-vr-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <select type="text" id="node-input-vr-service-endpoint" style="display: inline-block; width: 70%;" >
+            <option value="https://gateway-a.watsonplatform.net/visual-recognition/api">https://gateway-a.watsonplatform.net/visual-recognition/api</option>
+            <option value="https://gateway.watsonplatform.net/visual-recognition/api">https://gateway.watsonplatform.net/visual-recognition/api</option>
+        </select>
+    </div>
+
     <div class="form-row">
         <label for="node-input-image-feature"><i class="fa fa-book"></i> Detect: </label>
         <select type="text" id="node-input-image-feature" style="display: inline-block; width: 70%;">
@@ -148,6 +164,7 @@
             defaults: {
               name: {value: ""},
               apikey: {value: ""},
+              'vr-service-endpoint' :{value: 'https://gateway-a.watsonplatform.net/visual-recognition/api'},
               "image-feature": {value: ""},
               "lang": {value: ""},
             },
@@ -216,6 +233,7 @@
             defaults: {
               name: {value: ""},
               apikey: {value: ""},
+              'vr-service-endpoint' :{value: 'https://gateway-a.watsonplatform.net/visual-recognition/api'},
               "image-feature": {value: ""}
             },
             credentials: {
