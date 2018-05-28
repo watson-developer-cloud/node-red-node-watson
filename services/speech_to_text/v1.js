@@ -16,8 +16,7 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'speech-to-text';
-  var pkg = require('../../package.json'),
-    request = require('request'),
+  var request = require('request'),
     cfenv = require('cfenv'),
     temp = require('temp'),
     url = require('url'),
@@ -27,7 +26,6 @@ module.exports = function (RED) {
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     sttutils = require('./stt-utils'),
-    sttV1 = require('watson-developer-cloud/speech-to-text/v1'),
     authV1 = require('watson-developer-cloud/authorization/v1'),
     muteMode = true, discardMode = false, autoConnect = true,
     username = '', password = '', sUsername = '', sPassword = '',

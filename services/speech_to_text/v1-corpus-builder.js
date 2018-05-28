@@ -16,8 +16,7 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'speech-to-text';
-  var pkg = require('../../package.json'),
-    request = require('request'),
+  var request = require('request'),
     cfenv = require('cfenv'),
     url = require('url'),
     temp = require('temp'),
@@ -25,7 +24,7 @@ module.exports = function (RED) {
     fileType = require('file-type'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
-    STTV1 = require('watson-developer-cloud/speech-to-text/v1'),
+    sttutils = require('./stt-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
@@ -175,25 +174,9 @@ module.exports = function (RED) {
   }
 
   function determineService() {
-    var serviceSettings = {
-        headers: {
-          'User-Agent': pkg.name + '-' + pkg.version
-        }
-      };
-
-    if (apikey) {
-      serviceSettings.iam_apikey = apikey;
-    } else {
-      serviceSettings.username = username;
-      serviceSettings.password = password;
-    }
-
-    if (endpoint) {
-      serviceSettings.url = endpoint;
-    }
-
-    return new STTV1(serviceSettings);
+    return sttutils.determineService(apikey, username, password, endpoint);
   }
+
 
   function executeMethod(node, method, params, msg) {
     var stt = determineService();
@@ -369,31 +352,12 @@ module.exports = function (RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
-  function initSTTService(req) {
-    endpoint = req.query.e ? req.query.e : sEndpoint;
-
-    var serviceSettings = {
-      url: endpoint,
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
-      }
-    };
-
-    if (sApikey || req.query.key) {
-      serviceSettings.iam_apikey = sApikey ? sApikey : req.query.key;
-    } else {
-      serviceSettings.username = sUsername ? sUsername : req.query.un;
-      serviceSettings.password = sPassword ? sPassword : req.query.pwd;
-    }
-
-    return new STTV1(serviceSettings);
-  }
 
    // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-speech-to-text-v1-query-builder/models', function (req, res) {
     endpoint = req.query.e ? req.query.e : sEndpoint;
 
-    var stt = initSTTService(req);
+    var stt = sttutils.initSTTService(req, sApikey, sUsername, sPassword, sEndpoint);
 
     stt.listModels({}, function(err, models){
       if (err) {
