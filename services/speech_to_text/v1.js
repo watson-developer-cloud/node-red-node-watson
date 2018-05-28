@@ -96,7 +96,7 @@ module.exports = function (RED) {
   function Node (config) {
     RED.nodes.createNode(this, config);
     var node = this, token = null, tokenTime = null,
-      tokenPending = false;
+      tokenPending = false,
       websocket = null,
       socketCreationInProcess = false,
       socketListening = false,
