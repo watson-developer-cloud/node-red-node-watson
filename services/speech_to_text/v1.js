@@ -262,12 +262,12 @@ module.exports = function (RED) {
       return Promise.reject('Payload must be either an audio buffer or a string representing a url');
     }
 
-    function getService() {
-      return Promise.resolve(determineService());
-    }
-
     function determineService() {
       return sttutils.determineService(apikey, username, password, endpoint);
+    }
+
+    function getService() {
+      return Promise.resolve(determineService());
     }
 
     function determineTokenService(stt) {

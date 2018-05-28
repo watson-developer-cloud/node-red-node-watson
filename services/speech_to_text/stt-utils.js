@@ -1,5 +1,5 @@
 const pkg = require('../../package.json'),
-  sttV1 = require('watson-developer-cloud/speech-to-text/v1');
+  STTV1 = require('watson-developer-cloud/speech-to-text/v1');
 
 class STTUtils {
   constructor() {
@@ -8,7 +8,7 @@ class STTUtils {
   static initSTTService(req, sApikey, sUsername, sPassword, sEndpoint) {
     const endpoint = req.query.e ? req.query.e : sEndpoint;
 
-    var serviceSettings = {
+    let serviceSettings = {
       url: endpoint,
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
@@ -22,15 +22,15 @@ class STTUtils {
       serviceSettings.password = sPassword ? sPassword : req.query.pwd;
     }
 
-    return new sttV1(serviceSettings);
+    return new STTV1(serviceSettings);
   }
 
   static determineService(apikey, username, password, endpoint) {
-    var serviceSettings = {
-        headers: {
-          'User-Agent': pkg.name + '-' + pkg.version
-        }
-      };
+    let serviceSettings = {
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
+    };
 
     if (apikey) {
       serviceSettings.iam_apikey = apikey;
@@ -43,9 +43,8 @@ class STTUtils {
       serviceSettings.url = endpoint;
     }
 
-    return new sttV1(serviceSettings);
+    return new STTV1(serviceSettings);
   }
-
 
 }
 

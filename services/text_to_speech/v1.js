@@ -170,11 +170,11 @@ module.exports = function(RED) {
       });
     })
   }
-  RED.nodes.registerType("watson-text-to-speech", Node, {
+  RED.nodes.registerType('watson-text-to-speech', Node, {
     credentials: {
-      username: {type:"text"},
-      password: {type:"password"},
-      apikey: {type:"password"}
+      username: {type:'text'},
+      password: {type:'password'},
+      apikey: {type:'password'}
     }
   });
 };

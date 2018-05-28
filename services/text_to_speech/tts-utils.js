@@ -35,14 +35,14 @@ class TTSUtils {
         'User-Agent': pkg.name + '-' + pkg.version
       }};
 
-      if (sApikey || req.query.key) {
-        serviceSettings.iam_apikey = sApikey ? sApikey : req.query.key;
-      } else {
-        serviceSettings.username = sUsername ? sUsername : req.query.un;
-        serviceSettings.password = sPassword ? sPassword : req.query.pwd;
-      }
+    if (sApikey || req.query.key) {
+      serviceSettings.iam_apikey = sApikey ? sApikey : req.query.key;
+    } else {
+      serviceSettings.username = sUsername ? sUsername : req.query.un;
+      serviceSettings.password = sPassword ? sPassword : req.query.pwd;
+    }
 
-      return new TextToSpeechV1(serviceSettings);
+    return new TextToSpeechV1(serviceSettings);
   }
 
 

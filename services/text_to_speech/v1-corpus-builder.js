@@ -307,7 +307,6 @@ module.exports = function (RED) {
   });
 
 
-
   // API used by widget to fetch available voices
   RED.httpAdmin.get('/watson-text-to-speech-v1-query-builder/voices', function (req, res) {
     var tts = ttsutils.initTTSService(req, sApikey, sUsername, sPassword, sEndpoint);
