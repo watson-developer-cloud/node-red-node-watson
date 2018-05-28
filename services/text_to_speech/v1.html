@@ -367,6 +367,16 @@
     var showit = false;
 
     $('select#node-input-langcustom').empty();
+
+    // Add an option to not select
+    $('select#node-input-langcustom')
+      .append('<option value='
+                    + 'NoCustomisationSetting'
+                    + '' //showit ? '' : ' selected="selected" '
+                    + '>'
+                    + 'None'
+                    + '</option>');
+
     if (tts.customisations) {
       tts.language_selected = tts.language_selected ?
                                   tts.language_selected :
@@ -393,15 +403,6 @@
         }
       });
     }
-
-    // Add an option to not select
-    $('select#node-input-langcustom')
-      .append('<option value='
-                    + 'NoCustomisationSetting'
-                    + '' //showit ? '' : ' selected="selected" '
-                    + '>'
-                    + 'None'
-                    + '</option>');
 
 
     if (showit) {
@@ -495,7 +496,7 @@
                 voicehidden: {value: ""},
                 format: {value: "audio/wav"},
                 password: {value: ''},
-                apikey: {value: ''},                
+                apikey: {value: ''},
                 'payload-response' :{value: false},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://stream.watsonplatform.net/text-to-speech/api'}

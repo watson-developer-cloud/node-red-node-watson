@@ -9,6 +9,7 @@ Node-RED Watson Nodes for IBM Cloud
 
 ### New in version 0.6.15
 - Conversation, Speech to Text, Text to Speech nodes updated to allow for use of iam key for authentication.
+- Migrated STT node off deprecated methods.
 
 ### New in version 0.6.14
 - Visual Recognition instances created post May 22 2018, have a new authentication mechanism

@@ -62,7 +62,7 @@ module.exports = function (RED) {
   }
 
   function executeListCustomisations(node, tts, params, msg) {
-    tts.getCustomizations(params, function (err, response) {
+    tts.listVoiceModels(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -75,7 +75,7 @@ module.exports = function (RED) {
   }
 
   function executeGetCustomisation(node, tts, params, msg) {
-    tts.getCustomization(params, function (err, response) {
+    tts.getVoiceModel(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -87,7 +87,7 @@ module.exports = function (RED) {
   }
 
   function executeGetPronounce(node, tts, params, msg) {
-    tts.pronunciation(params, function (err, response) {
+    tts.getPronunciation(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -113,7 +113,7 @@ module.exports = function (RED) {
   }
 
   function executeGetWords(node, tts, params, msg) {
-    tts.getWords(params, function (err, response) {
+    tts.listWords(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);
@@ -312,7 +312,7 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/watson-text-to-speech-v1-query-builder/voices', function (req, res) {
     var tts = ttsutils.initTTSService(req, sApikey, sUsername, sPassword, sEndpoint);
 
-    tts.voices({}, function(err, voices){
+    tts.listVoices({}, function(err, voices){
       if (err) {
         if (!err.error) {
           err.error = 'Error ' + err.code + ' in fetching voices';

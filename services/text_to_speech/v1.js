@@ -54,7 +54,7 @@ module.exports = function(RED) {
   RED.httpAdmin.get('/watson-text-to-speech/voices', function (req, res) {
     var tts = ttsutils.initTTSService(req, sApikey, sUsername, sPassword, sEndpoint);
 
-    tts.voices({}, function(err, voices){
+    tts.listVoices({}, function(err, voices){
       if (err) {
         if (!err.error) {
           err.error = 'Error ' + err.code + ' in fetching voices';
@@ -70,7 +70,7 @@ module.exports = function(RED) {
   RED.httpAdmin.get('/watson-text-to-speech/customs', function (req, res) {
     var tts = ttsutils.initTTSService(req, sApikey, sUsername, sPassword, sEndpoint);
 
-    tts.getCustomizations({}, function(err, customs){
+    tts.listVoiceModels({}, function(err, customs){
       if (err) {
         res.json(err);
       } else {

@@ -372,7 +372,7 @@
 
 
     $('#node-input-tts-voice-or-custom').change(function() {
-      console.log('voice or custom option is set to ', $('#node-input-tts-voice-or-custom').val());
+      //console.log('voice or custom option is set to ', $('#node-input-tts-voice-or-custom').val());
       if ('getPronounce' == ttsv1qbb.mode_selected) {
         ttsv1qbb.processPronounceSetting();
       }
@@ -549,7 +549,7 @@
             defaults: {
                 name: {value: ''},
                 password: {value: ''},
-                apikey: {value: ''},                  
+                apikey: {value: ''},
                 'tts-lang': {value: ""},
                 'tts-langhidden': {value: ""},
                 'tts-custom-mode': {value:"createCustomisation"},
