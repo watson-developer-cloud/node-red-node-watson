@@ -156,8 +156,6 @@ module.exports = function(RED) {
       endpoint = '',
       optoutLearning = false;
 
-     console.log('credentials are ', node.credentials);
-
     if ( !(apiKey) && (!(userName) || !(passWord)) ) {
       if ( (!msg.params) ||
             (!(msg.params.apikey) &&

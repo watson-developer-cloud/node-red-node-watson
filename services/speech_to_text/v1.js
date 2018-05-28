@@ -30,6 +30,7 @@ module.exports = function (RED) {
     authV1 = require('watson-developer-cloud/authorization/v1'),
     muteMode = true, discardMode = false, autoConnect = true,
     username = '', password = '', sUsername = '', sPassword = '',
+    apikey = '', sApikey = '',
     endpoint = '',
     sEndpoint = 'https://stream.watsonplatform.net/speech-to-text/api',
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
@@ -45,8 +46,9 @@ module.exports = function (RED) {
   // the edited ones are not being taken.
 
   if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
+    sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
 
@@ -62,19 +64,29 @@ module.exports = function (RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
-  // API used by widget to fetch available models
-  RED.httpAdmin.get('/watson-speech-to-text/models', (req, res) => {
-    //endpoint = sEndpoint ? sEndpoint : req.query.e;
+  function initSTTService(req) {
     endpoint = req.query.e ? req.query.e : sEndpoint;
 
-    var stt = new sttV1({
-      username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd,
+    var serviceSettings = {
       url: endpoint,
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
-    });
+    };
+
+    if (sApikey || req.query.key) {
+      serviceSettings.iam_apikey = sApikey ? sApikey : req.query.key;
+    } else {
+      serviceSettings.username = sUsername ? sUsername : req.query.un;
+      serviceSettings.password = sPassword ? sPassword : req.query.pwd;
+    }
+
+    return new sttV1(serviceSettings);
+  }
+
+  // API used by widget to fetch available models
+  RED.httpAdmin.get('/watson-speech-to-text/models', (req, res) => {
+    var stt = initSTTService(req);
 
     stt.listModels({}, (err, models) => {
       if (err) {
@@ -87,17 +99,7 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available customisations
   RED.httpAdmin.get('/watson-speech-to-text/customs', (req, res) => {
-    //endpoint = sEndpoint ? sEndpoint : req.query.e;
-    endpoint = req.query.e ? req.query.e : sEndpoint;
-
-    var stt = new sttV1({
-      username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd,
-      url: endpoint,
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
-      }
-    });
+    var stt = initSTTService(req);
 
     stt.listLanguageModels({}, (err, customs) => {
       if (err) {
@@ -124,8 +126,8 @@ module.exports = function (RED) {
       audioStack =[];
     const HOUR = 60 * 60;
 
-    function initialCheck(username, password) {
-      if (!username || !password) {
+    function initialCheck(username, password, apikey) {
+      if (!apikey && (!username || !password)) {
         return Promise.reject('Missing Speech To Text service credentials');
       }
       return Promise.resolve();
@@ -282,15 +284,22 @@ module.exports = function (RED) {
 
     function determineService() {
       var serviceSettings = {
-          username: username,
-          password: password,
           headers: {
             'User-Agent': pkg.name + '-' + pkg.version
           }
         };
+
+      if (apikey) {
+        serviceSettings.iam_apikey = apikey;
+      } else {
+        serviceSettings.username = username;
+        serviceSettings.password = password;
+      }
+
       if (endpoint) {
         serviceSettings.url = endpoint;
       }
+
       return new sttV1(serviceSettings);
     }
 
@@ -305,6 +314,7 @@ module.exports = function (RED) {
           speech_to_text = null;
 
         speech_to_text = determineService();
+
 
         // If we get to here then the audio is in one of the supported formats.
         if (audioData.format === 'ogg') {
@@ -585,6 +595,7 @@ module.exports = function (RED) {
       // specified by the user in the dialog.
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
+      apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
       if ((!config['default-endpoint']) && config['service-endpoint']) {
@@ -595,7 +606,7 @@ module.exports = function (RED) {
 
       // Now perform checks on the input and parameters, to make sure that all
       // is in place before the service is invoked.
-      initialCheck(username, password)
+      initialCheck(username, password, apikey)
       .then(() => {
         return configCheck();
       })
@@ -626,7 +637,7 @@ module.exports = function (RED) {
       .then(() => {
         temp.cleanup();
         if (config['streaming-mode']) {
-          node.status({fill:'blue', shape:'dot', text:'waiting for socket data'});
+          node.status({fill:'blue', shape:'dot', text:'listening for socket data'});
         } else {
           node.status({});
           node.send(msg);
@@ -644,7 +655,8 @@ module.exports = function (RED) {
   RED.nodes.registerType('watson-speech-to-text', Node, {
     credentials: {
       username: {type:'text'},
-      password: {type:'password'}
+      password: {type:'password'},
+      apikey: {type:'password'}
     }
   });
 };

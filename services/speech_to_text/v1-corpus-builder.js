@@ -28,6 +28,7 @@ module.exports = function (RED) {
     STTV1 = require('watson-developer-cloud/speech-to-text/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = '', password = '', sUsername = '', sPassword = '',
+    apikey = '', sApikey = '',
     endpoint = '',
     sEndpoint = 'https://stream.watsonplatform.net/speech-to-text/api';
 
@@ -44,8 +45,9 @@ module.exports = function (RED) {
   // the edited ones are not being taken.
 
   if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
+    sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
 
@@ -172,21 +174,29 @@ module.exports = function (RED) {
     });
   }
 
-  function executeMethod(node, method, params, msg) {
-    var stt = null,
-      serviceSettings = {
-        username: username,
-        password: password,
+  function determineService() {
+    var serviceSettings = {
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
       };
 
+    if (apikey) {
+      serviceSettings.iam_apikey = apikey;
+    } else {
+      serviceSettings.username = username;
+      serviceSettings.password = password;
+    }
+
     if (endpoint) {
       serviceSettings.url = endpoint;
     }
 
-    stt = new STTV1(serviceSettings);
+    return new STTV1(serviceSettings);
+  }
+
+  function executeMethod(node, method, params, msg) {
+    var stt = determineService();
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
 
@@ -359,19 +369,31 @@ module.exports = function (RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
+  function initSTTService(req) {
+    endpoint = req.query.e ? req.query.e : sEndpoint;
+
+    var serviceSettings = {
+      url: endpoint,
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
+    };
+
+    if (sApikey || req.query.key) {
+      serviceSettings.iam_apikey = sApikey ? sApikey : req.query.key;
+    } else {
+      serviceSettings.username = sUsername ? sUsername : req.query.un;
+      serviceSettings.password = sPassword ? sPassword : req.query.pwd;
+    }
+
+    return new STTV1(serviceSettings);
+  }
 
    // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-speech-to-text-v1-query-builder/models', function (req, res) {
     endpoint = req.query.e ? req.query.e : sEndpoint;
 
-    var stt = new STTV1({
-      username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd,
-      url: endpoint,
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
-      }
-    });
+    var stt = initSTTService(req);
 
     stt.listModels({}, function(err, models){
       if (err) {
@@ -395,13 +417,14 @@ module.exports = function (RED) {
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
+      apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
       if ((!config['default-endpoint']) && config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
-      if (!username || !password) {
+      if (!apikey && (!username || !password)) {
         message = 'Missing Watson Speech to Text service credentials';
       } else if (!method || '' === method) {
         message = 'Required mode has not been specified';
@@ -429,7 +452,8 @@ module.exports = function (RED) {
   RED.nodes.registerType('watson-speech-to-text-v1-query-builder', Node, {
     credentials: {
       username: {type:'text'},
-      password: {type:'password'}
+      password: {type:'password'},
+      apikey: {type:'password'}
     }
   });
 
