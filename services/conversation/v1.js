@@ -22,6 +22,7 @@ module.exports = function(RED) {
     AssistantV1 = require('watson-developer-cloud/assistant/v1'),
     serviceutils = require('../../utilities/service-utils'),
     service = null,
+    sApikey = null,
     sUsername = null,
     sPassword = null;
 
@@ -31,8 +32,9 @@ module.exports = function(RED) {
   }
 
   if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
+    sApikey = service.apikey ? service.apikey : '';
   }
 
   RED.httpAdmin.get('/watson-conversation/vcap', function(req, res) {
@@ -150,18 +152,24 @@ module.exports = function(RED) {
 
     var userName = sUsername || node.credentials.username,
       passWord = sPassword || node.credentials.password,
+      apiKey = sApikey || node.credentials.apikey,
       endpoint = '',
       optoutLearning = false;
 
-    if (!(userName || msg.params.username) ||
-      !(passWord || msg.params.password)) {
-      node.status({
-        fill: 'red',
-        shape: 'ring',
-        text: 'missing credentials'
-      });
-      node.error('Missing Watson Conversation API service credentials', msg);
-      return false;
+     console.log('credentials are ', node.credentials);
+
+    if ( !(apiKey) && (!(userName) || !(passWord)) ) {
+      if ( (!msg.params) ||
+            (!(msg.params.apikey) &&
+               (!(msg.params.username) || !(msg.params.password))) ) {
+        node.status({
+          fill: 'red',
+          shape: 'ring',
+          text: 'missing credentials'
+        });
+        node.error('Missing Watson Conversation API service credentials', msg);
+        return false;
+      }
     }
 
     if (msg.params) {
@@ -171,10 +179,14 @@ module.exports = function(RED) {
       if (msg.params.password) {
         passWord = msg.params.password;
       }
+      if (msg.params.apikey) {
+        apiKey = msg.params.apikey;
+      }
     }
 
     serviceSettings.username = userName;
     serviceSettings.password = passWord;
+    serviceSettings.iam_apikey = apiKey;
 
     if (service) {
       endpoint = service.url;
@@ -282,12 +294,9 @@ module.exports = function(RED) {
 
   RED.nodes.registerType('watson-conversation-v1', WatsonConversationV1Node, {
     credentials: {
-      username: {
-        type: 'text'
-      },
-      password: {
-        type: 'password'
-      }
+      username: {type: 'text'},
+      password: {type: 'password'},
+      apikey: {type: 'password'}
     }
   });
 };

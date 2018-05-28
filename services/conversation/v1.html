@@ -34,6 +34,10 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+    </div>
 
     <div class="form-row credentials">
         <label>&nbsp;</label>
@@ -100,6 +104,7 @@
     <br/>
     <li><code>msg.params.username</code> : If provided will be used as the username credential for the Conversation service.</li>
     <li><code>msg.params.password</code> : If provided will be used as the password credential for the Conversation service.</li>
+    <li><code>msg.params.apikey</code> : If provided will be used as the api key credential for the Conversation service.</li>
     <li><code>msg.params.endpoint</code> : If provided will be used as the url for the Conversation service.</li>
     <li><code>msg.params.optout_learning</code> : Set to true to opt out of request logging. Check the <a href="https://console.bluemix.net/docs/services/watson/getting-started-logging.html#controlling-request-logging-for-watson-services" target="_blank">documentation</a> for details.</li>
     </ul>
@@ -165,7 +170,8 @@
             },
             credentials: {
               username: {type:'text'},
-              password: {type:'password'}
+              password: {type:'password'},
+              apikey: {type:'password'}
             },
             color: 'rgb(84,149,230)',
             inputs: 1,
