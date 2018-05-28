@@ -38,6 +38,10 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password"></input>
     </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+    </div>
 
     <div class="form-row credentials">
         <label>&nbsp;</label>
@@ -223,8 +227,9 @@
   ttsv1qbb.checkCredentials = function () {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
+    var k = $('#node-input-apikey').val();
 
-    if (u && u.length && p) {
+    if ( (k && k.length) || (u && u.length && p) ) {
       if (!ttsv1qbb.voices) {
         ttsv1qbb.getVoices();
       }
@@ -341,6 +346,9 @@
       ttsv1qbb.checkCredentials();
     });
     $('#node-input-password').change(function(val){
+      ttsv1qbb.checkCredentials();
+    });
+    $('#node-input-apikey').change(function(val){
       ttsv1qbb.checkCredentials();
     });
 
@@ -480,8 +488,9 @@
   ttsv1qbb.getVoices = function (){
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
+    var k = $('#node-input-apikey').val();
     var e = $('#node-input-service-endpoint').val();
-    var creds = {un: u, pwd: p};
+    var creds = {un: u, pwd: p, key: k};
 
     if (! $('#node-input-default-endpoint').prop('checked')) {
       creds.e = e;
@@ -540,6 +549,7 @@
             defaults: {
                 name: {value: ''},
                 password: {value: ''},
+                apikey: {value: ''},                  
                 'tts-lang': {value: ""},
                 'tts-langhidden': {value: ""},
                 'tts-custom-mode': {value:"createCustomisation"},
@@ -552,7 +562,7 @@
                 'tts-voice': {value: ""},
                 'tts-voicehidden': {value: ""},
                 'default-endpoint' :{value: true},
-                'service-endpoint' :{value: 'https://stream.watsonplatform.net/text-to-speech/api'}                
+                'service-endpoint' :{value: 'https://stream.watsonplatform.net/text-to-speech/api'}
             },
             credentials: {
               username: {type:'text'} //,
