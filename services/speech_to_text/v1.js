@@ -26,7 +26,7 @@ module.exports = function (RED) {
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     sttutils = require('./stt-utils'),
-    authV1 = require('watson-developer-cloud/authorization/v1'),
+    AuthV1 = require('watson-developer-cloud/authorization/v1'),
     muteMode = true, discardMode = false, autoConnect = true,
     username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
@@ -272,7 +272,7 @@ module.exports = function (RED) {
     }
 
     function determineTokenService(stt) {
-      let tokenService = new authV1(stt.getCredentials());
+      let tokenService = new AuthV1(stt.getCredentials());
       // Streaming - IAM Key fudge.
       // Check if the token service options have the header set. If not then
       // create them. This will stop the function from crashing the app,
