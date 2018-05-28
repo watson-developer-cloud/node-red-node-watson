@@ -96,6 +96,7 @@ module.exports = function (RED) {
   function Node (config) {
     RED.nodes.createNode(this, config);
     var node = this, token = null, tokenTime = null,
+      tokenPending = false;
       websocket = null,
       socketCreationInProcess = false,
       socketListening = false,
@@ -271,7 +272,15 @@ module.exports = function (RED) {
     }
 
     function determineTokenService(stt) {
-      return new authV1(stt.getCredentials());
+      let tokenService = new authV1(stt.getCredentials());
+      // Streaming - IAM Key fudge.
+      // Check if the token service options have the header set. If not then
+      // create them. This will stop the function from crashing the app,
+      // altough it will still fail authentication.
+      if (!tokenService._options.headers) {
+        tokenService._options.headers = {};
+      }
+      return tokenService;
     }
 
     function performSTT(speech_to_text, audioData) {
@@ -319,14 +328,21 @@ module.exports = function (RED) {
         var now = Math.floor(Date.now() / 1000);
         var tokenService = determineTokenService(stt);
 
+        if (tokenPending) {
+          setTimeout(() => {
+          }, 1000);
+        }
+
         if (token && now > (HOUR + tokenTime)) {
           resolve();
         } else {
           // Everything is now in place to invoke the service
+          tokenPending = true;
           tokenService.getToken(function (err, res) {
             if (err) {
               reject(err);
             } else {
+              tokenPending = false;
               tokenTime = now;
               token = res;
               resolve();
@@ -607,11 +623,7 @@ module.exports = function (RED) {
       .then((audioData) => {
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         if (config['streaming-mode']) {
-          if (!apikey) {
-            return performStreamSTT(service, audioData);
-          } else {
-            return performStreamSTTIAM(service, audioData);
-          }
+          return performStreamSTT(service, audioData);
         } else {
           return performSTT(service, audioData);
         }
@@ -631,7 +643,6 @@ module.exports = function (RED) {
           node.status({});
           node.send(msg);
         }
-
       })
       .catch((err) => {
         temp.cleanup();
