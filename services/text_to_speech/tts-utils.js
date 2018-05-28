@@ -27,7 +27,7 @@ class TTSUtils {
   }
 
   static initTTSService(req, sApikey, sUsername, sPassword, sEndpoint) {
-    endpoint = req.query.e ? req.query.e : sEndpoint;
+    const endpoint = req.query.e ? req.query.e : sEndpoint;
 
     let serviceSettings = {
       url: endpoint,

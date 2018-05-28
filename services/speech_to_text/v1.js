@@ -26,6 +26,7 @@ module.exports = function (RED) {
     fileType = require('file-type'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
+    sttutils = require('./stt-utils'),
     sttV1 = require('watson-developer-cloud/speech-to-text/v1'),
     authV1 = require('watson-developer-cloud/authorization/v1'),
     muteMode = true, discardMode = false, autoConnect = true,
@@ -64,29 +65,10 @@ module.exports = function (RED) {
     res.json(service ? {bound_service: true} : null);
   });
 
-  function initSTTService(req) {
-    endpoint = req.query.e ? req.query.e : sEndpoint;
-
-    var serviceSettings = {
-      url: endpoint,
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
-      }
-    };
-
-    if (sApikey || req.query.key) {
-      serviceSettings.iam_apikey = sApikey ? sApikey : req.query.key;
-    } else {
-      serviceSettings.username = sUsername ? sUsername : req.query.un;
-      serviceSettings.password = sPassword ? sPassword : req.query.pwd;
-    }
-
-    return new sttV1(serviceSettings);
-  }
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-speech-to-text/models', (req, res) => {
-    var stt = initSTTService(req);
+    var stt = sttutils.initSTTService(req, sApikey, sUsername, sPassword, sEndpoint);
 
     stt.listModels({}, (err, models) => {
       if (err) {
@@ -99,7 +81,7 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available customisations
   RED.httpAdmin.get('/watson-speech-to-text/customs', (req, res) => {
-    var stt = initSTTService(req);
+    var stt = sttutils.initSTTService(req, sApikey, sUsername, sPassword, sEndpoint);
 
     stt.listLanguageModels({}, (err, customs) => {
       if (err) {
@@ -287,24 +269,7 @@ module.exports = function (RED) {
     }
 
     function determineService() {
-      var serviceSettings = {
-          headers: {
-            'User-Agent': pkg.name + '-' + pkg.version
-          }
-        };
-
-      if (apikey) {
-        serviceSettings.iam_apikey = apikey;
-      } else {
-        serviceSettings.username = username;
-        serviceSettings.password = password;
-      }
-
-      if (endpoint) {
-        serviceSettings.url = endpoint;
-      }
-
-      return new sttV1(serviceSettings);
+      return sttutils.determineService(apikey, username, password, endpoint);
     }
 
     function determineTokenService(stt) {
