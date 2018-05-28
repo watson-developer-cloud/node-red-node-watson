@@ -174,7 +174,7 @@ module.exports = function(RED) {
     credentials: {
       username: {type:"text"},
       password: {type:"password"},
-      apikey: {type:'password'}
+      apikey: {type:"password"}
     }
   });
 };
