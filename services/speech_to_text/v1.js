@@ -282,6 +282,10 @@ module.exports = function (RED) {
       return Promise.reject('Payload must be either an audio buffer or a string representing a url');
     }
 
+    function getService() {
+      return Promise.resolve(determineService());
+    }
+
     function determineService() {
       var serviceSettings = {
           headers: {
@@ -307,13 +311,13 @@ module.exports = function (RED) {
       return new authV1(stt.getCredentials());
     }
 
-    function performSTT(audioData) {
+    function performSTT(speech_to_text, audioData) {
       var p = new Promise(function resolver(resolve, reject){
         var model = config.lang + '_' + config.band,
-          params = {},
-          speech_to_text = null;
+          params = {};
+          //speech_to_text = null;
 
-        speech_to_text = determineService();
+        //speech_to_text = determineService();
 
 
         // If we get to here then the audio is in one of the supported formats.
@@ -533,8 +537,20 @@ module.exports = function (RED) {
       return p;
     }
 
-    function performStreamSTT(audioData) {
-      var speech_to_text = determineService();
+
+    function init() {
+      return Promise.resolve();
+    }
+
+    function performStreamSTTIAM(speech_to_text, audioData) {
+      var p = new Promise(function resolver(resolve, reject) {
+        reject('Streaming with IAM Key not yet implemented');
+      });
+      return p;
+    }
+
+    function performStreamSTT(speech_to_text, audioData) {
+      //var speech_to_text = determineService();
       var delay = 1000;
       var p = getToken(speech_to_text)
         .then(() => {
@@ -604,6 +620,8 @@ module.exports = function (RED) {
 
       node.status({});
 
+      let service = null;
+
       // Now perform checks on the input and parameters, to make sure that all
       // is in place before the service is invoked.
       initialCheck(username, password, apikey)
@@ -617,14 +635,22 @@ module.exports = function (RED) {
         return overrideCheck(msg);
       })
       .then(() => {
+        return getService();
+      })
+      .then((s) => {
+        service = s;
         return processInput(msg);
       })
       .then((audioData) => {
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         if (config['streaming-mode']) {
-          return performStreamSTT(audioData);
+          if (!apikey) {
+            return performStreamSTT(service, audioData);
+          } else {
+            return performStreamSTTIAM(service, audioData);
+          }
         } else {
-          return performSTT(audioData);
+          return performSTT(service, audioData);
         }
       })
       .then((data) => {
