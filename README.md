@@ -8,7 +8,7 @@ Node-RED Watson Nodes for IBM Cloud
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 ### New in version 0.6.15
-- Conversation, Speech to Text, Text to Speech nodes updated to allow for use of iam key for authentication.
+- Conversation, Speech to Text, Text to Speech, Tone Analyzer nodes updated to allow for use of iam key for authentication.
 - Migrated STT node off deprecated methods.
 
 ### New in version 0.6.14
