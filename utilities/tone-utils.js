@@ -42,7 +42,6 @@ ToneUtils.prototype = {
   // Function that checks the payload and determines
   // whether it is JSON or a Buffer
   checkPayload: function(payload) {
-    console.log('Checking Tone Payload');
     var message = null,
       isJSON = this.isJsonString(payload) || this.isJsonObject(payload);
 

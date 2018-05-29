@@ -506,8 +506,6 @@ module.exports = function (RED) {
   function executeMethod(node, method, params, msg) {
     var conv = null,
       serviceSettings = {
-        //username: username,
-        //password: password,
         version_date: '2018-02-16',
         version: '2018-02-16',
         headers: {

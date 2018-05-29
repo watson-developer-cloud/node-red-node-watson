@@ -16,8 +16,7 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'speech-to-text';
-  var request = require('request'),
-    cfenv = require('cfenv'),
+  var cfenv = require('cfenv'),
     temp = require('temp'),
     url = require('url'),
     fs = require('fs'),
@@ -273,6 +272,7 @@ module.exports = function (RED) {
 
     function determineTokenService(stt) {
       let tokenService = new AuthV1(stt.getCredentials());
+
       // Streaming - IAM Key fudge.
       // Check if the token service options have the header set. If not then
       // create them. This will stop the function from crashing the app,
@@ -287,10 +287,6 @@ module.exports = function (RED) {
       var p = new Promise(function resolver(resolve, reject){
         var model = config.lang + '_' + config.band,
           params = {};
-          //speech_to_text = null;
-
-        //speech_to_text = determineService();
-
 
         // If we get to here then the audio is in one of the supported formats.
         if (audioData.format === 'ogg') {
@@ -516,20 +512,7 @@ module.exports = function (RED) {
       return p;
     }
 
-
-    function init() {
-      return Promise.resolve();
-    }
-
-    function performStreamSTTIAM(speech_to_text, audioData) {
-      var p = new Promise(function resolver(resolve, reject) {
-        reject('Streaming with IAM Key not yet implemented');
-      });
-      return p;
-    }
-
     function performStreamSTT(speech_to_text, audioData) {
-      //var speech_to_text = determineService();
       var delay = 1000;
       var p = getToken(speech_to_text)
         .then(() => {
