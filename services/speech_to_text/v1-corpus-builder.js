@@ -16,8 +16,7 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'speech-to-text';
-  var request = require('request'),
-    cfenv = require('cfenv'),
+  var cfenv = require('cfenv'),
     url = require('url'),
     temp = require('temp'),
     fs = require('fs'),
