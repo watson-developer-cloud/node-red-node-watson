@@ -11,6 +11,7 @@ Node-RED Watson Nodes for IBM Cloud
 - Assistant, Speech to Text, Text to Speech, Tone Analyzer nodes updated to allow for use of iam key for authentication.
 - Migrated STT node off deprecated methods.
 - Fix to Tone Analyzer Node to preserve credentials on config reopen.
+- Fix to Tone Analyzer to allow json objects and arrays as payload.
 
 ### New in version 0.6.14
 - Visual Recognition instances created post May 22 2018, have a new authentication mechanism

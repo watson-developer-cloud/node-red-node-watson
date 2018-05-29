@@ -32,7 +32,11 @@ ToneUtils.prototype = {
   },
 
   isJsonObject: function(str) {
-    if (str instanceof Array || str instanceof Object) {
+    console.log('Checking for Array', str instanceof Array);
+    console.log('Cecking for Object', str instanceof Object);
+    console.log('Type is ', typeof str);
+    if (str instanceof Array || str instanceof Object ||
+          Array.isArray(str) || 'object' === typeof str || ) {
       return true;
     }
     return false;
@@ -41,6 +45,7 @@ ToneUtils.prototype = {
   // Function that checks the payload and determines
   // whether it is JSON or a Buffer
   checkPayload: function(payload) {
+    console.log('Checking Tone Payload');
     var message = null,
       isJSON = this.isJsonString(payload) || this.isJsonObject(payload);
 
