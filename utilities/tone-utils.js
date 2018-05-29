@@ -32,11 +32,8 @@ ToneUtils.prototype = {
   },
 
   isJsonObject: function(str) {
-    console.log('Checking for Array', str instanceof Array);
-    console.log('Cecking for Object', str instanceof Object);
-    console.log('Type is ', typeof str);
     if (str instanceof Array || str instanceof Object ||
-          Array.isArray(str) || 'object' === typeof str || ) {
+          Array.isArray(str) || 'object' === typeof str ) {
       return true;
     }
     return false;
