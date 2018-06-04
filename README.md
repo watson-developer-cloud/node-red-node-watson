@@ -15,7 +15,7 @@ to allow for use of iam key for authentication.
 - Fix to Tone Analyzer to allow json objects and arrays as payload.
 - Fix to STT where auto-connect was not being preserved when reopening configuration.
 - Bump to 2018-03-05 version date for Discovery service.
-- Migraged Discovery Query Builder off deprecated getEnvrionments method
+- Migrated Discovery Nodes off deprecated methods.
 
 
 ### Watson Nodes for Node-RED

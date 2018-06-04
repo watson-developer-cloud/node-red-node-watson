@@ -17,9 +17,7 @@
 module.exports = function(RED) {
 
   const SERVICE_IDENTIFIER = 'discovery';
-  var pkg = require('../../package.json'),
-    discoveryutils = require('./discovery-utils'),
-    DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
+  var discoveryutils = require('./discovery-utils'),
     serviceutils = require('../../utilities/service-utils'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     sUsername = null,

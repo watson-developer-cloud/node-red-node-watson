@@ -17,9 +17,7 @@
 module.exports = function (RED) {
 
   const SERVICE_IDENTIFIER = 'discovery';
-  var pkg = require('../../package.json'),
-    discoveryutils = require('./discovery-utils'),
-    DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
+  var discoveryutils = require('./discovery-utils'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
@@ -84,7 +82,7 @@ module.exports = function (RED) {
 
   function executeListEnvrionments(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.getEnvironments(params, function (err, response) {
+      discovery.listEnvironments(params, function (err, response) {
         if (err) {
           reject(err);
         } else {
@@ -162,7 +160,7 @@ module.exports = function (RED) {
 
   function executeListCollections(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.getCollections(params, function (err, response) {
+      discovery.listCollections(params, function (err, response) {
         if (err) {
           reject(err);
         } else {
@@ -204,7 +202,7 @@ module.exports = function (RED) {
 
   function executeListConfigurations(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.getConfigurations(params, function (err, response) {
+      discovery.listConfigurations(params, function (err, response) {
         if (err) {
           reject(err);
         } else {
