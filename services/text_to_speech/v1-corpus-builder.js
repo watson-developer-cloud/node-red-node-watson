@@ -16,8 +16,7 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'text-to-speech';
-  var url = require('url'),
-    temp = require('temp'),
+  var temp = require('temp'),
     fs = require('fs'),
     fileType = require('file-type'),
     serviceutils = require('../../utilities/service-utils'),

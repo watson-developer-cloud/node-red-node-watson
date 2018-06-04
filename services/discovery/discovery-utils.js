@@ -13,9 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+const pkg = require('../../package.json'),
+  DiscoveryV1 = require('watson-developer-cloud/discovery/v1');
 
 function DiscoveryUtils() {}
 DiscoveryUtils.prototype = {
+
+  buildService: function(username, password, apikey, endpoint) {
+    let serviceSettings = {
+        version_date: '2018-03-05',
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
+      };
+
+      if (apikey) {
+        serviceSettings.iam_apikey = apikey;
+      } else {
+        serviceSettings.username = username;
+        serviceSettings.password = password;
+      }
+
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    return new DiscoveryV1(serviceSettings);
+
+  },
 
   buildParamsForName: function(msg, config, params) {
     if (msg.discoveryparams && msg.discoveryparams.environmentname) {

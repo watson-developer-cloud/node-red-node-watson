@@ -27,6 +27,8 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
+    apikey = null,
+    sApikey = null,
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/discovery/api';
 
@@ -247,21 +249,7 @@ module.exports = function (RED) {
   }
 
   function executeMethod(node, method, params, msg) {
-    var discovery = null, p = null,
-      serviceSettings = {
-        username: username,
-        password: password,
-        version_date: '2017-11-07',
-        headers: {
-          'User-Agent': pkg.name + '-' + pkg.version
-        }
-      };
-
-    if (endpoint) {
-      serviceSettings.url = endpoint;
-    }
-
-    discovery = new DiscoveryV1(serviceSettings);
+    let discovery = discoveryutils.buildService(username, password, apikey, endpoint);
 
     switch (method) {
     case 'createEnvrionment':
@@ -307,9 +295,9 @@ module.exports = function (RED) {
     return p;
   }
 
-  function initialCheck(u, p, m) {
+  function initialCheck(u, p, k, m) {
     var message = '';
-    if (!u || !p) {
+    if (!k && (!u || !p)) {
       message = 'Missing Watson Discovery service credentials';
     } else if (!m || '' === m) {
       message = 'Required Discovery method has not been specified';
@@ -320,11 +308,11 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
-
   if (dservice) {
-    sUsername = dservice.username;
-    sPassword = dservice.password;
-    sEndpoint = dservice.url;
+    sUsername = dservice.username ? dservice.username : '';
+    sPassword = dservice.password ? dservice.password : '';
+    sApikey = dservice.apikey ? dservice.apikey : '';
+    sEndpoint = dservice.url ? dservice.url : '';
   }
 
   RED.httpAdmin.get('/watson-discovery/vcap', function (req, res) {
@@ -343,6 +331,7 @@ module.exports = function (RED) {
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
+      apikey = sApikey || this.credentials.apikey;
 
       endpoint = sEndpoint;
       if ((!config['default-endpoint']) && config['service-endpoint']) {
@@ -350,7 +339,7 @@ module.exports = function (RED) {
       }
 
       node.status({});
-      initialCheck(username, password, method)
+      initialCheck(username, password, apikey, method)
         .then(function(){
           params = discoveryutils.buildParams(msg,config);
           return checkParams(method, params);
@@ -374,7 +363,8 @@ module.exports = function (RED) {
   RED.nodes.registerType('watson-discovery-v1', Node, {
     credentials: {
       username: {type:'text'},
-      password: {type:'password'}
+      password: {type:'password'},
+      apikey: {type:'password'}
     }
   });
 };
