@@ -32,6 +32,10 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+    </div>
 
     <div class="form-row credentials">
         <label>&nbsp;</label>
@@ -143,7 +147,7 @@
         fields.push('#node-input-tones');
         fields.push('#node-input-sentences');
         fields.push('#node-input-contentType');
-        fields.push('#node-input-inputlang');        
+        fields.push('#node-input-inputlang');
         break;
     }
     ToneV3.showSelectedFields(fields);
@@ -219,8 +223,9 @@
                 'service-endpoint' :{value: 'https://gateway.watsonplatform.net/tone-analyzer/api'}
             },
             credentials: {
-              username: {type:"text"},
-              password: {type:"password"}
+              username: {type:'text'},
+              password: {type:'password'},
+              apikey: {type: 'password'}
             },
             color: "rgb(84,149,230)",
             inputs: 1,

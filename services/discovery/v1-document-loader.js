@@ -21,9 +21,7 @@ module.exports = function (RED) {
     temp = require('temp'),
     fileType = require('file-type'),
     isDocx = require('is-docx'),
-    pkg = require('../../package.json'),
     discoveryutils = require('./discovery-utils'),
-    DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
@@ -31,14 +29,16 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
+    apikey = null,
+    sApikey = null,
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/discovery/api';
 
   temp.track();
 
-  function initialCheck(u, p) {
+  function initialCheck(u, p, k) {
     var message = '';
-    if (!u || !p) {
+    if (!k && (!u || !p)) {
       message = 'Missing Watson Discovery service credentials';
     }
     if (message) {
@@ -126,21 +126,8 @@ module.exports = function (RED) {
 
   function execute(params, msg, suffix) {
     var p = new Promise(function resolver(resolve, reject) {
-      var discovery = null, p = null, method = null,
-        serviceSettings = {
-          username: username,
-          password: password,
-          version_date: '2017-11-07',
-          headers: {
-            'User-Agent': pkg.name + '-' + pkg.version
-          }
-        };
-
-      if (endpoint) {
-        serviceSettings.url = endpoint;
-      }
-
-      discovery = new DiscoveryV1(serviceSettings);
+      let discovery = discoveryutils.buildService(username, password, apikey, endpoint);
+      
       // modify as getting addJsonDocument will be deprecated messages
       if ('.json' === suffix) {
         //method = 'addJsonDocument';
@@ -164,9 +151,10 @@ module.exports = function (RED) {
   }
 
   if (dservice) {
-    sUsername = dservice.username;
-    sPassword = dservice.password;
-    sEndpoint = dservice.url;
+    sUsername = dservice.username ? dservice.username : '';
+    sPassword = dservice.password ? dservice.password : '';
+    sApikey = dservice.apikey ? dservice.apikey : '';
+    sEndpoint = dservice.url ? dservice.url : '';
   }
 
   RED.httpAdmin.get('/watson-discovery-docs/vcap', function (req, res) {
@@ -186,6 +174,7 @@ module.exports = function (RED) {
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
+      apikey = sApikey || this.credentials.apikey;
 
       endpoint = sEndpoint;
       if ((!config['default-endpoint']) && config['service-endpoint']) {
@@ -193,7 +182,7 @@ module.exports = function (RED) {
       }
 
       node.status({});
-      initialCheck(username, password)
+      initialCheck(username, password, apikey)
         .then(function(){
           return verifyPayload(msg);
         })
@@ -247,7 +236,8 @@ module.exports = function (RED) {
   RED.nodes.registerType('watson-discovery-v1-document-loader', Node, {
     credentials: {
       username: {type:'text'},
-      password: {type:'password'}
+      password: {type:'password'},
+      apikey: {type:'password'}
     }
   });
 };

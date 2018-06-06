@@ -48,6 +48,10 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+    </div>
 
     <div class="form-row credentials">
         <label>&nbsp;</label>
@@ -215,6 +219,10 @@
       });
 
       $('#node-input-password').change(function(val){
+        disQB.getCredentials();
+      });
+
+      $('#node-input-apikey').change(function(val){
         disQB.getCredentials();
       });
 
@@ -447,8 +455,9 @@
     disQB.getEnvironments = function () {
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
+      var k = $('#node-input-apikey').val();
 
-      var creds = {un: u, pwd: p};
+      var creds = {un: u, pwd: p, key: k};
       var eChecked = $('input#node-input-default-endpoint').prop('checked')
       if (!eChecked) {
         creds.endpoint = $('#node-input-service-endpoint').val();
@@ -484,8 +493,9 @@
     disQB.getCollections = function () {
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
+      var k = $('#node-input-apikey').val();
 
-      var creds = {un: u, pwd: p};
+      var creds = {un: u, pwd: p, key: k};
       var eChecked = $('input#node-input-default-endpoint').prop('checked')
       if (!eChecked) {
         creds.endpoint = $('#node-input-service-endpoint').val();
@@ -520,8 +530,9 @@
     disQB.getSchemas = function () {
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
+      var k = $('#node-input-apikey').val();
 
-      var creds = {un: u, pwd: p};
+      var creds = {un: u, pwd: p, key: k};
       var eChecked = $('input#node-input-default-endpoint').prop('checked')
       if (!eChecked) {
         creds.endpoint = $('#node-input-service-endpoint').val();
@@ -559,8 +570,9 @@
     disQB.getCredentials = function () {
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
+      var k = $('#node-input-apikey').val();
 
-      if (u && u.length && p) {
+      if ( (k && k.length) || (u && u.length && p) ) {
         if (!disQB.environments) {
           disQB.getEnvironments();
         }
@@ -694,8 +706,9 @@
         RED.nodes.registerType('watson-discovery-v1-query-builder', {
             category: 'IBM Watson',
             defaults: {
-                name: {value: ""},
+                name: {value: ''},
                 password: {value: ''},
+                apikey: {type:'password'},
                 environment: {value: ''},
                 environmenthidden: {value: ''},
                 collection: {value: ''},
