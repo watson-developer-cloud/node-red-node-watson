@@ -197,8 +197,6 @@ module.exports = function (RED) {
       serviceSettings.url = endpoint;
     }
 
-    console.log('SERVICE SETTINGS:', serviceSettings);
-
     nlu = new NaturalLanguageUnderstandingV1(serviceSettings);
 
     var p = new Promise(function resolver(resolve, reject){
@@ -214,7 +212,6 @@ module.exports = function (RED) {
   }
 
   if (service) {
-    console.log('SERVICE:', service);
     sUsername = service.username;
     sPassword = service.password;
     sEndpoint = service.url;
@@ -240,9 +237,6 @@ module.exports = function (RED) {
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
       apikey = this.credentials.apikey;
-
-      console.log('this', this);
-      console.log('this.credentials', this.credentials);
 
       endpoint = sEndpoint;
       if ((!config['default-endpoint']) && config['service-endpoint']) {
