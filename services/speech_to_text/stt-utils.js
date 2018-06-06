@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
- const pkg = require('../../package.json'),
+const pkg = require('../../package.json'),
   STTV1 = require('watson-developer-cloud/speech-to-text/v1');
 
 class STTUtils {
@@ -54,6 +54,22 @@ class STTUtils {
       serviceSettings.username = username;
       serviceSettings.password = password;
     }
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    return new STTV1(serviceSettings);
+  }
+
+  static determineServiceFromToken(accessToken, endpoint) {
+    let serviceSettings = {
+      headers: {
+        'User-Agent': pkg.name + '-' + pkg.version
+      }
+    };
+
+    serviceSettings.iam_access_token = accessToken;
 
     if (endpoint) {
       serviceSettings.url = endpoint;

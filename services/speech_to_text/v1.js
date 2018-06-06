@@ -25,6 +25,7 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     sttutils = require('./stt-utils'),
     AuthV1 = require('watson-developer-cloud/authorization/v1'),
+    AuthIAMV1 = require('watson-developer-cloud/iam-token-manager/v1'),
     muteMode = true, discardMode = false, autoConnect = true,
     username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
@@ -270,15 +271,30 @@ module.exports = function (RED) {
     }
 
     function determineTokenService(stt) {
-      let tokenService = new AuthV1(stt.getCredentials());
+      let tokenService = null;
+
+      if (apikey) {
+        // console.log('API Key stuff to go here');
+        // tokenService = new AuthV1(stt.getCredentials());
+        // console.log('the keys that we have are ', stt.getCredentials());
+        // let creds = {}; // stt.getCredentials();
+        // creds.iamApikey = apikey;
+        // console.log('Creating token with endpoint ', endpoint);
+        // tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey, iamUrl: endpoint});
+        tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey});
+
+      } else {
+        // console.log('Standard Key');
+        tokenService = new AuthV1(stt.getCredentials());
+      }
 
       // Streaming - IAM Key fudge.
       // Check if the token service options have the header set. If not then
       // create them. This will stop the function from crashing the app,
       // altough it will still fail authentication.
-      if (!tokenService._options.headers) {
-        tokenService._options.headers = {};
-      }
+      //if (!tokenService._options.headers) {
+      //  tokenService._options.headers = {};
+      //}
       return tokenService;
     }
 
@@ -321,6 +337,7 @@ module.exports = function (RED) {
     function getToken(stt) {
       var p = new Promise(function resolver(resolve, reject) {
         var now = Math.floor(Date.now() / 1000);
+
         var tokenService = determineTokenService(stt);
 
         if (tokenPending) {
@@ -335,11 +352,13 @@ module.exports = function (RED) {
           tokenPending = true;
           tokenService.getToken(function (err, res) {
             if (err) {
+              // console.log('Error getting token ', err);
               reject(err);
             } else {
               tokenPending = false;
               tokenTime = now;
               token = res;
+              // console.log('We have the token ', token);
               resolve();
             }
           });
@@ -368,14 +387,19 @@ module.exports = function (RED) {
                              + '?watson-token=' + token + '&model=' + model;
         }
 
+        // console.log('wsURI is : ', wsURI);
+
         if (!websocket && !socketCreationInProcess) {
           socketCreationInProcess = true;
+          // console.log('Attempting creation of web socket');
           var ws = new WebSocket(wsURI);
+          // console.log('Setting up listeners');
           ws.on('open', () => {
+            // console.log('Socket is open');
             ws.send(JSON.stringify(startPacket));
             websocket = ws;
             socketCreationInProcess = false;
-            //resolve();
+            // resolve();
           });
 
           ws.on('message', (data) => {
@@ -393,7 +417,7 @@ module.exports = function (RED) {
                 if (!muteMode) {
                   payloadutils.reportError(node,newMsg,d.error);
                 }
-
+                // console.log('Fetching token');
                 token = null;
                 getToken(determineService())
                   .then(() => {
@@ -428,11 +452,13 @@ module.exports = function (RED) {
           ws.on('error', (err) => {
             socketListening = false;
             if (!muteMode) {
+              var newMsg = {payload : 'STT Connection Error'};
+              console.log('Socket Error ', err);
               payloadutils.reportError(node,newMsg,err);
             }
             // console.log('Error Detected');
             if (initialConnect) {
-              //reject(err);
+              // reject(err);
             }
           });
 
@@ -495,10 +521,13 @@ module.exports = function (RED) {
         sendTheStack();
         if (audioData && audioData.action) {
           if ('data' === audioData.action) {
+            // console.log('Sending data');
             websocket.send(audioData.data, (error) => {
               if (error) {
+                // console.log('Error Sending data ', error);
                 reject(error);
               } else {
+                // console.log('Data was sent');
                 resolve();
               }
             });
@@ -517,7 +546,7 @@ module.exports = function (RED) {
         .then(() => {
           switch (audioData.action) {
           case 'start':
-            //return Promise.reject('Its a start');
+            // console.log('Its a start');
             return processSTTSocketStart(true);
           case 'stop':
             delay = 2000;
@@ -526,6 +555,7 @@ module.exports = function (RED) {
             // Add a Delay to allow the listening thread to kick in
             // Delays for Stop is longer, so that it doesn't get actioned
             // before the audio buffers.
+            // console.log('We have data');
             setTimeout(() => {
               if (socketListening) {
                 return sendAudioSTTSocket(audioData);
@@ -581,7 +611,7 @@ module.exports = function (RED) {
 
       node.status({});
 
-      let service = null;
+      let sttService = null;
 
       // Now perform checks on the input and parameters, to make sure that all
       // is in place before the service is invoked.
@@ -599,15 +629,15 @@ module.exports = function (RED) {
         return getService();
       })
       .then((s) => {
-        service = s;
+        sttService = s;
         return processInput(msg);
       })
       .then((audioData) => {
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         if (config['streaming-mode']) {
-          return performStreamSTT(service, audioData);
+          return performStreamSTT(sttService, audioData);
         } else {
-          return performSTT(service, audioData);
+          return performSTT(sttService, audioData);
         }
       })
       .then((data) => {
