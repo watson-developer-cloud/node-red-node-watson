@@ -38,6 +38,7 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
+    apikey = null,
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/natural-language-understanding/api';
 
@@ -47,9 +48,11 @@ module.exports = function (RED) {
     node.error(message, msg);
   }
 
-  function initialCheck(u, p) {
+  function initialCheck(u, p, a) {
     if (!u || !p) {
-      return Promise.reject('Missing Watson Natural Language Understanding service credentials');
+      if(!a){
+        return Promise.reject('Missing Watson Natural Language Understanding service credentials');
+      }
     }
     return Promise.resolve();
   }
@@ -186,12 +189,15 @@ module.exports = function (RED) {
         version: '2018-03-16',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
-        }
+        },
+        iam_apikey: apikey,
       };
 
     if (endpoint) {
       serviceSettings.url = endpoint;
     }
+
+    console.log('SERVICE SETTINGS:', serviceSettings);
 
     nlu = new NaturalLanguageUnderstandingV1(serviceSettings);
 
@@ -208,6 +214,7 @@ module.exports = function (RED) {
   }
 
   if (service) {
+    console.log('SERVICE:', service);
     sUsername = service.username;
     sPassword = service.password;
     sEndpoint = service.url;
@@ -232,13 +239,17 @@ module.exports = function (RED) {
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
+      apikey = this.credentials.apikey;
+
+      console.log('this', this);
+      console.log('this.credentials', this.credentials);
 
       endpoint = sEndpoint;
       if ((!config['default-endpoint']) && config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
-      initialCheck(username, password)
+      initialCheck(username, password, apikey)
         .then(function(){
           return payloadCheck(msg, options);
         })
@@ -272,7 +283,8 @@ module.exports = function (RED) {
   RED.nodes.registerType('natural-language-understanding', NLUNode, {
     credentials: {
       username: {type:'text'},
-      password: {type:'password'}
+      password: {type:'password'},
+      apikey: {type: 'password'}
     }
   });
 };

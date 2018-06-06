@@ -30,6 +30,13 @@
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
 
+    <p style="width:100%; text-align:center;"><em>or</em></p>
+
+    <div class="form-row credentials" style="display: none;">
+      <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+      <input type="password" id="node-input-apikey" placeholder="API Key">
+    </div>
+
     <div class="form-row credentials">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
@@ -342,7 +349,8 @@
             },
             credentials: {
               username: {type:"text"},
-              password: {type:"password"}
+              password: {type:"password"},
+              apikey: {type:"password"}
             },
             color: '#00A2FF',
             inputs: 1,
