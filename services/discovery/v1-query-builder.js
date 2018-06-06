@@ -17,20 +17,20 @@
 module.exports = function(RED) {
 
   const SERVICE_IDENTIFIER = 'discovery';
-  var pkg = require('../../package.json'),
-    discoveryutils = require('./discovery-utils'),
-    DiscoveryV1 = require('watson-developer-cloud/discovery/v1'),
+  var discoveryutils = require('./discovery-utils'),
     serviceutils = require('../../utilities/service-utils'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     sUsername = null,
     sPassword = null,
+    sApikey = null,
     sEndpoint = 'https://gateway.watsonplatform.net/discovery/api';
 
 
   if (dservice) {
-    sUsername = dservice.username;
-    sPassword = dservice.password;
-    sEndpoint = dservice.url;
+    sUsername = dservice.username ? dservice.username : '';
+    sPassword = dservice.password ? dservice.password : '';
+    sApikey = dservice.apikey ? dservice.apikey : '';
+    sEndpoint = dservice.url ? dservice.url : '';
   }
 
   RED.httpAdmin.get('/watson-discovery-v1-query-builder/vcap', function(req, res) {
@@ -39,17 +39,13 @@ module.exports = function(RED) {
 
   // API used by widget to fetch available environments
   RED.httpAdmin.get('/watson-discovery-v1-query-builder/environments', function(req, res) {
-    var discovery = new DiscoveryV1({
-      username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd,
-      url: req.query.endpoint ? req.query.endpoint : sEndpoint,
-      version_date: '2017-11-07',
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
-      }
-    });
 
-    discovery.getEnvironments({}, function(err, response) {
+    let discovery = discoveryutils.buildService(sUsername ? sUsername : req.query.un,
+                                         sPassword ? sPassword : req.query.pwd,
+                                         sApikey ? sApikey : req.query.key,
+                                         req.query.endpoint ? req.query.endpoint : sEndpoint);
+
+    discovery.listEnvironments({}, function(err, response) {
       if (err) {
         res.json(err);
       } else {
@@ -60,15 +56,10 @@ module.exports = function(RED) {
 
   // API used by widget to fetch available collections in environment
   RED.httpAdmin.get('/watson-discovery-v1-query-builder/collections', function(req, res) {
-    var discovery = new DiscoveryV1({
-      username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd,
-      url: req.query.endpoint ? req.query.endpoint : sEndpoint,
-      version_date: '2017-11-07',
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
-      }
-    });
+    let discovery = discoveryutils.buildService(sUsername ? sUsername : req.query.un,
+                                         sPassword ? sPassword : req.query.pwd,
+                                         sApikey ? sApikey : req.query.key,
+                                         req.query.endpoint ? req.query.endpoint : sEndpoint);
 
     discovery.listCollections({
       environment_id: req.query.environment_id
@@ -83,17 +74,13 @@ module.exports = function(RED) {
     );
   });
 
+
   // API used by widget to fetch available collections in environment
   RED.httpAdmin.get('/watson-discovery-v1-query-builder/schemas', function(req, res) {
-    var discovery = new DiscoveryV1({
-      username: sUsername ? sUsername : req.query.un,
-      password: sPassword ? sPassword : req.query.pwd,
-      url: req.query.endpoint ? req.query.endpoint : sEndpoint,
-      version_date: '2017-11-07',
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
-      }
-    });
+    let discovery = discoveryutils.buildService(sUsername ? sUsername : req.query.un,
+                                         sPassword ? sPassword : req.query.pwd,
+                                         sApikey ? sApikey : req.query.key,
+                                         req.query.endpoint ? req.query.endpoint : sEndpoint);
 
     discovery.query({
       environment_id: req.query.environment_id,
@@ -131,6 +118,9 @@ module.exports = function(RED) {
         type: 'text'
       },
       password: {
+        type: 'password'
+      },
+      apikey: {
         type: 'password'
       }
     }

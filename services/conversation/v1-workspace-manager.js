@@ -26,6 +26,7 @@ module.exports = function (RED) {
     AssistantV1 = require('watson-developer-cloud/assistant/v1'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = '', password = '', sUsername = '', sPassword = '',
+    apikey = '', sApikey = '',
     endpoint = '', sEndpoint = '';
 
   if (!service) {
@@ -45,8 +46,10 @@ module.exports = function (RED) {
   // the edited ones are not being taken.
 
   if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
+    sApikey = service.apikey ? service.apikey : '';
+
     sEndpoint = service.url;
   }
 
@@ -503,14 +506,19 @@ module.exports = function (RED) {
   function executeMethod(node, method, params, msg) {
     var conv = null,
       serviceSettings = {
-        username: username,
-        password: password,
         version_date: '2018-02-16',
         version: '2018-02-16',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
       };
+
+    if (apikey) {
+      serviceSettings.iam_apikey = apikey;
+    } else {
+      serviceSettings.username = username;
+      serviceSettings.password = password;
+    }
 
     if (endpoint) {
       serviceSettings.url = endpoint;
@@ -1040,9 +1048,9 @@ module.exports = function (RED) {
     return Promise.resolve(false);
   }
 
-  function initialCheck(u, p, m) {
+  function initialCheck(a, u, p, m) {
     var message = '';
-    if (!u || !p) {
+    if (!a && (!u || !p)) {
       message = 'Missing Conversation service credentials';
     } else if (!m || '' === m) {
       message = 'Required mode has not been specified';
@@ -1076,6 +1084,7 @@ module.exports = function (RED) {
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
+      apikey = sApikey || this.credentials.apikey || config.apikey;
 
       // All method to be overridden
       if (msg.params) {
@@ -1088,6 +1097,9 @@ module.exports = function (RED) {
         if (msg.params.password) {
           password = msg.params.password;
         }
+        if (msg.params.apikey) {
+          apikey = msg.params.apikey;
+        }
       }
       endpoint = sEndpoint;
       if ((!config['cwm-default-endpoint']) && config['cwm-service-endpoint']) {
@@ -1095,7 +1107,7 @@ module.exports = function (RED) {
       }
 
       node.status({});
-      initialCheck(username, password, method)
+      initialCheck(apikey, username, password, method)
         .then(function(){
           return buildParams(msg, method, config, params);
         })
@@ -1134,7 +1146,8 @@ module.exports = function (RED) {
   RED.nodes.registerType('watson-conversation-v1-workspace-manager', Node, {
     credentials: {
       username: {type:'text'},
-      password: {type:'password'}
+      password: {type:'password'},
+      apikey: {type: 'password'}
     }
   });
 

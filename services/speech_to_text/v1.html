@@ -38,6 +38,10 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password"></input>
     </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+    </div>
 
     <div class="form-row credentials">
         <label>&nbsp;</label>
@@ -275,8 +279,9 @@
   stt.checkCredentials = function () {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
+    var k = $('#node-input-apikey').val();
 
-    if (u && u.length && p) {
+    if ( (k && k.length) || (u && u.length && p) ) {
       if (!stt.models) {
         stt.getModels();
       }
@@ -386,6 +391,9 @@
     $('#node-input-password').change(function(val){
       stt.checkCredentials();
     });
+    $('#node-input-apikey').change(function(val){
+      stt.checkCredentials();
+    });
 
     $('#node-input-lang').change(function (val) {
       stt.language_selected = $('#node-input-lang').val();
@@ -436,8 +444,9 @@
     if (!stt.customisations) {
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
+      var k = $('#node-input-apikey').val();
       var e = $('#node-input-service-endpoint').val();
-      var creds = {un: u, pwd: p};
+      var creds = {un: u, pwd: p, key: k};
 
       if (! $('#node-input-default-endpoint').prop('checked')) {
         creds.e = e;
@@ -480,8 +489,9 @@
   stt.getModels = function (haveCredentials) {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
+    var k = $('#node-input-apikey').val();
     var e = $('#node-input-service-endpoint').val();
-    var creds = {un: u, pwd: p};
+    var creds = {un: u, pwd: p, key: k};
 
     if (! $('#node-input-default-endpoint').prop('checked')) {
       creds.e = e;
@@ -600,9 +610,11 @@
                 band: {value: ''},
                 bandhidden: {value: ''},
                 password: {value: ''},
+                apikey: {value: ''},
                 'payload-response' :{value: false},
                 'streaming-mode' :{value: false},
                 'streaming-mute' :{value: true},
+                'auto-connect' :{value: false},
                 'discard-listening' :{value: false},
                 'disable-precheck' :{value: false},
                 'default-endpoint' :{value: true},

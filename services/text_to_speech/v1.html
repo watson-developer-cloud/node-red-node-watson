@@ -38,6 +38,10 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+    </div>
 
     <div class="form-row credentials">
         <label>&nbsp;</label>
@@ -238,8 +242,9 @@
     if (!tts.customisations) {
       var u = $('#node-input-username').val();
       var p = $('#node-input-password').val();
+      var k = $('#node-input-apikey').val();
       var e = $('#node-input-service-endpoint').val();
-      var creds = {un: u, pwd: p};
+      var creds = {un: u, pwd: p, key: k};
 
       if (! $('#node-input-default-endpoint').prop('checked')) {
         creds.e = e;
@@ -283,8 +288,9 @@
   tts.getVoices = function (){
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
+    var k = $('#node-input-apikey').val();
     var e = $('#node-input-service-endpoint').val();
-    var creds = {un: u, pwd: p};
+    var creds = {un: u, pwd: p, key: k};
 
     if (! $('#node-input-default-endpoint').prop('checked')) {
       creds.e = e;
@@ -329,8 +335,9 @@
   tts.checkCredentials = function () {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
+    var k = $('#node-input-apikey').val();
 
-    if (u && u.length && p) {
+    if ( (k && k.length) || (u && u.length && p) ) {
       if (!tts.voices) {
         tts.getVoices();
       }
@@ -360,6 +367,16 @@
     var showit = false;
 
     $('select#node-input-langcustom').empty();
+
+    // Add an option to not select
+    $('select#node-input-langcustom')
+      .append('<option value='
+                    + 'NoCustomisationSetting'
+                    + '' //showit ? '' : ' selected="selected" '
+                    + '>'
+                    + 'None'
+                    + '</option>');
+
     if (tts.customisations) {
       tts.language_selected = tts.language_selected ?
                                   tts.language_selected :
@@ -387,15 +404,6 @@
       });
     }
 
-    // Add an option to not select
-    $('select#node-input-langcustom')
-      .append('<option value='
-                    + 'NoCustomisationSetting'
-                    + '' //showit ? '' : ' selected="selected" '
-                    + '>'
-                    + 'None'
-                    + '</option>');
-
 
     if (showit) {
       $('select#node-input-langcustom').parent().show();
@@ -410,6 +418,9 @@
       tts.checkCredentials();
     });
     $('#node-input-password').change(function(val){
+      tts.checkCredentials();
+    });
+    $('#node-input-apikey').change(function(val){
       tts.checkCredentials();
     });
     $('#node-input-lang').change(function () {
@@ -485,6 +496,7 @@
                 voicehidden: {value: ""},
                 format: {value: "audio/wav"},
                 password: {value: ''},
+                apikey: {value: ''},
                 'payload-response' :{value: false},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://stream.watsonplatform.net/text-to-speech/api'}

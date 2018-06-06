@@ -22,6 +22,7 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     toneutils = require('../../utilities/tone-utils'),
     username = '', password = '', sUsername = '', sPassword = '',
+    apikey = '', sApikey = '',
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/tone-analyzer/api',
     service = null;
@@ -37,8 +38,9 @@ module.exports = function (RED) {
   service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
+    sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
 
@@ -51,15 +53,19 @@ module.exports = function (RED) {
   // Check that the credentials have been provided
   // Credentials are needed for each the service.
   var checkCreds = function(credentials) {
-    var taSettings = null;
+    var taSettings = {};
 
     username = sUsername || credentials.username;
     password = sPassword || credentials.password;
+    apikey = sApikey || credentials.apikey;
 
-    if (username && password) {
-      taSettings = {};
+    if (apikey) {
+      taSettings.iam_apikey = apikey;
+    } else if (username && password) {
       taSettings.username = username;
       taSettings.password = password;
+    } else {
+      taSettings = null;
     }
 
     return taSettings;
@@ -92,13 +98,18 @@ module.exports = function (RED) {
 
   function invokeService(config, options, settings) {
     var serviceSettings = {
-      'username': settings.username,
-      'password': settings.password,
       version_date: '2017-09-21',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
     };
+
+    if (settings.iam_apikey) {
+      serviceSettings.iam_apikey = settings.iam_apikey;
+    } else {
+      serviceSettings.username = settings.username;
+      serviceSettings.password = settings.password;
+    }
 
     endpoint = sEndpoint;
     if ((!config['default-endpoint']) && config['service-endpoint']) {
@@ -174,7 +185,8 @@ module.exports = function (RED) {
   RED.nodes.registerType('watson-tone-analyzer-v3', Node, {
     credentials: {
       username: {type:'text'},
-      password: {type:'password'}
+      password: {type:'password'},
+      apikey: {type:'password'}
     }
   });
 };
