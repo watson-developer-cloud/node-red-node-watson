@@ -32,6 +32,10 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+    </div>
 
     <div class="form-row credentials">
         <label>&nbsp;</label>
@@ -125,7 +129,8 @@
             },
             credentials: {
               username: {type:"text"},
-              password: {type:"password"}
+              password: {type:"password"},
+              apikey: {type: 'password'}
             },
             color: "rgb(0, 150, 200)",
             inputs: 1,
