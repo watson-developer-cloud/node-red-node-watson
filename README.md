@@ -16,6 +16,7 @@ to allow for use of iam key for authentication.
 - Fix to STT where auto-connect was not being preserved when reopening configuration.
 - Bump to 2018-03-05 version date for Discovery service.
 - Migrated Discovery Nodes off deprecated methods.
+- Remove Deprecated Retrieve and Rank Nodes
 
 
 ### Watson Nodes for Node-RED

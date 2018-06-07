@@ -46,7 +46,6 @@
       "watson-natural-language-classifier-v1": "services/natural_language_classifier/v1.js",
       "watson-natural-language-understanding-v1": "services/natural_language_understanding/v1.js",
       "watson-personality-insights-v3": "services/personality_insights/v3.js",
-      "watson-retrieve-and-rank-v1": "services/retrieve_and_rank/v1.js",
       "watson-speech-to-text-v1": "services/speech_to_text/v1.js",
       "watson-speech-to-text-corpus-builder-v1": "services/speech_to_text/v1-corpus-builder.js",
       "watson-text-to-speech-v1": "services/text_to_speech/v1.js",
