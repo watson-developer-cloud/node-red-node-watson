@@ -25,6 +25,8 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
+    apikey = null,
+    sApikey = null,
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/personality-insights/api',
 
@@ -32,8 +34,9 @@ module.exports = function (RED) {
     VALID_RESPONSE_LANGUAGES = ['ar','de','en','es','fr','it','ja','ko','pt-br','zh-cn','zh-tw'];
 
   if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
+    sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
 
@@ -72,8 +75,9 @@ module.exports = function (RED) {
   function credentialsCheck(node) {
     username = sUsername || node.credentials.username;
     password = sPassword || node.credentials.password;
+    apikey = sApikey || node.credentials.apikey;
 
-    if (!username || !password) {
+    if (!apikey && (!username || !password)) {
       return Promise.reject('Missing Personality Insights service credentials');
     }
     return Promise.resolve();
@@ -123,13 +127,18 @@ module.exports = function (RED) {
     var p = new Promise(function resolver(resolve, reject) {
       var personality_insights = null,
         serviceSettings = {
-          username: username,
-          password: password,
           version_date: '2016-10-20',
           headers: {
             'User-Agent': pkg.name + '-' + pkg.version
           }
         };
+
+      if (apikey) {
+        serviceSettings.iam_apikey = apikey;
+      } else {
+        serviceSettings.username = username;
+        serviceSettings.password = password;
+      }
 
       if (endpoint) {
         serviceSettings.url = endpoint;
@@ -191,7 +200,8 @@ module.exports = function (RED) {
   RED.nodes.registerType('watson-personality-insights-v3',Node,{
     credentials: {
       username: {type:'text'},
-      password: {type:'password'}
+      password: {type:'password'},
+      apikey: {type:'password'}
     }
   });
 };
