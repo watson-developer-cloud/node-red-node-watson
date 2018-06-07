@@ -33,12 +33,12 @@ module.exports = function (RED) {
     VALID_INPUT_LANGUAGES = ['ar','en','es','ja'],
     VALID_RESPONSE_LANGUAGES = ['ar','de','en','es','fr','it','ja','ko','pt-br','zh-cn','zh-tw'];
 
-    if (service) {
-      sUsername = service.username ? service.username : '';
-      sPassword = service.password ? service.password : '';
-      sApikey = service.apikey ? service.apikey : '';
-      sEndpoint = service.url;
-    }
+  if (service) {
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
+    sApikey = service.apikey ? service.apikey : '';
+    sEndpoint = service.url;
+  }
 
   // This HTTP GET REST request is used by the browser side of the node to
   // determine if credentials are found.
