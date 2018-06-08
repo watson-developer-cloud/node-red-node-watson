@@ -17,6 +17,7 @@
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'speech-to-text';
   var temp = require('temp'),
+    request = require('request'),
     url = require('url'),
     fs = require('fs'),
     WebSocket = require('ws'),
@@ -298,6 +299,7 @@ module.exports = function (RED) {
       return tokenService;
     }
 
+
     function performSTT(speech_to_text, audioData) {
       var p = new Promise(function resolver(resolve, reject){
         var model = config.lang + '_' + config.band,
@@ -330,6 +332,7 @@ module.exports = function (RED) {
             resolve(res);
           }
         });
+
       });
       return p;
     }
@@ -637,6 +640,9 @@ module.exports = function (RED) {
         if (config['streaming-mode']) {
           return performStreamSTT(sttService, audioData);
         } else {
+          if (apikey) {
+            node.warn('STT Speech Recognition may not work with API Key!');
+          }
           return performSTT(sttService, audioData);
         }
       })
