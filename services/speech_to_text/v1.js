@@ -22,8 +22,10 @@ module.exports = function (RED) {
     fs = require('fs'),
     WebSocket = require('ws'),
     fileType = require('file-type'),
+    pkg = require('../../package.json'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
+    iamutils = require('../../utilities/iam-utils'),
     sttutils = require('./stt-utils'),
     AuthV1 = require('watson-developer-cloud/authorization/v1'),
     AuthIAMV1 = require('watson-developer-cloud/iam-token-manager/v1'),
@@ -268,7 +270,21 @@ module.exports = function (RED) {
     }
 
     function getService() {
-      return Promise.resolve(determineService());
+      var p = new Promise(function resolver(resolve, reject){
+        let sttService = determineService();
+        if (apikey) {
+          sttService.preAuthenticate((ready) => {
+            if (!ready) {
+              reject('Service is not ready');
+            } else {
+              resolve(sttService);
+            }
+          });
+        } else {
+          resolve(sttService);
+        }
+      });
+      return p;
     }
 
     function determineTokenService(stt) {
@@ -299,6 +315,95 @@ module.exports = function (RED) {
       return tokenService;
     }
 
+    function cloneQS(original) {
+      // First create an empty object that will receive copies of properties
+      let clone = {}, i, keys = Object.keys(original);
+
+      for (i = 0; i < keys.length; i++) {
+        // copy each property into the clone
+        clone[keys[i]] = original[keys[i]];
+      }
+      ['audio', 'content_type'].forEach((f) => {
+        if (clone[f]) {
+          delete clone[f];
+        }
+      });
+
+      return clone;
+    }
+
+    function buildRequestSettings(params, t) {
+      let requestSettings = {
+        qs : cloneQS(params),
+        method : 'POST',
+        uri : endpoint + '/recognize',
+        headers : {
+          //Authorization: "Bearer " + t,
+          'Content-Type': params.content_type,
+          'User-Agent': pkg.name + '-' + pkg.version,
+          'Accept': 'application/json',
+        },
+        iam_apikey: apikey,
+        auth: {
+          'bearer': t
+        },
+        body : params.audio
+      };
+
+      return Promise.resolve(requestSettings);
+    }
+
+    function executePostRequest(requestSettings) {
+      var p = new Promise(function resolver(resolve, reject){
+        request(requestSettings, (error, response, body) => {
+          console.log('--------- request has been executed ---------------');
+
+          if (!error && response.statusCode == 200) {
+            data = JSON.parse(body);
+            resolve(data);
+          } else if (error) {
+            reject(error);
+          } else {
+            let errordata = JSON.parse(body);
+            console.log(errordata);
+            if (errordata.errors &&
+                   Array.isArray(errordata.errors) &&
+                   errordata.errors.length &&
+                   errordata.errors[0].message) {
+              reject('Error ' + response.statusCode + ' ' + errordata.errors[0].message);
+            } else {
+              reject('Error performing request ' + response.statusCode);
+            }
+          }
+
+        });
+      });
+      return p;
+    }
+
+    function iamRecognize(params) {
+      var p = new Promise(function resolver(resolve, reject){
+        //console.log('qs params look like ', qs);
+        // The token may have expired so test for it.
+        //getToken(speech_to_text)
+        iamutils.getIAMToken(apikey)
+          .then((t) => {
+            //console.log('We should now have a token ', token);
+            return buildRequestSettings(params, t);
+          })
+          .then((requestSettings) => {
+            //console.log('Request parameters look like ', requestSettings);
+            return executePostRequest(requestSettings);
+          })
+          .then((data) => {
+            resolve(data);
+          })
+          .catch((err) => {
+            reject(err);
+          })
+      });
+      return p;
+    }
 
     function performSTT(speech_to_text, audioData) {
       var p = new Promise(function resolver(resolve, reject){
@@ -640,9 +745,6 @@ module.exports = function (RED) {
         if (config['streaming-mode']) {
           return performStreamSTT(sttService, audioData);
         } else {
-          if (apikey) {
-            node.warn('STT Speech Recognition may not work with API Key!');
-          }
           return performSTT(sttService, audioData);
         }
       })
