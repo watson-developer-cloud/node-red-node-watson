@@ -39,12 +39,12 @@ class IAMUtils {
 
   static stashToken(key, tokenInfo) {
     if (! IAMUtils.tokenStash) {
-       IAMUtils.tokenStash = {};
+      IAMUtils.tokenStash = {};
     }
     IAMUtils.tokenStash[key] = {};
     ['access_token', 'refresh_token', 'expires_in', 'expiration'].forEach((f) => {
       IAMUtils.tokenStash[key][f] = tokenInfo[f] ? tokenInfo[f] : null;
-    })
+    });
   }
 
   static checkForToken(key) {
@@ -88,7 +88,7 @@ class IAMUtils {
           response_type: 'cloud_iam'
         }
       }, (error, response, body) => {
-        if (!error && response.statusCode == 200) {
+        if (!error && response.statusCode === 200) {
           //console.log('Token body looks like : ', body);
           var b = JSON.parse(body);
           //console.log('Token body looks like : ', b);

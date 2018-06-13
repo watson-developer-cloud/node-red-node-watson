@@ -323,7 +323,7 @@ module.exports = function (RED) {
 
     function cloneQS(original) {
       // First create an empty object that will receive copies of properties
-      let clone = {}, i, keys = Object.keys(original);
+      let clone = {}, i = 0, keys = Object.keys(original);
 
       for (i = 0; i < keys.length; i++) {
         // copy each property into the clone
@@ -364,8 +364,8 @@ module.exports = function (RED) {
         request(requestSettings, (error, response, body) => {
           //console.log('--------- request has been executed ---------------');
 
-          if (!error && response.statusCode == 200) {
-            data = JSON.parse(body);
+          if (!error && response.statusCode === 200) {
+            let data = JSON.parse(body);
             resolve(data);
           } else if (error) {
             reject(error);
@@ -407,7 +407,7 @@ module.exports = function (RED) {
           })
           .catch((err) => {
             reject(err);
-          })
+          });
       });
       return p;
     }
