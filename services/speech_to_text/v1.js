@@ -17,12 +17,15 @@
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'speech-to-text';
   var temp = require('temp'),
+    request = require('request'),
     url = require('url'),
     fs = require('fs'),
     WebSocket = require('ws'),
     fileType = require('file-type'),
+    pkg = require('../../package.json'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
+    iamutils = require('../../utilities/iam-utils'),
     sttutils = require('./stt-utils'),
     AuthV1 = require('watson-developer-cloud/authorization/v1'),
     AuthIAMV1 = require('watson-developer-cloud/iam-token-manager/v1'),
@@ -267,7 +270,25 @@ module.exports = function (RED) {
     }
 
     function getService() {
-      return Promise.resolve(determineService());
+      var p = new Promise(function resolver(resolve, reject){
+        let sttService = determineService();
+        // preAuthenticate was a temp fix, but now that we are
+        // processing IAM Keys directly, no need for this, but
+        // we will keep the commented out code for now, as we
+        // may come back to this.
+        // if (apikey) {
+        //   sttService.preAuthenticate((ready) => {
+        //     if (!ready) {
+        //       reject('Service is not ready');
+        //     } else {
+        //       resolve(sttService);
+        //     }
+        //   });
+        // } else {
+        resolve(sttService);
+        // }
+      });
+      return p;
     }
 
     function determineTokenService(stt) {
@@ -281,7 +302,9 @@ module.exports = function (RED) {
         // creds.iamApikey = apikey;
         // console.log('Creating token with endpoint ', endpoint);
         // tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey, iamUrl: endpoint});
+
         tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey});
+        //tokenService = new iamutils(apikey);
 
       } else {
         // console.log('Standard Key');
@@ -296,6 +319,97 @@ module.exports = function (RED) {
       //  tokenService._options.headers = {};
       //}
       return tokenService;
+    }
+
+    function cloneQS(original) {
+      // First create an empty object that will receive copies of properties
+      let clone = {}, i = 0, keys = Object.keys(original);
+
+      for (i = 0; i < keys.length; i++) {
+        // copy each property into the clone
+        clone[keys[i]] = original[keys[i]];
+      }
+      ['audio', 'content_type'].forEach((f) => {
+        if (clone[f]) {
+          delete clone[f];
+        }
+      });
+
+      return clone;
+    }
+
+    function buildRequestSettings(params, t) {
+      let requestSettings = {
+        qs : cloneQS(params),
+        method : 'POST',
+        uri : endpoint + '/v1/recognize',
+        headers : {
+          //Authorization: "Bearer " + t,
+          'Content-Type': params.content_type,
+          'User-Agent': pkg.name + '-' + pkg.version,
+          'Accept': 'application/json',
+        },
+        iam_apikey: apikey,
+        auth: {
+          'bearer': t
+        },
+        body : params.audio
+      };
+
+      return Promise.resolve(requestSettings);
+    }
+
+    function executePostRequest(requestSettings) {
+      var p = new Promise(function resolver(resolve, reject){
+        request(requestSettings, (error, response, body) => {
+          //console.log('--------- request has been executed ---------------');
+
+          if (!error && response.statusCode === 200) {
+            let data = JSON.parse(body);
+            resolve(data);
+          } else if (error) {
+            reject(error);
+          } else {
+            let errordata = JSON.parse(body);
+            console.log(errordata);
+            if (errordata.errors &&
+                   Array.isArray(errordata.errors) &&
+                   errordata.errors.length &&
+                   errordata.errors[0].message) {
+              reject('Error ' + response.statusCode + ' ' + errordata.errors[0].message);
+            } else if (errordata.error) {
+              reject('Error performing request ' + errordata.error);
+            } else {
+              reject('Error performing request ' + response.statusCode);
+            }
+          }
+
+        });
+      });
+      return p;
+    }
+
+    function iamRecognize(params) {
+      var p = new Promise(function resolver(resolve, reject){
+        //console.log('qs params look like ', qs);
+        // The token may have expired so test for it.
+        //getToken(speech_to_text)
+        iamutils.getIAMToken(apikey)
+          .then((t) => {
+            //console.log('We should now have a token ', token);
+            return buildRequestSettings(params, t);
+          })
+          .then((requestSettings) => {
+            return executePostRequest(requestSettings);
+          })
+          .then((data) => {
+            resolve(data);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+      return p;
     }
 
     function performSTT(speech_to_text, audioData) {
@@ -323,13 +437,24 @@ module.exports = function (RED) {
         }
 
         // Everything is now in place to invoke the service
-        speech_to_text.recognize(params, function (err, res) {
-          if (err) {
+        if (apikey) {
+          iamRecognize(params)
+          .then((data) => {
+            resolve(data);
+          })
+          .catch((err) => {
             reject(err);
-          } else {
-            resolve(res);
-          }
+          })
+        } else {
+          speech_to_text.recognize(params, function (err, res) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
         });
+        }
+
       });
       return p;
     }
@@ -358,7 +483,7 @@ module.exports = function (RED) {
               tokenPending = false;
               tokenTime = now;
               token = res;
-              // console.log('We have the token ', token);
+              //console.log('We have the token ', token);
               resolve();
             }
           });
@@ -387,7 +512,7 @@ module.exports = function (RED) {
                              + '?watson-token=' + token + '&model=' + model;
         }
 
-        // console.log('wsURI is : ', wsURI);
+        //console.log('wsURI is : ', wsURI);
 
         if (!websocket && !socketCreationInProcess) {
           socketCreationInProcess = true;
