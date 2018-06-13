@@ -120,11 +120,11 @@ class IAMUtils {
         //console.log('Resolving from new');
         IAMUtils.getNewIAMToken(key)
         .then((iamtoken) => {
-          resolve(iamtoken)
+          resolve(iamtoken);
         })
         .catch((err) => {
-          reject(err)
-        })
+          reject(err);
+        });
       });
     });
     return p;
