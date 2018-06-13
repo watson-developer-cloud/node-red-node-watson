@@ -8,14 +8,17 @@ Node-RED Watson Nodes for IBM Cloud
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 ### New in version 0.7.0
-- Assistant, Discovery, Natural Language Understanding, Personality Insights,
+- In this release STT in Stream mode with IAM Keys does not work.
+- Assistant, Discovery, Language Identify, Language Translator,
+Natural Language Understanding, Personality Insights,
 Speech to Text, Text to Speech, Tone Analyzer nodes updated
-to allow for use of iam key for authentication.
+to allow for use of IAM key for authentication.
 - Migrated STT node off deprecated methods.
 - Fix to Tone Analyzer Node to preserve credentials on config reopen.
 - Fix to Tone Analyzer to allow json objects and arrays as payload.
 - Fix to STT where auto-connect was not being preserved when reopening configuration.
 - Bump to 2018-03-05 version date for Discovery service.
+- Move to V3 of Language Translator
 - Migrated Discovery Nodes off deprecated methods.
 - Remove Deprecated Retrieve and Rank Nodes
 

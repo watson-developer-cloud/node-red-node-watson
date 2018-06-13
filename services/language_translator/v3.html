@@ -38,6 +38,10 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password"/>
     </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+    </div>
 
     <div class="form-row credentials">
         <label>&nbsp;</label>
@@ -237,6 +241,7 @@
                     'ru': 'Russian',
                     'tr': 'Turkish',
                     'zh': 'Chinese',
+                    'zh-TW' : 'Taiwanese',
                     'zht': 'Traditional Chinese'
                   };
 
@@ -307,8 +312,9 @@
   tor.checkModels = function () {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
+    var k = $('#node-input-apikey').val();
     var e = $('#node-input-service-endpoint').val();
-    var creds = {un: u, pwd: p};
+    var creds = {un: u, pwd: p, key: k};
 
     if ($('#node-input-neural').prop('checked')) {
       creds.n = 'Y';
@@ -335,8 +341,9 @@
   tor.getCredentials = function () {
     var u = $('#node-input-username').val();
     var p = $('#node-input-password').val();
+    var k = $('#node-input-apikey').val();
 
-    if (u && u.length && p) {
+    if ( (k && k.length) || (u && u.length && p) ) {
       if (!tor.models) {
         tor.checkModels();
         if (tor.models) {$('#node-input-action').parent().show(); }
@@ -366,7 +373,10 @@
     $('select#node-input-destlang').empty();
 
     available_destlang.forEach(function (val) {
-      var lang = val.split('-')[1];
+      // can now have languages like zh-TW, so simple split on -
+      // no longer works.
+      // var lang = val.split('-')[1];
+      let lang = val.replace(tor.srclang_selected + '-', '');
 
       var selectedText = '';
       if (tor.destlang_selected === lang) {
@@ -559,6 +569,7 @@
       var output_lang = tor.domain_type.map(function (a) {
         return a.target;
       });
+
       input_lang_unique = input_lang.filter(tor.checkUnique);
       output_lang_unique = output_lang.filter(tor.checkUnique);
 
@@ -594,6 +605,12 @@
         tor.checkActionSelected();}
     });
     $('#node-input-password').change(function(val){
+      tor.getCredentials();
+      if (tor.have_credentials) {
+        tor.checkActionSelected();
+      }
+    });
+    $('#node-input-apikey').change(function(val){
       tor.getCredentials();
       if (tor.have_credentials) {
         tor.checkActionSelected();
@@ -727,6 +744,7 @@
                 srclang: {value: 'en'},
                 destlang: {value: 'fr'},
                 password: {value: ''},
+                apikey: {value: ''},
                 custom: {value: ''},
                 domainhidden: {value: ''},
                 srclanghidden: {value: ''},

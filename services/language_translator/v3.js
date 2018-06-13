@@ -24,7 +24,7 @@ module.exports = function (RED) {
   // the edited ones are not being taken.
   const SERVICE_IDENTIFIER = 'language-translator';
   var pkg = require('../../package.json'),
-    LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
+    LanguageTranslatorV3 = require('watson-developer-cloud/language-translator/v3'),
     //cfenv = require('cfenv'),
     payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
@@ -34,6 +34,8 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
+    apikey = null,
+    sApikey = null,
     //service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     endpoint = '',
@@ -43,8 +45,9 @@ module.exports = function (RED) {
   temp.track();
 
   if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
+    sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
 
@@ -64,22 +67,27 @@ module.exports = function (RED) {
     var lt = null,
       neural = req.query.n ? true : false,
       serviceSettings = {
-        username: sUsername ? sUsername : req.query.un,
-        password: sPassword ? sPassword : req.query.pwd,
-        version: 'v2',
+        version: '2018-05-01',
         url: endpoint,
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
       };
 
+    if (sApikey || req.query.key) {
+      serviceSettings.iam_apikey = sApikey ? sApikey : req.query.key;
+    } else {
+      serviceSettings.username = sUsername ? sUsername : req.query.un;
+      serviceSettings.password = sPassword ? sPassword : req.query.pwd;
+    }
+
     if (neural) {
       serviceSettings.headers['X-Watson-Technology-Preview'] = '2017-07-01';
     }
 
-    lt = new LanguageTranslatorV2(serviceSettings);
+    lt = new LanguageTranslatorV3(serviceSettings);
 
-    lt.getModels({}, function (err, models) {
+    lt.listModels({}, function (err, models) {
       if (err) {
         res.json(err);
       }
@@ -105,8 +113,8 @@ module.exports = function (RED) {
     var node = this;
 
 
-    function initialCheck(u, p) {
-      if (!u || !p) {
+    function initialCheck(u, p, k) {
+      if (!k && (!u || !p)) {
         return Promise.reject('Missing Watson Language Translator service credentials');
       }
       return Promise.resolve();
@@ -188,7 +196,7 @@ module.exports = function (RED) {
       }
 
       model_id = srclang + '-' + destlang;
-      if (domain !== 'news') {
+      if (domain !== 'news' && domain !== 'general') {
         model_id += ('-' + domain);
       }
       return Promise.resolve(model_id);
@@ -374,13 +382,18 @@ module.exports = function (RED) {
       var p = null,
         language_translator = null,
         serviceSettings = {
-          username: username,
-          password: password,
-          version: 'v2',
+          version: '2018-05-01',
           headers: {
             'User-Agent': pkg.name + '-' + pkg.version
           }
         };
+
+      if (apikey) {
+        serviceSettings.iam_apikey = apikey;
+      } else {
+        serviceSettings.username = username;
+        serviceSettings.password = password;
+      }
 
       if (endpoint) {
         serviceSettings.url = endpoint;
@@ -390,7 +403,7 @@ module.exports = function (RED) {
         serviceSettings.headers['X-Watson-Technology-Preview'] = '2017-07-01';
       }
 
-      language_translator = new LanguageTranslatorV2(serviceSettings);
+      language_translator = new LanguageTranslatorV3(serviceSettings);
 
       // We have credentials, and know the mode. Further required fields checks
       // are specific to the requested action.
@@ -434,6 +447,7 @@ module.exports = function (RED) {
       // Credentials are needed for each of the modes.
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
+      apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
       if ((!config['default-endpoint']) && config['service-endpoint']) {
@@ -442,7 +456,7 @@ module.exports = function (RED) {
 
       node.status({});
 
-      initialCheck(username, password)
+      initialCheck(username, password, apikey)
         .then(function(){
           return payloadCheck(msg);
         })
@@ -472,7 +486,8 @@ module.exports = function (RED) {
   RED.nodes.registerType('watson-translator', SMTNode, {
     credentials: {
       username: {type:'text'},
-      password: {type:'password'}
+      password: {type:'password'},
+      apikey: {type:'password'}
     }
   });
 };

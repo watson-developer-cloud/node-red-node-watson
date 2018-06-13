@@ -33,6 +33,10 @@
         <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
         <input type="password" id="node-input-password" placeholder="Password">
     </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+    </div>
 
     <div class="form-row credentials">
         <label>&nbsp;</label>
@@ -46,7 +50,7 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-language-translator-identify">
-    <p>Packaged in with release 0.5.14 of node-red-node-watson</p>
+    <p>Packaged in with release 0.7.0 of node-red-node-watson</p>
     <p>The Watson Language Translator service can be used to identify languages used in a text input. <p>
     <p>Node input : </p>
     <ul>
@@ -97,7 +101,8 @@
             },
             credentials: {
               username: {type:'text'},
-              password: {type:'password'}
+              password: {type:'password'},
+              apikey: {type: 'password'}
             },
             color: 'rgb(84,149,230)',
             inputs: 1,
