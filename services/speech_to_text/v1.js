@@ -444,7 +444,7 @@ module.exports = function (RED) {
           })
           .catch((err) => {
             reject(err);
-          })
+          });
         } else {
           speech_to_text.recognize(params, function (err, res) {
             if (err) {

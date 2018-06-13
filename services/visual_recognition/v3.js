@@ -51,7 +51,7 @@ module.exports = function(RED) {
   service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
-    sAPIKey = service.api_key;
+    sAPIKey = service.api_key || service.apikey;
     sEndpoint = service.url;
   }
 
