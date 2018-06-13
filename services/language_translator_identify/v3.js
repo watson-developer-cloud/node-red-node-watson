@@ -17,7 +17,7 @@
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'language-translator';
   var pkg = require('../../package.json'),
-    LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
+    LanguageTranslatorV3 = require('watson-developer-cloud/language-translator/v3'),
     payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
@@ -25,17 +25,20 @@ module.exports = function (RED) {
     password = null,
     sUsername = null,
     sPassword = null,
+    apikey = null,
+    sApikey = null,
     endpoint = '', sEndpoint = '';
     //endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
+    sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
 
-  function initialCheck(u, p) {
-    if (!u || !p) {
+  function initialCheck(u, p, k) {
+    if (!k && (!u || !p)) {
       return Promise.reject('Missing Watson Language Translator service credentials');
     }
     return Promise.resolve();
@@ -52,19 +55,24 @@ module.exports = function (RED) {
     var p = new Promise(function resolver(resolve, reject){
       var language_translator = null,
         serviceSettings = {
-          username: username,
-          password: password,
-          version: 'v2',
+          version: '2018-05-01',
           headers: {
             'User-Agent': pkg.name + '-' + pkg.version
           }
         };
 
+      if (apikey) {
+        serviceSettings.iam_apikey = apikey;
+      } else {
+        serviceSettings.username = username;
+        serviceSettings.password = password;
+      }
+
       if (endpoint) {
         serviceSettings.url = endpoint;
       }
 
-      language_translator = new LanguageTranslatorV2(serviceSettings);
+      language_translator = new LanguageTranslatorV3(serviceSettings);
 
       language_translator.identify({text: msg.payload}, function (err, response) {
         if (err) {
@@ -91,6 +99,7 @@ module.exports = function (RED) {
     this.on('input', function (msg) {
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
+      apikey = sApikey || this.credentials.apikey;
 
       endpoint = sEndpoint;
       if ((!config['default-endpoint']) && config['service-endpoint']) {
@@ -98,7 +107,7 @@ module.exports = function (RED) {
       }
 
       node.status({});
-      initialCheck(username, password)
+      initialCheck(username, password, apikey)
         .then(function(){
           return payloadCheck(msg);
         })
@@ -118,7 +127,8 @@ module.exports = function (RED) {
   RED.nodes.registerType('watson-language-translator-identify', Node, {
     credentials: {
       username: {type:'text'},
-      password: {type:'password'}
+      password: {type:'password'},
+      apikey: {type:'password'}
     }
   });
 };

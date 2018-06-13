@@ -16,9 +16,10 @@
 
 module.exports = function (RED) {
   var pkg = require('../../package.json'),
-    LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2'),
+    LanguageTranslatorV3 = require('watson-developer-cloud/language-translator/v3'),
     cfenv = require('cfenv'),
     username = null, password = null, sUsername = null, sPassword = null,
+    apikey = null, sApikey = null,
     service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/language-translator/api';
@@ -26,8 +27,9 @@ module.exports = function (RED) {
     //endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
+    sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
 
@@ -61,6 +63,7 @@ module.exports = function (RED) {
 
     username = sUsername || this.credentials.username;
     password = sPassword || this.credentials.password || config.password;
+    apikey = sApikey || this.credentials.apikey || config.apikey;
 
     // The node has received an input as part of a flow, need to determine
     // what the request is for, and based on that if the required fields
@@ -69,18 +72,23 @@ module.exports = function (RED) {
 
       var message = '',
         serviceSettings = {
-          username: username,
-          password: password,
-          version: 'v2',
+          version: '2018-05-01',
           headers: {
             'User-Agent': pkg.name + '-' + pkg.version
           }
         };
 
-      if (!username || !password) {
+      if (!apikey && (!username || !password)) {
         message = 'Missing Language Translation service credentials';
         node.error(message, msg);
         return;
+      }
+
+      if (apikey) {
+        serviceSettings.iam_apikey = apikey;
+      } else {
+        serviceSettings.username = username;
+        serviceSettings.password = password;
       }
 
       endpoint = sEndpoint;
@@ -91,7 +99,7 @@ module.exports = function (RED) {
         serviceSettings.url = endpoint;
       }
 
-      var lt = new LanguageTranslatorV2(serviceSettings);
+      var lt = new LanguageTranslatorV3(serviceSettings);
 
       // set global variable in order to make them accessible for the tranlsation node
       var globalContext = this.context().global;
@@ -120,14 +128,21 @@ module.exports = function (RED) {
           'zh': 'Chinese',
           'ko': 'Korean',
           'pt': 'Portuguese',
-          'de': 'German'
+          'de': 'German',
+          'ja': 'Japanese',
+          'nl': 'Dutch',
+          'pl': 'Polish',
+          'ru': 'Russian',
+          'tr': 'Turkish',
+          'zh-TW' : 'Taiwanese',
+          'zht': 'Traditional Chinese'
         };
         return langs[string];
       }
       // ---- END OF UTILITY FUNCTIONS ----
 
       if (lt) {
-        lt.getModels({},function (err, models ){
+        lt.listModels({},function (err, models ){
           if (err) {
             node.error(err,msg);
           } else {
@@ -223,7 +238,8 @@ module.exports = function (RED) {
   RED.nodes.registerType('watson-translator-util', SMTNode, {
     credentials: {
       username: {type:'text'},
-      password: {type:'password'}
+      password: {type:'password'},
+      apikey: {type:'password'}
     }
   });
 };
