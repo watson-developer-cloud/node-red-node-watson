@@ -23,7 +23,18 @@ const request = require('request');
 
 class IAMUtils {
 
-  constructor() {
+  constructor(key) {
+    this._key = key;
+  }
+
+  getToken(cb) {
+    IAMUtils.getIAMToken(this._key)
+    .then((token) => {
+      cb(null, token);
+    })
+    .catch((err) => {
+      cb(err, null);
+    });
   }
 
   static stashToken(key, tokenInfo) {
@@ -96,6 +107,7 @@ class IAMUtils {
     });
     return p;
   }
+
 
   static getIAMToken(key) {
     var p = new Promise(function resolver(resolve, reject){

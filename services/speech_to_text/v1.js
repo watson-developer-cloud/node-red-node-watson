@@ -272,17 +272,21 @@ module.exports = function (RED) {
     function getService() {
       var p = new Promise(function resolver(resolve, reject){
         let sttService = determineService();
-        if (apikey) {
-          sttService.preAuthenticate((ready) => {
-            if (!ready) {
-              reject('Service is not ready');
-            } else {
-              resolve(sttService);
-            }
-          });
-        } else {
-          resolve(sttService);
-        }
+        // preAuthenticate was a temp fix, but now that we are
+        // processing IAM Keys directly, no need for this, but
+        // we will keep the commented out code for now, as we
+        // may come back to this.
+        // if (apikey) {
+        //   sttService.preAuthenticate((ready) => {
+        //     if (!ready) {
+        //       reject('Service is not ready');
+        //     } else {
+        //       resolve(sttService);
+        //     }
+        //   });
+        // } else {
+        resolve(sttService);
+        // }
       });
       return p;
     }
@@ -298,7 +302,9 @@ module.exports = function (RED) {
         // creds.iamApikey = apikey;
         // console.log('Creating token with endpoint ', endpoint);
         // tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey, iamUrl: endpoint});
+
         tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey});
+        //tokenService = new iamutils(apikey);
 
       } else {
         // console.log('Standard Key');
@@ -336,7 +342,7 @@ module.exports = function (RED) {
       let requestSettings = {
         qs : cloneQS(params),
         method : 'POST',
-        uri : endpoint + '/recognize',
+        uri : endpoint + '/v1/recognize',
         headers : {
           //Authorization: "Bearer " + t,
           'Content-Type': params.content_type,
@@ -356,7 +362,7 @@ module.exports = function (RED) {
     function executePostRequest(requestSettings) {
       var p = new Promise(function resolver(resolve, reject){
         request(requestSettings, (error, response, body) => {
-          console.log('--------- request has been executed ---------------');
+          //console.log('--------- request has been executed ---------------');
 
           if (!error && response.statusCode == 200) {
             data = JSON.parse(body);
@@ -371,6 +377,8 @@ module.exports = function (RED) {
                    errordata.errors.length &&
                    errordata.errors[0].message) {
               reject('Error ' + response.statusCode + ' ' + errordata.errors[0].message);
+            } else if (errordata.error) {
+              reject('Error performing request ' + errordata.error);
             } else {
               reject('Error performing request ' + response.statusCode);
             }
@@ -392,7 +400,6 @@ module.exports = function (RED) {
             return buildRequestSettings(params, t);
           })
           .then((requestSettings) => {
-            //console.log('Request parameters look like ', requestSettings);
             return executePostRequest(requestSettings);
           })
           .then((data) => {
@@ -430,13 +437,23 @@ module.exports = function (RED) {
         }
 
         // Everything is now in place to invoke the service
-        speech_to_text.recognize(params, function (err, res) {
-          if (err) {
+        if (apikey) {
+          iamRecognize(params)
+          .then((data) => {
+            resolve(data);
+          })
+          .catch((err) => {
             reject(err);
-          } else {
-            resolve(res);
-          }
+          })
+        } else {
+          speech_to_text.recognize(params, function (err, res) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
         });
+        }
 
       });
       return p;
@@ -466,7 +483,7 @@ module.exports = function (RED) {
               tokenPending = false;
               tokenTime = now;
               token = res;
-              // console.log('We have the token ', token);
+              //console.log('We have the token ', token);
               resolve();
             }
           });
@@ -495,7 +512,7 @@ module.exports = function (RED) {
                              + '?watson-token=' + token + '&model=' + model;
         }
 
-        // console.log('wsURI is : ', wsURI);
+        //console.log('wsURI is : ', wsURI);
 
         if (!websocket && !socketCreationInProcess) {
           socketCreationInProcess = true;
