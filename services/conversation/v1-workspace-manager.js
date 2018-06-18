@@ -27,7 +27,8 @@ module.exports = function (RED) {
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
-    endpoint = '', sEndpoint = '';
+    endpoint = '', sEndpoint = '',
+    version = '2018-02-16';
 
   if (!service) {
     service = serviceutils.getServiceCreds(OLD_SERVICE_IDENTIFIER);
@@ -504,10 +505,11 @@ module.exports = function (RED) {
   }
 
   function executeMethod(node, method, params, msg) {
-    var conv = null,
+    let conv = null,
+      version = '2018-02-16',
       serviceSettings = {
-        version_date: '2018-02-16',
-        version: '2018-02-16',
+        version_date: version,
+        version: version,
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
@@ -523,6 +525,8 @@ module.exports = function (RED) {
     if (endpoint) {
       serviceSettings.url = endpoint;
     }
+
+
 
     conv = new AssistantV1(serviceSettings);
 
@@ -1099,6 +1103,9 @@ module.exports = function (RED) {
         }
         if (msg.params.apikey) {
           apikey = msg.params.apikey;
+        }
+        if (msg.params.version) {
+          version = msg.params.version;
         }
       }
       endpoint = sEndpoint;
