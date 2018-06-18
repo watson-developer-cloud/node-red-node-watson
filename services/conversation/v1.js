@@ -166,71 +166,71 @@ module.exports = function(RED) {
       optoutLearning = false,
       version = '2018-02-16';
 
-    if (verifyCredentials(msg, apiKey, userName, passWord)) {
-      if (msg.params) {
-        if (msg.params.username) {
-          userName = msg.params.username;
-        }
-        if (msg.params.password) {
-          passWord = msg.params.password;
-        }
-        if (msg.params.apikey) {
-          apiKey = msg.params.apikey;
-        }
-        if (msg.params.version) {
-          version = msg.params.version;
-        }
-      }
-
-      if (apiKey) {
-        serviceSettings.iam_apikey = apiKey;
-      } else {
-        serviceSettings.username = userName;
-        serviceSettings.password = passWord;
-      }
-
-      serviceSettings.version = version;
-      serviceSettings.version_date = version;
-
-      if (service) {
-        endpoint = service.url;
-      }
-      if (!config['default-endpoint'] && config['service-endpoint']) {
-        endpoint = config['service-endpoint'];
-      }
-      if (msg.params && msg.params.endpoint) {
-        endpoint = msg.params.endpoint;
-      }
-
-      if (endpoint) {
-        serviceSettings.url = endpoint;
-      }
-
-      if ((msg.params && msg.params['optout_learning'])){
-        optoutLearning = true;
-      } else if (config['optout-learning']){
-        optoutLearning = true;
-      }
-
-      if (optoutLearning){
-        serviceSettings.headers = serviceSettings.headers || {};
-        serviceSettings.headers['X-Watson-Learning-Opt-Out'] = '1';
-      }
-
-      if (config['timeout'] && config['timeout'] !== '0' && isFinite(config['timeout'])){
-        serviceSettings.timeout = parseInt(config['timeout']);
-      }
-
-      if (msg.params && msg.params.timeout !== '0' && isFinite(msg.params.timeout)){
-        serviceSettings.timeout = parseInt(msg.params.timeout);
-      }
-
-      node.service = new AssistantV1(serviceSettings);
-      return true;
-    } else {
+    if (!verifyCredentials(msg, apiKey, userName, passWord)) {
       node.error('Missing Watson Assistant API service credentials');
       return false;
     }
+
+    if (msg.params) {
+      if (msg.params.username) {
+        userName = msg.params.username;
+      }
+      if (msg.params.password) {
+        passWord = msg.params.password;
+      }
+      if (msg.params.apikey) {
+        apiKey = msg.params.apikey;
+      }
+      if (msg.params.version) {
+        version = msg.params.version;
+      }
+    }
+
+    if (apiKey) {
+      serviceSettings.iam_apikey = apiKey;
+    } else {
+      serviceSettings.username = userName;
+      serviceSettings.password = passWord;
+    }
+
+    serviceSettings.version = version;
+    serviceSettings.version_date = version;
+
+    if (service) {
+      endpoint = service.url;
+    }
+    if (!config['default-endpoint'] && config['service-endpoint']) {
+      endpoint = config['service-endpoint'];
+    }
+    if (msg.params && msg.params.endpoint) {
+      endpoint = msg.params.endpoint;
+    }
+
+    if (endpoint) {
+      serviceSettings.url = endpoint;
+    }
+
+    if ((msg.params && msg.params['optout_learning'])){
+      optoutLearning = true;
+    } else if (config['optout-learning']){
+      optoutLearning = true;
+    }
+
+    if (optoutLearning){
+      serviceSettings.headers = serviceSettings.headers || {};
+      serviceSettings.headers['X-Watson-Learning-Opt-Out'] = '1';
+    }
+
+    if (config['timeout'] && config['timeout'] !== '0' && isFinite(config['timeout'])){
+      serviceSettings.timeout = parseInt(config['timeout']);
+    }
+
+    if (msg.params && msg.params.timeout !== '0' && isFinite(msg.params.timeout)){
+      serviceSettings.timeout = parseInt(msg.params.timeout);
+    }
+
+    node.service = new AssistantV1(serviceSettings);
+    return true;
   }
 
   function processResponse(err, body, node, msg, config) {
