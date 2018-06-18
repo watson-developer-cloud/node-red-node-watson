@@ -86,37 +86,38 @@
 
 
 <script type="text/x-red" data-help-name="watson-conversation-v1">
-	<p>With the IBM Watson™ Conversation service you can create cognitive agents – virtual agents that combine machine learning, natural language understanding, and integrated dialog scripting tools to provide outstanding customer engagements.</p>
+	<p>With the IBM Watson™ Assistant service you can create cognitive agents – virtual agents that combine machine learning, natural language understanding, and integrated dialog scripting tools to provide outstanding customer engagements.</p>
 
     <p><b>Usage</b></p>
     <p>This node should be provided in input : </p>
     <ul>
-    <li><code>msg.payload</code> : the message of the conversation to analyse. Format: String </li>
-    <li><code>msg.user</code> (optional): unique identifier of the user. This will be used to maintain the context of the conversation for each user when using with multiple users. Format: String </li>
+    <li><code>msg.payload</code> : the message of the Assistant to analyse. Format: String </li>
+    <li><code>msg.user</code> (optional): unique identifier of the user. This will be used to maintain the context of the Assistant for each user when using with multiple users. Format: String </li>
     <li><code>msg.params.workspace_id</code> : unique identifier of the workspace to be used. Could be also configured in the node. Format: String </li>
     <li><code>msg.params.timeout</code> (optional): The timeout period (in millisecond) for Watson request. Leave empty or set to 0 to disable. </li>
-    <li><code>msg.params.context</code> (optional): A context object that includes state information for the conversation. When you send multiple requests for the same conversation, include the context object from the response. (<a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">documentation</a>). This will overwrite any context saved in the node. Format: JSON </li>
+    <li><code>msg.params.context</code> (optional): A context object that includes state information for the Assistant. When you send multiple requests for the same Assistant, include the context object from the response. (<a href="http://www.ibm.com/watson/developercloud/assistant/api/v1/#send_input" target="_blank">documentation</a>). This will overwrite any context saved in the node. Format: JSON </li>
     <li><code>msg.params.alternate_intents</code> (optional) : whether to return more than one intent. Default is false. Set to true to return all matching intents. For example, return all intents when the confidence is not high to allow users to choose their intent.</li>
     <li><code>msg.params.output</code> (optional) : see API documentation </li>
     <li><code>msg.params.entities</code> (optional) : see API documentation </li>
     <li><code>msg.params.output</code> (optional) : see API documentation </li>
     <li><code>msg.additional_context</code> (optional) : additional properties that will be added to the context object. Format: Object </li>
     <br/>
-    <li><code>msg.params.username</code> : If provided will be used as the username credential for the Conversation service.</li>
-    <li><code>msg.params.password</code> : If provided will be used as the password credential for the Conversation service.</li>
-    <li><code>msg.params.apikey</code> : If provided will be used as the api key credential for the Conversation service.</li>
-    <li><code>msg.params.endpoint</code> : If provided will be used as the url for the Conversation service.</li>
+    <li><code>msg.params.username</code> : If provided will be used as the username credential for the Assistant service.</li>
+    <li><code>msg.params.password</code> : If provided will be used as the password credential for the Assistant service.</li>
+    <li><code>msg.params.apikey</code> : If provided will be used as the api key credential for the Assistant service.</li>
+    <li><code>msg.params.endpoint</code> : If provided will be used as the url for the Assistant service.</li>
+    <li><code>msg.params.version</code> : If provided will be used as the API version date for the Assistant service.</li>
     <li><code>msg.params.optout_learning</code> : Set to true to opt out of request logging. Check the <a href="https://console.bluemix.net/docs/services/watson/getting-started-logging.html#controlling-request-logging-for-watson-services" target="_blank">documentation</a> for details.</li>
     </ul>
-    <p>See <a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">Conversation API documentation</a> for details.</p>
-    <p>All Results will made available at <code>msg.payload</code> in JSON format. Check the  <a href="http://www.ibm.com/watson/developercloud/conversation/api/v1/#send_input" target="_blank">documentation</a> for details.</p>
+    <p>See <a href="http://www.ibm.com/watson/developercloud/assistant/api/v1/#send_input" target="_blank">Assistant API documentation</a> for details.</p>
+    <p>All Results will made available at <code>msg.payload</code> in JSON format. Check the  <a href="http://www.ibm.com/watson/developercloud/assistant/api/v1/#send_input" target="_blank">documentation</a> for details.</p>
 
-    <p><b>Important</b> : before using this node, a workspace must be created and configured using the Watson Conversation Tool available in IBM Cloud, in the Watson Conversation instance detail page.</p>
+    <p><b>Important</b> : before using this node, a workspace must be created and configured using the Watson Assistant Tool available in IBM Cloud, in the Watson Assistant instance detail page.</p>
     <p><b>Documentation</b>
     <ul>
-    <li><a href="https://console.bluemix.net/docs/services/conversation/index.html" target="_blank">Watson Conversation API documentation</a></li>
-    <li><a href="https://watson-api-explorer.mybluemix.net/apis/conversation-v1" target="_blank">Watson API Explorer</a></li>
-    <li><a href="https://console.bluemix.net/docs/services/conversation/getting-started.html" target="_blank">Getting started tutorial</a>
+    <li><a href="https://console.bluemix.net/docs/services/assistant/index.html" target="_blank">Watson Assistant API documentation</a></li>
+    <li><a href="https://watson-api-explorer.mybluemix.net/apis/assistant-v1" target="_blank">Watson API Explorer</a></li>
+    <li><a href="https://console.bluemix.net/docs/services/assistant/getting-started.html" target="_blank">Getting started tutorial</a>
     <li><a href="https://github.com/watson-developer-cloud/node-red-bluemix-starter" target="_blank">Sample Flow in the Watson Node-RED Starter</a>
     </ul>
 </script>

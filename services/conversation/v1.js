@@ -136,6 +136,17 @@ module.exports = function(RED) {
     return true;
   }
 
+  function verifyCredentials(msg, k, u, p) {
+    if ( !(k) && (!(u) || !(p)) ) {
+      if ( (!msg.params) ||
+            (!(msg.params.apikey) &&
+               (!(msg.params.username) || !(msg.params.password))) ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 
   function verifyServiceCredentials(node, msg, config) {
     // If it is present the newly provided user entered key
@@ -143,84 +154,83 @@ module.exports = function(RED) {
     // If msg.params contain credentials then these will Overridde
     // the bound or configured credentials.
     const serviceSettings = {
-      version_date: '2018-02-16',
-      version: '2018-02-16',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
     };
 
-    var userName = sUsername || node.credentials.username,
+    let userName = sUsername || node.credentials.username,
       passWord = sPassword || node.credentials.password,
       apiKey = sApikey || node.credentials.apikey,
       endpoint = '',
-      optoutLearning = false;
+      optoutLearning = false,
+      version = '2018-02-16';
 
-    if ( !(apiKey) && (!(userName) || !(passWord)) ) {
-      if ( (!msg.params) ||
-            (!(msg.params.apikey) &&
-               (!(msg.params.username) || !(msg.params.password))) ) {
-        node.status({
-          fill: 'red',
-          shape: 'ring',
-          text: 'missing credentials'
-        });
-        node.error('Missing Watson Conversation API service credentials', msg);
-        return false;
+    if (verifyCredentials(msg, apiKey, userName, passWord)) {
+      if (msg.params) {
+        if (msg.params.username) {
+          userName = msg.params.username;
+        }
+        if (msg.params.password) {
+          passWord = msg.params.password;
+        }
+        if (msg.params.apikey) {
+          apiKey = msg.params.apikey;
+        }
+        if (msg.params.version) {
+          version = msg.params.version;
+        }
       }
-    }
 
-    if (msg.params) {
-      if (msg.params.username) {
-        userName = msg.params.username;
+      if (apiKey) {
+        serviceSettings.iam_apikey = apiKey;
+      } else {
+        serviceSettings.username = userName;
+        serviceSettings.password = passWord;
       }
-      if (msg.params.password) {
-        passWord = msg.params.password;
+
+      serviceSettings.version = version;
+      serviceSettings.version_date = version;
+
+      if (service) {
+        endpoint = service.url;
       }
-      if (msg.params.apikey) {
-        apiKey = msg.params.apikey;
+      if (!config['default-endpoint'] && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
       }
-    }
+      if (msg.params && msg.params.endpoint) {
+        endpoint = msg.params.endpoint;
+      }
 
-    serviceSettings.username = userName;
-    serviceSettings.password = passWord;
-    serviceSettings.iam_apikey = apiKey;
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
 
-    if (service) {
-      endpoint = service.url;
-    }
-    if (!config['default-endpoint'] && config['service-endpoint']) {
-      endpoint = config['service-endpoint'];
-    }
-    if (msg.params && msg.params.endpoint) {
-      endpoint = msg.params.endpoint;
-    }
+      if ((msg.params && msg.params['optout_learning'])){
+        optoutLearning = true;
+      } else if (config['optout-learning']){
+        optoutLearning = true;
+      }
 
-    if (endpoint) {
-      serviceSettings.url = endpoint;
-    }
+      if (optoutLearning){
+        serviceSettings.headers = serviceSettings.headers || {};
+        serviceSettings.headers['X-Watson-Learning-Opt-Out'] = '1';
+      }
 
-    if ((msg.params && msg.params['optout_learning'])){
-      optoutLearning = true;
-    } else if (config['optout-learning']){
-      optoutLearning = true;
-    }
+      if (config['timeout'] && config['timeout'] !== '0' && isFinite(config['timeout'])){
+        serviceSettings.timeout = parseInt(config['timeout']);
+      }
 
-    if (optoutLearning){
-      serviceSettings.headers = serviceSettings.headers || {};
-      serviceSettings.headers['X-Watson-Learning-Opt-Out'] = '1';
-    }
+      if (msg.params && msg.params.timeout !== '0' && isFinite(msg.params.timeout)){
+        serviceSettings.timeout = parseInt(msg.params.timeout);
+      }
 
-    if (config['timeout'] && config['timeout'] !== '0' && isFinite(config['timeout'])){
-      serviceSettings.timeout = parseInt(config['timeout']);
+      node.service = new AssistantV1(serviceSettings);
+      return true;
+    } else {
+      node.error('Missing Watson Assistant API service credentials');
+      return false;
     }
-
-    if (msg.params && msg.params.timeout !== '0' && isFinite(msg.params.timeout)){
-      serviceSettings.timeout = parseInt(msg.params.timeout);
-    }
-
-    node.service = new AssistantV1(serviceSettings);
-    return true;
   }
 
   function processResponse(err, body, node, msg, config) {
