@@ -136,6 +136,17 @@ module.exports = function(RED) {
     return true;
   }
 
+  function verifyCredentials(msg, k, u, p) {
+    if ( !(k) && (!(u) || !(p)) ) {
+      if ( (!msg.params) ||
+            (!(msg.params.apikey) &&
+               (!(msg.params.username) || !(msg.params.password))) ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 
   function verifyServiceCredentials(node, msg, config) {
     // If it is present the newly provided user entered key
@@ -143,31 +154,21 @@ module.exports = function(RED) {
     // If msg.params contain credentials then these will Overridde
     // the bound or configured credentials.
     const serviceSettings = {
-      version_date: '2018-02-16',
-      version: '2018-02-16',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
     };
 
-    var userName = sUsername || node.credentials.username,
+    let userName = sUsername || node.credentials.username,
       passWord = sPassword || node.credentials.password,
       apiKey = sApikey || node.credentials.apikey,
       endpoint = '',
-      optoutLearning = false;
+      optoutLearning = false,
+      version = '2018-02-16';
 
-    if ( !(apiKey) && (!(userName) || !(passWord)) ) {
-      if ( (!msg.params) ||
-            (!(msg.params.apikey) &&
-               (!(msg.params.username) || !(msg.params.password))) ) {
-        node.status({
-          fill: 'red',
-          shape: 'ring',
-          text: 'missing credentials'
-        });
-        node.error('Missing Watson Conversation API service credentials', msg);
-        return false;
-      }
+    if (!verifyCredentials(msg, apiKey, userName, passWord)) {
+      node.error('Missing Watson Assistant API service credentials');
+      return false;
     }
 
     if (msg.params) {
@@ -180,11 +181,20 @@ module.exports = function(RED) {
       if (msg.params.apikey) {
         apiKey = msg.params.apikey;
       }
+      if (msg.params.version) {
+        version = msg.params.version;
+      }
     }
 
-    serviceSettings.username = userName;
-    serviceSettings.password = passWord;
-    serviceSettings.iam_apikey = apiKey;
+    if (apiKey) {
+      serviceSettings.iam_apikey = apiKey;
+    } else {
+      serviceSettings.username = userName;
+      serviceSettings.password = passWord;
+    }
+
+    serviceSettings.version = version;
+    serviceSettings.version_date = version;
 
     if (service) {
       endpoint = service.url;
