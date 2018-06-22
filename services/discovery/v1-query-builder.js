@@ -82,13 +82,9 @@ module.exports = function(RED) {
                                          sApikey ? sApikey : req.query.key,
                                          req.query.endpoint ? req.query.endpoint : sEndpoint);
 
-    discovery.query({
+    discovery.listCollectionFields({
       environment_id: req.query.environment_id,
-      collection_id: req.query.collection_id,
-      //query: 'text:a,text:ibm',
-      // Need a Query that will return some data!
-      query: 'text:"Trump",text:"IBM",text:"Watson"',
-      count: 1
+      collection_id: req.query.collection_id
     },
       function(err, response) {
         if (err) {
