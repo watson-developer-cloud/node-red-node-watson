@@ -12,6 +12,7 @@ Node-RED Watson Nodes for IBM Cloud
 - Bump Assistant version to 2018-09-20
 - Bump Discovery version to 2018-08-01
 - Discovery New Environment Size is now a string
+- Add Language Text to DropDrown for new supported languages in Translation Node.
 
 ### New in version 0.7.3
 - Modify Discovery Query Builder Node to use `listCollectionFields` to determine query list.
