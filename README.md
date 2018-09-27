@@ -9,6 +9,7 @@ Node-RED Watson Nodes for IBM Cloud
 
 ### New in version 0.7.4
 - Bump SDK Dependency to 3.11.0
+- Bump Assistant version to 2018-09-20
 
 ### New in version 0.7.3
 - Modify Discovery Query Builder Node to use `listCollectionFields` to determine query list.
