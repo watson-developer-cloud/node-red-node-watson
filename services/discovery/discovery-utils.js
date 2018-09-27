@@ -308,18 +308,23 @@ DiscoveryUtils.prototype = {
   // Looking for Text, Type and label
   buildFieldList: function(schemaData) {
     var fields = [];
-    if ('object' === typeof schemaData) {
-      for (var k in schemaData) {
-        if ('results' === k &&
-          'object' === typeof schemaData[k] &&
-          'object' === typeof schemaData[k][0]) {
-          fields = this.buildFieldByStep(schemaData[k][0], fields, '');
+
+    if (schemaData &&
+           'object' === typeof schemaData &&
+           schemaData['fields'] &&
+            Array.isArray(schemaData['fields'])) {
+      schemaData['fields'].forEach((f) => {
+        if (f['field'] && f['type'] && 'nested' !== f['type']) {
+          fields.push(f['field']);
         }
-      }
-      if (fields.length) {
-        fields = fields.filter(this.uniqueFilter);
-      }
+      });
+
     }
+
+    if (fields.length) {
+      fields = fields.filter(this.uniqueFilter);
+    }
+
     return fields;
   },
 
