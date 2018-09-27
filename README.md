@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.7.4
+- Bump SDK Dependency to 3.11.0
+
 ### New in version 0.7.3
 - Modify Discovery Query Builder Node to use `listCollectionFields` to determine query list.
 
