@@ -35,10 +35,10 @@ module.exports = function(RED) {
     sEndpoint = 'https://gateway.watsonplatform.net/natural-language-classifier/api';
 
   if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
-    sEndpoint = service.url;
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
+    sEndpoint = service.url;
   }
 
   temp.track();
@@ -220,7 +220,7 @@ module.exports = function(RED) {
           if (err) {
             reject(err);
           } else {
-            console.log(response);
+            //console.log(response);
             switch (mode) {
             case 'classify':
               msg.payload = {

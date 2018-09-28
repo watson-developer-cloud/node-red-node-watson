@@ -36,9 +36,10 @@ module.exports = function (RED) {
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
+    apikey = null,
     sUsername = null,
     sPassword = null,
-    apikey = null,
+    sApikey = null,
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/natural-language-understanding/api';
 
@@ -48,11 +49,9 @@ module.exports = function (RED) {
     node.error(message, msg);
   }
 
-  function initialCheck(u, p, a) {
-    if (!u || !p) {
-      if(!a){
-        return Promise.reject('Missing Watson Natural Language Understanding service credentials');
-      }
+  function initialCheck(u, p, k) {
+    if (!k && (!u || !p)) {
+      return Promise.reject('Missing Watson Natural Language Understanding service credentials');
     }
     return Promise.resolve();
   }
@@ -184,14 +183,18 @@ module.exports = function (RED) {
   function invokeService(options) {
     var nlu = null,
       serviceSettings = {
-        username: username,
-        password: password,
         version: '2018-09-21',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
-        },
-        iam_apikey: apikey,
+        }
       };
+
+    if (apikey) {
+      serviceSettings.iam_apikey = apikey;
+    } else {
+      serviceSettings.username = username;
+      serviceSettings.password = password;
+    }
 
     if (endpoint) {
       serviceSettings.url = endpoint;
@@ -212,8 +215,9 @@ module.exports = function (RED) {
   }
 
   if (service) {
-    sUsername = service.username;
-    sPassword = service.password;
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
+    sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
 
@@ -236,7 +240,7 @@ module.exports = function (RED) {
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
-      apikey = this.credentials.apikey;
+      apikey = sApikey || this.credentials.apikey;
 
       endpoint = sEndpoint;
       if ((!config['default-endpoint']) && config['service-endpoint']) {
@@ -271,7 +275,6 @@ module.exports = function (RED) {
 
     });
   }
-
 
   //Register the node as natural-language-understanding to nodeRED
   RED.nodes.registerType('natural-language-understanding', NLUNode, {
