@@ -12,6 +12,7 @@ Node-RED Watson Nodes for IBM Cloud
 - Bump Assistant version to 2018-09-20
 - Bump Discovery version to 2018-08-01
 - Bump Natural Language Understanding to 2018-09-21
+- Bump Personality Insights to 2017-10-13
 - Discovery New Environment Size is now a string
 - Add Language Text to DropDrown for new supported languages in Translation Node.
 - Natural Language Classifier updated for use of IAM key for authentication.
