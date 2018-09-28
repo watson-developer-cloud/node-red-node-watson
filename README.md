@@ -17,6 +17,7 @@ Node-RED Watson Nodes for IBM Cloud
 - Add Language Text to DropDrown for new supported languages in Translation Node.
 - Natural Language Classifier updated for use of IAM key for authentication.
 - Fix the Natural Language Understanding for bound IAM key service.
+- German is a supported STT Language.
 
 ### New in version 0.7.3
 - Modify Discovery Query Builder Node to use `listCollectionFields` to determine query list.
