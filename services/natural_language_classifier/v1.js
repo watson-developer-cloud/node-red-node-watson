@@ -27,8 +27,10 @@ module.exports = function(RED) {
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
+    apikey = null,
     sUsername = null,
     sPassword = null,
+    sApikey = null,
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/natural-language-classifier/api';
 
@@ -36,6 +38,7 @@ module.exports = function(RED) {
     sUsername = service.username;
     sPassword = service.password;
     sEndpoint = service.url;
+    sApikey = service.apikey ? service.apikey : '';
   }
 
   temp.track();
@@ -57,13 +60,14 @@ module.exports = function(RED) {
     node.verifyCredentials = function(msg) {
       username = sUsername || node.credentials.username;
       password = sPassword || node.credentials.password;
+      apikey = sApikey || node.credentials.apikey;
 
       endpoint = sEndpoint;
       if ((!config['default-endpoint']) && config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
-      if (!username || !password) {
+      if (!apikey && (!username || !password)) {
         return Promise.reject('Missing Natural Language Classifier credentials');
       } else {
         return Promise.resolve();
@@ -188,13 +192,18 @@ module.exports = function(RED) {
       var p = new Promise(function resolver(resolve, reject) {
         var natural_language_classifier = null,
           serviceSettings = {
-            username: username,
-            password: password,
             version: 'v1',
             headers: {
               'User-Agent': pkg.name + '-' + pkg.version
             }
           };
+
+        if (apikey) {
+          serviceSettings.iam_apikey = apikey;
+        } else {
+          serviceSettings.username = username;
+          serviceSettings.password = password;
+        }
 
         if (endpoint) {
           serviceSettings.url = endpoint;
@@ -278,12 +287,9 @@ module.exports = function(RED) {
   }
   RED.nodes.registerType('watson-natural-language-classifier', Node, {
     credentials: {
-      username: {
-        type: 'text'
-      },
-      password: {
-        type: 'password'
-      }
+      username: {type: 'text'},
+      password: {type: 'password'},
+      apikey: {type:'password'}
     }
   });
 };
