@@ -148,8 +148,18 @@
     </div>
     <div class="form-row">
       <label for="node-input-size">Envrionment Size</label>
-      <input type="number" min="0" max="4"
-             id="node-input-size" />
+      <select type="text" id="node-input-size" style="display: inline-block; width: 70%;">
+        <option value="LT">LT</option>
+        <option value="XS">XS</option>
+        <option value="S">S</option>
+        <option value="MS">MS</option>
+        <option value="M">M</option>
+        <option value="ML">ML</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+        <option value="XXL">XXL</option>
+        <option value="XXXL">XXXL</option>
+      </select>
     </div>
 
 </script>
@@ -464,7 +474,7 @@
                 aggregation: {value: ''},
                 return: {value: ''},
                 description: {value: ''},
-                size: {value: 0},
+                size: {value: 'LT'},
                 'discovery-method': {value:'query'},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://gateway.watsonplatform.net/discovery/api'}

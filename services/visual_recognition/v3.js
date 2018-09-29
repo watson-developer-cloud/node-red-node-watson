@@ -40,6 +40,7 @@ module.exports = function(RED) {
     async = require('async'),
     toArray = require('stream-to-array'),
     sAPIKey = null,
+    apikey = '',
     iamAPIKey = false,
     service = null,
     endpoint = '',
@@ -152,8 +153,8 @@ module.exports = function(RED) {
   function verifyServiceCredentials(node, msg) {
     // If it is present the newly provided user entered key
     // takes precedence over the existing one.
-    node.apikey = sAPIKey || node.credentials.apikey;
-    if (!node.apikey) {
+    apikey = sAPIKey || node.credentials.apikey;
+    if (!apikey) {
       return Promise.reject('Missing Watson Visual Recognition API service credentials');
     }
 
@@ -170,9 +171,9 @@ module.exports = function(RED) {
 
     // VR instances created post 22 May 2018, are expecting an iam API Key
     if (iamAPIKey) {
-      serviceSettings.iam_apikey = node.apikey;
+      serviceSettings.iam_apikey = apikey;
     } else {
-      serviceSettings.api_key = node.apikey;
+      serviceSettings.api_key = apikey;
     }
 
     // The change to watson-developer-cloud 3.0.x has resulted in a

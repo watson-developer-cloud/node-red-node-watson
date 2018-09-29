@@ -21,7 +21,7 @@ DiscoveryUtils.prototype = {
 
   buildService: function(username, password, apikey, endpoint) {
     let serviceSettings = {
-      version_date: '2018-03-05',
+      version_date: '2018-08-01',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }

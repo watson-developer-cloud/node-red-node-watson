@@ -28,7 +28,7 @@ module.exports = function (RED) {
     username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
     endpoint = '', sEndpoint = '',
-    version = '2018-02-16';
+    version = '2018-09-20';
 
   if (!service) {
     service = serviceutils.getServiceCreds(OLD_SERVICE_IDENTIFIER);
@@ -506,7 +506,7 @@ module.exports = function (RED) {
 
   function executeMethod(node, method, params, msg) {
     let conv = null,
-      version = '2018-02-16',
+      version = '2018-09-20',
       serviceSettings = {
         version_date: version,
         version: version,

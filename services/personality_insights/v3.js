@@ -127,7 +127,7 @@ module.exports = function (RED) {
     var p = new Promise(function resolver(resolve, reject) {
       var personality_insights = null,
         serviceSettings = {
-          version_date: '2016-10-20',
+          version_date: '2017-10-13',
           headers: {
             'User-Agent': pkg.name + '-' + pkg.version
           }
