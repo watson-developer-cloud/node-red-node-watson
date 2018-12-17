@@ -51,7 +51,7 @@ A collection of nodes to interact with the IBM Watson services in [IBM Cloud](ht
 
 # Nodes
 
-- Conversation
+- Assistant (formerly Conversation)
     - Add conversational capabilities into applications.
 - Discovery
     - List environments created for the Discovery service

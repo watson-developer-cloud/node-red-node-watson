@@ -229,6 +229,10 @@ module.exports = function(RED) {
       serviceSettings.timeout = parseInt(msg.params.timeout);
     }
 
+    if (msg.params && msg.params.disable_ssl_verification){
+      serviceSettings.disable_ssl_verification = true;
+    }
+
     node.service = new AssistantV1(serviceSettings);
     return true;
   }
