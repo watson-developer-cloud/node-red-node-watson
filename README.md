@@ -11,6 +11,11 @@ Node-RED Watson Nodes for IBM Cloud
 - Bump SDK Dependency to 3.15.0
 - Added Portuguese (Brazilian) and Chinese (Simplified and Traditional) as output languages
 for Visual Recognition node.
+- Added list voices and delete customisation methods to TTS Corpus Builder node.
+- Allowing SDK to manage IAM Tokens for STT Node.
+- Streaming mode for STT using IAM key now working
+- Allow Start and End data packets to be specified as JSON objects, as well as
+a stringified JSON objects.
 - Disable SSL Verification option for Assistant Node.
 
 ### New in version 0.7.4

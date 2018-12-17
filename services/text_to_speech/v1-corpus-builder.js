@@ -72,6 +72,18 @@ module.exports = function (RED) {
     });
   }
 
+  function executeListVoices(node, tts, params, msg) {
+    tts.listVoices(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['voices'] = response.voices ? response.voices: response;
+      }
+      node.send(msg);
+    });
+  }
+
   function executeGetCustomisation(node, tts, params, msg) {
     tts.getVoiceModel(params, function (err, response) {
       node.status({});
@@ -79,6 +91,18 @@ module.exports = function (RED) {
         payloadutils.reportError(node, msg, err);
       } else {
         msg['customization'] = response ;
+      }
+      node.send(msg);
+    });
+  }
+
+  function executeDeleteCustomisation(node, tts, params, msg) {
+    tts.deleteVoiceModel(params, function (err, response) {
+      node.status({});
+      if (err) {
+        payloadutils.reportError(node, msg, err);
+      } else {
+        msg['response'] = response ;
       }
       node.send(msg);
     });
@@ -152,8 +176,14 @@ module.exports = function (RED) {
     case 'listCustomisations':
       executeListCustomisations(node, tts, params, msg);
       break;
+    case 'listVoices':
+      executeListVoices(node, tts, params, msg);
+      break;
     case 'getCustomisation':
       executeGetCustomisation(node, tts, params, msg);
+      break;
+    case 'deleteCustomisation':
+      executeDeleteCustomisation(node, tts, params, msg);
       break;
     case 'getPronounce':
       executeGetPronounce(node, tts, params, msg);
@@ -282,8 +312,9 @@ module.exports = function (RED) {
         params['word'] = config['tts-custom-word'];
       }
     // No break here as want the custom id also
-    case 'listCustomisations':
+    //case 'listCustomisations':
     case 'getCustomisation':
+    case 'deleteCustomisation':
     case 'addWords':
     case 'getWords':
       if (config['tts-custom-id']) {

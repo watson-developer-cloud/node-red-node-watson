@@ -241,8 +241,9 @@ module.exports = function (RED) {
 
       if ('string' === typeof msg.payload) {
         msg.payload = JSON.parse(tmp);
-        if ( msg.payload.action &&
-                'start' === msg.payload.action) {
+      }
+      if (msg.payload.action) {
+        if ('start' === msg.payload.action) {
           startPacket = msg.payload;
         }
       } else {
@@ -307,7 +308,6 @@ module.exports = function (RED) {
         //tokenService = new iamutils(apikey);
 
       } else {
-        // console.log('Standard Key');
         tokenService = new AuthV1(stt.getCredentials());
       }
 
@@ -338,79 +338,6 @@ module.exports = function (RED) {
       return clone;
     }
 
-    function buildRequestSettings(params, t) {
-      let requestSettings = {
-        qs : cloneQS(params),
-        method : 'POST',
-        uri : endpoint + '/v1/recognize',
-        headers : {
-          //Authorization: "Bearer " + t,
-          'Content-Type': params.content_type,
-          'User-Agent': pkg.name + '-' + pkg.version,
-          'Accept': 'application/json',
-        },
-        iam_apikey: apikey,
-        auth: {
-          'bearer': t
-        },
-        body : params.audio
-      };
-
-      return Promise.resolve(requestSettings);
-    }
-
-    function executePostRequest(requestSettings) {
-      var p = new Promise(function resolver(resolve, reject){
-        request(requestSettings, (error, response, body) => {
-          //console.log('--------- request has been executed ---------------');
-
-          if (!error && response.statusCode === 200) {
-            let data = JSON.parse(body);
-            resolve(data);
-          } else if (error) {
-            reject(error);
-          } else {
-            let errordata = JSON.parse(body);
-            console.log(errordata);
-            if (errordata.errors &&
-                   Array.isArray(errordata.errors) &&
-                   errordata.errors.length &&
-                   errordata.errors[0].message) {
-              reject('Error ' + response.statusCode + ' ' + errordata.errors[0].message);
-            } else if (errordata.error) {
-              reject('Error performing request ' + errordata.error);
-            } else {
-              reject('Error performing request ' + response.statusCode);
-            }
-          }
-
-        });
-      });
-      return p;
-    }
-
-    function iamRecognize(params) {
-      var p = new Promise(function resolver(resolve, reject){
-        //console.log('qs params look like ', qs);
-        // The token may have expired so test for it.
-        //getToken(speech_to_text)
-        iamutils.getIAMToken(apikey)
-          .then((t) => {
-            //console.log('We should now have a token ', token);
-            return buildRequestSettings(params, t);
-          })
-          .then((requestSettings) => {
-            return executePostRequest(requestSettings);
-          })
-          .then((data) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-      return p;
-    }
 
     function performSTT(speech_to_text, audioData) {
       var p = new Promise(function resolver(resolve, reject){
@@ -437,23 +364,13 @@ module.exports = function (RED) {
         }
 
         // Everything is now in place to invoke the service
-        if (apikey) {
-          iamRecognize(params)
-          .then((data) => {
-            resolve(data);
-          })
-          .catch((err) => {
+        speech_to_text.recognize(params, function (err, res) {
+          if (err) {
             reject(err);
-          });
-        } else {
-          speech_to_text.recognize(params, function (err, res) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(res);
-            }
+          } else {
+            resolve(res);
+          }
         });
-        }
 
       });
       return p;
@@ -483,7 +400,7 @@ module.exports = function (RED) {
               tokenPending = false;
               tokenTime = now;
               token = res;
-              //console.log('We have the token ', token);
+              // console.log('We have the token ', token);
               resolve();
             }
           });
@@ -505,22 +422,31 @@ module.exports = function (RED) {
 
         if (endpoint) {
           var tmp = endpoint.replace('https', 'wss');
-          wsURI = tmp + '/v1/recognize'
-                             + '?watson-token=' + token + '&model=' + model;
+          wsURI = tmp + '/v1/recognize';
         } else {
-          wsURI = 'wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize'
-                             + '?watson-token=' + token + '&model=' + model;
+          wsURI = 'wss://stream.watsonplatform.net/speech-to-text/api/v1/recognize';
+        }
+
+        if (apikey) {
+          wsURI += '?model=' + model;
+        } else {
+          wsURI += '?watson-token=' + token + '&model=' + model;
         }
 
         //console.log('wsURI is : ', wsURI);
 
         if (!websocket && !socketCreationInProcess) {
           socketCreationInProcess = true;
-          // console.log('Attempting creation of web socket');
-          var ws = new WebSocket(wsURI);
-          // console.log('Setting up listeners');
+          //console.log('Attempting creation of web socket');
+          var authHeader = {};
+          if (apikey) {
+            authHeader.headers = { authorization: 'Bearer ' + token };
+          }
+
+          var ws = new WebSocket(wsURI, authHeader);
+          //console.log('Setting up listeners');
           ws.on('open', () => {
-            // console.log('Socket is open');
+            //console.log('Socket is open');
             ws.send(JSON.stringify(startPacket));
             websocket = ws;
             socketCreationInProcess = false;
