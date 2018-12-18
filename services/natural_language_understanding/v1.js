@@ -79,6 +79,17 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
+  function checkNonFeatureOptions(config, options) {
+    var limitCharacters = parseInt(config.limittextcharacters);
+
+    if (! isNaN(limitCharacters) && 0 < limitCharacters) {
+      options.limit_text_characters = limitCharacters
+    }
+
+    return Promise.resolve();
+  }
+
+
   function checkFeatureRequest(config, options) {
     var message = '',
       enabled_features = null;
@@ -267,6 +278,9 @@ module.exports = function (RED) {
         })
         .then(function(){
           return checkFeatureOptions(msg, config, options);
+        })
+        .then(function(){
+          return checkNonFeatureOptions(config, options);
         })
         .then(function(){
           node.status({fill:'blue', shape:'dot', text:'requesting'});

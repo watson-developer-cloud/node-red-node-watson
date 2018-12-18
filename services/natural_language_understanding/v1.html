@@ -21,6 +21,11 @@
         </div>
     </div>
 
+    <div class="form-row" style="padding-top: 10px;">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
         <input type="text" id="node-input-username" placeholder="Username">
@@ -175,12 +180,14 @@
             </div>
 
           </div>
-
-        </div>
-    <div class="form-row" style="padding-top: 10px;">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
     </div>
+
+    <div class="form-row">
+        <label for="node-input-limittextcharacters">Limit Text Characters</label>
+        <input type="number" min="0" step='1'
+                 id="node-input-limittextcharacters" />
+    </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="natural-language-understanding">
@@ -210,6 +217,10 @@
                                 action, and object form.</li>
 
     </ul>
+    <p>
+      You can limit the text analyzed by setting limit text characters. A value
+      of 0 applies no limit. 
+    </p>
     <p>For full details on the feature details,
       please see the
       <a href="https://www.ibm.com/watson/services/natural-language-understanding/">
@@ -356,6 +367,7 @@
               'semantic-entities': {value: false},
               'semantic-keywords': {value: false},
               'maxsemantics' :{value: '50'},
+              'limittextcharacters': {value: '0'},
               'default-endpoint' :{value: true},
               'service-endpoint' :{value: 'https://gateway.watsonplatform.net/natural-language-understanding/api'}
             },
