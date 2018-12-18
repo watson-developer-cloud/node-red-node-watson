@@ -339,6 +339,26 @@ module.exports = function (RED) {
     }
 
 
+    function keywordParams(params) {
+      // Check for keywords, which might already be an array
+      if (config['keywords'] && 'string' === typeof config['keywords']) {
+        // Trim any [] from edges of string
+        var keywords = config['keywords'];
+        var start = 0;
+        var end = keywords.length;
+        var threshold = parseFloat(config['keywords_threshold']);
+
+        if ('[' === keywords[start]) {
+          start++;
+        }
+        if (']' === keywords[end]) {
+          end--;
+        }
+        params.keywords = keywords.substring(start, end).split(',');
+        params['keywords_threshold'] = isNaN(threshold) ? 0 : threshold;
+      }
+    }
+
     function performSTT(speech_to_text, audioData) {
       var p = new Promise(function resolver(resolve, reject){
         var model = config.lang + '_' + config.band,
@@ -358,9 +378,13 @@ module.exports = function (RED) {
           smart_formatting: config.smartformatting ? config.smartformatting : false
         };
 
+        keywordParams(params);
+
         // Check the params for customisation options
         if (config.langcustom && 'NoCustomisationSetting' !== config.langcustom) {
+          var weight = parseFloat(config['custom-weight']);
           params.customization_id = config.langcustom;
+          params.customization_weight = isNaN(weight) ? 0 : weight;      
         }
 
         // Everything is now in place to invoke the service
@@ -447,7 +471,21 @@ module.exports = function (RED) {
           //console.log('Setting up listeners');
           ws.on('open', () => {
             //console.log('Socket is open');
-            ws.send(JSON.stringify(startPacket));
+            var streamStartPacket = startPacket;
+
+            if (config['alternatives']) {
+              streamStartPacket.max_alternatives = parseInt(config['alternatives']);
+            }
+            if (config.speakerlabels) {
+              streamStartPacket.speakerlabels = config.speakerlabels;
+            }
+            if (config.smart_formatting) {
+              streamStartPacket.smartformatting = config.smartformatting;
+            }
+
+            keywordParams(streamStartPacket);
+
+            ws.send(JSON.stringify(streamStartPacket));
             websocket = ws;
             socketCreationInProcess = false;
             // resolve();
