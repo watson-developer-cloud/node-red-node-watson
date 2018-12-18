@@ -108,6 +108,13 @@ module.exports = function (RED) {
     }
   }
 
+  function processCategoriesOptions(config, features) {
+    if (features.categories) {
+      features.categories.limit =
+         config['limitcategories'] ? parseInt(config['limitcategories']) : 3;
+    }
+  }
+
   function processEmotionOptions(config, features) {
     if (features.emotion && config['doc-emotion-target']) {
       features.emotion.targets = config['doc-emotion-target'].split(',');
@@ -170,6 +177,7 @@ module.exports = function (RED) {
   function checkFeatureOptions(msg, config, options) {
     if (options && options.features) {
       processConceptsOptions(config, options.features);
+      processCategoriesOptions(config, options.features);
       processEmotionOptions(config, options.features);
       processSentimentOptions(config, options.features);
       processEntitiesOptions(msg,config, options.features);
@@ -183,7 +191,7 @@ module.exports = function (RED) {
   function invokeService(options) {
     var nlu = null,
       serviceSettings = {
-        version: '2018-09-21',
+        version: '2018-11-16',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }

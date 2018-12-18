@@ -21,6 +21,8 @@ for Visual Recognition node.
 a stringified JSON objects.
   - In line with SDK change use createLanguageModel() to create custom model
 - Disable SSL Verification option for Assistant Node.
+- Bump Natural Language Understanding to 2018-11-16
+- Add Limit Categories option on Natural Language Understanding node
 
 ### New in version 0.7.4
 - Bump SDK Dependency to 3.11.0

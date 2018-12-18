@@ -58,6 +58,11 @@
                      type="checkbox" id="node-input-categories" />
               <label style="width: auto;" for="node-input-categories">Categories</label>
             </div>
+            <div>
+              <label style="width: auto;" for="node-input-limitcategories">Limit Categories</label>
+              <input type="number" min="1" max="10"
+                     id="node-input-limitcategories" />
+            </div>
 
             <div>
               <input style="width: 30px; margin-left: 20px; margin-top: 0;"
@@ -237,6 +242,7 @@
 
   nluV1.hideAll = function() {
     $('#node-input-maxconcepts').parent().hide();
+    $('#node-input-limitcategories').parent().hide();
     $('#node-input-doc-emotion-target').parent().hide();
     $('#node-input-doc-sentiment-target').parent().hide();
     $('#node-input-entity-emotion').parent().hide();
@@ -272,6 +278,9 @@
   nluV1.UIListeners = function () {
     nluV1.CreateIListener($('#node-input-concepts'),
                                $('#node-input-maxconcepts'));
+
+    nluV1.CreateIListener($('#node-input-categories'),
+                               $('#node-input-limitcategories'));
 
     nluV1.CreateIListener($('#node-input-doc-emotion'),
                                 $('#node-input-doc-emotion-target'));
@@ -326,6 +335,7 @@
             defaults: {
               'name': {value: ''},
               'categories': {value: false},
+              'limitcategories': {value: '3'},
               'concepts': {value: false},
               'maxconcepts': {value: '8'},
               'doc-emotion': {value: false},
