@@ -102,26 +102,8 @@
 
     <div class="form-row">
         <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-streaming-mode" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-streaming-mode" style="width: 70%;"> Streaming Mode</label>
-    </div>
-
-    <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-streaming-mute" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-streaming-mute" style="width: 70%;"> Mute in Streaming Mode</label>
-    </div>
-
-    <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-discard-listening" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-discard-listening" style="width: 70%;"> Discard Listening events from STT</label>
-    </div>
-
-    <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-auto-connect" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-auto-connect" style="width: 70%;"> Attempt auto connect on connection close</label>
+        <input type="checkbox" id="node-input-word-confidence" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-word-confidence" style="width: 70%;"> Word Confidence</label>
     </div>
 
     <div class="form-row">
@@ -146,6 +128,30 @@
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-disable-precheck" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-disable-precheck" style="width: 70%;"> Disable Audio format pre-check</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-streaming-mode" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-streaming-mode" style="width: 70%;"> Streaming Mode</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-streaming-mute" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-streaming-mute" style="width: 70%;"> Mute in Streaming Mode</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-discard-listening" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-discard-listening" style="width: 70%;"> Discard Listening events from STT</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-auto-connect" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-auto-connect" style="width: 70%;"> Attempt auto connect on connection close</label>
     </div>
 
     <div class="form-row">
@@ -182,6 +188,11 @@
     <p></p>
     Keywords to identify should be entered as a comma separted list. If keywords are specified
     then keyword threshold must also be set.
+    <p></p>
+    Keywords to identify should be entered as a comma separted list. If keywords are specified
+    then keyword threshold must also be set.
+    <p></p>
+    Check the word confidence setting if you want confidence scores for each word.
     <p></p>
     <p>The returned audio transcription will be returned on <code>msg.transcription</code>.</p>
     <p>The full response, including alternative transcriptions can be found on
@@ -258,6 +269,7 @@
                      + ', #node-input-alternatives'
                      + ', #node-input-keywords'
                      + ', #node-input-keywords-threshold'
+                     + ', #node-input-word-confidence'
                      + ', #node-input-speakerlabels'
                      + ', #node-input-smartformatting'
                      + ', #node-input-lang'
@@ -277,6 +289,7 @@
       showFields.push('#node-input-alternatives'
                      + ', #node-input-keywords'
                      + ', #node-input-keywords-threshold'
+                     + ', #node-input-word-confidence'
                      + ', #node-input-speakerlabels'
                      + ', #node-input-smartformatting'
                      + ', #node-input-lang'
@@ -288,6 +301,7 @@
                      + ', #node-input-alternatives'
                      + ', #node-input-keywords'
                      + ', #node-input-keywords-threshold'
+                     + ', #node-input-word-confidence'
                      + ', #node-input-speakerlabels'
                      + ', #node-input-smartformatting'
                      + ', #node-input-langcustom'
@@ -640,6 +654,7 @@
                 bandhidden: {value: ''},
                 keywords: {value: ''},
                 'keywords-threshold': {value: '0.5'},
+                'word-confidence': {value: false},
                 password: {value: ''},
                 apikey: {value: ''},
                 'payload-response' :{value: false},

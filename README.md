@@ -16,7 +16,7 @@ for Visual Recognition node.
   - Allowing SDK to manage IAM Tokens.
   - Streaming mode for STT using IAM key now working.
   - Fix to stream mode for max alternatives and smart formatting options
-  - Keywords and Customization Weight can now be specified
+  - Keywords, Word Confidence and Customization Weight can now be specified
   - Allow Start and End data packets to be specified as JSON objects, as well as
 a stringified JSON objects.
   - In line with SDK change use createLanguageModel() to create custom model

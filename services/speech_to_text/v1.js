@@ -375,7 +375,8 @@ module.exports = function (RED) {
           model: model,
           max_alternatives: config['alternatives'] ? parseInt(config['alternatives']) : 1,
           speaker_labels: config.speakerlabels ? config.speakerlabels : false,
-          smart_formatting: config.smartformatting ? config.smartformatting : false
+          smart_formatting: config.smartformatting ? config.smartformatting : false,
+          word_confidence: config['word-confidence'] ? config['word-confidence'] : false
         };
 
         keywordParams(params);
@@ -384,7 +385,7 @@ module.exports = function (RED) {
         if (config.langcustom && 'NoCustomisationSetting' !== config.langcustom) {
           var weight = parseFloat(config['custom-weight']);
           params.customization_id = config.langcustom;
-          params.customization_weight = isNaN(weight) ? 0 : weight;      
+          params.customization_weight = isNaN(weight) ? 0 : weight;
         }
 
         // Everything is now in place to invoke the service
@@ -481,6 +482,9 @@ module.exports = function (RED) {
             }
             if (config.smart_formatting) {
               streamStartPacket.smartformatting = config.smartformatting;
+            }
+            if (config['word-confidence']) {
+              streamStartPacket.word_confidence = config['word-confidence'];
             }
 
             keywordParams(streamStartPacket);
