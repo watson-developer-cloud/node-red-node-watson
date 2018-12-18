@@ -23,7 +23,8 @@ a stringified JSON objects.
 - Disable SSL Verification option for Assistant Node.
 - Natural Language Understanding Node Changes
   - Bump Natural Language Understanding to 2018-11-16
-  - Add Limit Categories and limit_text_characters options 
+  - Add Limit Categories and limit_text_characters options
+- Allow JSON input into Personality Insights node.
 
 
 ### New in version 0.7.4
