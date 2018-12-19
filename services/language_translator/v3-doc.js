@@ -15,7 +15,10 @@
  **/
 
 module.exports = function (RED) {
-  const SERVICE_IDENTIFIER = 'language-translator';
+  const request = require('request');
+    SERVICE_IDENTIFIER = 'language-translator',
+    SERVICE_VERSION = '2018-05-01';
+
   var  serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     translatorutils = require('./translator-utils'),
@@ -66,6 +69,61 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
+
+    function executeRequest(uriAddress) {
+      return new Promise(function resolver(resolve, reject){
+        var authSettings = {};
+
+        if (apikey) {
+          authSettings.user = 'apikey';
+          authSettings.pass = apikey;
+        } else {
+          authSettings.user = username;
+          authSettings.pass = password;
+        }
+
+        request({
+          uri: uriAddress,
+          method: 'GET',
+          auth: authSettings
+        }, (error, response, body) => {
+          if (!error && response.statusCode == 200) {
+            data = JSON.parse(body);
+            resolve(data);
+          } else if (error) {
+            reject(error);
+          } else {
+            reject('Error performing request ' + response.statusCode);
+          }
+        });
+      });
+    }
+
+    function executeUnknownMethod() {
+      return Promise.reject('Unable to process as unknown mode has been specified');
+    }
+
+    function executeListDocuments() {
+      let uriAddress = endpoint + '/v3/documents?version=' + SERVICE_VERSION;
+      return executeRequest(uriAddress);
+    }
+
+    function executeAction(msg, action) {
+      var f = null;
+
+      const execute = {
+        'listDocuments' : executeListDocuments
+      }
+
+      f = execute[action] || executeUnknownMethod;
+      return f();
+    }
+
+    function processResponse(msg, data) {
+      msg.payload = data;
+      return Promise.resolve();
+    }
+
     this.on('input', function (msg) {
       msg.payload = 'Node does nothing yet - 001';
 
@@ -93,13 +151,21 @@ module.exports = function (RED) {
           return payloadCheck(msg, action);
         })
         .then(function(){
-          return Promise.reject('Not working yet - 003');
+          node.status({fill:'blue', shape:'dot', text:'executing'});
+          return executeAction(msg, action);
+        })
+        .then( (data) => {
+          node.status({ fill: 'blue', shape: 'dot', text: 'processing response' });
+          return processResponse(msg, data);
+        })
+        .then(function(){
+          node.status({});
+          node.send(msg);
         })
         .catch(function(err){
           payloadutils.reportError(node, msg, err);
           node.send(msg);
         });
-      node.send(msg);
     });
   }
 
