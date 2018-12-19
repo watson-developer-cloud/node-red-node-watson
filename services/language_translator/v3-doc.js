@@ -46,6 +46,26 @@ module.exports = function (RED) {
     var node = this;
     RED.nodes.createNode(this, config);
 
+    function payloadCheck(msg, mode) {
+      var message = null;
+      switch (mode) {
+      case 'listDocuments':
+        break;
+      case 'translateDocument':
+        if (!msg.payload) {
+          message = 'Missing property: msg.payload';
+        }
+        break;
+      default:
+        message = 'Unexpected Mode';
+        break;
+      }
+      if (message) {
+        return Promise.reject(message);
+      }
+      return Promise.resolve();
+    }
+
     this.on('input', function (msg) {
       msg.payload = 'Node does nothing yet - 001';
 
@@ -70,7 +90,10 @@ module.exports = function (RED) {
           return translatorutils.checkForAction(action);
         })
         .then(function(){
-          return Promise.reject('Not working yet - 002');
+          return payloadCheck(msg, action);
+        })
+        .then(function(){
+          return Promise.reject('Not working yet - 003');
         })
         .catch(function(err){
           payloadutils.reportError(node, msg, err);
