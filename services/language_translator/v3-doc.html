@@ -1,0 +1,71 @@
+<!--
+  Copyright 2018 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-doc-translator">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-doc-translator">
+    <p>The Watson Document Translator Node makes use of the Language
+      translator service to translate documents. A list of the supported
+      file types can be found
+      <a href="https://console.bluemix.net/docs/services/language-translator/translating-documents.html#supported-file-formats">
+        here.</a>
+
+    <p><b>Usage</b></p>
+    <p>This node should be provided in input : </p>
+    <ul>
+      <li><code>msg.payload</code> : A stream buffer of the document to convert.
+      </li>
+    </ul>
+    <p>On successful conversion this node will output : </p>
+    <ul>
+      <li> </li>
+    </ul>
+    <p>For more information about the Language Translator service, read the
+      <a href="https://console.bluemix.net/docs/services/language-translator/index.html">
+        documentation</a>.</p>
+</script>
+
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('watson-doc-translator', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""}
+            },
+            credentials: {
+                username: {type: 'text'}
+            },
+            color: "rgb(84,149,230)",
+            inputs: 1,
+            outputs: 1,
+            paletteLabel: "document translator",
+            icon: "LanguageTranslator25x25.png",
+            label: function() {
+                return this.name || "document translator";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            }
+        });
+    })();
+</script>

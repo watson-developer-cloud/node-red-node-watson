@@ -41,6 +41,7 @@
       "watson-discovery-v1-document-loader": "services/discovery/v1-document-loader.js",
       "watson-discovery-v1-query-builder": "services/discovery/v1-query-builder.js",
       "watson-language-translator-v3": "services/language_translator/v3.js",
+      "watson-doc-translator-v3": "services/language_translator/v3-doc.js",
       "watson-language-translator-identify-v3": "services/language_translator_identify/v3.js",
       "watson-language-translator-util-v3": "services/language_translator_util/v3.js",
       "watson-natural-language-classifier-v1": "services/natural_language_classifier/v1.js",
