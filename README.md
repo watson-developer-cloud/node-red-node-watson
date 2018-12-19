@@ -25,6 +25,10 @@ a stringified JSON objects.
   - Bump Natural Language Understanding to 2018-11-16
   - Add Limit Categories and limit_text_characters options
 - Allow JSON input into Personality Insights node.
+- Hungarian supported by Language Translator.
+- Discovery Node changes
+  - Bump Discovery to 2018-12-03
+  - Implement Query Notices method
 
 
 ### New in version 0.7.4
