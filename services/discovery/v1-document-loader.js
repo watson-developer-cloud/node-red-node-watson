@@ -127,7 +127,7 @@ module.exports = function (RED) {
   function execute(params, msg, suffix) {
     var p = new Promise(function resolver(resolve, reject) {
       let discovery = discoveryutils.buildService(username, password, apikey, endpoint);
-      
+
       // modify as getting addJsonDocument will be deprecated messages
       if ('.json' === suffix) {
         //method = 'addJsonDocument';
