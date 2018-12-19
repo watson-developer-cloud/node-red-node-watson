@@ -15,6 +15,27 @@
  **/
 
 module.exports = function (RED) {
+  const SERVICE_IDENTIFIER = 'language-translator';
+  var  serviceutils = require('../../utilities/service-utils'),
+    username = null,
+    password = null,
+    sUsername = null,
+    sPassword = null,
+    apikey = null,
+    sApikey = null,
+    service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
+
+  if (service) {
+    sUsername = service.username ? service.username : '';
+    sPassword = service.password ? service.password : '';
+    sApikey = service.apikey ? service.apikey : '';
+    sEndpoint = service.url;
+  }
+
+  // Node RED Admin - fetch and set vcap services
+  RED.httpAdmin.get('/watson-doc-translator/vcap', function (req, res) {
+    res.json(service ? {bound_service: true} : null);
+  });
 
 
   function Node (config) {
