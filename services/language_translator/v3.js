@@ -120,13 +120,6 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
-    function checkForAction(action) {
-      if (!action) {
-        return Promise.reject('Missing action, please select one');
-      }
-      return Promise.resolve();
-    }
-
     function checkForGlobalOverides(msg) {
       // If the selection is to use global overrides then
       // look for them
@@ -454,7 +447,7 @@ module.exports = function (RED) {
           return payloadCheck(msg);
         })
         .then(function(){
-          return checkForAction(action);
+          return translatorutils.checkForAction(action);
         })
         .then(function(){
           return checkForGlobalOverides(msg);

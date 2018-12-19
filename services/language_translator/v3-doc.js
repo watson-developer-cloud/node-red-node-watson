@@ -67,7 +67,10 @@ module.exports = function (RED) {
       node.status({});
       translatorutils.credentialCheck(username, password, apikey)
         .then(function(){
-          return Promise.reject('Not working yet - 001');
+          return translatorutils.checkForAction(action);
+        })
+        .then(function(){
+          return Promise.reject('Not working yet - 002');
         })
         .catch(function(err){
           payloadutils.reportError(node, msg, err);

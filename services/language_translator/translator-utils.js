@@ -26,6 +26,13 @@ class TranslatorUtils {
     return Promise.resolve();
   }
 
+  checkForAction(action) {
+    if (!action) {
+      return Promise.reject('Missing action, please select one');
+    }
+    return Promise.resolve();
+  }
+
 }
 
 var translatorutils = new TranslatorUtils();
