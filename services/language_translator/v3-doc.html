@@ -145,15 +145,18 @@
     }
 
     doctor.checkCredentials = function() {
-      $.getJSON('watson-doc-translator/vcap/')
-        .done(function (service) {
-          $('.credentials').toggle(!service);
-        })
-        .fail(function () {
-          $('.credentials').show();
-        }).always(function () {
-          $('#credentials-check').hide();
-        })
+      return new Promise(function resolver(resolve, reject){
+        $.getJSON('watson-doc-translator/vcap/')
+          .done(function (service) {
+            $('.credentials').toggle(!service);
+          })
+          .fail(function () {
+            $('.credentials').show();
+          }).always(function () {
+            $('#credentials-check').hide();
+            resolve();
+          })
+      });
     }
 
     // This is the on edit prepare function, which will be invoked everytime
@@ -161,7 +164,12 @@
     function oneditprepare() {
       //doctor.hideAll();
       doctor.UIListeners();
-      doctor.checkCredentials();
+      doctor.checkCredentials()
+        .then(() => {
+        })
+        .catch(function(err){
+          console.log('Error in oneditprepare for doc translator node ', err);
+        });  
     }
 
     // Save the values in the dyanmic lists to the hidden fields.
