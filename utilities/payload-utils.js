@@ -117,6 +117,9 @@ PayloadUtils.prototype = {
     case 'pt':
       code = 'pt-BR';
       break;
+    case 'de':
+      code = 'de-DE';
+      break;
     case 'ko':
       code = 'ko-KR';
       break;
