@@ -17,12 +17,16 @@
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'language-translator';
   var  serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
+    translatorutils = require('./translator-utils'),
     username = null,
     password = null,
     sUsername = null,
     sPassword = null,
     apikey = null,
     sApikey = null,
+    endpoint = '',
+    sEndpoint = 'https://gateway.watsonplatform.net/language-translator/api',
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
@@ -43,7 +47,32 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
 
     this.on('input', function (msg) {
-      msg.payload = 'Node does nothing yet';
+      msg.payload = 'Node does nothing yet - 001';
+
+      var action = msg.action || config.action;
+
+      // The dynamic nature of this node has caused problems with the password field. it is
+      // hidden but not a credential. If it is treated as a credential, it gets lost when there
+      // is a request to refresh the model list.
+      // Credentials are needed for each of the modes.
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password || config.password;
+      apikey = sApikey || this.credentials.apikey || config.apikey;
+
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
+
+      node.status({});
+      translatorutils.credentialCheck(username, password, apikey)
+        .then(function(){
+          return Promise.reject('Not working yet - 001');
+        })
+        .catch(function(err){
+          payloadutils.reportError(node, msg, err);
+          node.send(msg);
+        });
       node.send(msg);
     });
   }
