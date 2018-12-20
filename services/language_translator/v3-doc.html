@@ -64,6 +64,25 @@
         </select>
     </div>
 
+    <div class="form-row">
+        <label for="node-input-srclang"><i class="fa fa-comments-o"></i> Source</label>
+        <select type="text" id="node-input-srclang" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-srclanghidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-destlang"><i class="fa fa-comments-o"></i> Target</label>
+        <select type="text" id="node-input-destlang" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-destlanghidden"/>
+    </div>
+
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-doc-translator">
@@ -97,6 +116,13 @@
     // This is the namespace for document translator.
     var doctor = new DocTranslator();
 
+    doctor.models = null;
+
+    doctor.action = $('#node-input-action').val();
+    doctor.srclang_selected = $('#node-input-srclanghidden').val();
+    doctor.destlang_selected = $('#node-input-destlanghidden').val();
+
+    doctor.using_local_credentials = false;
 
     doctor.showSelectedFields = function(fields) {
       for (i = 0; i < fields.length; i++) {
@@ -106,7 +132,7 @@
 
     doctor.hideSelectedFields = function(fields) {
       for (i = 0; i < fields.length; i++) {
-        $(fields[i]).parent().show();
+        $(fields[i]).parent().hide();
       }
     }
 
@@ -120,6 +146,26 @@
       //hideFields.push('#node-input-action');
     //}
 
+    // UI Handler for the Mode / switch.
+    // Princliple function is to show / hide the appropriate fields.
+    doctor.checkActionSelected = function () {
+      var hideFields = [];
+      var showFields = [];
+      tor.action = $('#node-input-action').val();
+      switch (tor.action) {
+        case 'translateDocument':
+          showFields.push('#node-input-srclang' + ', #node-input-destlang');
+          break;
+        case 'listDocuments':
+          hideFields.push('#node-input-srclang' + ', #node-input-destlang');
+          break;
+        default:
+          break;
+      }
+      doctor.showSelectedFields(showFields);
+      doctor.hideSelectedFields(hideFields);
+    }
+
     // Register the handlers for the fields
     doctor.UIListeners = function () {
       $('#node-input-username').change((val) => {
@@ -132,6 +178,8 @@
       });
 
       $('#node-input-action').change((val) => {
+        doctor.action = $('#node-input-action').val();
+        doctor.checkActionSelected();
       });
 
       $('#node-input-default-endpoint').change(() => {
@@ -142,16 +190,39 @@
           $('#node-input-service-endpoint').parent().show();
         }
       });
+
+      $('#node-input-srclang').change(function () {
+        doctor.srclang_selected = $('#node-input-srclang').val();
+        //doctor.langDestAvailable();
+      });
+
+      $('#node-input-destlang').change(function () {
+        doctor.destlang_selected = $('#node-input-destlang').val();
+      });
     }
+
+    doctor.restoreHidden = function () {
+      doctor.srclang_selected = $('#node-input-srclanghidden').val();
+      $('select#node-input-srslang').val(doctor.srclang_selected);
+      doctor.destlang_selected = $('#node-input-destlanghidden').val();
+      $('select#node-input-destlang').val(doctor.destlang_selected);
+    }
+
 
     doctor.checkCredentials = function() {
       return new Promise(function resolver(resolve, reject){
         $.getJSON('watson-doc-translator/vcap/')
           .done(function (service) {
             $('.credentials').toggle(!service);
+            if (service) {
+              doctor.using_local_credentials = false;
+            } else {
+              doctor.using_local_credentials = true;
+            }
           })
           .fail(function () {
             $('.credentials').show();
+            doctor.using_local_credentials = true;
           }).always(function () {
             $('#credentials-check').hide();
             resolve();
@@ -159,21 +230,42 @@
       });
     }
 
+    doctor.checkModels = function () {
+      return new Promise(function resolver(resolve, reject){
+        // Take a sneaky look to see if the translator node
+        // has pulled down models
+        if (!doctor.models && tor && tor.models) {
+          doctor.models = tor.models;
+        }
+        if (doctor.models) {
+          console.log('We have models');
+          console.log(doctor.models);
+          resolve();
+        } else {
+          reject('No Translation Models found');
+        }
+      });
+    }
+
     // This is the on edit prepare function, which will be invoked everytime
     // the dialog is shown.
     function oneditprepare() {
       //doctor.hideAll();
+      doctor.restoreHidden();
       doctor.UIListeners();
       doctor.checkCredentials()
         .then(() => {
+          return doctor.checkModels();
         })
         .catch(function(err){
           console.log('Error in oneditprepare for doc translator node ', err);
-        });  
+        });
     }
 
     // Save the values in the dyanmic lists to the hidden fields.
     function oneditsave(){
+      $('#node-input-srclanghidden').val(doctor.srclang_selected);
+      $('#node-input-destlanghidden').val(doctor.destlang_selected);
     }
 
     (function() {
@@ -184,6 +276,10 @@
                 password: {value: ''},
                 apikey: {value: ''},
                 action: {value: 'translateDocument'},
+                srclang: {value: 'en'},
+                destlang: {value: 'fr'},
+                srclanghidden: {value: ''},
+                destlanghidden: {value: ''},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://gateway.watsonplatform.net/language-translator/api'}
             },
