@@ -33,6 +33,15 @@ PayloadUtils.prototype = {
     return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
   },
 
+  // Function that checks if the input is a valid json object
+  isJsonObject: function (payload) {
+    if (payload instanceof Array || payload instanceof Object ||
+          'object' === typeof payload || Array.isArray(payload)) {
+      return true;
+    }
+    return false;
+  },
+
   // Function that is syncing up the asynchronous nature of the stream
   // so that the full file can be sent to the API.
   stream_buffer: function(file, contents, cb) {

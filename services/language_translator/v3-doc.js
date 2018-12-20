@@ -21,6 +21,7 @@ module.exports = function (RED) {
 
   var pkg = require('../../package.json'),
     LanguageTranslatorV3 = require('watson-developer-cloud/language-translator/v3'),
+    fileType = require('file-type'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     translatorutils = require('./translator-utils'),
@@ -104,7 +105,7 @@ module.exports = function (RED) {
     }
 
 
-    function executeRequest(uriAddress) {
+    function executeGetRequest(uriAddress) {
       return new Promise(function resolver(resolve, reject){
         var authSettings = {};
 
@@ -133,24 +134,76 @@ module.exports = function (RED) {
       });
     }
 
+    function verifyDocumentPayload (msg) {
+      if (!msg.payload) {
+        return Promise.reject('Missing property: msg.payload');
+      } else if ( (msg.payload instanceof Buffer) ||
+          (payloadutils.isJsonObject(msg.payload)) ) {
+        return Promise.resolve();
+      } else {
+        return Promise.reject('msg.payload should be a data buffer or json object');
+      }
+    }
+
+    function determineSuffix(msg) {
+      var ext = '.json';
+
+      if (msg.payload instanceof Buffer) {
+        var ft = fileType(msg.payload);
+
+        console.log('File Type is ', ft);
+
+        if (ft && ft.ext) {
+          ext = '.' + ft.ext;
+        } else {
+          // We don't know what file type, so just assume .txt
+          ext = '.txt';
+        }
+      }
+
+      return Promise.resolve(ext);
+    }
+
+    function loadFile() {
+      return Promise.reject('Load File Functionality is incomplete');
+    }
+
     function executeUnknownMethod() {
       return Promise.reject('Unable to process as unknown mode has been specified');
     }
 
-    function executeListDocuments() {
+    function executeListDocuments(msg) {
       let uriAddress = endpoint + '/v3/documents?version=' + SERVICE_VERSION;
-      return executeRequest(uriAddress);
+      return executeGetRequest(uriAddress);
     }
+
+    function executeTranslateDocument(msg) {
+      var p = null;
+      let uriAddress = endpoint + '/v3/documents?version=' + SERVICE_VERSION;
+
+      p = verifyDocumentPayload(msg)
+        .then (() => {
+          return determineSuffix(msg);
+        })
+        .then ((ext) => {
+          return loadFile();
+        });
+
+      return p;
+      //return executeGetRequest(uriAddress);
+    }
+
 
     function executeAction(msg, action) {
       var f = null;
 
       const execute = {
-        'listDocuments' : executeListDocuments
+        'listDocuments' : executeListDocuments,
+        'translateDocument' : executeTranslateDocument
       }
 
       f = execute[action] || executeUnknownMethod;
-      return f();
+      return f(msg);
     }
 
     function processResponse(msg, data) {
@@ -159,8 +212,6 @@ module.exports = function (RED) {
     }
 
     this.on('input', function (msg) {
-      msg.payload = 'Node does nothing yet - 001';
-
       var action = msg.action || config.action;
 
       // The dynamic nature of this node has caused problems with the password field. it is

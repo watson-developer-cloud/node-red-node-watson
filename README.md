@@ -26,10 +26,11 @@ a stringified JSON objects.
   - Add Limit Categories and limit_text_characters options
 - Allow JSON input into Personality Insights node.
 - Hungarian supported by Language Translator.
-- New Document Language Translator node. 
+- New Document Language Translator node.
 - Discovery Node changes
   - Bump Discovery to 2018-12-03
   - Implement Query Notices method
+- Bump dependency on file-type to 10.7.0
 
 
 ### New in version 0.7.4
