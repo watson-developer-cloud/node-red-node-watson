@@ -124,6 +124,37 @@
 
     doctor.using_local_credentials = false;
 
+    doctor.LANGUAGES = { 'ar' : 'Arabic',
+                      'arz': 'Spoken Arabic',
+                      'ca' : 'Catalan',
+                      'cs' : 'Czech',
+                      'da' : 'Danish',
+                      'en' : 'English' ,
+                      'es' : 'Spanish',
+                      'fr' : 'French',
+                      'fi' : 'Finnish',
+                      'hi' : 'Hindi',
+                      'hu' : 'Hungarian',
+                      'it' : 'Italian',
+                      'de' : 'German',
+                      'ja' : 'Japanese',
+                      'pt' : 'Portuguese',
+                      'ko' : 'Korean',
+                      'nb' : 'Norwegian Bokmål',
+                      'nl' : 'Dutch',
+                      'pl' : 'Polish',
+                      'ru' : 'Russian',
+                      'sv' : 'Swedish',
+                      'tr' : 'Turkish',
+                      'zh' : 'Chinese',
+                      'zh-TW' : 'Taiwanese',
+                      'zht' : 'Traditional Chinese'
+                    };
+
+
+
+
+
     doctor.showSelectedFields = function(fields) {
       for (i = 0; i < fields.length; i++) {
         $(fields[i]).parent().show();
@@ -169,12 +200,15 @@
     // Register the handlers for the fields
     doctor.UIListeners = function () {
       $('#node-input-username').change((val) => {
+        doctor.checkModels().then(() => {}).catch((err) => {console.log(err)});
       });
 
       $('#node-input-password').change((val) => {
+        doctor.checkModels().then(() => {}).catch((err) => {console.log(err)});
       });
 
       $('#node-input-apikey').change((val) => {
+        doctor.checkModels().then(() => {}).catch((err) => {console.log(err)});
       });
 
       $('#node-input-action').change((val) => {
@@ -193,7 +227,9 @@
 
       $('#node-input-srclang').change(function () {
         doctor.srclang_selected = $('#node-input-srclang').val();
-        //doctor.langDestAvailable();
+        if (doctor.models) {
+          doctor.buildTargetList();
+        }
       });
 
       $('#node-input-destlang').change(function () {
@@ -207,7 +243,6 @@
       doctor.destlang_selected = $('#node-input-destlanghidden').val();
       $('select#node-input-destlang').val(doctor.destlang_selected);
     }
-
 
     doctor.checkCredentials = function() {
       return new Promise(function resolver(resolve, reject){
@@ -238,14 +273,112 @@
           doctor.models = tor.models;
         }
         if (doctor.models) {
-          console.log('We have models');
-          console.log(doctor.models);
           resolve();
         } else {
-          reject('No Translation Models found');
+          var u = $('#node-input-username').val();
+          var p = $('#node-input-password').val();
+          var k = $('#node-input-apikey').val();
+          var e = $('#node-input-service-endpoint').val();
+          var creds = {un: u, pwd: p, key: k};
+
+          if (! $('#node-input-default-endpoint').prop('checked')) {
+            creds.e = e;
+          }
+
+          $.getJSON('watson-doc-translator/models/', creds)
+          .done(function (data) {
+            if (data.models) {
+              doctor.models = data.models;
+              resolve()
+            } else {
+              reject('No Translation Models Found');
+            }
+          }).fail(function (err) {
+            console.log(err);
+            reject('Error Retrieving Translation Models');
+          }).always(function () {});
         }
       });
     }
+
+    // sorting functions
+    doctor.checkUnique = function (value, index, self) {
+      return self.indexOf(value) === index;
+    }
+
+    doctor.buildSourceList = function () {
+      $('#node-input-srclang').empty();
+      // $('#node-input-destlang').empty();
+
+      // For Some reason this gets lost in the JSON get
+      doctor.srclang_selected = $('#node-input-srclanghidden').val();
+
+      if (doctor.models) {
+        var input_lang = doctor.models.map(function (a) {
+          return a.source;
+        });
+
+        //var output_lang = doctor.models.map(function (a) {
+        //  return a.target;
+        //});
+
+        var input_lang_unique = input_lang.filter(tor.checkUnique);
+        //var output_lang_unique = output_lang.filter(tor.checkUnique);
+
+        input_lang_unique.forEach(function(lang){
+          var selectedText = '';
+
+          if (doctor.srclang_selected === lang) {
+            selectedText = 'selected="selected"';
+          }
+          $('select#node-input-srclang')
+            .append('<option value='
+                          + '"' + lang + '"'
+                          + selectedText
+                          + '>'
+                          + (doctor.LANGUAGES[lang] ? doctor.LANGUAGES[lang] : lang)
+                          + '</option>');
+        });
+
+      }
+    }
+
+    doctor.buildTargetList = function () {
+      $('#node-input-destlang').empty();
+
+      // For Some reason this gets lost in the JSON get
+      doctor.destlang_selected = $('#node-input-destlanghidden').val();
+
+      var pair_lang = doctor.models.map(function (a) {
+        return a.model_id;
+      });
+
+      // need to do an exact source language match to allow for variations
+      // like ar and arz. if the input is ar, then don't want it to match with arz
+      var available_destlang = pair_lang.filter(function (model_id) {
+        return model_id.match('^' + doctor.srclang_selected + '-');
+      });
+
+      available_destlang.forEach(function (val) {
+        // can now have languages like zh-TW, so simple split on -
+        // no longer works.
+        // var lang = val.split('-')[1];
+        let lang = val.replace(doctor.srclang_selected + '-', '');
+
+        var selectedText = '';
+        if (doctor.destlang_selected === lang) {
+          selectedText = 'selected="selected"';
+        }
+        $('select#node-input-destlang')
+          .append('<option value='
+                        + '"' + lang + '"'
+                        + selectedText
+                        + '>'
+                        + (tor.LANGUAGES[lang] ? tor.LANGUAGES[lang] : lang)
+                        + '</option>');
+      });
+    }
+
 
     // This is the on edit prepare function, which will be invoked everytime
     // the dialog is shown.
@@ -257,8 +390,11 @@
         .then(() => {
           return doctor.checkModels();
         })
+        .then(() => {
+          doctor.buildSourceList();
+          doctor.buildTargetList();
+        })
         .catch(function(err){
-          console.log('Error in oneditprepare for doc translator node ', err);
         });
     }
 

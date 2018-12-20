@@ -19,7 +19,9 @@ module.exports = function (RED) {
     SERVICE_IDENTIFIER = 'language-translator',
     SERVICE_VERSION = '2018-05-01';
 
-  var  serviceutils = require('../../utilities/service-utils'),
+  var pkg = require('../../package.json'),
+    LanguageTranslatorV3 = require('watson-developer-cloud/language-translator/v3'),
+    serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     translatorutils = require('./translator-utils'),
     username = null,
@@ -42,6 +44,38 @@ module.exports = function (RED) {
   // Node RED Admin - fetch and set vcap services
   RED.httpAdmin.get('/watson-doc-translator/vcap', function (req, res) {
     res.json(service ? {bound_service: true} : null);
+  });
+
+
+  // API used by widget to fetch available models
+  RED.httpAdmin.get('/watson-doc-translator/models', function (req, res) {
+    endpoint = req.query.e ? req.query.e : sEndpoint;
+    var lt = null,
+      serviceSettings = {
+        version: SERVICE_VERSION,
+        url: endpoint,
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
+      };
+
+    if (sApikey || req.query.key) {
+      serviceSettings.iam_apikey = sApikey ? sApikey : req.query.key;
+    } else {
+      serviceSettings.username = sUsername ? sUsername : req.query.un;
+      serviceSettings.password = sPassword ? sPassword : req.query.pwd;
+    }
+
+    lt = new LanguageTranslatorV3(serviceSettings);
+
+    lt.listModels({}, function (err, models) {
+      if (err) {
+        res.json(err);
+      }
+      else {
+        res.json(models);
+      }
+    });
   });
 
 
