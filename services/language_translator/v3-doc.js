@@ -91,6 +91,7 @@ module.exports = function (RED) {
       switch (mode) {
       case 'listDocuments':
       case 'documentStatus':
+      case 'deleteDocument':
         break;
       case 'translateDocument':
         if (!msg.payload) {
@@ -113,7 +114,8 @@ module.exports = function (RED) {
       case 'listDocuments':
       case 'translateDocument':
         break;
-      case 'documentStatus' :
+      case 'documentStatus':
+      case 'deleteDocument':
         if (!msg.docID && !(config['document-id'])) {
           message = 'Document ID is required to fetch document status';
         }
@@ -140,25 +142,44 @@ module.exports = function (RED) {
       return authSettings;
     }
 
-    function executeGetRequest(uriAddress) {
+    function executeRequest(uriAddress, method) {
       return new Promise(function resolver(resolve, reject){
         var authSettings = buildAuthSettings();
 
         request({
           uri: uriAddress,
-          method: 'GET',
+          method: method,
           auth: authSettings
         }, (error, response, body) => {
-          if (!error && response.statusCode == 200) {
-            data = JSON.parse(body);
-            resolve(data);
-          } else if (error) {
+          if (error) {
             reject(error);
           } else {
-            reject('Error performing request ' + response.statusCode);
+            switch (response.statusCode) {
+              case 200:
+                data = JSON.parse(body);
+                resolve(data);
+                break;
+              case 204:
+                resolve(body);
+                break;
+              case 404:
+                reject('Document not found ' + response.statusCode);
+              default:
+                reject('Error Invoking API ' + response.statusCode);
+                break;
+            }
           }
         });
+
       });
+    }
+
+    function executeGetRequest(uriAddress) {
+      return executeRequest(uriAddress, 'GET');
+    }
+
+    function executeDeleteRequest(uriAddress) {
+      return executeRequest(uriAddress, 'DELETE');
     }
 
     function verifyDocumentPayload (msg) {
@@ -261,7 +282,7 @@ module.exports = function (RED) {
     }
 
     function executeListDocuments(msg) {
-      let uriAddress = endpoint + '/v3/documents?version=' + SERVICE_VERSION;
+      let uriAddress = `${endpoint}/v3/documents?version=${SERVICE_VERSION}`
       return executeGetRequest(uriAddress);
     }
 
@@ -273,11 +294,19 @@ module.exports = function (RED) {
       return executeGetRequest(uriAddress);
     }
 
+    function executeDeleteDocument(msg) {
+      var docid = msg.documentID ? msg.documentID : config['document-id'];
+      //let uriAddress = endpoint + '/v3/documents/' + docid + '?version=' + SERVICE_VERSION;
+      let uriAddress = `${endpoint}/v3/documents/${docid}?version=${SERVICE_VERSION}`;
+
+      return executeDeleteRequest(uriAddress);
+    }
+
     function executeTranslateDocument(msg) {
       var p = null,
         fileInfo = null,
         fileSuffix = '';
-      let uriAddress = endpoint + '/v3/documents?version=' + SERVICE_VERSION;
+      let uriAddress = `${endpoint}/v3/documents?version=${SERVICE_VERSION}`
 
       p = verifyDocumentPayload(msg)
         .then (() => {
@@ -326,7 +355,8 @@ module.exports = function (RED) {
       const execute = {
         'listDocuments' : executeListDocuments,
         'translateDocument' : executeTranslateDocument,
-        'documentStatus' : executeGetDocumentStatus
+        'documentStatus' : executeGetDocumentStatus,
+        'deleteDocument' : executeDeleteDocument
       }
 
       f = execute[action] || executeUnknownMethod;

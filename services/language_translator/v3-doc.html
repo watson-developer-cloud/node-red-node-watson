@@ -62,6 +62,7 @@
             <option value="translateDocument">translate document</option>
             <option value="listDocuments">list documents</option>
             <option value="documentStatus">document status</option>
+            <option value="deleteDocument">delete document</option>
         </select>
     </div>
 
@@ -207,7 +208,8 @@
                             ', #node-input-filename' +
                             ', #node-input-document-id');
           break;
-        case 'documentStatus' :
+        case 'documentStatus':
+        case 'deleteDocument':
           hideFields.push('#node-input-srclang' +
                           ', #node-input-destlang' +
                           ', #node-input-filename');
