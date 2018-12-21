@@ -116,8 +116,10 @@ module.exports = function (RED) {
         break;
       case 'documentStatus':
       case 'deleteDocument':
-        if (!msg.docID && !(config['document-id'])) {
-          message = 'Document ID is required to fetch document status';
+        if (!(config['document-id'])) {
+          if (!msg.payload || 'string' !== typeof msg.payload) {
+            message = 'Document ID is required to fetch document status';
+          }
         }
         break;
       default:
@@ -255,6 +257,14 @@ module.exports = function (RED) {
       return (name + suffix);
     }
 
+    function docID(msg) {
+      if (msg.payload && 'string' == typeof msg.payload) {
+        return msg.payload;
+      } else {
+        return config['document-id'];
+      }
+    }
+
     function executePostRequest(uriAddress, params, msg, fileSuffix) {
       return new Promise(function resolver(resolve, reject){
         var authSettings = buildAuthSettings();
@@ -287,7 +297,7 @@ module.exports = function (RED) {
     }
 
     function executeGetDocumentStatus(msg) {
-      var docid = msg.documentID ? msg.documentID : config['document-id'];
+      var docid = docID(msg);
       //let uriAddress = endpoint + '/v3/documents/' + docid + '?version=' + SERVICE_VERSION;
       let uriAddress = `${endpoint}/v3/documents/${docid}?version=${SERVICE_VERSION}`;
 
@@ -295,7 +305,7 @@ module.exports = function (RED) {
     }
 
     function executeDeleteDocument(msg) {
-      var docid = msg.documentID ? msg.documentID : config['document-id'];
+      var docid = docID(msg);
       //let uriAddress = endpoint + '/v3/documents/' + docid + '?version=' + SERVICE_VERSION;
       let uriAddress = `${endpoint}/v3/documents/${docid}?version=${SERVICE_VERSION}`;
 
