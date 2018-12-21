@@ -82,6 +82,11 @@
         <input type="hidden" id="node-input-destlanghidden"/>
     </div>
 
+    <div class="form-row">
+        <label for="node-input-filename"><i class="fa fa-tag"></i> Filename</label>
+        <input type="text" id="node-input-filename" placeholder="">
+    </div>
+
 
 </script>
 
@@ -185,10 +190,14 @@
       tor.action = $('#node-input-action').val();
       switch (tor.action) {
         case 'translateDocument':
-          showFields.push('#node-input-srclang' + ', #node-input-destlang');
+          showFields.push('#node-input-srclang' +
+                            ', #node-input-destlang' +
+                            ', #node-input-filename');
           break;
         case 'listDocuments':
-          hideFields.push('#node-input-srclang' + ', #node-input-destlang');
+          hideFields.push('#node-input-srclang' +
+                            ', #node-input-destlang' +
+                            ', #node-input-filename');
           break;
         default:
           break;
@@ -416,6 +425,7 @@
                 destlang: {value: 'fr'},
                 srclanghidden: {value: ''},
                 destlanghidden: {value: ''},
+                filename: {value: ''},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://gateway.watsonplatform.net/language-translator/api'}
             },

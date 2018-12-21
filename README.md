@@ -31,6 +31,7 @@ a stringified JSON objects.
   - Bump Discovery to 2018-12-03
   - Implement Query Notices method
 - Bump dependency on file-type to 10.7.0
+- Bump dependency on temp to 0.9.0
 
 
 ### New in version 0.7.4

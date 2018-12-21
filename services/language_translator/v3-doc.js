@@ -21,7 +21,9 @@ module.exports = function (RED) {
 
   var pkg = require('../../package.json'),
     LanguageTranslatorV3 = require('watson-developer-cloud/language-translator/v3'),
+    fs = require('fs'),
     fileType = require('file-type'),
+    temp = require('temp'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     translatorutils = require('./translator-utils'),
@@ -104,18 +106,21 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
+    function buildAuthSettings () {
+      var authSettings = {};
+      if (apikey) {
+        authSettings.user = 'apikey';
+        authSettings.pass = apikey;
+      } else {
+        authSettings.user = username;
+        authSettings.pass = password;
+      }
+      return authSettings;
+    }
 
     function executeGetRequest(uriAddress) {
       return new Promise(function resolver(resolve, reject){
-        var authSettings = {};
-
-        if (apikey) {
-          authSettings.user = 'apikey';
-          authSettings.pass = apikey;
-        } else {
-          authSettings.user = username;
-          authSettings.pass = password;
-        }
+        var authSettings = buildAuthSettings();
 
         request({
           uri: uriAddress,
@@ -151,8 +156,6 @@ module.exports = function (RED) {
       if (msg.payload instanceof Buffer) {
         var ft = fileType(msg.payload);
 
-        console.log('File Type is ', ft);
-
         if (ft && ft.ext) {
           ext = '.' + ft.ext;
         } else {
@@ -164,11 +167,74 @@ module.exports = function (RED) {
       return Promise.resolve(ext);
     }
 
-    function loadFile() {
-      return Promise.reject('Load File Functionality is incomplete');
+    function loadFile(suffix) {
+      return new Promise(function resolver(resolve, reject){
+        var options = {};
+        if (suffix) {
+          options.suffix = suffix;
+        }
+        temp.open(options, function(err, info) {
+          if (err) {
+            reject('Error opening temp file');
+          } else {
+            resolve(info);
+          }
+        });
+      });
     }
 
-    function executeUnknownMethod() {
+    function syncTheFile(info, msg) {
+      return new Promise(function resolver(resolve, reject){
+        fs.writeFile(info.path, msg.payload, function(err) {
+          if (err) {
+            reject('Error processing buffer');
+          }
+          resolve();
+        });
+
+      });
+    }
+
+    function createStream(info) {
+      //var theStream = fs.createReadStream(info.path, 'utf8');
+      var theStream = fs.readFileSync(info.path, 'utf8');
+      return Promise.resolve(theStream);
+    }
+
+    function whatName(msg, suffix){
+      var name = 'Doc ' + (new Date()).toString(); // + suffix;
+      if (msg && msg.filename) {
+        name = msg.filename;
+      } else if (config && config.filename ) {
+        name = config.filename
+      }
+      name = name.replace(/[^0-9a-z]/gi, '');
+      return (name + suffix);
+    }
+
+    function executePostRequest(uriAddress, params, msg, fileSuffix) {
+      return new Promise(function resolver(resolve, reject){
+        var authSettings = buildAuthSettings();
+
+        request({
+          uri: uriAddress,
+          method: 'POST',
+          auth: authSettings,
+          formData: params
+        }, (error, response, body) => {
+          if (!error && response.statusCode == 200) {
+            data = JSON.parse(body);
+            resolve(data);
+          } else if (error) {
+            reject(error);
+          } else {
+            reject('Error performing request ' + response.statusCode + ' ' + body);
+          }
+        });
+      });
+    }
+
+    function executeUnknownMethod(msg) {
       return Promise.reject('Unable to process as unknown mode has been specified');
     }
 
@@ -178,19 +244,49 @@ module.exports = function (RED) {
     }
 
     function executeTranslateDocument(msg) {
-      var p = null;
+      var p = null,
+        fileInfo = null,
+        fileSuffix = '';
       let uriAddress = endpoint + '/v3/documents?version=' + SERVICE_VERSION;
 
       p = verifyDocumentPayload(msg)
         .then (() => {
           return determineSuffix(msg);
         })
-        .then ((ext) => {
-          return loadFile();
-        });
+        .then ((suffix) => {
+          //return loadFile(uriAddress, msg, ext);
+          fileSuffix = suffix;
+          return loadFile(suffix);
+        })
+        .then ((info) => {
+          fileInfo = info;
+          return syncTheFile(fileInfo, msg);
+        })
+        .then(function(){
+          return createStream(fileInfo);
+        })
+        .then(function(theStream){
+          //params.file = theStream;
+          //var fname = 'temp' + fileSuffix;
+          var params = {
+            'source' : msg.srclang ? msg.srclang : config.srclang,
+            'target' : msg.destlang ? msg.destlang : config.destlang
+          };
+          var fname = whatName(msg, fileSuffix);
+
+          params.file = {
+            value: theStream,
+            options: {
+              filename: fname
+            }
+          };
+
+          node.status({ fill: 'blue', shape: 'dot', text: 'processing' });
+          //return Promise.reject('temp disabled');
+          return executePostRequest(uriAddress, params, msg, fileSuffix);
+        })
 
       return p;
-      //return executeGetRequest(uriAddress);
     }
 
 
@@ -228,6 +324,8 @@ module.exports = function (RED) {
       }
 
       node.status({});
+      temp.track();
+
       translatorutils.credentialCheck(username, password, apikey)
         .then(function(){
           return translatorutils.checkForAction(action);
@@ -244,10 +342,12 @@ module.exports = function (RED) {
           return processResponse(msg, data);
         })
         .then(function(){
+          temp.cleanup();
           node.status({});
           node.send(msg);
         })
         .catch(function(err){
+          temp.cleanup();
           payloadutils.reportError(node, msg, err);
           node.send(msg);
         });
