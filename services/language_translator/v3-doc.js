@@ -90,6 +90,7 @@ module.exports = function (RED) {
       var message = null;
       switch (mode) {
       case 'listDocuments':
+      case 'documentStatus':
         break;
       case 'translateDocument':
         if (!msg.payload) {
@@ -105,6 +106,27 @@ module.exports = function (RED) {
       }
       return Promise.resolve();
     }
+
+    function paramCheck(msg, mode) {
+      var message = null;
+      switch (mode) {
+      case 'listDocuments':
+      case 'translateDocument':
+        break;
+      case 'documentStatus' :
+        if (!msg.docID && !(config['document-id'])) {
+          message = 'Document ID is required to fetch document status';
+        }
+        break;
+      default:
+        break;
+      }
+      if (message) {
+        return Promise.reject(message);
+      }
+      return Promise.resolve();
+    }
+
 
     function buildAuthSettings () {
       var authSettings = {};
@@ -243,6 +265,14 @@ module.exports = function (RED) {
       return executeGetRequest(uriAddress);
     }
 
+    function executeGetDocumentStatus(msg) {
+      var docid = msg.documentID ? msg.documentID : config['document-id'];
+      //let uriAddress = endpoint + '/v3/documents/' + docid + '?version=' + SERVICE_VERSION;
+      let uriAddress = `${endpoint}/v3/documents/${docid}?version=${SERVICE_VERSION}`;
+
+      return executeGetRequest(uriAddress);
+    }
+
     function executeTranslateDocument(msg) {
       var p = null,
         fileInfo = null,
@@ -295,7 +325,8 @@ module.exports = function (RED) {
 
       const execute = {
         'listDocuments' : executeListDocuments,
-        'translateDocument' : executeTranslateDocument
+        'translateDocument' : executeTranslateDocument,
+        'documentStatus' : executeGetDocumentStatus
       }
 
       f = execute[action] || executeUnknownMethod;
@@ -332,6 +363,9 @@ module.exports = function (RED) {
         })
         .then(function(){
           return payloadCheck(msg, action);
+        })
+        .then(function(){
+          return paramCheck(msg, action);
         })
         .then(function(){
           node.status({fill:'blue', shape:'dot', text:'executing'});

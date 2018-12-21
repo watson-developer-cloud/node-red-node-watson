@@ -61,6 +61,7 @@
         <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
             <option value="translateDocument">translate document</option>
             <option value="listDocuments">list documents</option>
+            <option value="documentStatus">document status</option>
         </select>
     </div>
 
@@ -85,6 +86,11 @@
     <div class="form-row">
         <label for="node-input-filename"><i class="fa fa-tag"></i> Filename</label>
         <input type="text" id="node-input-filename" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-document-id"><i class="fa fa-tag"></i> Document ID</label>
+        <input type="text" id="node-input-document-id" placeholder="">
     </div>
 
 
@@ -193,12 +199,19 @@
           showFields.push('#node-input-srclang' +
                             ', #node-input-destlang' +
                             ', #node-input-filename');
+          hideFields.push('#node-input-document-id');
           break;
         case 'listDocuments':
           hideFields.push('#node-input-srclang' +
                             ', #node-input-destlang' +
-                            ', #node-input-filename');
+                            ', #node-input-filename' +
+                            ', #node-input-document-id');
           break;
+        case 'documentStatus' :
+          hideFields.push('#node-input-srclang' +
+                          ', #node-input-destlang' +
+                          ', #node-input-filename');
+          showFields.push('#node-input-document-id');
         default:
           break;
       }
@@ -426,6 +439,7 @@
                 srclanghidden: {value: ''},
                 destlanghidden: {value: ''},
                 filename: {value: ''},
+                'document-id': {value: ''},
                 'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://gateway.watsonplatform.net/language-translator/api'}
             },
