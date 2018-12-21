@@ -92,6 +92,8 @@ module.exports = function (RED) {
       case 'listDocuments':
       case 'documentStatus':
       case 'deleteDocument':
+      case 'getDocument':
+      case 'translateSubmittedDocument':
         break;
       case 'translateDocument':
         if (!msg.payload) {
@@ -116,9 +118,11 @@ module.exports = function (RED) {
         break;
       case 'documentStatus':
       case 'deleteDocument':
+      case 'getDocument':
+      case 'translateSubmittedDocument':
         if (!(config['document-id'])) {
           if (!msg.payload || 'string' !== typeof msg.payload) {
-            message = 'Document ID is required to fetch document status';
+            message = 'Document ID is required';
           }
         }
         break;
@@ -145,6 +149,7 @@ module.exports = function (RED) {
     }
 
     function executeRequest(uriAddress, method) {
+      console.log('uri is ', uriAddress);
       return new Promise(function resolver(resolve, reject){
         var authSettings = buildAuthSettings();
 
@@ -158,7 +163,12 @@ module.exports = function (RED) {
           } else {
             switch (response.statusCode) {
               case 200:
-                data = JSON.parse(body);
+                let data = null;
+                try {
+                  data = JSON.parse(body);
+                } catch(e) {
+                  data = body
+                }
                 resolve(data);
                 break;
               case 204:
@@ -167,6 +177,7 @@ module.exports = function (RED) {
               case 404:
                 reject('Document not found ' + response.statusCode);
               default:
+                console.log(body);
                 reject('Error Invoking API ' + response.statusCode);
                 break;
             }
@@ -265,7 +276,7 @@ module.exports = function (RED) {
       }
     }
 
-    function executePostRequest(uriAddress, params, msg, fileSuffix) {
+    function executePostRequest(uriAddress, params, msg) {
       return new Promise(function resolver(resolve, reject){
         var authSettings = buildAuthSettings();
 
@@ -276,7 +287,7 @@ module.exports = function (RED) {
           formData: params
         }, (error, response, body) => {
           if (!error && response.statusCode == 200) {
-            data = JSON.parse(body);
+            let data = JSON.parse(body);
             resolve(data);
           } else if (error) {
             reject(error);
@@ -292,14 +303,20 @@ module.exports = function (RED) {
     }
 
     function executeListDocuments(msg) {
-      let uriAddress = `${endpoint}/v3/documents?version=${SERVICE_VERSION}`
+      let uriAddress = `${endpoint}/v3/documents?version=${SERVICE_VERSION}`;
       return executeGetRequest(uriAddress);
     }
 
     function executeGetDocumentStatus(msg) {
       var docid = docID(msg);
-      //let uriAddress = endpoint + '/v3/documents/' + docid + '?version=' + SERVICE_VERSION;
       let uriAddress = `${endpoint}/v3/documents/${docid}?version=${SERVICE_VERSION}`;
+
+      return executeGetRequest(uriAddress);
+    }
+
+    function executeGetDocument(msg) {
+      var docid = docID(msg);
+      let uriAddress = `${endpoint}/v3/documents/${docid}/translated_document?version=${SERVICE_VERSION}`;
 
       return executeGetRequest(uriAddress);
     }
@@ -312,11 +329,21 @@ module.exports = function (RED) {
       return executeDeleteRequest(uriAddress);
     }
 
+    function executeTranslateSubmittedDocument(msg) {
+      let uriAddress = `${endpoint}/v3/documents?version=${SERVICE_VERSION}`;
+      var params = {
+        'source' : msg.srclang ? msg.srclang : config.srclang,
+        'target' : msg.destlang ? msg.destlang : config.destlang,
+        'document_id' : docID(msg)
+      };
+      return executePostRequest(uriAddress, params, msg);
+    }
+
     function executeTranslateDocument(msg) {
       var p = null,
         fileInfo = null,
         fileSuffix = '';
-      let uriAddress = `${endpoint}/v3/documents?version=${SERVICE_VERSION}`
+      let uriAddress = `${endpoint}/v3/documents?version=${SERVICE_VERSION}`;
 
       p = verifyDocumentPayload(msg)
         .then (() => {
@@ -350,9 +377,8 @@ module.exports = function (RED) {
             }
           };
 
-          node.status({ fill: 'blue', shape: 'dot', text: 'processing' });
           //return Promise.reject('temp disabled');
-          return executePostRequest(uriAddress, params, msg, fileSuffix);
+          return executePostRequest(uriAddress, params, msg);
         })
 
       return p;
@@ -365,11 +391,14 @@ module.exports = function (RED) {
       const execute = {
         'listDocuments' : executeListDocuments,
         'translateDocument' : executeTranslateDocument,
+        'translateSubmittedDocument' : executeTranslateSubmittedDocument,
         'documentStatus' : executeGetDocumentStatus,
-        'deleteDocument' : executeDeleteDocument
+        'deleteDocument' : executeDeleteDocument,
+        'getDocument' : executeGetDocument
       }
 
       f = execute[action] || executeUnknownMethod;
+      node.status({ fill: 'blue', shape: 'dot', text: 'processing' });
       return f(msg);
     }
 

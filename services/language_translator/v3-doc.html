@@ -60,9 +60,11 @@
         <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
         <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
             <option value="translateDocument">translate document</option>
+            <option value="translateSubmittedDocument">translate submitted document</option>
             <option value="listDocuments">list documents</option>
             <option value="documentStatus">document status</option>
             <option value="deleteDocument">delete document</option>
+            <option value="getDocument">get translated document</option>
         </select>
     </div>
 
@@ -202,6 +204,12 @@
                             ', #node-input-filename');
           hideFields.push('#node-input-document-id');
           break;
+        case 'translateSubmittedDocument':
+          showFields.push('#node-input-srclang' +
+                            ', #node-input-destlang' +
+                            ', #node-input-document-id');
+          hideFields.push('#node-input-filename');
+          break;
         case 'listDocuments':
           hideFields.push('#node-input-srclang' +
                             ', #node-input-destlang' +
@@ -210,6 +218,7 @@
           break;
         case 'documentStatus':
         case 'deleteDocument':
+        case 'getDocument':
           hideFields.push('#node-input-srclang' +
                           ', #node-input-destlang' +
                           ', #node-input-filename');
@@ -336,6 +345,10 @@
 
       // For Some reason this gets lost in the JSON get
       doctor.srclang_selected = $('#node-input-srclanghidden').val();
+
+      //if (!doctor.srclang_seleted) {
+      //  doctor.srclang_selected = 'en';
+      //}
 
       if (doctor.models) {
         var input_lang = doctor.models.map(function (a) {
