@@ -120,10 +120,13 @@ module.exports = function (RED) {
       case 'deleteDocument':
       case 'getDocument':
       case 'translateSubmittedDocument':
-        if (!(config['document-id'])) {
-          if (!msg.payload || 'string' !== typeof msg.payload) {
+        if (!docID(msg)) {
+
+        //if (!(config['document-id'])) {
+        //  if (!msg.payload ||
+        //        !('string' === typeof msg.payload || 'object' === typeof msg.payload)) {
             message = 'Document ID is required';
-          }
+        //  }
         }
         break;
       default:
@@ -269,8 +272,12 @@ module.exports = function (RED) {
     }
 
     function docID(msg) {
-      if (msg.payload && 'string' == typeof msg.payload) {
+      if (msg.payload && 'string' === typeof msg.payload) {
         return msg.payload;
+      } else if (msg.payload &&
+                   'object' === typeof msg.payload &&
+                   msg.payload.document_id) {
+        return msg.payload.document_id;
       } else {
         return config['document-id'];
       }
