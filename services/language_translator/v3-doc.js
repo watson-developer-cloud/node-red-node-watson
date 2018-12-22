@@ -121,12 +121,7 @@ module.exports = function (RED) {
       case 'getDocument':
       case 'translateSubmittedDocument':
         if (!docID(msg)) {
-
-        //if (!(config['document-id'])) {
-        //  if (!msg.payload ||
-        //        !('string' === typeof msg.payload || 'object' === typeof msg.payload)) {
             message = 'Document ID is required';
-        //  }
         }
         break;
       default:
@@ -414,24 +409,8 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
-    this.on('input', function (msg) {
-      var action = msg.action || config.action;
-
-      // The dynamic nature of this node has caused problems with the password field. it is
-      // hidden but not a credential. If it is treated as a credential, it gets lost when there
-      // is a request to refresh the model list.
-      // Credentials are needed for each of the modes.
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
-      apikey = sApikey || this.credentials.apikey || config.apikey;
-
-      endpoint = sEndpoint;
-      if ((!config['default-endpoint']) && config['service-endpoint']) {
-        endpoint = config['service-endpoint'];
-      }
-
-      node.status({});
-      temp.track();
+    function doit(msg) {
+      let action = msg.action || config.action;
 
       translatorutils.credentialCheck(username, password, apikey)
         .then(function(){
@@ -461,6 +440,40 @@ module.exports = function (RED) {
           payloadutils.reportError(node, msg, err);
           node.send(msg);
         });
+    }
+
+    this.on('input', function (msg) {
+      // The dynamic nature of this node has caused problems with the password field. it is
+      // hidden but not a credential. If it is treated as a credential, it gets lost when there
+      // is a request to refresh the model list.
+      // Credentials are needed for each of the modes.
+      username = sUsername || this.credentials.username;
+      password = sPassword || this.credentials.password || config.password;
+      apikey = sApikey || this.credentials.apikey || config.apikey;
+
+      endpoint = sEndpoint;
+      if ((!config['default-endpoint']) && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
+
+      node.status({});
+      temp.track();
+
+      if ('object' === typeof msg.payload &&
+            msg.payload.documents &&
+            Array.isArray(msg.payload.documents)) {
+        let len = msg.payload.documents.length;
+
+        msg.payload.documents.forEach((e, i) => {
+          let msgClone = Object.assign({}, msg),
+            pos = i+1;
+          node.status({ fill: 'blue', shape: 'dot', text: `Processing document ${pos} of ${len}` });
+          msgClone.payload = e;
+          doit(msgClone);
+        })
+      } else {
+        doit(msg);
+      }
     });
   }
 
