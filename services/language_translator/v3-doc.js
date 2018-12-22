@@ -278,6 +278,16 @@ module.exports = function (RED) {
       }
     }
 
+    function sourceLang(msg) {
+      if (msg.payload &&
+            'object' === typeof msg.payload &&
+            msg.payload.source
+          ) {
+        return msg.payload.source;
+      }
+      return msg.srclang ? msg.srclang : config.srclang;
+    }
+
     function executePostRequest(uriAddress, params, msg) {
       return new Promise(function resolver(resolve, reject){
         var authSettings = buildAuthSettings();
@@ -334,7 +344,7 @@ module.exports = function (RED) {
     function executeTranslateSubmittedDocument(msg) {
       let uriAddress = `${endpoint}/v3/documents?version=${SERVICE_VERSION}`;
       var params = {
-        'source' : msg.srclang ? msg.srclang : config.srclang,
+        'source' : sourceLang(msg),
         'target' : msg.destlang ? msg.destlang : config.destlang,
         'document_id' : docID(msg)
       };

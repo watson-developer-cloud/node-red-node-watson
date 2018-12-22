@@ -106,19 +106,96 @@
       <a href="https://console.bluemix.net/docs/services/language-translator/translating-documents.html#supported-file-formats">
         here.</a>
 
-    <p><b>Usage</b></p>
-    <p>This node should be provided in input : </p>
+    <p><b>Translate document</b>.</p>
+    <p>In this mode the node should be provided in input : </p>
     <ul>
       <li><code>msg.payload</code> : A stream buffer of the document to convert.
       </li>
     </ul>
-    <p>On successful conversion this node will output : </p>
+    <p>Source and target language parameters can be configured through the
+      configuration editor panel or set dynamically using
+      the language codes in the following properties, <code>msg.srclang</code>
+      and <code>msg.destlang</code>. Please see the documentation linked below
+      for the currently supported source and destination
+      languages translation permutations.
+    </p>
+
+    <br/><br/>
+
+    <p><b>Translate submitted document</b>.</p>
+    <p>In this mode the node should be provided in input : </p>
     <ul>
-      <li> </li>
+      <li><code>msg.payload</code> : Document ID in one of the following formats
+        <ul>
+          <li>A string
+          </li>
+          <li>Document status JSON object as returned by the get document status
+            method. The object will contain a document id
+          </li>
+          <li>JSON object containing an array of document details
+            as returned by the get document list, each containing
+            a document id. In this mode a translation will be attempted for
+            each document.
+          </li>
+        </ul>
+      </li>
     </ul>
+    <p>Source and target language parameters see Translate document mode
+      for details. If the document id is provided as a JSON object, the source
+      languge for the new translation is searched for in the JSON object.
+    </p>
+
+    <br/><br/>
+
+    <p><b>List Documents</b>.</p>
+    <p>In this mode no input is required. A JSON object containing an array
+      of documents submitted for translation is returned in
+      <code>msg.payload</code>
+    </p>
+
+    <br/><br/>
+
+    <p><b>Document status</b>.</p>
+    <p>In this mode the node should be provided in input : </p>
+    <ul>
+      <li><code>msg.payload</code> : Document ID. See Translate submitted
+        document for the format details.
+      </li>
+    </ul>
+    <p>A JSON object detailing document status is returned in
+      <code>msg.payload</code>
+    </p>
+
+    <br/><br/>
+
+    <p><b>Delete document</b>.</p>
+    <p>In this mode the node should be provided in input : </p>
+    <ul>
+      <li><code>msg.payload</code> : Document ID. See Translate submitted
+        document for the format details.
+      </li>
+    </ul>
+    <p>The documents are deleted. </p>
+
+    <br/><br/>
+
+    <p><b>Get document</b>.</p>
+    <p>In this mode the node should be provided in input : </p>
+    <ul>
+      <li><code>msg.payload</code> : Document ID. See Translate submitted
+        document for the format details.
+      </li>
+    </ul>
+    <p>The requested documents are returned as a buffer in
+      <code>msg.payload</code>
+    </p>
+
+    <br/><br/>
+    
     <p>For more information about the Language Translator service, read the
       <a href="https://console.bluemix.net/docs/services/language-translator/index.html">
-        documentation</a>.</p>
+        documentation</a>.
+    </p>
 </script>
 
 
