@@ -35,8 +35,8 @@
   ],
   "node-red": {
     "nodes": {
-      "watson-conversation-v1": "services/conversation/v1.js",
-      "watson-conversation-workspace-manager-v1": "services/conversation/v1-workspace-manager.js",
+      "watson-conversation-v1": "services/assistant/v1.js",
+      "watson-conversation-workspace-manager-v1": "services/assistant/v1-workspace-manager.js",
       "watson-discovery-v1": "services/discovery/v1.js",
       "watson-discovery-v1-document-loader": "services/discovery/v1-document-loader.js",
       "watson-discovery-v1-query-builder": "services/discovery/v1-query-builder.js",
