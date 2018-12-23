@@ -77,12 +77,22 @@ module.exports = function(RED) {
       return Promise.resolve();
     }
 
+    function idCheck(msg, config) {
+      if (!config.assistant_id && !(msg.params && msg.params.assistant_id)) {
+        return Promise.reject('Missing assistant_id. Check node documentation.');
+      }
+      return Promise.resolve();
+    }
+
     this.on('input', function(msg) {
       node.status({});
 
       var creds = setCredentials(msg);
 
       credentialCheck(creds.username, creds.password, creds.apikey)
+        .then(function(){
+          return idCheck(msg, config);
+        })
         .then(function(){
           msg.payload = 'No functionality yet';
           return Promise.resolve();
