@@ -55,7 +55,23 @@
       <input type="text" id="node-input-assistantid" placeholder="Assistant ID">
   </div>
 
+  <div class="form-row">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-session" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-session" style="width: 70%;"> Save Session</label>
+  </div>
+  <div class="form-row">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-multisession" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-multisession" style="width: 70%;"> Multiple Sessions</label>
+  </div>
 
+
+  <div class="form-tips" id="assistantv2-form-tips">
+    <strong>Note:</strong> When using with multiple sessions, <code>msg.params.session</code>
+    must be set.<br>
+    See info box for details.
+  </div>
 </script>
 
 <script type="text/x-red" data-help-name="watson-assistant-v2">
@@ -85,6 +101,18 @@
   var assistantV2 = new AssistantV2();
 
   assistantV2.UIListeners = function () {
+    $('input#node-input-session').change(function () {
+        var checked = $('input#node-input-session').prop('checked');
+        if (checked) {
+            $('input#node-input-multisession').parent().show();
+            $('#assistantv2-form-tips').show();
+        } else {
+            $('input#node-input-multisession').parent().hide();
+            $('#assistantv2-form-tips').hide();
+        }
+    });
+
+
     $('input#node-input-default-endpoint').change(function () {
       var checked = $('input#node-input-default-endpoint').prop('checked');
       if (checked) {
@@ -121,6 +149,8 @@
         'default-endpoint' : {value: true},
         'service-endpoint' : {value: 'https://gateway.watsonplatform.net/assistant/api'},
         assitantid: {value: ''},
+        multisession: {value: false},
+        session: {value: true},
       },
       credentials: {
         username: {type:'text'},
