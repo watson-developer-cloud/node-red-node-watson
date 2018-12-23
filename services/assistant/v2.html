@@ -75,6 +75,12 @@
 
   <div class="form-row">
       <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-alternate-intents" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-alternate-intents" style="width: 70%;"> Return Alternate Intents</label>
+  </div>
+
+  <div class="form-row">
+      <label>&nbsp;</label>
       <input type="checkbox" id="node-input-multisession" style="display: inline-block; width: auto; vertical-align: top;">
       <label for="node-input-multisession" style="width: 70%;"> Multiple Sessions</label>
   </div>
@@ -162,6 +168,7 @@
         debug: {value: false},
         restart: {value: false},
         returncontext: {value: true},
+        alternateintents: {value: false},
         multisession: {value: true}
       },
       credentials: {
