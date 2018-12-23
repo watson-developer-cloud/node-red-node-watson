@@ -91,12 +91,45 @@ module.exports = function(RED) {
       return Promise.resolve();
     }
 
+    function setSessionID(msg, config) {
+      let session_id = null;
+
+      if (!config.multisession) {
+        let id = node.context().flow.get('session_id');
+        if (id) {
+          params.session_id = id;
+        }
+      } else if (msg.params && msg.params.session_id) {
+        params.session_id = msg.params.session_id;
+      }
+
+      return session_id;
+    }
+
+    function setContext(msg, config, session_id) {
+      let context = null;
+      if (session_id) {
+        let c = null
+        c = node.context().flow.get('context-' + session_id);
+        if (c) {
+          context = c;
+        }
+      }
+      return context;
+    }
+
     function buildInputParams(msg, config) {
       let params = {
         'message_type': 'text',
-        'input' : msg.payload
+        'input' : msg.payload,
+        'session_id' : setSessionID(msg, config)
       };
 
+      let context = setContext(msg, config, params.session_id);
+      if (context) {
+        params.context = context;
+        // Look for additional context
+      }
 
       return Promise.resolve(params);
     }
