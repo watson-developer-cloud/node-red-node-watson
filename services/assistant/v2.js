@@ -77,11 +77,28 @@ module.exports = function(RED) {
       return Promise.resolve();
     }
 
+    function payloadCheck(msg) {
+      if (msg.payload && 'string' != typeof msg.payload) {
+        return Promise.reject('msg.payload must be either empty or a string');
+      }
+      return Promise.resolve();
+    }
+
     function idCheck(msg, config) {
       if (!config.assistant_id && !(msg.params && msg.params.assistant_id)) {
         return Promise.reject('Missing assistant_id. Check node documentation.');
       }
       return Promise.resolve();
+    }
+
+    function buildInputParams(msg, config) {
+      let params = {
+        'message_type': 'text',
+        'input' : msg.payload
+      };
+
+
+      return Promise.resolve(params);
     }
 
     this.on('input', function(msg) {
@@ -91,9 +108,17 @@ module.exports = function(RED) {
 
       credentialCheck(creds.username, creds.password, creds.apikey)
         .then(function(){
+          return payloadCheck(msg);
+        })
+        .then(function(){
           return idCheck(msg, config);
         })
         .then(function(){
+          return buildInputParams(msg, config);
+        })
+        .then(function(params){
+          console.log('params have been built');
+          console.log(params);
           msg.payload = 'No functionality yet';
           return Promise.resolve();
         })
