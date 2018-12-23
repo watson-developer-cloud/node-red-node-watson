@@ -21,6 +21,7 @@ module.exports = function(RED) {
   var pkg = require('../../package.json'),
     AssistantV2 = require('watson-developer-cloud/assistant/v2'),
     serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
     service = null,
     sApikey = null,
     sUsername = null,
@@ -47,10 +48,53 @@ module.exports = function(RED) {
     var node = this;
     RED.nodes.createNode(this, config);
 
-    this.on('input', function(msg) {
+    function setCredentials(msg) {
+      creds = {
+        username : sUsername || node.credentials.username,
+        password : sPassword || node.credentials.password || config.password,
+        apikey : sApikey || node.credentials.apikey || config.apikey,
+      }
 
-      msg.payload = 'No functionality yet';
-      node.send(msg);
+      if (msg.params) {
+        if (msg.params.username) {
+          creds.username = msg.params.username;
+        }
+        if (msg.params.password) {
+          creds.password = msg.params.password;
+        }
+        if (msg.params.apikey) {
+          creds.apiKey = msg.params.apikey;
+        }
+      }
+
+      return creds;
+    }
+
+    function credentialCheck(u, p, k) {
+      if (!k && (!u || !p)) {
+        return Promise.reject('Missing Watson Assistant service credentials');
+      }
+      return Promise.resolve();
+    }
+
+    this.on('input', function(msg) {
+      node.status({});
+
+      var creds = setCredentials(msg);
+
+      credentialCheck(creds.username, creds.password, creds.apikey)
+        .then(function(){
+          msg.payload = 'No functionality yet';
+          return Promise.resolve();
+        })
+        .then(function(){
+          node.status({});
+          node.send(msg);
+        })
+        .catch(function(err){
+          payloadutils.reportError(node,msg,err);
+          node.send(msg);
+        });
 
     });
   }
