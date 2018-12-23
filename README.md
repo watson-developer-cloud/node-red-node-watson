@@ -27,6 +27,7 @@ a stringified JSON objects.
 - Allow JSON input into Personality Insights node.
 - Hungarian supported by Language Translator.
 - New Document Language Translator node.
+- New Assistant V2 Node.
 - Discovery Node changes
   - Bump Discovery to 2018-12-03
   - Implement Query Notices method

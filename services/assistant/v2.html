@@ -1,0 +1,138 @@
+<!--
+  Copyright 2018 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-assistant-v2">
+  <div id="credentials-check" class="form-row">
+      <div class="form-tips">
+          <i class="fa fa-question-circle"></i>
+             <b> Please wait: </b> Checking for bound service credentials...
+      </div>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+
+  <div class="form-row credentials" style="display: none;">
+      <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+      <input type="text" id="node-input-username" placeholder="Username">
+  </div>
+  <div class="form-row credentials" style="display: none;">
+      <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+      <input type="password" id="node-input-password" placeholder="Password">
+  </div>
+  <div class="form-row credentials" style="display: none;">
+      <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+      <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+  </div>
+
+  <div class="form-row credentials">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+  </div>
+  <div class="form-row">
+      <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+      <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/assistant/api">
+  </div>
+
+
+</script>
+
+<script type="text/x-red" data-help-name="watson-assistant-v2">
+  <p>This node ...
+  </p>
+
+  <p><b>Usage</b></p>
+  <p>This node should be provided in input : </p>
+  <ul>
+    <li><code>msg.payload</code> : ...
+    </li>
+  </ul>
+  <p>On successful conversion this node will output : </p>
+  <ul>
+    <li><code>msg.payload</code> : ... </li>
+  </ul>
+
+</script>
+
+
+<script type="text/javascript">
+  // Need to simulate a namespace, so that some of the variables don't leak across nodes
+  function AssistantV2 () {
+  }
+
+  // This is the namespace for document translator.
+  var assistantV2 = new AssistantV2();
+
+  assistantV2.UIListeners = function () {
+    $('input#node-input-default-endpoint').change(function () {
+      var checked = $('input#node-input-default-endpoint').prop('checked');
+      if (checked) {
+        $('#node-input-service-endpoint').parent().hide();
+      } else {
+        $('#node-input-service-endpoint').parent().show();
+      }
+    });
+  }
+
+  assistantV2.checkCredentials = function () {
+    $.getJSON('watson-assistant-v2/vcap/')
+      .done(function (service) {
+        $('.credentials').toggle(!service);
+      })
+      .fail(function () {
+        $('.credentials').show();
+      })
+      .always(function () {
+        $('#credentials-check').hide();
+      })
+    }
+
+  var oneditprepare = function() {
+    assistantV2.UIListeners();
+    assistantV2.checkCredentials()
+  };
+
+  (function() {
+    RED.nodes.registerType('watson-assistant-v2', {
+      category: 'IBM Watson',
+      defaults: {
+        name: { value: '' },
+        'default-endpoint' : {value: true},
+        'service-endpoint' : {value: 'https://gateway.watsonplatform.net/assistant/api'}
+      },
+      credentials: {
+        username: {type:'text'},
+        password: {type:'password'},
+        apikey: {type:'password'}
+      },
+      color: 'rgb(84,149,230)',
+      inputs: 1,
+      outputs: 1,
+      paletteLabel: 'assistant V2',
+      icon: 'conversation-v1-25x25.png',
+      label: function() {
+        return this.name || 'assistant';
+      },
+      labelStyle: function() {
+        return this.name ? 'node_label_italic' : '';
+      },
+      oneditprepare: oneditprepare
+    });
+  })();
+</script>
