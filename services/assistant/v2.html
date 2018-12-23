@@ -57,6 +57,24 @@
 
   <div class="form-row">
       <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-debug" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-debug" style="width: 70%;"> Switch on Debug</label>
+  </div>
+
+  <div class="form-row">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-restart" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-restart" style="width: 70%;"> Restart Dialog</label>
+  </div>
+
+  <div class="form-row">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-returncontext" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-returncontext" style="width: 70%;"> Return Context</label>
+  </div>
+
+  <div class="form-row">
+      <label>&nbsp;</label>
       <input type="checkbox" id="node-input-multisession" style="display: inline-block; width: auto; vertical-align: top;">
       <label for="node-input-multisession" style="width: 70%;"> Multiple Sessions</label>
   </div>
@@ -141,6 +159,9 @@
         'default-endpoint' : {value: true},
         'service-endpoint' : {value: 'https://gateway.watsonplatform.net/assistant/api'},
         assitantid: {value: ''},
+        debug: {value: false},
+        restart: {value: false},
+        returncontext: {value: true},
         multisession: {value: true}
       },
       credentials: {
@@ -154,7 +175,7 @@
       paletteLabel: 'assistant V2',
       icon: 'conversation-v1-25x25.png',
       label: function() {
-        return this.name || 'assistant';
+        return this.name || 'assistant V2';
       },
       labelStyle: function() {
         return this.name ? 'node_label_italic' : '';
