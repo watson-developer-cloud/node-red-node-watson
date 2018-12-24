@@ -16,7 +16,8 @@
 
 module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'assistant',
-    OLD_SERVICE_IDENTIFIER = 'conversation';
+    OLD_SERVICE_IDENTIFIER = 'conversation',
+    SERVICE_VERSION = '2018-11-08';
 
   var pkg = require('../../package.json'),
     AssistantV2 = require('watson-developer-cloud/assistant/v2'),
@@ -84,14 +85,14 @@ module.exports = function(RED) {
       return Promise.resolve();
     }
 
-    function idCheck(msg, config) {
+    function idCheck(msg) {
       if (!config.assistant_id && !(msg.params && msg.params.assistant_id)) {
         return Promise.reject('Missing assistant_id. Check node documentation.');
       }
       return Promise.resolve();
     }
 
-    function setSessionID(msg, config) {
+    function setSessionID(msg) {
       let session_id = null;
 
       if (!config.multisession) {
@@ -128,6 +129,8 @@ module.exports = function(RED) {
     }
 
     function setAdditionalContext(msg, params) {
+      // needs to go in context.skills['main skill']['user_defined']
+
       if (msg.additional_context) {
         params.context = params.context ? params.context : {};
 
@@ -139,16 +142,16 @@ module.exports = function(RED) {
       }
     }
 
-    function setAssistantID(msg, params, config) {
+    function setAssistantID(msg, params) {
       checkAndSet(config, params, 'assistant_id');
       if (msg.params) {
         checkAndSet(msg.params, params, 'assistant_id');
       }
     }
 
-    function setInputOptions(msg, params, config) {
+    function setInputOptions(msg, params) {
       // Setting the flags this way works as their default
-      // values are false. 
+      // values are false.
       ['alternate_intents',
        'return_context',
        'restart',
@@ -160,14 +163,23 @@ module.exports = function(RED) {
       });
     }
 
-    function buildInputParams(msg, config) {
+    function setParamInputs(msg, params) {
+      if (msg.params) {
+        ['intents',
+         'entities'].forEach((f) => {
+          checkAndSet(msg.params, params, f);
+        });
+      }
+    }
+
+    function buildInputParams(msg) {
       let params = {
         'input' : {
           'message_type': 'text',
           'text' : msg.payload,
           'options' : {}
         },
-        'session_id' : setSessionID(msg, config)
+        'session_id' : setSessionID(msg)
       };
 
       let context = setContext(msg, params.session_id);
@@ -175,33 +187,146 @@ module.exports = function(RED) {
         params.context = context;
       }
       setAdditionalContext(msg, params);
-      setAssistantID(msg, params, config);
-      setInputOptions(msg, params, config);
+      setAssistantID(msg, params);
+      setInputOptions(msg, params);
+      setParamInputs(msg, params);
 
       //verifyOptionalInputs(node, msg, config, params);
 
       return Promise.resolve(params);
     }
 
-    this.on('input', function(msg) {
-      node.status({});
+    function setServiceSettings(msg, creds) {
+        const serviceSettings = {
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
+        };
+        let endpoint = '',
+          optoutLearning = false,
+          version = SERVICE_VERSION;
 
-      var creds = setCredentials(msg);
+        if (creds.apikey) {
+          serviceSettings.iam_apikey = creds.apikey;
+        } else {
+          serviceSettings.username = creds.username;
+          serviceSettings.password = creds.password;
+        }
+
+        if (service) {
+          endpoint = service.url;
+        }
+        if (!config['default-endpoint'] && config['service-endpoint']) {
+          endpoint = config['service-endpoint'];
+        }
+
+        if (config['optout-learning']){
+          optoutLearning = true;
+        }
+
+        if (config['timeout'] && config['timeout'] !== '0' && isFinite(config['timeout'])){
+          serviceSettings.timeout = parseInt(config['timeout']);
+        }
+
+        // Look for message overrides
+        if (msg.params) {
+          if (msg.params.endpoint) {
+            endpoint = msg.params.endpoint;
+          }
+          if (msg.params.version) {
+            version = msg.params.version;
+          }
+          if ((msg.params['optout_learning'])){
+            optoutLearning = true;
+          }
+          if (msg.params.timeout !== '0' && isFinite(msg.params.timeout)){
+            serviceSettings.timeout = parseInt(msg.params.timeout);
+          }
+          if (msg.params.disable_ssl_verification){
+            serviceSettings.disable_ssl_verification = true;
+          }
+        }
+
+        serviceSettings.version = version;
+        if (endpoint) {
+          serviceSettings.url = endpoint;
+        }
+        if (optoutLearning) {
+          serviceSettings.headers = serviceSettings.headers || {};
+          serviceSettings.headers['X-Watson-Learning-Opt-Out'] = '1';
+        }
+
+        return Promise.resolve(serviceSettings);
+    }
+
+    function buildService(settings) {
+      node.service = new AssistantV2(settings);
+      return Promise.resolve()
+    }
+
+    function checkSession(params) {
+      return new Promise(function resolver(resolve, reject){
+        if (params.session_id) {
+          resolve();
+        } else {
+          node.service.createSession({
+            assistant_id: params.assistant_id
+          }, function(err, response) {
+            if (err) {
+              console.log('Error Detected');
+              reject(err);
+            } else {
+              console.log('Data returned')
+              console.log(response);
+              if (response && response.session_id) {
+                params.session_id = response.session_id;
+                if (!config.multisession) {
+                  node.context().flow.set('session_id', params.session_id);
+                }
+                resolve();
+              } else {
+                reject('Unable to set session');
+              }
+            }
+          });
+        }
+      });
+    }
+
+    this.on('input', function(msg) {
+      var creds = setCredentials(msg),
+        params = {};
+
+      node.status({});
 
       credentialCheck(creds.username, creds.password, creds.apikey)
         .then(function(){
           return payloadCheck(msg);
         })
         .then(function(){
-          return idCheck(msg, config);
+          return idCheck(msg);
         })
         .then(function(){
-          return buildInputParams(msg, config);
+          return buildInputParams(msg);
         })
-        .then(function(params){
+        .then(function(p){
+          params = p;
           console.log('params have been built');
           console.log(params);
-          msg.payload = 'No functionality yet';
+          return setServiceSettings(msg, creds);
+
+        })
+        .then(function(settings){
+          console.log('service settings have been built');
+          console.log(settings);
+          return buildService(settings);
+        })
+        .then(function(){
+          console.log('service is ready');
+          return checkSession(params);
+        })
+        .then(function(){
+          msg.payload = 'Not complete yet';
           return Promise.resolve();
         })
         .then(function(){

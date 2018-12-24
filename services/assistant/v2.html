@@ -56,6 +56,11 @@
   </div>
 
   <div class="form-row">
+      <label for="node-input-timeout"><i class="fa fa-tag"></i> Timeout Period</label>
+      <input type="text" id="node-input-timeout" placeholder="Leave empty to disable">
+  </div>
+
+  <div class="form-row">
       <label>&nbsp;</label>
       <input type="checkbox" id="node-input-debug" style="display: inline-block; width: auto; vertical-align: top;">
       <label for="node-input-debug" style="width: 70%;"> Switch on Debug</label>
@@ -83,6 +88,12 @@
       <label>&nbsp;</label>
       <input type="checkbox" id="node-input-multisession" style="display: inline-block; width: auto; vertical-align: top;">
       <label for="node-input-multisession" style="width: 70%;"> Multiple Sessions</label>
+  </div>
+
+  <div class="form-row">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-optout-learning" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-optout-learning" style="width: 70%;"> Opt Out Request Logging</label>
   </div>
 
   <div class="form-tips" id="assistantv2-form-tips">
@@ -168,7 +179,9 @@
         restart: {value: false},
         return_context: {value: true},
         alternate_intents: {value: false},
-        multisession: {value: true}
+        multisession: {value: true},
+        timeout: {value: '', validate: RED.validators.number(true)},
+        'optout-learning': {value: false}
       },
       credentials: {
         username: {type:'text'},
