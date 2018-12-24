@@ -104,19 +104,52 @@
 </script>
 
 <script type="text/x-red" data-help-name="watson-assistant-v2">
-  <p>This node ...
-  </p>
+  <p>With the IBM Watson™ Assistant V2 service you can create cognitive agents
+    – virtual agents that combine machine learning,
+    natural language understanding, and integrated dialog scripting tools to
+    provide outstanding customer engagements.</p>
 
-  <p><b>Usage</b></p>
-  <p>This node should be provided in input : </p>
-  <ul>
-    <li><code>msg.payload</code> : ...
-    </li>
-  </ul>
-  <p>On successful conversion this node will output : </p>
-  <ul>
-    <li><code>msg.payload</code> : ... </li>
-  </ul>
+    <p><b>Usage</b></p>
+    <p>This node should be provided in input : </p>
+    <ul>
+    <li><code>msg.payload</code> : the message of the Assistant to analyse. Format: String </li>
+    <li><code>msg.params.session_id</code> (optional): unique identifier for the conversation session.
+      If this field is not provided then the node will generate a new session_id and
+      return itt as part of the response. If the node is not used in multi-session mode, then
+      a session_id need not be provided, to reset the session_id in single-session mode
+      send a null value as the session_id. Format: String </li>
+    <li><code>msg.params.assistant_id</code> : unique identifier of the assistant to be used. Could be also configured in the node. Format: String </li>
+    <li><code>msg.params.timeout</code> (optional): The timeout period (in millisecond) for Watson request. Leave empty or set to 0 to disable. </li>
+    <li><code>msg.params.alternate_intents</code> (optional) : whether to return more than one intent. Default is false. Set to true to return all matching intents. For example, return all intents when the confidence is not high to allow users to choose their intent.</li>
+    <li><code>msg.params.entities</code> (optional) : see API documentation </li>
+    <li><code>msg.params.intents</code> (optional) : see API documentation </li>
+    <li><code>msg.params.return_context</code> (optional) : see API documentation </li>
+    <li><code>msg.params.debug</code> (optional) : see API documentation </li>
+    <li><code>msg.params.restart</code> (optional) : see API documentation </li>
+    <li><code>msg.additional_context</code> (optional) : additional properties that will be added to the context object. Format: Object </li>
+    <br/>
+    <li><code>msg.params.username</code> : If provided will be used as the username credential for the Assistant service.</li>
+    <li><code>msg.params.password</code> : If provided will be used as the password credential for the Assistant service.</li>
+    <li><code>msg.params.apikey</code> : If provided will be used as the api key credential for the Assistant service.</li>
+    <li><code>msg.params.endpoint</code> : If provided will be used as the url for the Assistant service.</li>
+    <li><code>msg.params.version</code> : If provided will be used as the API version date for the Assistant service.</li>
+    <li><code>msg.params.optout_learning</code> : Set to true to opt out of request logging. Check the <a href="https://console.bluemix.net/docs/services/watson/getting-started-logging.html#controlling-request-logging-for-watson-services" target="_blank">documentation</a> for details.</li>
+    <li><code>msg.params.disable_ssl_verification</code> : Set to true to disable SSL verification. <b>Note that this has serious security implications - only do this if you really mean to!</b></li>
+    </ul>
+    <p>See <a href="https://cloud.ibm.com/apidocs/assistant-v2" target="_blank">Assistant V2 API documentation</a> for details.</p>
+    <p>All Results will made available at <code>msg.payload</code> in JSON format.
+      Check the  <a href="https://cloud.ibm.com/apidocs/assistant-v2"
+      target="_blank">documentation</a> for details.</p>
+
+    <p><b>Important</b> : before using this node, a workspace must be created and configured using the Watson Assistant Tool available in IBM Cloud, in the Watson Assistant instance detail page.</p>
+    <p><b>Documentation</b>
+    <ul>
+    <li><a href="https://console.bluemix.net/docs/services/assistant/index.html" target="_blank">Watson Assistant API documentation</a></li>
+    <li><a href="https://watson-api-explorer.mybluemix.net/apis/assistant-v1" target="_blank">Watson API Explorer</a></li>
+    <li><a href="https://console.bluemix.net/docs/services/assistant/getting-started.html" target="_blank">Getting started tutorial</a>
+    <li><a href="https://github.com/watson-developer-cloud/node-red-bluemix-starter" target="_blank">Sample Flow in the Watson Node-RED Starter</a>
+    </ul>
+
 
 </script>
 

@@ -113,17 +113,10 @@ module.exports = function(RED) {
       }
     }
 
-    function setContext(msg, session_id) {
+    function setContext(msg, params) {
       let context = null;
       if (msg.params) {
         checkAndSet(msg.params, params, 'context');
-      }
-      if (!context && session_id) {
-        let c = null
-        c = node.context().flow.get('context-' + session_id);
-        if (c) {
-          context = c;
-        }
       }
       return context;
     }
@@ -183,8 +176,7 @@ module.exports = function(RED) {
         'session_id' : setSessionID(msg)
       };
 
-      let context = setContext(msg, params.session_id);
-
+      let context = setContext(msg, params);
       if (context) {
         params.context = context;
       }
@@ -302,7 +294,6 @@ module.exports = function(RED) {
         });
       });
     }
-
 
     this.on('input', function(msg) {
       var creds = setCredentials(msg),
