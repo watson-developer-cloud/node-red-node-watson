@@ -106,9 +106,18 @@ module.exports = function(RED) {
       return session_id;
     }
 
-    function setContext(msg, config, session_id) {
+    function checkAndSet(source, target, field) {
+      if (source[field]) {
+        target[field] = source[field];
+      }
+    }
+
+    function setContext(msg, session_id) {
       let context = null;
-      if (session_id) {
+      if (msg.params) {
+        checkAndSet(msg.params, params, 'context');
+      }
+      if (!context && session_id) {
         let c = null
         c = node.context().flow.get('context-' + session_id);
         if (c) {
@@ -118,18 +127,58 @@ module.exports = function(RED) {
       return context;
     }
 
+    function setAdditionalContext(msg, params) {
+      if (msg.additional_context) {
+        params.context = params.context ? params.context : {};
+
+        for (prop in msg.additional_context) {
+          if (msg.additional_context.hasOwnProperty(prop)) {
+            params.context[prop] = msg.additional_context[prop];
+          }
+        }
+      }
+    }
+
+    function setAssistantID(msg, params, config) {
+      checkAndSet(config, params, 'assistant_id');
+      if (msg.params) {
+        checkAndSet(msg.params, params, 'assistant_id');
+      }
+    }
+
+    function setInputOptions(msg, params, config) {
+      // Setting the flags this way works as their default
+      // values are false. 
+      ['alternate_intents',
+       'return_context',
+       'restart',
+       'debug'].forEach((f) => {
+        checkAndSet(config, params.input.options, f);
+        if (msg.params) {
+          checkAndSet(msg.params, params.input.options, f);
+        }
+      });
+    }
+
     function buildInputParams(msg, config) {
       let params = {
-        'message_type': 'text',
-        'input' : msg.payload,
+        'input' : {
+          'message_type': 'text',
+          'text' : msg.payload,
+          'options' : {}
+        },
         'session_id' : setSessionID(msg, config)
       };
 
-      let context = setContext(msg, config, params.session_id);
+      let context = setContext(msg, params.session_id);
       if (context) {
         params.context = context;
-        // Look for additional context
       }
+      setAdditionalContext(msg, params);
+      setAssistantID(msg, params, config);
+      setInputOptions(msg, params, config);
+
+      //verifyOptionalInputs(node, msg, config, params);
 
       return Promise.resolve(params);
     }
