@@ -98,10 +98,10 @@ module.exports = function(RED) {
       if (!config.multisession) {
         let id = node.context().flow.get('session_id');
         if (id) {
-          params.session_id = id;
+          session_id = id;
         }
       } else if (msg.params && msg.params.session_id) {
-        params.session_id = msg.params.session_id;
+        session_id = msg.params.session_id;
       }
 
       return session_id;
@@ -129,14 +129,15 @@ module.exports = function(RED) {
     }
 
     function setAdditionalContext(msg, params) {
-      // needs to go in context.skills['main skill']['user_defined']
-
       if (msg.additional_context) {
-        params.context = params.context ? params.context : {};
+        params.context = params.context ?
+                             params.context :
+                                {'skills' : {'main skill' : {'user_defined': {}}}};
 
         for (prop in msg.additional_context) {
           if (msg.additional_context.hasOwnProperty(prop)) {
-            params.context[prop] = msg.additional_context[prop];
+            params.context.skills['main skill']['user_defined'][prop]
+                = msg.additional_context[prop];
           }
         }
       }
@@ -183,15 +184,15 @@ module.exports = function(RED) {
       };
 
       let context = setContext(msg, params.session_id);
+
       if (context) {
         params.context = context;
       }
+
       setAdditionalContext(msg, params);
       setAssistantID(msg, params);
       setInputOptions(msg, params);
       setParamInputs(msg, params);
-
-      //verifyOptionalInputs(node, msg, config, params);
 
       return Promise.resolve(params);
     }
@@ -273,11 +274,8 @@ module.exports = function(RED) {
             assistant_id: params.assistant_id
           }, function(err, response) {
             if (err) {
-              console.log('Error Detected');
               reject(err);
             } else {
-              console.log('Data returned')
-              console.log(response);
               if (response && response.session_id) {
                 params.session_id = response.session_id;
                 if (!config.multisession) {
@@ -292,6 +290,19 @@ module.exports = function(RED) {
         }
       });
     }
+
+    function messageTurn(params) {
+      return new Promise(function resolver(resolve, reject){
+        node.service.message(params, function(err, body) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(body);
+          }
+        });
+      });
+    }
+
 
     this.on('input', function(msg) {
       var creds = setCredentials(msg),
@@ -311,22 +322,21 @@ module.exports = function(RED) {
         })
         .then(function(p){
           params = p;
-          console.log('params have been built');
-          console.log(params);
           return setServiceSettings(msg, creds);
-
         })
         .then(function(settings){
-          console.log('service settings have been built');
-          console.log(settings);
           return buildService(settings);
         })
         .then(function(){
-          console.log('service is ready');
           return checkSession(params);
         })
         .then(function(){
-          msg.payload = 'Not complete yet';
+          node.status({ fill: 'blue', shape: 'dot', text: 'Calling Assistant service ...'});
+          return messageTurn(params);
+        })
+        .then(function(body){
+          body.session_id = params.session_id;
+          msg.payload = body;
           return Promise.resolve();
         })
         .then(function(){
