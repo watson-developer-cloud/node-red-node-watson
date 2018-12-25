@@ -157,7 +157,13 @@ PayloadUtils.prototype = {
   kuromojipath: function() {
     var dic_path = '/../../kuromoji/dict';
     var dic_dir = path.normalize(__dirname + dic_path);
-    return dic_dir;    
+    var filelist = '';
+
+    fs.readdirSync(dic_dir).forEach((file) => {
+      filelist += ',' + file;
+    });
+
+    return filelist;
   },
 
   // Function that is returns a function to count
