@@ -388,7 +388,7 @@ module.exports = function (RED) {
 
           //return Promise.reject('temp disabled');
           return executePostRequest(uriAddress, params, msg);
-        })
+        });
 
       return p;
     }
