@@ -15,7 +15,7 @@
  **/
 
 module.exports = function (RED) {
-  const request = require('request');
+  const request = require('request'),
     SERVICE_IDENTIFIER = 'language-translator',
     SERVICE_VERSION = '2018-05-01';
 
@@ -121,7 +121,7 @@ module.exports = function (RED) {
       case 'getDocument':
       case 'translateSubmittedDocument':
         if (!docID(msg)) {
-            message = 'Document ID is required';
+          message = 'Document ID is required';
         }
         break;
       default:
@@ -147,7 +147,6 @@ module.exports = function (RED) {
     }
 
     function executeRequest(uriAddress, method) {
-      console.log('uri is ', uriAddress);
       return new Promise(function resolver(resolve, reject){
         var authSettings = buildAuthSettings();
 
@@ -160,24 +159,25 @@ module.exports = function (RED) {
             reject(error);
           } else {
             switch (response.statusCode) {
-              case 200:
-                let data = null;
-                try {
-                  data = JSON.parse(body);
-                } catch(e) {
-                  data = body
-                }
-                resolve(data);
-                break;
-              case 204:
-                resolve(body);
-                break;
-              case 404:
-                reject('Document not found ' + response.statusCode);
-              default:
-                console.log(body);
-                reject('Error Invoking API ' + response.statusCode);
-                break;
+            case 200:
+              let data = null;
+              try {
+                data = JSON.parse(body);
+              } catch(e) {
+                data = body
+              }
+              resolve(data);
+              break;
+            case 204:
+              resolve(body);
+              break;
+            case 404:
+              reject('Document not found ' + response.statusCode);
+              break;
+            default:
+              console.log(body);
+              reject('Error Invoking API ' + response.statusCode);
+              break;
             }
           }
         });

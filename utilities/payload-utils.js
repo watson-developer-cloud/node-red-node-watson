@@ -168,7 +168,7 @@ PayloadUtils.prototype = {
     if (ct === 'ja') {
       fn = function(txt, cb) {
         cb(200);
-      }
+      };
     } else if (ct === 'ko') {
       fn = function(txt, cb) {
         cb(count(txt));

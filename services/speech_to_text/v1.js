@@ -343,10 +343,10 @@ module.exports = function (RED) {
       // Check for keywords, which might already be an array
       if (config['keywords'] && 'string' === typeof config['keywords']) {
         // Trim any [] from edges of string
-        var keywords = config['keywords'];
-        var start = 0;
-        var end = keywords.length;
-        var threshold = parseFloat(config['keywords_threshold']);
+        var keywords = config['keywords'],
+          start = 0,
+          end = keywords.length,
+          threshold = parseFloat(config['keywords_threshold']);
 
         if ('[' === keywords[start]) {
           start++;

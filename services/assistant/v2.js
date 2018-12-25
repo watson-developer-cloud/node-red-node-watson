@@ -50,7 +50,7 @@ module.exports = function(RED) {
     RED.nodes.createNode(this, config);
 
     function setCredentials(msg) {
-      creds = {
+      var creds = {
         username : sUsername || node.credentials.username,
         password : sPassword || node.credentials.password || config.password,
         apikey : sApikey || node.credentials.apikey || config.apikey,
@@ -127,7 +127,7 @@ module.exports = function(RED) {
                              params.context :
                                 {'skills' : {'main skill' : {'user_defined': {}}}};
 
-        for (prop in msg.additional_context) {
+        for (var prop in msg.additional_context) {
           if (msg.additional_context.hasOwnProperty(prop)) {
             params.context.skills['main skill']['user_defined'][prop]
                 = msg.additional_context[prop];
@@ -190,66 +190,66 @@ module.exports = function(RED) {
     }
 
     function setServiceSettings(msg, creds) {
-        const serviceSettings = {
+      const serviceSettings = {
           headers: {
             'User-Agent': pkg.name + '-' + pkg.version
           }
-        };
-        let endpoint = '',
-          optoutLearning = false,
-          version = SERVICE_VERSION;
+      };
+      let endpoint = '',
+        optoutLearning = false,
+        version = SERVICE_VERSION;
 
-        if (creds.apikey) {
-          serviceSettings.iam_apikey = creds.apikey;
-        } else {
-          serviceSettings.username = creds.username;
-          serviceSettings.password = creds.password;
-        }
+      if (creds.apikey) {
+        serviceSettings.iam_apikey = creds.apikey;
+      } else {
+        serviceSettings.username = creds.username;
+        serviceSettings.password = creds.password;
+      }
 
-        if (service) {
-          endpoint = service.url;
-        }
-        if (!config['default-endpoint'] && config['service-endpoint']) {
-          endpoint = config['service-endpoint'];
-        }
+      if (service) {
+        endpoint = service.url;
+      }
+      if (!config['default-endpoint'] && config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
+      }
 
-        if (config['optout-learning']){
+      if (config['optout-learning']){
+        optoutLearning = true;
+      }
+
+      if (config['timeout'] && config['timeout'] !== '0' && isFinite(config['timeout'])){
+        serviceSettings.timeout = parseInt(config['timeout']);
+      }
+
+      // Look for message overrides
+      if (msg.params) {
+        if (msg.params.endpoint) {
+          endpoint = msg.params.endpoint;
+        }
+        if (msg.params.version) {
+          version = msg.params.version;
+        }
+        if ((msg.params['optout_learning'])){
           optoutLearning = true;
         }
-
-        if (config['timeout'] && config['timeout'] !== '0' && isFinite(config['timeout'])){
-          serviceSettings.timeout = parseInt(config['timeout']);
+        if (msg.params.timeout !== '0' && isFinite(msg.params.timeout)){
+          serviceSettings.timeout = parseInt(msg.params.timeout);
         }
-
-        // Look for message overrides
-        if (msg.params) {
-          if (msg.params.endpoint) {
-            endpoint = msg.params.endpoint;
-          }
-          if (msg.params.version) {
-            version = msg.params.version;
-          }
-          if ((msg.params['optout_learning'])){
-            optoutLearning = true;
-          }
-          if (msg.params.timeout !== '0' && isFinite(msg.params.timeout)){
-            serviceSettings.timeout = parseInt(msg.params.timeout);
-          }
-          if (msg.params.disable_ssl_verification){
-            serviceSettings.disable_ssl_verification = true;
-          }
+        if (msg.params.disable_ssl_verification){
+          serviceSettings.disable_ssl_verification = true;
         }
+      }
 
-        serviceSettings.version = version;
-        if (endpoint) {
-          serviceSettings.url = endpoint;
-        }
-        if (optoutLearning) {
-          serviceSettings.headers = serviceSettings.headers || {};
-          serviceSettings.headers['X-Watson-Learning-Opt-Out'] = '1';
-        }
+      serviceSettings.version = version;
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
+      if (optoutLearning) {
+        serviceSettings.headers = serviceSettings.headers || {};
+        serviceSettings.headers['X-Watson-Learning-Opt-Out'] = '1';
+      }
 
-        return Promise.resolve(serviceSettings);
+      return Promise.resolve(serviceSettings);
     }
 
     function buildService(settings) {
