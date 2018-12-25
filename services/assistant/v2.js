@@ -147,9 +147,9 @@ module.exports = function(RED) {
       // Setting the flags this way works as their default
       // values are false.
       ['alternate_intents',
-       'return_context',
-       'restart',
-       'debug'].forEach((f) => {
+        'return_context',
+        'restart',
+        'debug'].forEach((f) => {
         checkAndSet(config, params.input.options, f);
         if (msg.params) {
           checkAndSet(msg.params, params.input.options, f);
@@ -160,7 +160,7 @@ module.exports = function(RED) {
     function setParamInputs(msg, params) {
       if (msg.params) {
         ['intents',
-         'entities'].forEach((f) => {
+          'entities'].forEach((f) => {
           checkAndSet(msg.params, params, f);
         });
       }

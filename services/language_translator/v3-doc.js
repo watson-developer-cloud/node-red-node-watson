@@ -109,6 +109,18 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
+    function docID(msg) {
+      if (msg.payload && 'string' === typeof msg.payload) {
+        return msg.payload;
+      }
+      if (msg.payload &&
+            'object' === typeof msg.payload &&
+               msg.payload.document_id) {
+        return msg.payload.document_id;
+      }
+      return config['document-id'];
+    }
+
     function paramCheck(msg, mode) {
       var message = null;
       switch (mode) {
@@ -244,7 +256,6 @@ module.exports = function (RED) {
           }
           resolve();
         });
-
       });
     }
 
@@ -268,23 +279,10 @@ module.exports = function (RED) {
     function sourceLang(msg) {
       if (msg.payload &&
             'object' === typeof msg.payload &&
-            msg.payload.source
-          ) {
+            msg.payload.source) {
         return msg.payload.source;
       }
       return msg.srclang ? msg.srclang : config.srclang;
-    }
-
-    function docID(msg) {
-      if (msg.payload && 'string' === typeof msg.payload) {
-        return msg.payload;
-      }
-      if (msg.payload &&
-            'object' === typeof msg.payload &&
-               msg.payload.document_id) {
-        return msg.payload.document_id;
-      }
-      return config['document-id'];
     }
 
     function executePostRequest(uriAddress, params, msg) {
@@ -479,7 +477,8 @@ module.exports = function (RED) {
           node.status({ fill: 'blue', shape: 'dot', text: `Processing document ${pos} of ${len}` });
           msgClone.payload = e;
           doit(msgClone);
-        })
+        });
+
       } else {
         doit(msg);
       }
