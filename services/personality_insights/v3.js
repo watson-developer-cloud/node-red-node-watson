@@ -51,7 +51,7 @@ module.exports = function (RED) {
     if (!msg.payload) {
       return Promise.reject('Missing property: msg.payload');
     }
-    if ('string' !== typeof msg.payload  &&
+    if ('string' !== typeof msg.payload &&
            'object' !== typeof msg.payload) {
       return Promise.reject('submitted msg.payload is not text or json object');
     }

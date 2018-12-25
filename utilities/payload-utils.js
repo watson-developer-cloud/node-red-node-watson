@@ -157,14 +157,12 @@ PayloadUtils.prototype = {
   // Function that is returns a function to count
   // the characters in each language.
   word_count: function(ct) {
-    var count = require('word-count') ;
+    var count = require('word-count'),
       fn = function(txt, cb) {
         // default
         return cb(txt.split(' ').length);
-      },
-      dic_path = '/../../kuromoji/dict',
-      dic_dir = path.normalize(__dirname + dic_path),
-      tokenizer = null;
+      };
+      
     if (ct === 'ja') {
       fn = function(txt, cb) {
         cb(200);

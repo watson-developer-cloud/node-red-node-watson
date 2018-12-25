@@ -54,7 +54,7 @@ module.exports = function(RED) {
         username : sUsername || node.credentials.username,
         password : sPassword || node.credentials.password || config.password,
         apikey : sApikey || node.credentials.apikey || config.apikey,
-      }
+      };
 
       if (msg.params) {
         if (msg.params.username) {
@@ -191,10 +191,11 @@ module.exports = function(RED) {
 
     function setServiceSettings(msg, creds) {
       const serviceSettings = {
-          headers: {
-            'User-Agent': pkg.name + '-' + pkg.version
-          }
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
       };
+
       let endpoint = '',
         optoutLearning = false,
         version = SERVICE_VERSION;
@@ -254,7 +255,7 @@ module.exports = function(RED) {
 
     function buildService(settings) {
       node.service = new AssistantV2(settings);
-      return Promise.resolve()
+      return Promise.resolve();
     }
 
     function checkSession(params) {
@@ -267,16 +268,14 @@ module.exports = function(RED) {
           }, function(err, response) {
             if (err) {
               reject(err);
-            } else {
-              if (response && response.session_id) {
-                params.session_id = response.session_id;
-                if (!config.multisession) {
-                  node.context().flow.set('session_id', params.session_id);
-                }
-                resolve();
-              } else {
-                reject('Unable to set session');
+            } else if (response && response.session_id) {
+              params.session_id = response.session_id;
+              if (!config.multisession) {
+                node.context().flow.set('session_id', params.session_id);
               }
+              resolve();
+            } else {
+              reject('Unable to set session');
             }
           });
         }

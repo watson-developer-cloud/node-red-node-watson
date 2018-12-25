@@ -83,7 +83,7 @@ module.exports = function (RED) {
     var limitCharacters = parseInt(config.limittextcharacters);
 
     if (! isNaN(limitCharacters) && 0 < limitCharacters) {
-      options.limit_text_characters = limitCharacters
+      options.limit_text_characters = limitCharacters;
     }
 
     return Promise.resolve();

@@ -74,8 +74,7 @@ module.exports = function (RED) {
     lt.listModels({}, function (err, models) {
       if (err) {
         res.json(err);
-      }
-      else {
+      } else {
         res.json(models);
       }
     });
@@ -164,7 +163,7 @@ module.exports = function (RED) {
               try {
                 data = JSON.parse(body);
               } catch(e) {
-                data = body
+                data = body;
               }
               resolve(data);
               break;
@@ -260,22 +259,10 @@ module.exports = function (RED) {
       if (msg && msg.filename) {
         name = msg.filename;
       } else if (config && config.filename ) {
-        name = config.filename
+        name = config.filename;
       }
       name = name.replace(/[^0-9a-z]/gi, '');
       return (name + suffix);
-    }
-
-    function docID(msg) {
-      if (msg.payload && 'string' === typeof msg.payload) {
-        return msg.payload;
-      } else if (msg.payload &&
-                   'object' === typeof msg.payload &&
-                   msg.payload.document_id) {
-        return msg.payload.document_id;
-      } else {
-        return config['document-id'];
-      }
     }
 
     function sourceLang(msg) {
@@ -288,6 +275,18 @@ module.exports = function (RED) {
       return msg.srclang ? msg.srclang : config.srclang;
     }
 
+    function docID(msg) {
+      if (msg.payload && 'string' === typeof msg.payload) {
+        return msg.payload;
+      }
+      if (msg.payload &&
+            'object' === typeof msg.payload &&
+               msg.payload.document_id) {
+        return msg.payload.document_id;
+      }
+      return config['document-id'];
+    }
+
     function executePostRequest(uriAddress, params, msg) {
       return new Promise(function resolver(resolve, reject){
         var authSettings = buildAuthSettings();
@@ -298,7 +297,7 @@ module.exports = function (RED) {
           auth: authSettings,
           formData: params
         }, (error, response, body) => {
-          if (!error && response.statusCode == 200) {
+          if (!error && response.statusCode === 200) {
             let data = JSON.parse(body);
             resolve(data);
           } else if (error) {
@@ -407,7 +406,7 @@ module.exports = function (RED) {
         'documentStatus' : executeGetDocumentStatus,
         'deleteDocument' : executeDeleteDocument,
         'getDocument' : executeGetDocument
-      }
+      };
 
       f = execute[action] || executeUnknownMethod;
       node.status({ fill: 'blue', shape: 'dot', text: 'processing' });

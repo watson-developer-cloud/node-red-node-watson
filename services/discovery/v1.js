@@ -263,6 +263,7 @@ module.exports = function (RED) {
 
   function executeMethod(node, method, params, msg) {
     let discovery = discoveryutils.buildService(username, password, apikey, endpoint);
+    var p = null;
 
     switch (method) {
     case 'createEnvrionment':
