@@ -181,6 +181,9 @@ module.exports = function (RED) {
       node.status({});
 
       payloadCheck(msg)
+      .then(function() {
+        return Promise.reject(payloadutils.kuromojipath());
+      })
       .then(function(){
         return wordcountCheck(msg, config);
       })
