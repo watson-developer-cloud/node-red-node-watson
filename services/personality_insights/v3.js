@@ -181,9 +181,6 @@ module.exports = function (RED) {
       node.status({});
 
       payloadCheck(msg)
-      .then(function() {
-        return Promise.reject(payloadutils.kuromojipath());
-      })
       .then(function(){
         return wordcountCheck(msg, config);
       })
@@ -194,9 +191,11 @@ module.exports = function (RED) {
         return setEndPoint(config);
       })
       .then(function(){
+        return Promise.reject('Got to prepareParams');
         return prepareParams(msg, config);
       })
       .then(function(params){
+
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         return executeService(msg, params);
       })

@@ -154,18 +154,6 @@ PayloadUtils.prototype = {
     return code;
   },
 
-  kuromojipath: function() {
-    var dic_path = '/../../kuromoji/dict';
-    var dic_dir = path.normalize(__dirname + dic_path);
-    var filelist = '';
-
-    fs.readdirSync(dic_dir).forEach((file) => {
-      filelist += ',' + file;
-    });
-
-    return filelist;
-  },
-
   // Function that is returns a function to count
   // the characters in each language.
   word_count: function(ct) {
