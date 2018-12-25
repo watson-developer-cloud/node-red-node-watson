@@ -157,33 +157,20 @@ PayloadUtils.prototype = {
   // Function that is returns a function to count
   // the characters in each language.
   word_count: function(ct) {
-    console.log('performing count for language ', ct);
-    const count = require('word-count'),
-      kuromoji = require('kuromoji');
+    var count = require('word-count') ;
       fn = function(txt, cb) {
         // default
-        console.log('performing real count');
         return cb(txt.split(' ').length);
       },
       dic_path = '/../../kuromoji/dict',
       dic_dir = path.normalize(__dirname + dic_path),
       tokenizer = null;
-    /*
     if (ct === 'ja') {
       fn = function(txt, cb) {
-        kuromoji.builder({dicPath: dic_dir}).build(function(err, tknz) {
-          if (err) {
-            throw err;
-          }
-          tokenizer = tknz;
-          return cb(tokenizer.tokenize(txt).length);
-        });
-      };
-    } else
-    */
-    if (ct === 'ko' || ct === 'ja') {
+        cb(200);
+      }
+    } else if (ct === 'ko') {
       fn = function(txt, cb) {
-        console.log('performing korean count')
         cb(count(txt));
       };
     }

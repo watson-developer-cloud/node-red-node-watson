@@ -185,7 +185,6 @@ module.exports = function (RED) {
         return wordcountCheck(msg, config);
       })
       .then(function(){
-        return Promise.reject('Got to credentialsCheck');
         return credentialsCheck(node);
       })
       .then(function(){

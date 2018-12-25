@@ -25,6 +25,7 @@ a stringified JSON objects.
   - Bump Natural Language Understanding to 2018-11-16
   - Add Limit Categories and limit_text_characters options
 - Allow JSON input into Personality Insights node.
+- Japanese word count was causing a Node-RED crash when run in the cloud.
 - Hungarian supported by Language Translator.
 - New Document Language Translator node.
 - New Assistant V2 Node.
