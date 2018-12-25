@@ -72,6 +72,11 @@
     </div>
 
     <div class="form-row">
+        <label for="node-input-custom-weight"><i class="fa fa-tag"></i> Customization Weight</label>
+        <input type="number" min='0' max='1' step='0.01' id="node-input-custom-weight">
+    </div>
+
+    <div class="form-row">
         <label for="node-input-band"><i class="fa fa-audio-o"></i> Quality</label>
         <select type="text" id="node-input-band" style="display: inline-block; width: 70%;">
         </select>
@@ -85,29 +90,20 @@
         <input type="number" min="1" max="5" id="node-input-alternatives" />
     </div>
 
+    <div class="form-row">
+        <label for="node-input-keywords"><i class="fa fa-tag"></i> Keywords</label>
+        <input type="text" id="node-input-keywords">
+    </div>
 
     <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-streaming-mode" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-streaming-mode" style="width: 70%;"> Streaming Mode</label>
+        <label for="node-input-keywords-threshold"><i class="fa fa-tag"></i> Keywords Threshold</label>
+        <input type="number" min='0' max='1' step='0.01' id="node-input-keywords-threshold">
     </div>
 
     <div class="form-row">
         <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-streaming-mute" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-streaming-mute" style="width: 70%;"> Mute in Streaming Mode</label>
-    </div>
-
-    <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-discard-listening" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-discard-listening" style="width: 70%;"> Discard Listening events from STT</label>
-    </div>
-
-    <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-auto-connect" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-auto-connect" style="width: 70%;"> Attempt auto connect on connection close</label>
+        <input type="checkbox" id="node-input-word-confidence" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-word-confidence" style="width: 70%;"> Word Confidence</label>
     </div>
 
     <div class="form-row">
@@ -132,6 +128,30 @@
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-disable-precheck" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-disable-precheck" style="width: 70%;"> Disable Audio format pre-check</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-streaming-mode" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-streaming-mode" style="width: 70%;"> Streaming Mode</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-streaming-mute" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-streaming-mute" style="width: 70%;"> Mute in Streaming Mode</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-discard-listening" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-discard-listening" style="width: 70%;"> Discard Listening events from STT</label>
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-auto-connect" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-auto-connect" style="width: 70%;"> Attempt auto connect on connection close</label>
     </div>
 
     <div class="form-row">
@@ -165,6 +185,14 @@
     the documentation linked below for the currently supported language codes. You can use the
     two character code from Language Indentification, but the language will default. eg. <code>en</code>
     will default to <code>en-US</code></p>
+    <p></p>
+    Keywords to identify should be entered as a comma separted list. If keywords are specified
+    then keyword threshold must also be set.
+    <p></p>
+    Keywords to identify should be entered as a comma separted list. If keywords are specified
+    then keyword threshold must also be set.
+    <p></p>
+    Check the word confidence setting if you want confidence scores for each word.
     <p></p>
     <p>The returned audio transcription will be returned on <code>msg.transcription</code>.</p>
     <p>The full response, including alternative transcriptions can be found on
@@ -239,11 +267,15 @@
 
       fields.push('#node-label-message'
                      + ', #node-input-alternatives'
+                     + ', #node-input-keywords'
+                     + ', #node-input-keywords-threshold'
+                     + ', #node-input-word-confidence'
                      + ', #node-input-speakerlabels'
                      + ', #node-input-smartformatting'
                      + ', #node-input-lang'
                      + ', #node-input-band'
-                     + ', #node-input-langcustom');
+                     + ', #node-input-langcustom'
+                     + ', #node-input-custom-weight');
       stt.hideSelectedFields(fields);
     }
   }
@@ -255,6 +287,9 @@
     var hideFields = [];
     if (stt.models) {
       showFields.push('#node-input-alternatives'
+                     + ', #node-input-keywords'
+                     + ', #node-input-keywords-threshold'
+                     + ', #node-input-word-confidence'
                      + ', #node-input-speakerlabels'
                      + ', #node-input-smartformatting'
                      + ', #node-input-lang'
@@ -264,9 +299,13 @@
     } else {
       hideFields.push('#node-label-message'
                      + ', #node-input-alternatives'
+                     + ', #node-input-keywords'
+                     + ', #node-input-keywords-threshold'
+                     + ', #node-input-word-confidence'
                      + ', #node-input-speakerlabels'
                      + ', #node-input-smartformatting'
                      + ', #node-input-langcustom'
+                     + ', #node-input-custom-weight'
                      + ', #node-input-lang'
                      + ', #node-input-band');
     }
@@ -370,8 +409,10 @@
 
     if (showit) {
       $('select#node-input-langcustom').parent().show();
+      $('#node-input-custom-weight').parent().show();
     } else {
       $('select#node-input-langcustom').parent().hide();
+      $('#node-input-custom-weight').parent().hide();
     }
 
   }
@@ -608,8 +649,12 @@
                 langhidden: {value: ''},
                 langcustom: {value: ''},
                 langcustomhidden: {value: ''},
+                'custom-weight': {value: '0.5'},
                 band: {value: ''},
                 bandhidden: {value: ''},
+                keywords: {value: ''},
+                'keywords-threshold': {value: '0.5'},
+                'word-confidence': {value: false},
                 password: {value: ''},
                 apikey: {value: ''},
                 'payload-response' :{value: false},

@@ -1,0 +1,238 @@
+<!--
+  Copyright 2018 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-assistant-v2">
+  <div id="credentials-check" class="form-row">
+      <div class="form-tips">
+          <i class="fa fa-question-circle"></i>
+             <b> Please wait: </b> Checking for bound service credentials...
+      </div>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+
+  <div class="form-row credentials" style="display: none;">
+      <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+      <input type="text" id="node-input-username" placeholder="Username">
+  </div>
+  <div class="form-row credentials" style="display: none;">
+      <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+      <input type="password" id="node-input-password" placeholder="Password">
+  </div>
+  <div class="form-row credentials" style="display: none;">
+      <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+      <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+  </div>
+
+  <div class="form-row credentials">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+  </div>
+  <div class="form-row">
+      <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+      <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/assistant/api">
+  </div>
+
+  <div class="form-row">
+      <label for="node-input-assistant_id"><i class="fa fa-tag"></i> Assitant ID</label>
+      <input type="text" id="node-input-assistant_id" placeholder="Assistant ID">
+  </div>
+
+  <div class="form-row">
+      <label for="node-input-timeout"><i class="fa fa-tag"></i> Timeout Period</label>
+      <input type="text" id="node-input-timeout" placeholder="Leave empty to disable">
+  </div>
+
+  <div class="form-row">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-debug" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-debug" style="width: 70%;"> Switch on Debug</label>
+  </div>
+
+  <div class="form-row">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-restart" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-restart" style="width: 70%;"> Restart Dialog</label>
+  </div>
+
+  <div class="form-row">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-return_context" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-return_context" style="width: 70%;"> Return Context</label>
+  </div>
+
+  <div class="form-row">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-alternate_intents" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-alternate_intents" style="width: 70%;"> Return Alternate Intents</label>
+  </div>
+
+  <div class="form-row">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-multisession" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-multisession" style="width: 70%;"> Multiple Sessions</label>
+  </div>
+
+  <div class="form-row">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-optout-learning" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-optout-learning" style="width: 70%;"> Opt Out Request Logging</label>
+  </div>
+
+  <div class="form-tips" id="assistantv2-form-tips">
+    <strong>Note:</strong> When using multiple sessions, and <code>msg.params.session_id</code>
+    is not set then a new session id is generated. <br>
+    See info box for details.
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="watson-assistant-v2">
+  <p>With the IBM Watson™ Assistant V2 service you can create cognitive agents
+    – virtual agents that combine machine learning,
+    natural language understanding, and integrated dialog scripting tools to
+    provide outstanding customer engagements.</p>
+
+    <p><b>Usage</b></p>
+    <p>This node should be provided in input : </p>
+    <ul>
+    <li><code>msg.payload</code> : the message of the Assistant to analyse. Format: String </li>
+    <li><code>msg.params.session_id</code> (optional): unique identifier for the conversation session.
+      If this field is not provided then the node will generate a new session_id and
+      return itt as part of the response. If the node is not used in multi-session mode, then
+      a session_id need not be provided, to reset the session_id in single-session mode
+      send a null value as the session_id. Format: String </li>
+    <li><code>msg.params.assistant_id</code> : unique identifier of the assistant to be used. Could be also configured in the node. Format: String </li>
+    <li><code>msg.params.timeout</code> (optional): The timeout period (in millisecond) for Watson request. Leave empty or set to 0 to disable. </li>
+    <li><code>msg.params.alternate_intents</code> (optional) : whether to return more than one intent. Default is false. Set to true to return all matching intents. For example, return all intents when the confidence is not high to allow users to choose their intent.</li>
+    <li><code>msg.params.entities</code> (optional) : see API documentation </li>
+    <li><code>msg.params.intents</code> (optional) : see API documentation </li>
+    <li><code>msg.params.return_context</code> (optional) : see API documentation </li>
+    <li><code>msg.params.debug</code> (optional) : see API documentation </li>
+    <li><code>msg.params.restart</code> (optional) : see API documentation </li>
+    <li><code>msg.additional_context</code> (optional) : additional properties that will be added to the context object. Format: Object </li>
+    <br/>
+    <li><code>msg.params.username</code> : If provided will be used as the username credential for the Assistant service.</li>
+    <li><code>msg.params.password</code> : If provided will be used as the password credential for the Assistant service.</li>
+    <li><code>msg.params.apikey</code> : If provided will be used as the api key credential for the Assistant service.</li>
+    <li><code>msg.params.endpoint</code> : If provided will be used as the url for the Assistant service.</li>
+    <li><code>msg.params.version</code> : If provided will be used as the API version date for the Assistant service.</li>
+    <li><code>msg.params.optout_learning</code> : Set to true to opt out of request logging. Check the <a href="https://console.bluemix.net/docs/services/watson/getting-started-logging.html#controlling-request-logging-for-watson-services" target="_blank">documentation</a> for details.</li>
+    <li><code>msg.params.disable_ssl_verification</code> : Set to true to disable SSL verification. <b>Note that this has serious security implications - only do this if you really mean to!</b></li>
+    </ul>
+    <p>See <a href="https://cloud.ibm.com/apidocs/assistant-v2" target="_blank">Assistant V2 API documentation</a> for details.</p>
+    <p>All Results will made available at <code>msg.payload</code> in JSON format.
+      Check the  <a href="https://cloud.ibm.com/apidocs/assistant-v2"
+      target="_blank">documentation</a> for details.</p>
+
+    <p><b>Important</b> : before using this node, a workspace must be created and configured using the Watson Assistant Tool available in IBM Cloud, in the Watson Assistant instance detail page.</p>
+    <p><b>Documentation</b>
+    <ul>
+    <li><a href="https://console.bluemix.net/docs/services/assistant/index.html" target="_blank">Watson Assistant API documentation</a></li>
+    <li><a href="https://watson-api-explorer.mybluemix.net/apis/assistant-v1" target="_blank">Watson API Explorer</a></li>
+    <li><a href="https://console.bluemix.net/docs/services/assistant/getting-started.html" target="_blank">Getting started tutorial</a>
+    <li><a href="https://github.com/watson-developer-cloud/node-red-bluemix-starter" target="_blank">Sample Flow in the Watson Node-RED Starter</a>
+    </ul>
+
+
+</script>
+
+
+<script type="text/javascript">
+  // Need to simulate a namespace, so that some of the variables don't leak across nodes
+  function AssistantV2 () {
+  }
+
+  // This is the namespace for document translator.
+  var assistantV2 = new AssistantV2();
+
+  assistantV2.UIListeners = function () {
+    $('input#node-input-multisession').change(function () {
+        var checked = $('input#node-input-multisession').prop('checked');
+        if (checked) {
+          $('#assistantv2-form-tips').show();
+        } else {
+          $('#assistantv2-form-tips').hide();
+        }
+    });
+
+    $('input#node-input-default-endpoint').change(function () {
+      var checked = $('input#node-input-default-endpoint').prop('checked');
+      if (checked) {
+        $('#node-input-service-endpoint').parent().hide();
+      } else {
+        $('#node-input-service-endpoint').parent().show();
+      }
+    });
+  }
+
+  assistantV2.checkCredentials = function () {
+    $.getJSON('watson-assistant-v2/vcap/')
+      .done(function (service) {
+        $('.credentials').toggle(!service);
+      })
+      .fail(function () {
+        $('.credentials').show();
+      })
+      .always(function () {
+        $('#credentials-check').hide();
+      })
+    }
+
+  var oneditprepare = function() {
+    assistantV2.UIListeners();
+    assistantV2.checkCredentials()
+  };
+
+  (function() {
+    RED.nodes.registerType('watson-assistant-v2', {
+      category: 'IBM Watson',
+      defaults: {
+        name: { value: '' },
+        'default-endpoint' : {value: true},
+        'service-endpoint' : {value: 'https://gateway.watsonplatform.net/assistant/api'},
+        assistant_id: {value: ''},
+        debug: {value: false},
+        restart: {value: false},
+        return_context: {value: true},
+        alternate_intents: {value: false},
+        multisession: {value: true},
+        timeout: {value: '', validate: RED.validators.number(true)},
+        'optout-learning': {value: false}
+      },
+      credentials: {
+        username: {type:'text'},
+        password: {type:'password'},
+        apikey: {type:'password'}
+      },
+      color: 'rgb(84,149,230)',
+      inputs: 1,
+      outputs: 1,
+      paletteLabel: 'assistant V2',
+      icon: 'conversation-v1-25x25.png',
+      label: function() {
+        return this.name || 'assistant V2';
+      },
+      labelStyle: function() {
+        return this.name ? 'node_label_italic' : '';
+      },
+      oneditprepare: oneditprepare
+    });
+  })();
+</script>
