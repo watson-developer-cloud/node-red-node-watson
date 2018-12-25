@@ -79,6 +79,17 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
+  function checkNonFeatureOptions(config, options) {
+    var limitCharacters = parseInt(config.limittextcharacters);
+
+    if (! isNaN(limitCharacters) && 0 < limitCharacters) {
+      options.limit_text_characters = limitCharacters;
+    }
+
+    return Promise.resolve();
+  }
+
+
   function checkFeatureRequest(config, options) {
     var message = '',
       enabled_features = null;
@@ -105,6 +116,13 @@ module.exports = function (RED) {
     if (features.concepts) {
       features.concepts.limit =
          config['maxconcepts'] ? parseInt(config['maxconcepts']) : 8;
+    }
+  }
+
+  function processCategoriesOptions(config, features) {
+    if (features.categories) {
+      features.categories.limit =
+         config['limitcategories'] ? parseInt(config['limitcategories']) : 3;
     }
   }
 
@@ -170,6 +188,7 @@ module.exports = function (RED) {
   function checkFeatureOptions(msg, config, options) {
     if (options && options.features) {
       processConceptsOptions(config, options.features);
+      processCategoriesOptions(config, options.features);
       processEmotionOptions(config, options.features);
       processSentimentOptions(config, options.features);
       processEntitiesOptions(msg,config, options.features);
@@ -183,7 +202,7 @@ module.exports = function (RED) {
   function invokeService(options) {
     var nlu = null,
       serviceSettings = {
-        version: '2018-09-21',
+        version: '2018-11-16',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
@@ -259,6 +278,9 @@ module.exports = function (RED) {
         })
         .then(function(){
           return checkFeatureOptions(msg, config, options);
+        })
+        .then(function(){
+          return checkNonFeatureOptions(config, options);
         })
         .then(function(){
           node.status({fill:'blue', shape:'dot', text:'requesting'});

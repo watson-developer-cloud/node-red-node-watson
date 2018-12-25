@@ -28,6 +28,7 @@ module.exports = function (RED) {
     //cfenv = require('cfenv'),
     payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
+    translatorutils = require('./translator-utils'),
     fs = require('fs'),
     temp = require('temp'),
     username = null,
@@ -112,24 +113,9 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-
-    function initialCheck(u, p, k) {
-      if (!k && (!u || !p)) {
-        return Promise.reject('Missing Watson Language Translator service credentials');
-      }
-      return Promise.resolve();
-    }
-
     function payloadCheck(msg) {
       if (!msg.payload) {
         return Promise.reject('Missing property: msg.payload');
-      }
-      return Promise.resolve();
-    }
-
-    function checkForAction(action) {
-      if (!action) {
-        return Promise.reject('Missing action, please select one');
       }
       return Promise.resolve();
     }
@@ -456,12 +442,12 @@ module.exports = function (RED) {
 
       node.status({});
 
-      initialCheck(username, password, apikey)
+      translatorutils.credentialCheck(username, password, apikey)
         .then(function(){
           return payloadCheck(msg);
         })
         .then(function(){
-          return checkForAction(action);
+          return translatorutils.checkForAction(action);
         })
         .then(function(){
           return checkForGlobalOverides(msg);

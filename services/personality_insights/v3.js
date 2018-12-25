@@ -51,23 +51,28 @@ module.exports = function (RED) {
     if (!msg.payload) {
       return Promise.reject('Missing property: msg.payload');
     }
-    if ('string' !== typeof(msg.payload)) {
-      return Promise.reject('submitted msg.payload is not text');
+    if ('string' !== typeof msg.payload &&
+           'object' !== typeof msg.payload) {
+      return Promise.reject('submitted msg.payload is not text or json object');
     }
     return Promise.resolve();
   }
 
   function wordcountCheck(msg, config) {
     var p = new Promise(function resolver(resolve, reject) {
-      var wc = payloadutils.word_count(config.inputlang);
-      wc(msg.payload, function (length) {
-        if (length < 100) {
-          reject('Personality insights requires a minimum of one hundred words.' +
-                            ' Only ' + length + ' submitted');
-        } else {
-          resolve();
-        }
-      });
+      if ('string' === typeof msg.payload) {
+        var wc = payloadutils.word_count(config.inputlang);
+        wc(msg.payload, function (length) {
+          if (length < 100) {
+            reject('Personality insights requires a minimum of one hundred words.' +
+                              ' Only ' + length + ' submitted');
+          } else {
+            resolve();
+          }
+        });
+      } else {
+        resolve();
+      }
     });
     return p;
   }
@@ -102,7 +107,7 @@ module.exports = function (RED) {
     }
 
     params = {
-      text: msg.payload,
+      content: msg.payload,
       consumption_preferences: config.consumption ? config.consumption : false,
       raw_scores: config.rawscores ? config.rawscores : false,
       headers: {
@@ -111,6 +116,12 @@ module.exports = function (RED) {
         'accept': 'application/json'
       }
     };
+
+    if ('string' === typeof msg.payload) {
+      params.content_type = 'text/plain';
+    } else {
+      params.content_type = 'application/json';
+    }
 
     return Promise.resolve(params);
   }
@@ -183,6 +194,7 @@ module.exports = function (RED) {
         return prepareParams(msg, config);
       })
       .then(function(params){
+
         node.status({fill:'blue', shape:'dot', text:'requesting'});
         return executeService(msg, params);
       })

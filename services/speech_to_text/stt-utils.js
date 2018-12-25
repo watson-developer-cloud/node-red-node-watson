@@ -74,7 +74,7 @@ class STTUtils {
     if (endpoint) {
       serviceSettings.url = endpoint;
     }
-    
+
     return new STTV1(serviceSettings);
   }
 

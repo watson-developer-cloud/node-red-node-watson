@@ -48,7 +48,7 @@ module.exports = function (RED) {
   }
 
   function executeCreateCustomisation(node, stt, params, msg) {
-    stt.createCustomization(params, function (err, response) {
+    stt.createLanguageModel(params, function (err, response) {
       node.status({});
       if (err) {
         payloadutils.reportError(node, msg, err);

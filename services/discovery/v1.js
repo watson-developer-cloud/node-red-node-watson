@@ -48,6 +48,7 @@ module.exports = function (RED) {
       break;
     case 'getCollectionDetails':
     case 'query':
+    case 'queryNotices':
       response = discoveryutils.paramEnvCheck(params) +
              discoveryutils.paramCollectionCheck(params);
       break;
@@ -242,12 +243,27 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeQueryNotices(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.queryNotices(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          msg.search_results = response;
+          resolve();
+        }
+      });
+    });
+    return p;
+  }
+
   function unknownMethod(node, discovery, params, msg) {
     return Promise.reject('Unable to process as unknown mode has been specified');
   }
 
   function executeMethod(node, method, params, msg) {
     let discovery = discoveryutils.buildService(username, password, apikey, endpoint);
+    var p = null;
 
     switch (method) {
     case 'createEnvrionment':
@@ -285,6 +301,9 @@ module.exports = function (RED) {
       break;
     case 'query':
       p = executeQuery(node, discovery, params, msg);
+      break;
+    case 'queryNotices':
+      p = executeQueryNotices(node, discovery, params, msg);
       break;
     default :
       p = unknownMethod(node, discovery, params, msg);

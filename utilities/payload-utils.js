@@ -33,6 +33,15 @@ PayloadUtils.prototype = {
     return (!!parsed.hostname && !!parsed.protocol && str.indexOf(' ') < 0);
   },
 
+  // Function that checks if the input is a valid json object
+  isJsonObject: function (payload) {
+    if (payload instanceof Array || payload instanceof Object ||
+          'object' === typeof payload || Array.isArray(payload)) {
+      return true;
+    }
+    return false;
+  },
+
   // Function that is syncing up the asynchronous nature of the stream
   // so that the full file can be sent to the API.
   stream_buffer: function(file, contents, cb) {
@@ -117,6 +126,9 @@ PayloadUtils.prototype = {
     case 'pt':
       code = 'pt-BR';
       break;
+    case 'de':
+      code = 'de-DE';
+      break;
     case 'ko':
       code = 'ko-KR';
       break;
@@ -145,25 +157,15 @@ PayloadUtils.prototype = {
   // Function that is returns a function to count
   // the characters in each language.
   word_count: function(ct) {
-    var count = require('word-count');
-    var kuromoji = require('kuromoji'),
+    var count = require('word-count'),
       fn = function(txt, cb) {
         // default
         return cb(txt.split(' ').length);
-      },
-      dic_path = '/../../kuromoji/dict',
-      dic_dir = path.normalize(__dirname + dic_path),
-      tokenizer = null;
-
+      };
+      
     if (ct === 'ja') {
       fn = function(txt, cb) {
-        kuromoji.builder({dicPath: dic_dir}).build(function(err, tknz) {
-          if (err) {
-            throw err;
-          }
-          tokenizer = tknz;
-          return cb(tokenizer.tokenize(txt).length);
-        });
+        cb(200);
       };
     } else if (ct === 'ko') {
       fn = function(txt, cb) {

@@ -59,6 +59,8 @@
             <option value="createCustomisation">Create a custom language model</option>
             <option value="listCustomisations">List Customizations</option>
             <option value="getCustomisation">Get Customization</option>
+            <option value="deleteCustomisation">Delete Customization</option>
+            <option value="listVoices">List Voices</option>
             <option value="getPronounce">Get Pronouncation</option>
             <option value="addWords">Add Words</option>
             <option value="getWords">Get Words</option>
@@ -281,6 +283,7 @@
                         + ', #node-input-tts-custom-id');
         break;
       case 'getCustomisation':
+      case 'deleteCustomisation':
       case 'addWords':
       case 'getWords':
         fields.push('#node-input-tts-custom-id');

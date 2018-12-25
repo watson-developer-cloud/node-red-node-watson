@@ -1,0 +1,556 @@
+<!--
+  Copyright 2018 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-doc-translator">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div id="credentials-not-found" class="form-row" style="display: none;">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Could not bind to service. </b>
+            This node can not be further configured without a valid service.
+            Try entering valid credentials?
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username"/>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password"/>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+    </div>
+
+    <div class="form-row credentials">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/language-translator/api">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-action"><i class="fa fa-cog"></i> Mode</label>
+        <select type="text" id="node-input-action" style="display: inline-block; vertical-align:middle; width: 70%;">
+            <option value="translateDocument">translate document</option>
+            <option value="translateSubmittedDocument">translate submitted document</option>
+            <option value="listDocuments">list documents</option>
+            <option value="documentStatus">document status</option>
+            <option value="deleteDocument">delete document</option>
+            <option value="getDocument">get translated document</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-srclang"><i class="fa fa-comments-o"></i> Source</label>
+        <select type="text" id="node-input-srclang" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-srclanghidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-destlang"><i class="fa fa-comments-o"></i> Target</label>
+        <select type="text" id="node-input-destlang" style="display: inline-block; vertical-align:middle; width: 70%;">
+        </select>
+    </div>
+    <div>
+        <input type="hidden" id="node-input-destlanghidden"/>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-filename"><i class="fa fa-tag"></i> Filename</label>
+        <input type="text" id="node-input-filename" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-document-id"><i class="fa fa-tag"></i> Document ID</label>
+        <input type="text" id="node-input-document-id" placeholder="">
+    </div>
+
+
+</script>
+
+<script type="text/x-red" data-help-name="watson-doc-translator">
+    <p>The Watson Document Translator Node makes use of the Language
+      translator service to translate documents. A list of the supported
+      file types can be found
+      <a href="https://console.bluemix.net/docs/services/language-translator/translating-documents.html#supported-file-formats">
+        here.</a>
+
+    <p><b>Translate document</b>.</p>
+    <p>In this mode the node should be provided in input : </p>
+    <ul>
+      <li><code>msg.payload</code> : A stream buffer of the document to convert.
+      </li>
+    </ul>
+    <p>Source and target language parameters can be configured through the
+      configuration editor panel or set dynamically using
+      the language codes in the following properties, <code>msg.srclang</code>
+      and <code>msg.destlang</code>. Please see the documentation linked below
+      for the currently supported source and destination
+      languages translation permutations.
+    </p>
+
+    <br/><br/>
+
+    <p><b>Translate submitted document</b>.</p>
+    <p>In this mode the node should be provided in input : </p>
+    <ul>
+      <li><code>msg.payload</code> : Document ID in one of the following formats
+        <ul>
+          <li>A string
+          </li>
+          <li>Document status JSON object as returned by the get document status
+            method. The object will contain a document id
+          </li>
+          <li>JSON object containing an array of document details
+            as returned by the get document list, each containing
+            a document id. In this mode a translation will be attempted for
+            each document.
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <p>Source and target language parameters see Translate document mode
+      for details. If the document id is provided as a JSON object, the source
+      languge for the new translation is searched for in the JSON object.
+    </p>
+
+    <br/><br/>
+
+    <p><b>List Documents</b>.</p>
+    <p>In this mode no input is required. A JSON object containing an array
+      of documents submitted for translation is returned in
+      <code>msg.payload</code>
+    </p>
+
+    <br/><br/>
+
+    <p><b>Document status</b>.</p>
+    <p>In this mode the node should be provided in input : </p>
+    <ul>
+      <li><code>msg.payload</code> : Document ID. See Translate submitted
+        document for the format details.
+      </li>
+    </ul>
+    <p>A JSON object detailing document status is returned in
+      <code>msg.payload</code>
+    </p>
+
+    <br/><br/>
+
+    <p><b>Delete document</b>.</p>
+    <p>In this mode the node should be provided in input : </p>
+    <ul>
+      <li><code>msg.payload</code> : Document ID. See Translate submitted
+        document for the format details.
+      </li>
+    </ul>
+    <p>The documents are deleted. </p>
+
+    <br/><br/>
+
+    <p><b>Get document</b>.</p>
+    <p>In this mode the node should be provided in input : </p>
+    <ul>
+      <li><code>msg.payload</code> : Document ID. See Translate submitted
+        document for the format details.
+      </li>
+    </ul>
+    <p>The requested documents are returned as a buffer in
+      <code>msg.payload</code>
+    </p>
+
+    <br/><br/>
+    
+    <p>For more information about the Language Translator service, read the
+      <a href="https://console.bluemix.net/docs/services/language-translator/index.html">
+        documentation</a>.
+    </p>
+</script>
+
+
+<script type="text/javascript">
+    // Need to simulate a namespace, so that some of the variables don't leak across nodes
+    function DocTranslator () {
+    }
+
+    // This is the namespace for document translator.
+    var doctor = new DocTranslator();
+
+    doctor.models = null;
+
+    doctor.action = $('#node-input-action').val();
+    doctor.srclang_selected = $('#node-input-srclanghidden').val();
+    doctor.destlang_selected = $('#node-input-destlanghidden').val();
+
+    doctor.using_local_credentials = false;
+
+    doctor.LANGUAGES = { 'ar' : 'Arabic',
+                      'arz': 'Spoken Arabic',
+                      'ca' : 'Catalan',
+                      'cs' : 'Czech',
+                      'da' : 'Danish',
+                      'en' : 'English' ,
+                      'es' : 'Spanish',
+                      'fr' : 'French',
+                      'fi' : 'Finnish',
+                      'hi' : 'Hindi',
+                      'hu' : 'Hungarian',
+                      'it' : 'Italian',
+                      'de' : 'German',
+                      'ja' : 'Japanese',
+                      'pt' : 'Portuguese',
+                      'ko' : 'Korean',
+                      'nb' : 'Norwegian Bokmål',
+                      'nl' : 'Dutch',
+                      'pl' : 'Polish',
+                      'ru' : 'Russian',
+                      'sv' : 'Swedish',
+                      'tr' : 'Turkish',
+                      'zh' : 'Chinese',
+                      'zh-TW' : 'Taiwanese',
+                      'zht' : 'Traditional Chinese'
+                    };
+
+
+
+
+
+    doctor.showSelectedFields = function(fields) {
+      for (i = 0; i < fields.length; i++) {
+        $(fields[i]).parent().show();
+      }
+    }
+
+    doctor.hideSelectedFields = function(fields) {
+      for (i = 0; i < fields.length; i++) {
+        $(fields[i]).parent().hide();
+      }
+    }
+
+    // Function to be used at the start, as don't want to expose any fields, unless the model is
+    // available. The model it self can only be fetched if the credentials are available.
+    //doctor.hideAll = function () {
+      //var hideFields = [];
+      //var showFields = [];
+
+      //showFields.push('#credentials-not-found');
+      //hideFields.push('#node-input-action');
+    //}
+
+    // UI Handler for the Mode / switch.
+    // Princliple function is to show / hide the appropriate fields.
+    doctor.checkActionSelected = function () {
+      var hideFields = [];
+      var showFields = [];
+      tor.action = $('#node-input-action').val();
+      switch (tor.action) {
+        case 'translateDocument':
+          showFields.push('#node-input-srclang' +
+                            ', #node-input-destlang' +
+                            ', #node-input-filename');
+          hideFields.push('#node-input-document-id');
+          break;
+        case 'translateSubmittedDocument':
+          showFields.push('#node-input-srclang' +
+                            ', #node-input-destlang' +
+                            ', #node-input-document-id');
+          hideFields.push('#node-input-filename');
+          break;
+        case 'listDocuments':
+          hideFields.push('#node-input-srclang' +
+                            ', #node-input-destlang' +
+                            ', #node-input-filename' +
+                            ', #node-input-document-id');
+          break;
+        case 'documentStatus':
+        case 'deleteDocument':
+        case 'getDocument':
+          hideFields.push('#node-input-srclang' +
+                          ', #node-input-destlang' +
+                          ', #node-input-filename');
+          showFields.push('#node-input-document-id');
+        default:
+          break;
+      }
+      doctor.showSelectedFields(showFields);
+      doctor.hideSelectedFields(hideFields);
+    }
+
+    // Register the handlers for the fields
+    doctor.UIListeners = function () {
+      $('#node-input-username').change((val) => {
+        doctor.checkModels().then(() => {}).catch((err) => {console.log(err)});
+      });
+
+      $('#node-input-password').change((val) => {
+        doctor.checkModels().then(() => {}).catch((err) => {console.log(err)});
+      });
+
+      $('#node-input-apikey').change((val) => {
+        doctor.checkModels().then(() => {}).catch((err) => {console.log(err)});
+      });
+
+      $('#node-input-action').change((val) => {
+        doctor.action = $('#node-input-action').val();
+        doctor.checkActionSelected();
+      });
+
+      $('#node-input-default-endpoint').change(() => {
+        var checked = $('#node-input-default-endpoint').prop('checked')
+        if (checked) {
+          $('#node-input-service-endpoint').parent().hide();
+        } else {
+          $('#node-input-service-endpoint').parent().show();
+        }
+      });
+
+      $('#node-input-srclang').change(function () {
+        doctor.srclang_selected = $('#node-input-srclang').val();
+        if (doctor.models) {
+          doctor.buildTargetList();
+        }
+      });
+
+      $('#node-input-destlang').change(function () {
+        doctor.destlang_selected = $('#node-input-destlang').val();
+      });
+    }
+
+    doctor.restoreHidden = function () {
+      doctor.srclang_selected = $('#node-input-srclanghidden').val();
+      $('select#node-input-srslang').val(doctor.srclang_selected);
+      doctor.destlang_selected = $('#node-input-destlanghidden').val();
+      $('select#node-input-destlang').val(doctor.destlang_selected);
+    }
+
+    doctor.checkCredentials = function() {
+      return new Promise(function resolver(resolve, reject){
+        $.getJSON('watson-doc-translator/vcap/')
+          .done(function (service) {
+            $('.credentials').toggle(!service);
+            if (service) {
+              doctor.using_local_credentials = false;
+            } else {
+              doctor.using_local_credentials = true;
+            }
+          })
+          .fail(function () {
+            $('.credentials').show();
+            doctor.using_local_credentials = true;
+          }).always(function () {
+            $('#credentials-check').hide();
+            resolve();
+          })
+      });
+    }
+
+    doctor.checkModels = function () {
+      return new Promise(function resolver(resolve, reject){
+        // Take a sneaky look to see if the translator node
+        // has pulled down models
+        if (!doctor.models && tor && tor.models) {
+          doctor.models = tor.models;
+        }
+        if (doctor.models) {
+          resolve();
+        } else {
+          var u = $('#node-input-username').val();
+          var p = $('#node-input-password').val();
+          var k = $('#node-input-apikey').val();
+          var e = $('#node-input-service-endpoint').val();
+          var creds = {un: u, pwd: p, key: k};
+
+          if (! $('#node-input-default-endpoint').prop('checked')) {
+            creds.e = e;
+          }
+
+          $.getJSON('watson-doc-translator/models/', creds)
+          .done(function (data) {
+            if (data.models) {
+              doctor.models = data.models;
+              resolve()
+            } else {
+              reject('No Translation Models Found');
+            }
+          }).fail(function (err) {
+            console.log(err);
+            reject('Error Retrieving Translation Models');
+          }).always(function () {});
+        }
+      });
+    }
+
+    // sorting functions
+    doctor.checkUnique = function (value, index, self) {
+      return self.indexOf(value) === index;
+    }
+
+    doctor.buildSourceList = function () {
+      $('#node-input-srclang').empty();
+      // $('#node-input-destlang').empty();
+
+      // For Some reason this gets lost in the JSON get
+      doctor.srclang_selected = $('#node-input-srclanghidden').val();
+
+      //if (!doctor.srclang_seleted) {
+      //  doctor.srclang_selected = 'en';
+      //}
+
+      if (doctor.models) {
+        var input_lang = doctor.models.map(function (a) {
+          return a.source;
+        });
+
+        //var output_lang = doctor.models.map(function (a) {
+        //  return a.target;
+        //});
+
+        var input_lang_unique = input_lang.filter(tor.checkUnique);
+        //var output_lang_unique = output_lang.filter(tor.checkUnique);
+
+        input_lang_unique.forEach(function(lang){
+          var selectedText = '';
+
+          if (doctor.srclang_selected === lang) {
+            selectedText = 'selected="selected"';
+          }
+          $('select#node-input-srclang')
+            .append('<option value='
+                          + '"' + lang + '"'
+                          + selectedText
+                          + '>'
+                          + (doctor.LANGUAGES[lang] ? doctor.LANGUAGES[lang] : lang)
+                          + '</option>');
+        });
+
+      }
+    }
+
+    doctor.buildTargetList = function () {
+      $('#node-input-destlang').empty();
+
+      // For Some reason this gets lost in the JSON get
+      doctor.destlang_selected = $('#node-input-destlanghidden').val();
+
+      var pair_lang = doctor.models.map(function (a) {
+        return a.model_id;
+      });
+
+      // need to do an exact source language match to allow for variations
+      // like ar and arz. if the input is ar, then don't want it to match with arz
+      var available_destlang = pair_lang.filter(function (model_id) {
+        return model_id.match('^' + doctor.srclang_selected + '-');
+      });
+
+      available_destlang.forEach(function (val) {
+        // can now have languages like zh-TW, so simple split on -
+        // no longer works.
+        // var lang = val.split('-')[1];
+        let lang = val.replace(doctor.srclang_selected + '-', '');
+
+        var selectedText = '';
+        if (doctor.destlang_selected === lang) {
+          selectedText = 'selected="selected"';
+        }
+        $('select#node-input-destlang')
+          .append('<option value='
+                        + '"' + lang + '"'
+                        + selectedText
+                        + '>'
+                        + (tor.LANGUAGES[lang] ? tor.LANGUAGES[lang] : lang)
+                        + '</option>');
+      });
+    }
+
+
+    // This is the on edit prepare function, which will be invoked everytime
+    // the dialog is shown.
+    function oneditprepare() {
+      //doctor.hideAll();
+      doctor.restoreHidden();
+      doctor.UIListeners();
+      doctor.checkCredentials()
+        .then(() => {
+          return doctor.checkModels();
+        })
+        .then(() => {
+          doctor.buildSourceList();
+          doctor.buildTargetList();
+        })
+        .catch(function(err){
+        });
+    }
+
+    // Save the values in the dyanmic lists to the hidden fields.
+    function oneditsave(){
+      $('#node-input-srclanghidden').val(doctor.srclang_selected);
+      $('#node-input-destlanghidden').val(doctor.destlang_selected);
+    }
+
+    (function() {
+        RED.nodes.registerType('watson-doc-translator', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ""},
+                password: {value: ''},
+                apikey: {value: ''},
+                action: {value: 'translateDocument'},
+                srclang: {value: 'en'},
+                destlang: {value: 'fr'},
+                srclanghidden: {value: ''},
+                destlanghidden: {value: ''},
+                filename: {value: ''},
+                'document-id': {value: ''},
+                'default-endpoint' :{value: true},
+                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/language-translator/api'}
+            },
+            credentials: {
+                username: {type: 'text'}
+            },
+            color: "rgb(84,149,230)",
+            inputs: 1,
+            outputs: 1,
+            paletteLabel: "document translator",
+            icon: "LanguageTranslator25x25.png",
+            label: function() {
+                return this.name || "document translator";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: oneditprepare,
+            oneditsave: oneditsave
+        });
+    })();
+</script>
