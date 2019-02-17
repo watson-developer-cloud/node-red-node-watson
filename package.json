@@ -3,18 +3,18 @@
   "version": "0.7.5",
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
-    "async": "^1.5.2",
-    "cfenv": "~1.0.0",
+    "async": "^2.6.2",
+    "cfenv": "~1.1.0",
     "file-type": "^10.7.0",
-    "request": "~2.86.0",
+    "request": "~2.88.0",
     "temp": "^0.9.0",
     "qs": "6.x",
-    "image-type": "^2.0.2",
+    "image-type": "^3.0.0",
     "watson-developer-cloud": "^3.15.0",
     "word-count": "^0.2.2",
     "is-docx": "^0.0.3",
     "stream-to-array": "^2.3.0",
-    "ws": "^4.1.0"
+    "ws": "^6.1.4"
   },
   "repository": {
     "type": "git",
