@@ -14,6 +14,8 @@ Node-RED Watson Nodes for IBM Cloud
 - TSS Node fix to add visibility check on tts.voices and not stt.models
 - Assistant V1 Workspace Manager Node updated to reflect that in update mode, updated fields
 need a new_ prefix in their keys as part of the input json.
+- NLC Node - migrate off deprecated methods
+- NLC Node - Allow create of a classier to be based on a csv template node.
 
 ### New in version 0.7.5
 - Bump SDK Dependency to 3.15.0
