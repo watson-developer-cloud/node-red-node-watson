@@ -140,13 +140,13 @@ module.exports = function(RED) {
     node.checkForCreate = function(msg, config) {
       if ('create' !== config.mode) {
         return Promise.resolve(null);
-      } else {
-        var p = node.openTemp()
-          .then(function(info) {
-            return node.streamFile(msg, config, info);
-          });
-        return p;
+      } else if ('string' === typeof msg.payload) {
+        return Promise.resolve(null);
       }
+      return node.openTemp()
+        .then(function(info) {
+          return node.streamFile(msg, config, info);
+        });
     };
 
     node.buildParams = function(msg, config, info, payloadData) {
@@ -167,11 +167,16 @@ module.exports = function(RED) {
         }
         break;
       case 'create':
-        params.training_data = fs.createReadStream(info.path);
+        if ('string' === typeof msg.payload) {
+          params.training_data = msg.payload;
+        } else {
+          params.training_data = fs.createReadStream(info.path);
+        }
+
         params.language = config.language;
         break;
-      case 'remove':
-      case 'list':
+      case 'deleteClassifier':
+      case 'listClassifiers':
         params.classifier_id = msg.payload;
         if (msg.nlcparams && msg.nlcparams.classifier_id) {
           params.classifier_id = msg.nlcparams.classifier_id;

@@ -28,7 +28,7 @@ module.exports = function (RED) {
     iamutils = require('../../utilities/iam-utils'),
     sttutils = require('./stt-utils'),
     AuthV1 = require('watson-developer-cloud/authorization/v1'),
-    AuthIAMV1 = require('watson-developer-cloud/iam-token-manager/v1'),
+    AuthIAMV1 = require('ibm-cloud-sdk-core/iam-token-manager/v1'),
     muteMode = true, discardMode = false, autoConnect = true,
     username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
@@ -365,9 +365,11 @@ module.exports = function (RED) {
           params = {};
 
         // If we get to here then the audio is in one of the supported formats.
-        if (audioData.format === 'ogg') {
-          audioData.format += ';codecs=opus';
-        }
+        // STT service can now automatically detect the codec of the input audio
+        // and supports more than codec=opus for ogg formats.
+        //if (audioData.format === 'ogg') {
+        //  audioData.format += ';codecs=opus';
+        //}
 
         params = {
           audio: audioData.audio,

@@ -447,7 +447,7 @@
   // Function to be used at the start, as don't want to expose any fields, unless the models are
   // available. The models can only be fetched if the credentials are available.
   tts.hideEverything = function () {
-    if (!stt.models) {
+    if (!tts.voices) {
       $('label#node-label-message').parent().hide();
       $('select#node-input-lang').parent().hide();
       $('select#node-input-voice').parent().hide();
