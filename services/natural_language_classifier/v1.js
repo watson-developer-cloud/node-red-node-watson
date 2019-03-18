@@ -143,13 +143,10 @@ module.exports = function(RED) {
       } else if ('string' === typeof msg.payload) {
         return Promise.resolve(null);
       }
-      else {
-        var p = node.openTemp()
-          .then(function(info) {
-            return node.streamFile(msg, config, info);
-          });
-        return p;
-      }
+      return node.openTemp()
+        .then(function(info) {
+          return node.streamFile(msg, config, info);
+        });
     };
 
     node.buildParams = function(msg, config, info, payloadData) {
