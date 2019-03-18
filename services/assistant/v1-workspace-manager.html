@@ -340,7 +340,8 @@
       <p>In this mode, the specified dialog node is updated. The input json structure
         defining the content of the updates
         should be passed in
-        as <code>msg.payload</code>.
+        as <code>msg.payload</code>. Fields to be updated need a
+        <code>new_</code> prefix as part of their key. 
       </p>
     </li>
     <li>Delete Dialog Node

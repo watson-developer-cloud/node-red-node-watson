@@ -7,6 +7,14 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.7.6
+- Bump SDK Dependency to 3.18.2
+- STT Node To use iam-utils in place of removed iam-token-manager
+- STT Node removed codec setting as service can now automatically detect the codec of the input audio and supports more than codec=opus for ogg formats.
+- TSS Node fix to add visibility check on tts.voices and not stt.models
+- Assistant V1 Workspace Manager Node updated to reflect that in update mode, updated fields
+need a new_ prefix in their keys as part of the input json.
+
 ### New in version 0.7.5
 - Bump SDK Dependency to 3.15.0
 - Added Portuguese (Brazilian) and Chinese (Simplified and Traditional) as output languages
