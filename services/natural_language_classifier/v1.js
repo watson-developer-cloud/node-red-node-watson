@@ -178,7 +178,7 @@ module.exports = function(RED) {
 
         params.language = config.language;
         break;
-      case 'remove':
+      case 'deleteClassifier':
       case 'listClassifiers':
         params.classifier_id = msg.payload;
         if (msg.nlcparams && msg.nlcparams.classifier_id) {
