@@ -7,6 +7,9 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.7.7
+- STT Node - Set correct content-type when File-Type reports a mime type of audio/opus for ogg;codec=opus files. 
+
 ### New in version 0.7.6
 - Bump SDK Dependency to 3.18.2
 - STT Node To use iam-utils in place of removed iam-token-manager

@@ -1,11 +1,11 @@
 {
   "name": "node-red-node-watson",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
     "async": "^1.5.2",
     "cfenv": "~1.0.0",
-    "file-type": "^10.7.0",
+    "file-type": "^10.9.0",
     "request": "~2.86.0",
     "temp": "^0.9.0",
     "qs": "6.x",
