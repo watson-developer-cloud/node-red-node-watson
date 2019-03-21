@@ -176,7 +176,9 @@ module.exports = function (RED) {
         case 'mpeg':
           break;
         default:
-          message = 'Audio format (' + f + ') not supported, must be encoded as WAV, MP3, FLAC or OGG.';
+          if (! ft.mime.toLowerCase().includes('audio')) {
+            message = 'Audio format (' + f + ') not supported, must be encoded as WAV, MP3, FLAC or OGG.';
+          }
         }
       }
       if (message) {
@@ -192,6 +194,24 @@ module.exports = function (RED) {
       return payloadNonStreamCheck(msg);
     }
 
+    function setFormat(format) {
+      // if the format is being seen as either opus or vorbis, then it
+      // could be one of
+      //      audio/ogg;codecs=opus
+      //      audio/ogg;codecs=vorbis
+      //      audio/webm;codecs=opus
+      //      audio/webm;codecs=vorbis
+      // there isn't enough information to decide between audio/ogg and audio/webm
+      // so lets go with audio/ogg
+      switch (format) {
+      case 'opus':
+      case 'vorbis':
+        return 'ogg;codecs=' + format;
+      default:
+        return format;
+      }
+    }
+
     function processInputBuffer(msg) {
       var p = new Promise(function resolver(resolve, reject){
         temp.open({suffix: '.' + fileType(msg.payload).ext}, (err, info) => {
@@ -203,7 +223,8 @@ module.exports = function (RED) {
               audio = fs.createReadStream(info.path);
 
             audioData.audio = audio;
-            audioData.format = format;
+            audioData.format = setFormat(format);
+
             resolve(audioData);
           });
         });
@@ -225,7 +246,7 @@ module.exports = function (RED) {
               audio = fs.createReadStream(info.path);
 
             audioData.audio = audio;
-            audioData.format = format;
+            audioData.format = setFormat(format);
             resolve(audioData);
           });
         });
