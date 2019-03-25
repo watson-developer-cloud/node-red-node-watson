@@ -179,6 +179,27 @@
                      id="node-input-maxsemantics" />
             </div>
 
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-syntax" />
+              <label style="width: auto;" for="node-input-syntax">Syntax</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-syntax-sentences" />
+              <label style="width: auto;" for="node-input-syntax-sentences">Syntax Sentences</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-syntax-tokens-lemma" />
+              <label style="width: auto;" for="node-input-syntax-tokens-lemma">Lemma Tokens</label>
+            </div>
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-syntax-tokens-pos" />
+              <label style="width: auto;" for="node-input-syntax-tokens-pos">Part of Speech</label>
+            </div>
+
           </div>
     </div>
 
@@ -215,11 +236,13 @@
         <li><b>Relations</b>, identify Subject-Action-Object relations.</li>
         <li><b>Semantic Roles</b>, parse out sentences into subject,
                                 action, and object form.</li>
+        <li><b>Syntax</b>, Returns information about the tokens and sentences in
+                           the input text. </li>
 
     </ul>
     <p>
       You can limit the text analyzed by setting limit text characters. A value
-      of 0 applies no limit. 
+      of 0 applies no limit.
     </p>
     <p>For full details on the feature details,
       please see the
@@ -265,6 +288,9 @@
     $('#node-input-semantic-entities').parent().hide();
     $('#node-input-semantic-keywords').parent().hide();
     $('#node-input-maxsemantics').parent().hide();
+    $('#node-input-syntax-sentences').parent().hide();
+    $('#node-input-syntax-tokens-lemma').parent().hide();
+    $('#node-input-syntax-tokens-pos').parent().hide();
   };
 
   nluV1.setVisibility = function(field, visible) {
@@ -318,6 +344,12 @@
     nluV1.CreateIListener($('#node-input-default-endpoint'),
                                 $('#node-input-service-endpoint'), true);
 
+    nluV1.CreateIListener($('#node-input-syntax'),
+                                $('#node-input-syntax-sentences'
+                                    + ', #node-input-syntax-tokens-lemma'
+                                    + ', #node-input-syntax-tokens-pos'));
+
+
   }
 
   nluV1.checkForPrepare = function () {
@@ -368,6 +400,10 @@
               'semantic-keywords': {value: false},
               'maxsemantics' :{value: '50'},
               'limittextcharacters': {value: '0'},
+              'syntax': {value: false},
+              'syntax-sentences': {value: false},
+              'syntax-tokens-lemma': {value: false},
+              'syntax-tokens-pos': {value: false},
               'default-endpoint' :{value: true},
               'service-endpoint' :{value: 'https://gateway.watsonplatform.net/natural-language-understanding/api'}
             },

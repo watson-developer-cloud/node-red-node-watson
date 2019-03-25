@@ -27,7 +27,8 @@ module.exports = function (RED) {
     'keyword': 'keywords',
     'metadata': 'metadata',
     'relation': 'relations',
-    'semantic': 'semantic_roles'
+    'semantic': 'semantic_roles',
+    'syntax': 'syntax'
   };
 
   var pkg = require('../../package.json'),
@@ -153,6 +154,20 @@ module.exports = function (RED) {
     }
   }
 
+  function processSyntaxOptions(msg, config, features) {
+    if (features.syntax) {
+      features.syntax.sentences =
+          config['syntax-sentences'] ? config['syntax-sentences'] : false;
+      if (config['syntax-tokens-lemma'] || config['syntax-tokens-pos']) {
+        features.syntax.tokens = {};
+        features.syntax.tokens.lemma =
+           config['syntax-tokens-lemma'] ? config['syntax-tokens-lemma'] : false;
+        features.syntax.tokens.part_of_speech =
+              config['syntax-tokens-pos'] ? config['syntax-tokens-pos'] : false;
+      }
+    }
+  }
+
   function processRelationsOptions(msg, config, features) {
     if (features.relations) {
       if (msg.nlu_options && msg.nlu_options.relations_model) {
@@ -195,6 +210,7 @@ module.exports = function (RED) {
       processRelationsOptions(msg,config, options.features);
       processKeywordsOptions(config, options.features);
       processSemanticRolesOptions(config, options.features);
+      processSyntaxOptions(msg,config, options.features);
     }
     return Promise.resolve();
   }
