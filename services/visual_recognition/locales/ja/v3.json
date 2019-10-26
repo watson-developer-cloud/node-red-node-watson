@@ -1,0 +1,23 @@
+{
+    "visualRecognition": {
+        "label": {
+            "apiKey": "APIキー",
+            "serviceEndpoint": "サービスエンドポイント",
+            "detect": "検出:",
+            "classifyAnImage": "画像分類",
+            "detectFaces": "顔検出",
+            "language": "言語",
+            "english": "英語",
+            "spanish": "スペイン語",
+            "german": "ドイツ語",
+            "french": "フランス語",
+            "italian": "イタリア語",
+            "portugueseBrazilian": "ポルトガル語(ブラジル)",
+            "chineseSimplified": "中国語(簡体)",
+            "chineseTraditional": "中国語(繁体)",
+            "arabic": "アラビア語",
+            "japanese": "日本語",
+            "korean": "韓国語"
+        }
+    }
+}

@@ -21,11 +21,11 @@
         </div>
     </div>
     <div class="form-row credentials" style="display: none;">
-        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
-        <input type="password" id="node-input-apikey" placeholder="API Key">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> <span data-i18n="visualRecognition.label.apiKey"></span></label>
+        <input type="password" id="node-input-apikey" data-i18n="[placeholder]visualRecognition.label.apiKey">
     </div>
     <div class="form-row credentials">
-        <label for="node-input-vr-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <label for="node-input-vr-service-endpoint"><i class="fa fa-tag"></i> <span data-i18n="visualRecognition.label.serviceEndpoint"></label>
         <select type="text" id="node-input-vr-service-endpoint" style="display: inline-block; width: 70%;" >
             <option value="https://gateway-a.watsonplatform.net/visual-recognition/api">https://gateway-a.watsonplatform.net/visual-recognition/api</option>
             <option value="https://gateway.watsonplatform.net/visual-recognition/api">https://gateway.watsonplatform.net/visual-recognition/api</option>
@@ -33,30 +33,30 @@
     </div>
 
     <div class="form-row">
-        <label for="node-input-image-feature"><i class="fa fa-book"></i> Detect: </label>
+        <label for="node-input-image-feature"><i class="fa fa-book"></i> <span data-i18n="visualRecognition.label.detect"> </label>
         <select type="text" id="node-input-image-feature" style="display: inline-block; width: 70%;">
-            <option selected="selected" value="classifyImage">Classify an image</option>
-            <option value="detectFaces">Detect Faces</option>
+            <option selected="selected" value="classifyImage" data-i18n="visualRecognition.label.classifyAnImage"></option>
+            <option value="detectFaces" data-i18n="visualRecognition.label.detectFaces"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
     </div>
     <div class="form-row" id="lang-group">
-        <label for="node-input-lang"><i class="fa fa-language"></i> Language</label>
+        <label for="node-input-lang"><i class="fa fa-language"></i> <span data-i18n="visualRecognition.label.language"></label>
         <select type="text" id="node-input-lang" style="display: inline-block; width: 70%;" >
-            <option selected="selected" value="en">English</option>
-            <option value="es">Spanish</option>
-            <option value="de">German</option>
-            <option value="fr">French</option>
-            <option value="it">Italian</option>
-            <option value="pt-br">Portuguese (Brazilian)</option>
-            <option value="zh-cn">Chinese (Simplified)</option>
-            <option value="zh-tw">Chinese (Traditional)</option>
-            <option value="ar">Arabic</option>
-            <option value="ja">Japanese</option>
-            <option value="ko">Korean</option>
+            <option selected="selected" value="en" data-i18n="visualRecognition.label.english"></option>
+            <option value="es" data-i18n="visualRecognition.label.spanish"></option>
+            <option value="de" data-i18n="visualRecognition.label.german"></option>
+            <option value="fr" data-i18n="visualRecognition.label.french"></option>
+            <option value="it" data-i18n="visualRecognition.label.italian"></option>
+            <option value="pt-br" data-i18n="visualRecognition.label.portugueseBrazilian"></option>
+            <option value="zh-cn" data-i18n="visualRecognition.label.chineseSimplified"></option>
+            <option value="zh-tw" data-i18n="visualRecognition.label.chineseTraditional"></option>
+            <option value="ar" data-i18n="visualRecognition.label.arabic"></option>
+            <option value="ja" data-i18n="visualRecognition.label.japanese"></option>
+            <option value="ko" data-i18n="visualRecognition.label.korean"></option>
         </select>
     </div>
 </script>

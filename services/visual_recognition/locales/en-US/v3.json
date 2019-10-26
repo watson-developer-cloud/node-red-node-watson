@@ -1,0 +1,23 @@
+{
+    "visualRecognition": {
+        "label": {
+            "apiKey": "API Key",
+            "serviceEndpoint": "Service Endpoint",
+            "detect": "Detect:",
+            "classifyAnImage": "Classify an image",
+            "detectFaces": "Detect Faces",
+            "language": "Language",
+            "english": "English",
+            "spanish": "Spanish",
+            "german": "German",
+            "french": "French",
+            "italian": "Italian",
+            "portugueseBrazilian": "Portuguese (Brazilian)",
+            "chineseSimplified": "Chinese (Simplified)",
+            "chineseTraditional": "Chinese (Traditional)",
+            "arabic": "Arabic",
+            "japanese": "Japanese",
+            "korean": "Korean"
+        }
+    }
+}
