@@ -7,89 +7,17 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
-### New in version 0.7.8
-- NLU Node - Add Syntax to list of selectable features
 
-### New in version 0.7.7
-- STT Node - Set correct content-type when File-Type reports a mime type of audio/opus for ogg;codec=opus files.
-
-### New in version 0.7.6
-- Bump SDK Dependency to 3.18.2
-- STT Node To use iam-utils in place of removed iam-token-manager
-- STT Node removed codec setting as service can now automatically detect the codec of the input audio and supports more than codec=opus for ogg formats.
-- TSS Node fix to add visibility check on tts.voices and not stt.models
-- Assistant V1 Workspace Manager Node updated to reflect that in update mode, updated fields
-need a new_ prefix in their keys as part of the input json.
-- NLC Node - migrate off deprecated methods
-- NLC Node - Allow create of a classier to be based on a csv template node.
-
-### New in version 0.7.5
-- Bump SDK Dependency to 3.15.0
-- Added Portuguese (Brazilian) and Chinese (Simplified and Traditional) as output languages
-for Visual Recognition node.
-- Added list voices and delete customisation methods to TTS Corpus Builder node.
-- STT Node Changes
-  - Allowing SDK to manage IAM Tokens.
-  - Streaming mode for STT using IAM key now working.
-  - Fix to stream mode for max alternatives and smart formatting options
-  - Keywords, Word Confidence and Customization Weight can now be specified
-  - Allow Start and End data packets to be specified as JSON objects, as well as
-a stringified JSON objects.
-  - In line with SDK change use createLanguageModel() to create custom model
-- Disable SSL Verification option for Assistant Node.
-- Natural Language Understanding Node Changes
-  - Bump Natural Language Understanding to 2018-11-16
-  - Add Limit Categories and limit_text_characters options
-- Allow JSON input into Personality Insights node.
-- Japanese word count was causing a Node-RED crash when run in the cloud.
-- Hungarian supported by Language Translator.
-- New Document Language Translator node.
-- New Assistant V2 Node.
-- Discovery Node changes
-  - Bump Discovery to 2018-12-03
-  - Implement Query Notices method
-- Bump dependency on file-type to 10.7.0
-- Bump dependency on temp to 0.9.0
-
-
-### New in version 0.7.4
-- Bump SDK Dependency to 3.11.0
-- Bump Assistant version to 2018-09-20
-- Bump Discovery version to 2018-08-01
-- Bump Natural Language Understanding to 2018-09-21
-- Bump Personality Insights to 2017-10-13
-- Discovery New Environment Size is now a string
-- Add Language Text to DropDrown for new supported languages in Translation Node.
-- Natural Language Classifier updated for use of IAM key for authentication.
-- Fix the Natural Language Understanding for bound IAM key service.
-- German is a supported STT Language.
-- Visual Recognition Key fix when migrating from unbound to bound service.
-
-### New in version 0.7.3
-- Modify Discovery Query Builder Node to use `listCollectionFields` to determine query list.
-
-### New in version 0.7.2
-- Allow version date for Assistant to be specified in `msg.params.version`
-to allow optional usage of beta version.
-
-### New in version 0.7.1
-- Fix to how IAM Key for bound Visual Recognition is retrieved
-
-### New in version 0.7.0
-- In this release STT in Stream mode with IAM Keys does not work.
-- Assistant, Discovery, Language Identify, Language Translator,
-Natural Language Understanding, Personality Insights,
-Speech to Text, Text to Speech, Tone Analyzer nodes updated
-to allow for use of IAM key for authentication.
-- Migrated STT node off deprecated methods.
-- Fix to Tone Analyzer Node to preserve credentials on config reopen.
-- Fix to Tone Analyzer to allow json objects and arrays as payload.
-- Fix to STT where auto-connect was not being preserved when reopening configuration.
-- Bump to 2018-03-05 version date for Discovery service.
-- Move to V3 of Language Translator
-- Migrated Discovery Nodes off deprecated methods.
-- Remove Deprecated Retrieve and Rank Nodes
-
+### New in version 0.8.0
+- In the 0.8.x releases the nodes are migrated to a node-red 1.0.x input
+event callback function signature.
+and migrated off watson-developer-cloud to ibm-watson as a npm dependancy.
+Migrated nodes will not run on pre 1.0.0 versions of node-red.
+During the migration there will be a dependancy on both modules.
+- Bump dependancy on node to >=10.0.0
+- Bump dependancy on cfenv, request, ibm-cloud-sdk-core.
+- Node-RED & IBM-Watson & IAM URL construct migration & Removal of default endpoint of
+    - Tone Analyzer node.
 
 ### Watson Nodes for Node-RED
 A collection of nodes to interact with the IBM Watson services in [IBM Cloud](http://bluemix.net).

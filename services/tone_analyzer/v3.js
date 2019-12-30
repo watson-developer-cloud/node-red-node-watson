@@ -15,9 +15,10 @@
  **/
 
 module.exports = function (RED) {
-  const SERVICE_IDENTIFIER = 'tone-analyzer';
+  const SERVICE_IDENTIFIER = 'tone-analyzer',
+    ToneAnalyzerV3 = require('ibm-watson/tone-analyzer/v3'),
+    IamAuthenticator = require('ibm-watson/auth');
   var pkg = require('../../package.json'),
-    ToneAnalyzerV3 = require('watson-developer-cloud/tone-analyzer/v3'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     toneutils = require('../../utilities/tone-utils'),
@@ -97,7 +98,9 @@ module.exports = function (RED) {
 
 
   function invokeService(config, options, settings) {
-    var serviceSettings = {
+    let authSettings  = {};
+
+    let serviceSettings = {
       version_date: '2017-09-21',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
@@ -105,11 +108,13 @@ module.exports = function (RED) {
     };
 
     if (settings.iam_apikey) {
-      serviceSettings.iam_apikey = settings.iam_apikey;
+      authSettings.apikey = settings.iam_apikey;
     } else {
-      serviceSettings.username = settings.username;
-      serviceSettings.password = settings.password;
+      authSettings.username = settings.username;
+      authSettings.password = settings.password;
     }
+
+    serviceSettings.authenicator = new IamAuthenticator(authSettings);
 
     endpoint = sEndpoint;
     if ((!config['default-endpoint']) && config['service-endpoint']) {
@@ -150,7 +155,7 @@ module.exports = function (RED) {
 
   // function when the node recieves input inside a flow.
   // Configuration is first checked before the service is invoked.
-  var processOnInput = function(msg, config, node) {
+  var processOnInput = function(msg, send, done, config, node) {
     checkConfiguration(msg, node)
       .then(function(settings) {
         var options = toneutils.parseOptions(msg, config);
@@ -161,12 +166,14 @@ module.exports = function (RED) {
       .then(function(data){
         node.status({})
         msg.response = data;
-        node.send(msg);
+        send(msg);
         node.status({});
+        done();
       })
       .catch(function(err){
         payloadutils.reportError(node,msg,err);
-        node.send(msg);
+        send(msg);
+        done(err);
       });
   }
 
@@ -177,8 +184,8 @@ module.exports = function (RED) {
     var node = this;
 
     // Invoked when the node has received an input as part of a flow.
-    this.on('input', function (msg) {
-      processOnInput(msg, config, node);
+    this.on('input', function(msg, send, done) {
+      processOnInput(msg, send, done, config, node);
     });
   }
 
