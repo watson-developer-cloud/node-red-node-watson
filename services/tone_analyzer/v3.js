@@ -17,7 +17,7 @@
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'tone-analyzer',
     ToneAnalyzerV3 = require('ibm-watson/tone-analyzer/v3'),
-    IamAuthenticator = require('ibm-watson/auth');
+    { IamAuthenticator } = require('ibm-watson/auth');
   var pkg = require('../../package.json'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
@@ -101,7 +101,7 @@ module.exports = function (RED) {
     let authSettings  = {};
 
     let serviceSettings = {
-      version_date: '2017-09-21',
+      version: '2017-09-21',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -114,7 +114,7 @@ module.exports = function (RED) {
       authSettings.password = settings.password;
     }
 
-    serviceSettings.authenicator = new IamAuthenticator(authSettings);
+    serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     endpoint = sEndpoint;
     if ((!config['default-endpoint']) && config['service-endpoint']) {
@@ -137,7 +137,7 @@ module.exports = function (RED) {
       case 'generalTone' :
         break;
       case 'customerEngagementTone' :
-        m = 'tone_chat';
+        m = 'toneChat';
         break;
       }
 
@@ -165,7 +165,11 @@ module.exports = function (RED) {
       })
       .then(function(data){
         node.status({})
-        msg.response = data;
+        if (data && data.result) {
+          msg.response = data.result;
+        } else {
+          msg.response = data;
+        }
         send(msg);
         node.status({});
         done();

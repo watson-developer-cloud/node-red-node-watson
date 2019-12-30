@@ -38,12 +38,7 @@
     </div>
 
     <div class="form-row credentials">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-cwm-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
-    </div>
-    <div class="form-row">
-        <label for="node-input-cwm-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
         <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/tone-analyzer/api">
     </div>
 
@@ -104,10 +99,26 @@
     <p>The service response will be returned on <b>msg.response</b>.</p>
     <p>The tone and sentances can be programmaticaly set in <code>msg.tones</code>
     and <code>msg.sentences</code></p>
-    <p>Usng the node editor dialog users can filter the results by tone (emotion, language or social) and
+    <p>Using the node editor dialog users can filter the results by tone (emotion, language or social) and
       whether to include sentence-level analysis.</p>
     <p>When running the Conversational Chat Tone, the input needs to follow the
     chat json format for utterences. </p>
+    <code>
+      msg.payload = [
+        {
+          text: "Hello, I'm having a problem with your product.",
+          user: "customer",
+        },
+        {
+          text: "OK, let me know what's going on, please.",
+          user: "agent",
+        },
+        {
+          text: "Well, nothing is working :(",
+          user: "customer",
+        }
+      ];
+    </code>
     <p>For more information about the Tone Analyzer service, read the <a href="https://www.ibm.com/watson/services/tone-analyzer/">documentation</a>.</p>
 </script>
 
@@ -177,15 +188,6 @@
       var method = $('#node-input-tone-method').val();
       ToneV3.processSelectedVersion(method, version);
     });
-
-    $('#node-input-default-endpoint').change(function () {
-      var checked = $('#node-input-default-endpoint').prop('checked')
-      if (checked) {
-        $('#node-input-service-endpoint').parent().hide();
-      } else {
-        $('#node-input-service-endpoint').parent().show();
-      }
-    });
   }
 
   ToneV3.checkForPrepare = function () {
@@ -219,7 +221,6 @@
                 "interface-version": {value:"generalTone"},
                 name: {value: ""},
                 inputlang: {value: "en"},
-                'default-endpoint' :{value: true},
                 'service-endpoint' :{value: 'https://gateway.watsonplatform.net/tone-analyzer/api'}
             },
             credentials: {
