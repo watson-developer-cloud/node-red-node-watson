@@ -23,15 +23,20 @@ ServiceUtils.prototype = {
   // that the url associated with the service, contains the matched
   // input value, hence reducing the chances of a false match.
   checkCFForService: function(serviceName, returnBoolean) {
-    var regex = RegExp('(http|https)(://)('+serviceName+').*');
+    var regex = RegExp('(http|https)(:\/\/)([^\/]+).*('+serviceName+').*');
 
     var services = appEnv.getServices();
 
     for (var service in services) {
-      if (services[service].hasOwnProperty('credentials')) {
-        if (services[service].credentials.hasOwnProperty('url')){
-          if (services[service].credentials.url.search(regex) === 0){
-            return returnBoolean ? true : services[service].credentials;
+      let section = services[service];
+      if (Array.isArray(section)) {
+        section = section[0];
+      }
+
+      if (section.hasOwnProperty('credentials')) {
+        if (section.credentials.hasOwnProperty('url')){
+          if (section.credentials.url.search(regex) === 0){
+            return returnBoolean ? true : section.credentials;
           }
         }
       }
