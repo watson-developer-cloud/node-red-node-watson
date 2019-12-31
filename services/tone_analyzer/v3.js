@@ -18,6 +18,7 @@ module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'tone-analyzer',
     ToneAnalyzerV3 = require('ibm-watson/tone-analyzer/v3'),
     { IamAuthenticator } = require('ibm-watson/auth');
+
   var pkg = require('../../package.json'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
@@ -117,7 +118,7 @@ module.exports = function (RED) {
     serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     endpoint = sEndpoint;
-    if ((!config['default-endpoint']) && config['service-endpoint']) {
+    if (config['service-endpoint']) {
       endpoint = config['service-endpoint'];
     }
 
@@ -126,7 +127,7 @@ module.exports = function (RED) {
     }
 
     if (config['interface-version']) {
-      serviceSettings.version_date = config['interface-version'];
+      serviceSettings.version = config['interface-version'];
     }
 
     const tone_analyzer = new ToneAnalyzerV3(serviceSettings);
@@ -141,13 +142,13 @@ module.exports = function (RED) {
         break;
       }
 
-      tone_analyzer[m](options, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
+      tone_analyzer[m](options)
+        .then((response) => {
           resolve(response);
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        })
     });
 
     return p;

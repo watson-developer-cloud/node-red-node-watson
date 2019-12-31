@@ -15,9 +15,11 @@
  **/
 
 module.exports = function (RED) {
-  const SERVICE_IDENTIFIER = 'personality-insights';
+  const SERVICE_IDENTIFIER = 'personality-insights',
+  PersonalityInsightsV3 = require('ibm-watson/personality-insights/v3'),
+  { IamAuthenticator } = require('ibm-watson/auth');
+
   var pkg = require('../../package.json'),
-    PersonalityInsightsV3 = require('watson-developer-cloud/personality-insights/v3'),
     payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
@@ -30,7 +32,7 @@ module.exports = function (RED) {
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/personality-insights/api',
 
-    VALID_INPUT_LANGUAGES = ['ar','en','es','ja'],
+    VALID_INPUT_LANGUAGES = ['ar','en','es','ja', 'ko'],
     VALID_RESPONSE_LANGUAGES = ['ar','de','en','es','fr','it','ja','ko','pt-br','zh-cn','zh-tw'];
 
   if (service) {
@@ -108,8 +110,8 @@ module.exports = function (RED) {
 
     params = {
       content: msg.payload,
-      consumption_preferences: config.consumption ? config.consumption : false,
-      raw_scores: config.rawscores ? config.rawscores : false,
+      consumptionPreferences: config.consumption ? config.consumption : false,
+      rawScores: config.rawscores ? config.rawscores : false,
       headers: {
         'content-language': inputlang,
         'accept-language': outputlang,
@@ -118,9 +120,9 @@ module.exports = function (RED) {
     };
 
     if ('string' === typeof msg.payload) {
-      params.content_type = 'text/plain';
+      params.contentType = 'text/plain';
     } else {
-      params.content_type = 'application/json';
+      params.contentType = 'application/json';
     }
 
     return Promise.resolve(params);
@@ -128,7 +130,7 @@ module.exports = function (RED) {
 
   function setEndPoint(config) {
     endpoint = sEndpoint;
-    if ((!config['default-endpoint']) && config['service-endpoint']) {
+    if (config['service-endpoint']) {
       endpoint = config['service-endpoint'];
     }
     return Promise.resolve();
@@ -136,20 +138,23 @@ module.exports = function (RED) {
 
   function executeService(msg, params) {
     var p = new Promise(function resolver(resolve, reject) {
-      var personality_insights = null,
-        serviceSettings = {
-          version_date: '2017-10-13',
+      let personality_insights = null;
+      let authSettings  = {};
+      let serviceSettings = {
+          version: '2017-10-13',
           headers: {
             'User-Agent': pkg.name + '-' + pkg.version
           }
         };
 
       if (apikey) {
-        serviceSettings.iam_apikey = apikey;
+        authSettings.apikey = apikey;
       } else {
-        serviceSettings.username = username;
-        serviceSettings.password = password;
+        authSettings.username = username;
+        authSettings.password = password;
       }
+
+      serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
       if (endpoint) {
         serviceSettings.url = endpoint;
@@ -157,14 +162,18 @@ module.exports = function (RED) {
 
       personality_insights = new PersonalityInsightsV3(serviceSettings);
 
-      personality_insights.profile(params, function(err, response){
-        if (err) {
-          reject(err);
-        } else {
-          msg.insights = response;
+      personality_insights.profile(params)
+        .then((profile) => {
+          if (profile && profile.result) {
+            msg.insights = profile.result;
+          } else {
+            msg.insights = profile;
+          }
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        })
 
     });
     return p;
@@ -177,7 +186,7 @@ module.exports = function (RED) {
     var node = this,
       message = '';
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg, send, done) {
       node.status({});
 
       payloadCheck(msg)
@@ -200,11 +209,13 @@ module.exports = function (RED) {
       })
       .then(function(){
         node.status({});
-        node.send(msg);
+        send(msg);
+        done();
       })
       .catch(function(err){
         payloadutils.reportError(node, msg, err);
-        node.send(msg);
+        send(msg);
+        done(err);
       });
     });
   }
