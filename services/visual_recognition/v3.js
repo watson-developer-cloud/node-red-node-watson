@@ -281,11 +281,17 @@ module.exports = function(RED) {
           return callback('open error on ' + k);
         }
         stream_buffer(info.path, msg.params[k], function() {
-          let example_name = k;
-          if (! (k.includes('positive') || k.includes('negative'))) {
-            example_name = k.replace('examples', 'positive_examples');
+          let example_name = k.replace('_examples','');
+
+          if (k.includes('negative')) {
+            listParams['negativeExamples'] = fs.createReadStream(info.path);
+          } else {
+            if (! listParams['positiveExamples']) {
+              listParams['positiveExamples'] = {};
+            }
+            listParams['positiveExamples'][example_name] = fs.createReadStream(info.path);
           }
-          listParams[example_name] = fs.createReadStream(info.path);
+
           callback(null, example_name);
         });
       });
@@ -295,7 +301,7 @@ module.exports = function(RED) {
   // This function is expecting
   // msg.params["name"] : a string name that will be used as prefix
   // for the returned classifier_id (Required)
-  // msg.params["{classname}_positive_examples"] : a Node.js binary
+  // msg.params["{classname}_examples"] : a Node.js binary
   // Buffer of the ZIP that contains a minimum of 10 images. (Required)
   // msg.params["negative_examples"] : a Node.js binary Buffer of the ZIP
   // that contains a minimum of 10 images.(Optional)
@@ -406,14 +412,17 @@ module.exports = function(RED) {
 
   function invokeClassifierMethod(node, params, method) {
     var p = new Promise(function resolver(resolve, reject) {
-      node.service[method](params, function(err, body) {
-        if (err) {
+      node.service[method](params)
+        .then((data) => {
+          let result = data
+          if (data && data.result) {
+            result = data.result;
+          }
+         resolve(result);
+        })
+        .catch((err) => {
           reject(err);
-        } else {
-          resolve(body);
-        }
-      });
-
+        })
     });
     return p;
   }

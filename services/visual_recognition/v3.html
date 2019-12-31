@@ -74,7 +74,7 @@
     </div>
 
     <div class="form-row">
-        <label for="node-input-image-feature"><i class="fa fa-book"></i> Detect: </label>
+        <label for="node-input-image-feature"><i class="fa fa-book"></i> Mode: </label>
         <select type="text" id="node-input-image-feature" style="display: inline-block; width: 70%;">
             <option value="createClassifier">Create a classifier</option>
             <option value="retrieveClassifiersList">Retrieve a list of classifiers</option>
@@ -261,7 +261,7 @@
     <p>this feature should be provided in input : </p>
     <ul>
     <li><code>msg.params["name"]</code> : a string name that will be used as prefix for the returned classifier_id (Required)</li>
-    <li><code>msg.params["{classname}_positive_examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images. (Required)</li>
+    <li><code>msg.params["{classname}__examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images. (Required) Muliple entires are optional</li>
     <li><code>msg.params["negative_examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images.(Optional)</li>
     </ul>
     <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#create_a_classifier">API documentation</a>.</p>
