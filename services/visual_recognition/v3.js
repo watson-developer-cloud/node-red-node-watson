@@ -16,7 +16,8 @@
 
 module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'visual-recognition',
-    VisualRecognitionV3 = require('watson-developer-cloud/visual-recognition/v3'),
+    VisualRecognitionV3 = require('ibm-watson/visual-recognition/v3'),
+    { IamAuthenticator } = require('ibm-watson/auth'),
     METHODS = {
       CREATECLASSIFER : 'createClassifier',
       LISTCLASSIFIERS : 'listClassifiers',
@@ -41,7 +42,6 @@ module.exports = function(RED) {
     toArray = require('stream-to-array'),
     sAPIKey = null,
     apikey = '',
-    iamAPIKey = false,
     service = null,
     endpoint = '',
     sEndpoint = '';
@@ -91,8 +91,7 @@ module.exports = function(RED) {
 
   function verifyFeatureMode(node, msg, config) {
     const theOptions = {
-      'classify' : 'classifyImage',
-      'faces' : 'detectFaces'
+      'classify' : 'classifyImage'
     };
 
     var f = config['image-feature'];
@@ -114,7 +113,6 @@ module.exports = function(RED) {
   function verifyInputs(feature, msg) {
     switch (feature) {
     case 'classifyImage':
-    case 'detectFaces':
       if (typeof msg.payload === 'boolean' ||
         typeof msg.payload === 'number') {
         return Promise.reject('Bad format : msg.payload must be a URL string or a Node.js Buffer');
@@ -158,8 +156,10 @@ module.exports = function(RED) {
       return Promise.reject('Missing Watson Visual Recognition API service credentials');
     }
 
+    let authSettings  = {};
+
     var serviceSettings = {
-      version_date: '2018-03-19',
+      version: '2018-03-19',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -170,11 +170,12 @@ module.exports = function(RED) {
     }
 
     // VR instances created post 22 May 2018, are expecting an iam API Key
-    if (iamAPIKey) {
-      serviceSettings.iam_apikey = apikey;
-    } else {
-      serviceSettings.api_key = apikey;
-    }
+    //if (iamAPIKey) {
+    //  serviceSettings.iam_apikey = apikey;
+    //} else {
+    authSettings.apikey = apikey;
+    //}
+    serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     // The change to watson-developer-cloud 3.0.x has resulted in a
     // change in how the Accept-Language is specified. It now needs
@@ -210,7 +211,7 @@ module.exports = function(RED) {
 
   function setCommonParams(node, msg, params) {
     if (msg.params != null && msg.params.classifier_ids != null) {
-      params['classifier_ids'] = msg.params['classifier_ids'];
+      params['classifierIds'] = msg.params['classifier_ids'];
     }
     if (msg.params != null && msg.params.owners != null) {
       params['owners'] = msg.params['owners'];
@@ -219,10 +220,10 @@ module.exports = function(RED) {
       params['threshold'] = msg.params['threshold'];
     }
     if (node.config != null && node.config.lang != null) {
-      params['Accept-Language'] = node.config.lang;
+      params['acceptLanguage'] = node.config.lang;
     }
     if (msg.params != null && msg.params.accept_language != null) {
-      params['Accept-Language'] = msg.params['accept_language'];
+      params['acceptLanguage'] = msg.params['accept_language'];
     }
   }
 
@@ -238,7 +239,7 @@ module.exports = function(RED) {
             reject('Node has been unable to open the image stream');
           }
           stream_buffer(info.path, msg.payload, function() {
-            params['images_file'] = fs.createReadStream(info.path);
+            params['imagesFile'] = fs.createReadStream(info.path);
             setCommonParams(node, msg, params);
             resolve();
           });
@@ -375,22 +376,17 @@ module.exports = function(RED) {
     var p = new Promise(function resolver(resolve, reject) {
       switch (feature) {
       case 'classifyImage':
-        node.service.classify(params, function(err, body) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(body);
-          }
-        });
-        break;
-      case 'detectFaces':
-        node.service.detectFaces(params, function(err, body) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(body);
-          }
-        });
+       node.service.classify(params)
+         .then((data) => {
+           let result = data
+           if (data && data.result) {
+             result = data.result;
+           }
+          resolve(result);
+         })
+         .catch((err) => {
+           reject(err);
+         });
         break;
       }
     });
@@ -485,7 +481,7 @@ module.exports = function(RED) {
       text: 'Calling ' + feature + ' ...'
     });
 
-    if (feature === 'classifyImage' || feature === 'detectFaces') {
+    if (feature === 'classifyImage') {
       return executeService(feature, params, node, msg);
       //return Promise.resolve();
     } else {
@@ -498,17 +494,9 @@ module.exports = function(RED) {
   }
 
   function determineEndpoint(config) {
-    // Any VR instances created post 22 May 2018, have a different endpoint
-    // and mechanism for authentication. This function detemines if this
-    // new authentication mechanism is being utlised.
-    iamAPIKey = false;
-
     endpoint = sEndpoint;
     if (!endpoint && config['vr-service-endpoint']) {
       endpoint = config['vr-service-endpoint'];
-    }
-    if (endpoint && 'https://gateway.watsonplatform.net/visual-recognition/api' === endpoint) {
-      iamAPIKey = true;
     }
     return Promise.resolve();
   }
@@ -522,7 +510,7 @@ module.exports = function(RED) {
     RED.nodes.createNode(this, config);
     node.config = config;
 
-    node.on('input', function(msg) {
+    node.on('input', function(msg, send, done) {
       var params = {};
 
       node.status({});
@@ -550,7 +538,8 @@ module.exports = function(RED) {
         .then(function() {
           temp.cleanup();
           node.status({});
-          node.send(msg);
+          send(msg);
+          done();
         })
         .catch(function(err) {
           payloadutils.reportError(node, msg, err);
@@ -562,7 +551,8 @@ module.exports = function(RED) {
           // Should be ok as the node.error would already have recorded
           // the error in the debug console.
           temp.cleanup();
-          node.send(msg);
+          send(msg);
+          done(err);
         });
     });
   }
