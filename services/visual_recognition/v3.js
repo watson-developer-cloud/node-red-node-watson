@@ -352,14 +352,14 @@ module.exports = function(RED) {
             asyncTasks.push(function(cb) {
               var parms = {};
 
-              parms.classifier_id = aClassifier.classifier_id;
+              parms.classifierId = aClassifier.classifierId;
               node.service.deleteClassifier(parms, function(err) {
                 if (err) {
                   node.error(err, msg);
                   return cb('error');
                 }
                 nbdeleted++;
-                cb(null, parms.classifier_id);
+                cb(null, parms.classifierId);
               });
             });
           });
@@ -495,7 +495,7 @@ module.exports = function(RED) {
       //return Promise.resolve();
     } else {
       if (msg.params && msg.params['classifier_id']) {
-        params['classifier_id'] = msg.params['classifier_id'];
+        params['classifierId'] = msg.params['classifier_id'];
       }
       return executeUtilService(feature, params, node, msg);
       // return Promise.resolve();

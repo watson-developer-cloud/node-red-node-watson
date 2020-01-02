@@ -106,7 +106,7 @@
     <ul>
     <li><code>msg.payload</code> : the URL or the Node.js Buffer of an image. Redirects are followed, so you can use shortened URLs. (Required)</li>
     <li><code>msg.params["detect_mode"]</code> : A setting of "classify" indicating the visual recognition feature required. "Default" is "classify" (string) (Optional)</li>
-    <li><code>msg.params["classifier_ids"]</code> : A comma-separated list of the classifier IDs used to classify the images. "Default" is the classifier_id of the built-in classifier. (string) (Optional)</li>
+    <li><code>msg.params["classifier_ids"]</code> : A comma-separated list of the classifier IDs, with no spaces, used to classify the images. "Default" is the classifier_id of the built-in classifier. (string) (Optional)</li>
     <li><code>msg.params["owners"]</code> : A comma-separated list with the value(s) "IBM" and/or "me" to specify which classifiers to run. (string) (Optional)</li>
     <li><code>msg.params["threshold"]</code> : A floating value (in string format) that specifies the minimum score a class must have to be displayed in the response (Optional)</li>
     <li><code>msg.params["accept_language"]</code> : Specifies the language of the output class names. Can be 'en' (English as default), 'es' (Spanish), 'ar' (Arabic) or 'ja' (Japanese). Classes for which no translation is available are omitted. If specified, it overrides the language specified in the node configuration (Optional)</li>
@@ -251,6 +251,7 @@
         <li><b>Create a classifier</b> </li>
         <li><b>Retrieve a list of custom classifier</b></li>
         <li><b>Retrieve classifier details</b></li>
+        <li><b>Update a classifier</b></li>
         <li><b>Delete a classifier</b></li>
         <li><b>Delete all classifiers</b></li>
     </ul>
@@ -277,6 +278,14 @@
     <li><code>msg.params["classifier_id"]</code> : the classifier_id (string) (Required)</li>
     </ul>
     <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#retrieve_classifier_details">API documentation</a>.</p>
+
+    <p><b>Update a Classifier</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+    <li><code>msg.params["classifier_id"]</code> : the classifier_id (string) (Required)</li>
+    <li><code>msg.params["{classname}__examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images. (Optional) Muliple entires are optional</li>
+    <li><code>msg.params["negative_examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images.(Optional)</li>
+    </ul>
 
     <p><b>Delete a classifier </b></p>
     <p>this feature should be provided in input : </p>
