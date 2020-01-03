@@ -25,6 +25,7 @@ During the migration there will be a dependancy on both modules.
 - Drop faces detect option from Visual Recognition V3 node.
 - Fix to URL parsing for bound services.
 - STT token manager no longer in ibm-cloud-sdk-core
+- Update language lists for STT, TTS, Language Translator and Document Translator Nodes
 
 ### Watson Nodes for Node-RED
 A collection of nodes to interact with the IBM Watson services in [IBM Cloud](http://bluemix.net).
