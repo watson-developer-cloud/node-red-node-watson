@@ -20,6 +20,7 @@ module.exports = function(RED) {
     { IamAuthenticator } = require('ibm-watson/auth'),
     FEATURE = 'image-feature',
     REQUIRED_PARAMS = {
+      'analyze': ['collectionIds'],
       'createCollection': ['name', 'description'],
       'getCollection': ['collectionId'],
       'updateCollection': ['collectionId'],
@@ -28,7 +29,9 @@ module.exports = function(RED) {
       'listImages': ['collectionId'],
       'getImageDetails': ['collectionId', 'imageId'],
       'deleteImage': ['collectionId', 'imageId'],
-      'getJpegImage': ['collectionId', 'imageId']
+      'getJpegImage': ['collectionId', 'imageId'],
+      'train': ['collectionId'],
+      'addImageTrainingData' : ['collectionId', 'imageId', 'objects']
     };
 
   var pkg = require('../../package.json'),
@@ -114,7 +117,7 @@ module.exports = function(RED) {
             reject(err);
           })
       }
-    });    
+    });
   }
 
   function extractIDs(body) {
@@ -268,6 +271,7 @@ module.exports = function(RED) {
 
     switch (feature) {
 
+      case 'analyze':
       case 'createCollection':
       case 'getCollection':
       case 'updateCollection':
@@ -277,6 +281,8 @@ module.exports = function(RED) {
       case 'getImageDetails':
       case 'deleteImage':
       case 'getJpegImage':
+      case 'train':
+      case 'addImageTrainingData':
         theMissing = paramCheckFor(REQUIRED_PARAMS[feature], msg);
         if (theMissing.length === 0) {
           return Promise.resolve();
@@ -286,6 +292,7 @@ module.exports = function(RED) {
 
       case 'listCollections':
       case 'deleteAllCollections':
+      case 'getTrainingUsage':
         if (! msg.params) {
           msg.params = {};
         }
@@ -294,6 +301,13 @@ module.exports = function(RED) {
       default:
         return Promise.reject('Unknown Mode');
     }
+  }
+
+  function augmentParams(node, msg) {
+    if ('analyze' === node.config[FEATURE]) {
+      msg.params.features = ['objects'];
+    }
+    return Promise.resolve();
   }
 
   function bufferCheck(data) {
@@ -335,9 +349,19 @@ module.exports = function(RED) {
     });
   }
 
+  function imagesExpected(feature) {
+    switch(feature) {
+      case 'addImages':
+      case 'analyze':
+        return true;
+      default:
+        return false;
+    }
+  }
+
   function processPayload(node, msg) {
     return new Promise(function resolver(resolve, reject) {
-      if ('addImages' !== node.config[FEATURE]) {
+      if (!imagesExpected(node.config[FEATURE])) {
         resolve();
       } else if (Array.isArray(msg.payload)) {
         // Payload can be either an array of urls for images
@@ -374,8 +398,12 @@ module.exports = function(RED) {
       case 'getImageDetails':
       case 'deleteImage':
       case 'getJpegImage':
+      case 'train':
+      case 'addImageTrainingData':
+      case 'getTrainingUsage':
         return Promise.resolve();
       case 'addImages':
+      case 'analyze':
         if (!msg.payload) {
           return Promise.reject('Missing property: msg.payload');
         }
@@ -407,6 +435,9 @@ module.exports = function(RED) {
         })
         .then(() => {
           return verifyParams(node, msg);
+        })
+        .then(() => {
+          return augmentParams(node, msg);
         })
         .then(() => {
           return processPayload(node, msg);

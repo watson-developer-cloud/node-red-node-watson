@@ -37,6 +37,8 @@
     <div class="form-row">
         <label for="node-input-image-feature"><i class="fa fa-book"></i> Mode: </label>
         <select type="text" id="node-input-image-feature" style="display: inline-block; width: 70%;">
+            <option value="analyze">Analyze Images</option>
+            <option disabled>______________</option>
             <option value="createCollection">Create a collection</option>
             <option value="listCollections">List collections</option>
             <option value="getCollection">Get collection details</option>
@@ -49,6 +51,10 @@
             <option value="getImageDetails">Get details of image in collection</option>
             <option value="deleteImage">Delete image from collection</option>
             <option value="getJpegImage">Get JPEG image from collection</option>
+            <option disabled>______________</option>
+            <option value="train">Train a collection</option>
+            <option value="addImageTrainingData">Add training data to image</option>
+            <option value="getTrainingUsage">Get training usage</option>
         </select>
     </div>
 </script>
@@ -115,6 +121,11 @@
     your needs.</p>
     <p>The following features are available :</p>
     <ul>
+      <li>Analysis
+        <ul>
+          <li><b>Analyze Images</b></li>
+        </ul>
+      </li>
       <li>Collections
         <ul>
           <li><b>Create a collection</b></li>
@@ -134,9 +145,29 @@
           <li><b>Get JPEG image from collection</b></li>
         </ul>
       </li>
+      <li>Training
+        <ul>
+          <li><b>Train a collection</b></li>
+          <li><b>Add training data to an image</b></li>
+          <li><b>Get training usage</b></li>
+        </ul>
+      </li>
     </ul>
 
     <p>All Results will made available at <code>msg.payload</code></p>
+
+    <p><b>Analyze Images</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+        <li><code>msg.payload</code> : Either a zip of image files or an array of URLs of image files (Required)</li>
+        <li><code>msg.params["collectionId"]</code> : The identifier of the collection (Required)</li>
+        <li><code>msg.params["threshold"]</code> : Minimum score for matches (Optional)</li>        
+    </ul>
+    <p>More information on this
+      <a href="https://cloud.ibm.com/apidocs/visual-recognition/visual-recognition-v4?code=node#add-images">
+        API documentation</a>.</p>
+
+
 
     <p><b>Create a collection</b></p>
     <p>this feature should be provided in input : </p>
@@ -234,8 +265,30 @@
         <li><code>msg.params["size"]</code> : Set to either 'full' or 'thumbnail' (Optional)</li>
     </ul>
     <p>More information on this
-      <a href="https://cloud.ibm.com/apidocs/visual-recognition/visual-recognition-v4?code=node#delete-an-image">
+      <a href="https://cloud.ibm.com/apidocs/visual-recognition/visual-recognition-v4?code=node#get-a-jpeg-file-of-an-image">
         API documentation</a>.</p>
 
+    <p><b>Train a collection</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+        <li><code>msg.params["collectionId"]</code> : The identifier of the collection (Required)</li>
+    </ul>
+    <p>More information on this
+      <a href="https://cloud.ibm.com/apidocs/visual-recognition/visual-recognition-v4?code=node#train-a-collection">
+        API documentation</a>.</p>
+
+    <p><b>Add training data to an image</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+        <li><code>msg.params["collectionId"]</code> : The identifier of the collection (Required)</li>
+        <li><code>msg.params["imageId"]</code> : The identifier of the image (Required)</li>
+        <li><code>msg.params["objects"]</code> : An array of training data (Required)</li>
+    </ul>
+    <p>More information on this
+      <a href="https://cloud.ibm.com/apidocs/visual-recognition/visual-recognition-v4?code=node#add-training-data-to-an-image">
+        API documentation</a>.</p>
+
+    <p><b>Get training usage</b></p>
+    <p>No input parameters are required : </p>
 
 </script>
