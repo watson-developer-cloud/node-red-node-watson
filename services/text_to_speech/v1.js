@@ -16,8 +16,8 @@
 
 module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'text-to-speech';
+
   var pkg = require('../../package.json'),
-    TextToSpeechV1 = require('watson-developer-cloud/text-to-speech/v1'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     ttsutils = require('./tts-utils'),
@@ -113,35 +113,52 @@ module.exports = function(RED) {
 
     function performTTS(msg, params) {
       var p = new Promise(function resolver(resolve, reject) {
-        var tts = ttsutils.buildStdSettings(apikey, username, password, endpoint);
+        let tts = ttsutils.buildStdSettings(apikey, username, password, endpoint);
 
-        tts.synthesize(params, function (err, body, response) {
-          if (err) {
-            reject(err);
-          } else {
+        tts.synthesize(params)
+          .then((body) => {
             resolve(body);
-          }
-        });
+          })
+          .catch((err) => {
+            reject(err);
+          });
+
       });
       return p;
     }
 
-    function processResponse(msg, body) {
-      msg.speech = body;
-      if (config['payload-response']) {
+    function processResponse(msg, data) {
+      return new Promise(function resolver(resolve, reject) {
+        let body = data
+        if (data && data.result) {
+          body = data.result;
+        }
+
+        let tmpHolder = msg.payload;
         msg.payload = body;
-      }
-      return Promise.resolve();
+
+        payloadutils.checkForStream(msg)
+          .then(() => {
+            if (! config['payload-response']) {
+              msg.speech = msg.payload;
+              msg.payload = tmpHolder;
+            }
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
     }
 
-    this.on('input', function(msg) {
+    this.on('input', function(msg, send, done) {
 
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
       apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
-      if ((!config['default-endpoint']) && config['service-endpoint']) {
+      if (config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
@@ -163,10 +180,12 @@ module.exports = function(RED) {
       })
       .then(function(){
         node.status({});
-        node.send(msg);
+        send(msg);
+        done();
       })
       .catch(function(err){
         payloadutils.reportError(node,msg,err);
+        done(err);
       });
     })
   }

@@ -44,11 +44,6 @@
     </div>
 
     <div class="form-row credentials">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
-    </div>
-    <div class="form-row">
         <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
         <input type="text" id="node-input-service-endpoint" placeholder="https://stream.watsonplatform.net/text-to-speech/api">
     </div>
@@ -247,9 +242,8 @@
       var e = $('#node-input-service-endpoint').val();
       var creds = {un: u, pwd: p, key: k};
 
-      if (! $('#node-input-default-endpoint').prop('checked')) {
-        creds.e = e;
-      }
+      creds.e = e;
+
       $.getJSON('watson-text-to-speech/customs', creds)
       .done(function (data) {
         $('label#node-label-message').parent().hide();
@@ -293,9 +287,7 @@
     var e = $('#node-input-service-endpoint').val();
     var creds = {un: u, pwd: p, key: k};
 
-    if (! $('#node-input-default-endpoint').prop('checked')) {
-      creds.e = e;
-    }
+    creds.e = e;
 
     $.getJSON('watson-text-to-speech/voices/', creds)
     .done(function (data) {
@@ -435,14 +427,6 @@
     $('#node-input-langcustom').change(function (val) {
       tts.custom_selected = $('#node-input-langcustom').val();
     });
-    $('#node-input-default-endpoint').change(function () {
-      var checked = $('#node-input-default-endpoint').prop('checked')
-      if (checked) {
-        $('#node-input-service-endpoint').parent().hide();
-      } else {
-        $('#node-input-service-endpoint').parent().show();
-      }
-    });
   }
 
   // Function to be used at the start, as don't want to expose any fields, unless the models are
@@ -499,8 +483,7 @@
                 password: {value: ''},
                 apikey: {value: ''},
                 'payload-response' :{value: false},
-                'default-endpoint' :{value: true},
-                'service-endpoint' :{value: 'https://stream.watsonplatform.net/text-to-speech/api'}
+                'service-endpoint' :{value: ""}
             },
             credentials: {
               username: {type:"text"},

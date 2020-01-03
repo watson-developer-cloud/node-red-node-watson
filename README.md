@@ -20,7 +20,9 @@ During the migration there will be a dependancy on both modules.
 - Node-RED & IBM-Watson & Use of promises on API invokation & IAM URL construct migration & Removal of default endpoint of
     - Tone Analyzer node.
     - Personality Insights node.
-    - Visual Recognition V3
+    - Visual Recognition V3 node
+    - Text to Speech node
+    - Text to Speech Corpus Builder node.
 - New Visual Recognition V4 node.
 - Drop faces detect option from Visual Recognition V3 node.
 - Fix to URL parsing for bound services.

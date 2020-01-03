@@ -81,7 +81,7 @@
             category: 'IBM Watson',
             defaults: {
               name: {value: ""},
-              'vr-service-endpoint' :{value: 'https://gateway.watsonplatform.net/visual-recognition/api'},
+              'vr-service-endpoint' :{value: ""},
               "image-feature": {value: ""}
             },
             credentials: {
@@ -161,7 +161,7 @@
     <ul>
         <li><code>msg.payload</code> : Either a zip of image files or an array of URLs of image files (Required)</li>
         <li><code>msg.params["collectionId"]</code> : The identifier of the collection (Required)</li>
-        <li><code>msg.params["threshold"]</code> : Minimum score for matches (Optional)</li>        
+        <li><code>msg.params["threshold"]</code> : Minimum score for matches (Optional)</li>
     </ul>
     <p>More information on this
       <a href="https://cloud.ibm.com/apidocs/visual-recognition/visual-recognition-v4?code=node#add-images">
