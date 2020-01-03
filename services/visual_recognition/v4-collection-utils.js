@@ -24,7 +24,11 @@ module.exports = function(RED) {
       'getCollection': ['collectionId'],
       'updateCollection': ['collectionId'],
       'deleteCollection': ['collectionId'],
-      'addImages': ['collectionId']
+      'addImages': ['collectionId'],
+      'listImages': ['collectionId'],
+      'getImageDetails': ['collectionId', 'imageId'],
+      'deleteImage': ['collectionId', 'imageId'],
+      'getJpegImage': ['collectionId', 'imageId']
     };
 
   var pkg = require('../../package.json'),
@@ -76,15 +80,41 @@ module.exports = function(RED) {
     });
   }
 
-  function processTheResponse (body, node, msg) {
-    if (body == null) {
-      return Promise.reject('call to watson visual recognition v4 service failed');
-    } else if (node.config[FEATURE] === 'deleteCollection') {
+  function responseForDeleteMode(node, msg) {
+    let feature = node.config[FEATURE];
+    let field = null;
+
+    switch (feature) {
+      case 'deleteCollection':
         msg.payload = 'Successfully deleted collection id: ' + msg.params.collectionId;
-    } else {
-        msg.payload = body;
+        break;
+      case 'deleteImage':
+        msg.payload = 'Successfully deleted image id: '
+                        + msg.params.imageId
+                        + ' from collection '
+                        + msg.params.collectionId;
+        break
+      default:
+        return false;
     }
-    return Promise.resolve();
+    return true;
+  }
+
+  function processTheResponse (body, node, msg) {
+    return new Promise(function resolver(resolve, reject) {
+      if (body == null) {
+        return reject('call to watson visual recognition v4 service failed');
+      } else if (! responseForDeleteMode(node, msg)) {
+        msg.payload = body;
+        payloadutils.checkForStream(msg)
+          .then(() => {
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          })
+      }
+    });    
   }
 
   function extractIDs(body) {
@@ -243,6 +273,10 @@ module.exports = function(RED) {
       case 'updateCollection':
       case 'deleteCollection':
       case 'addImages':
+      case 'listImages':
+      case 'getImageDetails':
+      case 'deleteImage':
+      case 'getJpegImage':
         theMissing = paramCheckFor(REQUIRED_PARAMS[feature], msg);
         if (theMissing.length === 0) {
           return Promise.resolve();
@@ -336,6 +370,10 @@ module.exports = function(RED) {
       case 'updateCollection':
       case 'deleteCollection':
       case 'deleteAllCollections':
+      case 'listImages':
+      case 'getImageDetails':
+      case 'deleteImage':
+      case 'getJpegImage':
         return Promise.resolve();
       case 'addImages':
         if (!msg.payload) {

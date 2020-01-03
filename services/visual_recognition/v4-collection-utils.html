@@ -45,6 +45,10 @@
             <option value="deleteAllCollections">Delete all collections</option>
             <option disabled>______________</option>
             <option value="addImages">Add image to collection</option>
+            <option value="listImages">List images in a collection</option>
+            <option value="getImageDetails">Get details of image in collection</option>
+            <option value="deleteImage">Delete image from collection</option>
+            <option value="getJpegImage">Get JPEG image from collection</option>
         </select>
     </div>
 </script>
@@ -111,13 +115,25 @@
     your needs.</p>
     <p>The following features are available :</p>
     <ul>
-        <li><b>Create a collection</b></li>
-        <li><b>List listCollections</b></li>
-        <li><b>Get collection details</b></li>
-        <li><b>Update collection</b></li>
-        <li><b>Delete collection</b></li>
-        <li><b>Delete all collections</b></li>
-        <li><b>Add images to collection</b></li>
+      <li>Collections
+        <ul>
+          <li><b>Create a collection</b></li>
+          <li><b>List listCollections</b></li>
+          <li><b>Get collection details</b></li>
+          <li><b>Update collection</b></li>
+          <li><b>Delete collection</b></li>
+          <li><b>Delete all collections</b></li>
+        </ul>
+      </li>
+      <li>Images
+        <ul>
+          <li><b>Add images to collection</b></li>
+          <li><b>List images in collection</b></li>
+          <li><b>Get details of image in collection</b></li>
+          <li><b>Delete image from collection</b></li>
+          <li><b>Get JPEG image from collection</b></li>
+        </ul>
+      </li>
     </ul>
 
     <p>All Results will made available at <code>msg.payload</code></p>
@@ -180,6 +196,46 @@
     <p>More information on this
       <a href="https://cloud.ibm.com/apidocs/visual-recognition/visual-recognition-v4?code=node#add-images">
         API documentation</a>.</p>
-      
+
+    <p><b>List images in collection</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+        <li><code>msg.params["collectionId"]</code> : The identifier of the collection (Required)</li>
+    </ul>
+    <p>More information on this
+      <a href="https://cloud.ibm.com/apidocs/visual-recognition/visual-recognition-v4?code=node#list-images">
+        API documentation</a>.</p>
+
+    <p><b>Get details of image in collection</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+        <li><code>msg.params["collectionId"]</code> : The identifier of the collection (Required)</li>
+        <li><code>msg.params["imageId"]</code> : The identifier of the image (Required)</li>
+    </ul>
+    <p>More information on this
+      <a href="https://cloud.ibm.com/apidocs/visual-recognition/visual-recognition-v4?code=node#get-image-details">
+        API documentation</a>.</p>
+
+    <p><b>Delete image from collection</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+        <li><code>msg.params["collectionId"]</code> : The identifier of the collection (Required)</li>
+        <li><code>msg.params["imageId"]</code> : The identifier of the image (Required)</li>
+    </ul>
+    <p>More information on this
+      <a href="https://cloud.ibm.com/apidocs/visual-recognition/visual-recognition-v4?code=node#delete-an-image">
+        API documentation</a>.</p>
+
+    <p><b>Get JPEG image from collection</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+        <li><code>msg.params["collectionId"]</code> : The identifier of the collection (Required)</li>
+        <li><code>msg.params["imageId"]</code> : The identifier of the image (Required)</li>
+        <li><code>msg.params["size"]</code> : Set to either 'full' or 'thumbnail' (Optional)</li>
+    </ul>
+    <p>More information on this
+      <a href="https://cloud.ibm.com/apidocs/visual-recognition/visual-recognition-v4?code=node#delete-an-image">
+        API documentation</a>.</p>
+
 
 </script>
