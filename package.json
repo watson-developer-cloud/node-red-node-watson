@@ -5,7 +5,7 @@
   "dependencies": {
     "async": "^1.5.2",
     "cfenv": "~1.2.2",
-    "file-type": "^10.9.0",
+    "file-type": "^12.4.2",
     "request": "~2.88.0",
     "temp": "^0.9.0",
     "qs": "6.x",

@@ -18,6 +18,7 @@ var url = require('url'),
   fileType = require('file-type'),
   request = require('request'),
   path = require('path'),
+  toArray = require('stream-to-array'),
   stream = require('stream');
 
 function PayloadUtils() {}
@@ -99,6 +100,31 @@ PayloadUtils.prototype = {
     request(url).pipe(wstream);
   },
 
+  // Convert filestream in msg.payload to a buffer
+  checkForStream: function (msg) {
+    let me = this;
+    return new Promise(function resolver(resolve, reject) {
+      if (me.isReadableStream(msg.payload)) {
+        //msg.payload.resume();
+        toArray(msg.payload)
+          .then(function(parts) {
+            var buffers = [], part = null;
+
+            for (var i = 0; i < parts.length; ++i) {
+              part = parts[i];
+              buffers.push((part instanceof Buffer) ? part : new Buffer(part));
+            }
+
+            msg.payload = Buffer.concat(buffers);
+            resolve();
+          });
+      } else {
+        resolve();
+      }
+    });
+  },
+
+
   reportError: function (node, msg, err) {
     var messageTxt = err;
 
@@ -162,7 +188,7 @@ PayloadUtils.prototype = {
         // default
         return cb(txt.split(' ').length);
       };
-      
+
     if (ct === 'ja') {
       fn = function(txt, cb) {
         cb(200);

@@ -23,13 +23,17 @@ module.exports = function(RED) {
       'createCollection': ['name', 'description'],
       'getCollection': ['collectionId'],
       'updateCollection': ['collectionId'],
-      'deleteCollection': ['collectionId']
+      'deleteCollection': ['collectionId'],
+      'addImages': ['collectionId']
     };
 
   var pkg = require('../../package.json'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     temp = require('temp'),
+    fileType = require('file-type'),
+    fs = require('fs'),
+    fsp = require('fs').promises,
     sAPIKey = null,
     apikey = '',
     service = null,
@@ -238,6 +242,7 @@ module.exports = function(RED) {
       case 'getCollection':
       case 'updateCollection':
       case 'deleteCollection':
+      case 'addImages':
         theMissing = paramCheckFor(REQUIRED_PARAMS[feature], msg);
         if (theMissing.length === 0) {
           return Promise.resolve();
@@ -257,6 +262,72 @@ module.exports = function(RED) {
     }
   }
 
+  function bufferCheck(data) {
+    return data instanceof Buffer;
+  }
+
+  function zipCheck(msg) {
+    return new Promise(function resolver(resolve, reject) {
+      if (!bufferCheck(msg.payload)) {
+        reject('msg.payload is neither an array or urls or a zip');
+      } else {
+        let ft = fileType(msg.payload);
+        if (!ft || !ft.ext || 'zip' != ft.ext) {
+          reject('msg.payload is not a zip');
+        } else {
+          resolve();
+        }
+      }
+    });
+  }
+
+  function setImagesFileParam(msg) {
+    return new Promise(function resolver(resolve, reject) {
+      temp.open({
+        suffix: '.' + 'zip'
+      }, function(err, info) {
+        if (err) {
+          reject('Node has been unable to open the zip stream');
+        }
+        fsp.writeFile(info.path, msg.payload)
+          .then(() => {
+            msg.params['imagesFile'] = fs.createReadStream(info.path);
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          })
+      });
+    });
+  }
+
+  function processPayload(node, msg) {
+    return new Promise(function resolver(resolve, reject) {
+      if ('addImages' !== node.config[FEATURE]) {
+        resolve();
+      } else if (Array.isArray(msg.payload)) {
+        // Payload can be either an array of urls for images
+        msg.params['imageUrl'] = msg.payload;
+        resolve();
+      } else {
+        // or a zip of images
+        payloadutils.checkForStream(msg)
+          .then(() => {
+            return zipCheck(msg);
+          })
+          .then(() => {
+            return setImagesFileParam(msg);
+          })
+          .then(() => {
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      }
+    });
+  }
+
   function verifyPayload(node, msg) {
     switch (node.config[FEATURE]) {
       case 'createCollection':
@@ -266,8 +337,13 @@ module.exports = function(RED) {
       case 'deleteCollection':
       case 'deleteAllCollections':
         return Promise.resolve();
+      case 'addImages':
+        if (!msg.payload) {
+          return Promise.reject('Missing property: msg.payload');
+        }
+        return Promise.resolve();
       default:
-        return Promise.reject('Missing property: msg.payload');
+        return Promise.reject('Unknown mode has been specified');
     }
   }
 
@@ -293,6 +369,9 @@ module.exports = function(RED) {
         })
         .then(() => {
           return verifyParams(node, msg);
+        })
+        .then(() => {
+          return processPayload(node, msg);
         })
         .then(() => {
           return determineEndpoint(node.config);

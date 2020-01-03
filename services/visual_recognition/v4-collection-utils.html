@@ -43,6 +43,8 @@
             <option value="updateCollection">Update name or description of a collection</option>
             <option value="deleteCollection">Delete a collection</option>
             <option value="deleteAllCollections">Delete all collections</option>
+            <option disabled>______________</option>
+            <option value="addImages">Add image to collection</option>
         </select>
     </div>
 </script>
@@ -115,6 +117,7 @@
         <li><b>Update collection</b></li>
         <li><b>Delete collection</b></li>
         <li><b>Delete all collections</b></li>
+        <li><b>Add images to collection</b></li>
     </ul>
 
     <p>All Results will made available at <code>msg.payload</code></p>
@@ -166,6 +169,17 @@
 
     <p><b>Delete all collections</b></p>
     <p>No input parameters are required : </p>
-        
+
+    <p><b>Add images to collection</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+        <li><code>msg.payload</code> : Either a zip of image files or an array of URLs of image files (Required)</li>
+        <li><code>msg.params["collectionId"]</code> : The identifier of the collection (Required)</li>
+        <li><code>msg.params["trainingData"]</code> : Training data if a single image is provided locating objects in image as a JSON object (Optional)</li>
+    </ul>
+    <p>More information on this
+      <a href="https://cloud.ibm.com/apidocs/visual-recognition/visual-recognition-v4?code=node#add-images">
+        API documentation</a>.</p>
+      
 
 </script>

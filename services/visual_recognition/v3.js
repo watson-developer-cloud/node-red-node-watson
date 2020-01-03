@@ -39,7 +39,6 @@ module.exports = function(RED) {
     fileType = require('file-type'),
     fs = require('fs'),
     async = require('async'),
-    toArray = require('stream-to-array'),
     sAPIKey = null,
     apikey = '',
     service = null,
@@ -122,31 +121,6 @@ module.exports = function(RED) {
     return Promise.resolve();
   }
 
-
-  // Even though Visual Reconition SDK can accept a filestream as input
-  // it can't handle the one on msg.payload, so read it into a buffer
-  function checkForStream(msg) {
-    var p = new Promise(function resolver(resolve, reject) {
-      if (payloadutils.isReadableStream(msg.payload)) {
-        //msg.payload.resume();
-        toArray(msg.payload)
-          .then(function(parts) {
-            var buffers = [], part = null;
-
-            for (var i = 0; i < parts.length; ++i) {
-              part = parts[i];
-              buffers.push((part instanceof Buffer) ? part : new Buffer(part));
-            }
-            msg.payload = Buffer.concat(buffers);
-            resolve();
-          });
-      } else {
-        resolve();
-      }
-    });
-    return p;
-
-  }
 
   function verifyServiceCredentials(node, msg) {
     // If it is present the newly provided user entered key
@@ -530,7 +504,7 @@ module.exports = function(RED) {
         })
         .then(function(f) {
           feature = f;
-          return checkForStream(msg);
+          return payloadutils.checkForStream(msg);
         })
         .then(function() {
           return verifyInputs(feature, msg);
