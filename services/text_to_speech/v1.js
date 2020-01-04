@@ -54,28 +54,36 @@ module.exports = function(RED) {
   RED.httpAdmin.get('/watson-text-to-speech/voices', function (req, res) {
     var tts = ttsutils.initTTSService(req, sApikey, sUsername, sPassword, sEndpoint);
 
-    tts.listVoices({}, function(err, voices){
-      if (err) {
+    tts.listVoices({})
+      .then((response) => {
+        let voices = response;
+        if (response.result) {
+          voices = response.result;
+        }
+        res.json(voices);
+      })
+      .catch((err) => {
         if (!err.error) {
           err.error = 'Error ' + err.code + ' in fetching voices';
         }
         res.json(err);
-      } else {
-        res.json(voices);
-      }
-    });
+      });
   });
 
   // API used by widget to fetch available customisations
   RED.httpAdmin.get('/watson-text-to-speech/customs', function (req, res) {
     var tts = ttsutils.initTTSService(req, sApikey, sUsername, sPassword, sEndpoint);
 
-    tts.listVoiceModels({}, function(err, customs){
-      if (err) {
-        res.json(err);
-      } else {
-        res.json(customs);
+    tts.listVoiceModels({})
+    .then((response) => {
+      let customs = response;
+      if (response.result) {
+        customs = response.result;
       }
+      res.json(customs);
+    })
+    .catch((err) => {
+      res.json(err);
     });
   });
 
@@ -106,7 +114,7 @@ module.exports = function(RED) {
 
       // Check the params for customisation options
       if (config.langcustom && 'NoCustomisationSetting' !== config.langcustom) {
-        params.customization_id = config.langcustom;
+        params.customizationId = config.langcustom;
       }
       return Promise.resolve(params);
     }
