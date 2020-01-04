@@ -11,7 +11,6 @@
     "qs": "6.x",
     "image-type": "^2.0.2",
     "watson-developer-cloud": "^3.18.3",
-    "ibm-cloud-sdk-core": "^2.0.1",
     "ibm-watson": "^5.2.1",
     "word-count": "^0.2.2",
     "is-docx": "^0.0.3",
