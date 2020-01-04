@@ -316,13 +316,12 @@ module.exports = function (RED) {
     }
     if ('custom' === config['tts-voice-or-custom']) {
       if (config['tts-custom-id']) {
-        params['customization_id'] = config['tts-custom-id'];
+        params['customizationId'] = config['tts-custom-id'];
       }
     } else if ( config['tts-voice'] ) {
       params['voice'] = config['tts-voice'];
     }
 
-    console.log('Params will be :', params);
     return params;
   }
 
@@ -390,7 +389,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function(msg) {
+    this.on('input', function(msg, send, done) {
       var method = config['tts-custom-mode'],
         message = '',
         params = {};
@@ -417,16 +416,6 @@ module.exports = function (RED) {
         return;
       }
 
-
-      //if (checkForFile(method)) {
-      //  if (msg.payload instanceof Buffer) {
-      //    console.log('Processing as a Buffer');
-      //    loadFile(node, method, params, msg);
-      //    return;
-      //  }
-      //  params = setFileParams(method, params, msg);
-      //}
-
       checkForFile(method)
         .then((lookForBuffer) => {
           if (msg.payload instanceof Buffer) {
@@ -442,15 +431,15 @@ module.exports = function (RED) {
         })
         .then(() => {
           node.status({});
-          node.send(msg);
+          send(msg);
           temp.cleanup();
-          console.log('Method ran to completion');
+          done();
         })
         .catch((err) => {
           node.status({});
           payloadutils.reportError(node, msg, err);
           temp.cleanup();
-          console.log('Method failed');
+          done(err);
         })
       });
   }
