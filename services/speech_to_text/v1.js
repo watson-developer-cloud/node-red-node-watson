@@ -28,7 +28,8 @@ module.exports = function (RED) {
     iamutils = require('../../utilities/iam-utils'),
     sttutils = require('./stt-utils'),
     AuthV1 = require('watson-developer-cloud/authorization/v1'),
-    AuthIAMV1 = require('ibm-watson/authorization/v1'),
+    //AuthIAMV1 = require('ibm-cloud-sdk-core/iam-token-manager/v1'),
+    { IamTokenManager } = require('ibm-watson/auth');
     muteMode = true, discardMode = false, autoConnect = true,
     username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
@@ -325,7 +326,7 @@ module.exports = function (RED) {
         // console.log('Creating token with endpoint ', endpoint);
         // tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey, iamUrl: endpoint});
 
-        tokenService = new AuthIAMV1({apikey : apikey});
+        tokenService = new IamTokenManager({apikey : apikey});
         //tokenService = new iamutils(apikey);
 
       } else {

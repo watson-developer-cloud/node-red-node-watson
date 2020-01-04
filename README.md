@@ -15,14 +15,13 @@ and migrated off watson-developer-cloud to ibm-watson as a npm dependancy.
 Migrated nodes will not be compatible with pre 1.0.0 versions of node-red.
 During the migration there will be a dependancy on both modules.
 - Bump dependancy on node to >=10.0.0
-- Bump dependancy on cfenv, request, file-type
-- Remove dependancy on ibm-cloud-sdk-core.
+- Bump dependancy on cfenv, request, file-type, ibm-cloud-sdk-core
 - Node-RED & IBM-Watson & Use of promises on API invokation & IAM URL construct migration & Removal of default endpoint of
     - Tone Analyzer node.
     - Personality Insights node.
     - Visual Recognition V3 node
     - Text to Speech node
-    - Text to Speech Corpus Builder node.
+    - Text to Speech Corpus Builder node
 - New Visual Recognition V4 node.
 - Drop faces detect option from Visual Recognition V3 node.
 - Fix to URL parsing for bound services.
