@@ -15,13 +15,15 @@
  **/
 
 const pkg = require('../../package.json'),
-  TextToSpeechV1 = require('watson-developer-cloud/text-to-speech/v1');
+  TextToSpeechV1 = require('ibm-watson/text-to-speech/v1'),
+  { IamAuthenticator } = require('ibm-watson/auth');
 
 class TTSUtils {
   constructor() {
   }
 
   static buildStdSettings (apikey, username, password, endpoint) {
+    let authSettings  = {};
     let serviceSettings = {
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
@@ -29,11 +31,13 @@ class TTSUtils {
     };
 
     if (apikey) {
-      serviceSettings.iam_apikey = apikey;
+      authSettings.apikey = apikey;
     } else {
-      serviceSettings.username = username;
-      serviceSettings.password = password;
+      authSettings.username = username;
+      authSettings.password = password;
     }
+
+    serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     if (endpoint) {
       serviceSettings.url = endpoint;
@@ -45,6 +49,7 @@ class TTSUtils {
   static initTTSService(req, sApikey, sUsername, sPassword, sEndpoint) {
     const endpoint = req.query.e ? req.query.e : sEndpoint;
 
+    let authSettings  = {};
     let serviceSettings = {
       url: endpoint,
       headers: {
@@ -52,15 +57,16 @@ class TTSUtils {
       }};
 
     if (sApikey || req.query.key) {
-      serviceSettings.iam_apikey = sApikey ? sApikey : req.query.key;
+      authSettings.apikey = sApikey ? sApikey : req.query.key;
     } else {
-      serviceSettings.username = sUsername ? sUsername : req.query.un;
-      serviceSettings.password = sPassword ? sPassword : req.query.pwd;
+      authSettings.username = sUsername ? sUsername : req.query.un;
+      authSettings.password = sPassword ? sPassword : req.query.pwd;
     }
+
+    serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     return new TextToSpeechV1(serviceSettings);
   }
-
 
 }
 

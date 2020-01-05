@@ -28,7 +28,10 @@ module.exports = function (RED) {
     iamutils = require('../../utilities/iam-utils'),
     sttutils = require('./stt-utils'),
     AuthV1 = require('watson-developer-cloud/authorization/v1'),
-    AuthIAMV1 = require('ibm-cloud-sdk-core/iam-token-manager/v1'),
+    //AuthIAMV1 = require('ibm-cloud-sdk-core/iam-token-manager/v1'),
+    AuthIAMV1 = require('ibm-cloud-sdk-core/auth/iam-token-manager-v1'),
+    //AuthIAMV1 = require('ibm-cloud-sdk-core/auth/token-managers/iam-token-manager'),
+    //{ IamTokenManager } = require('ibm-watson/auth');
     muteMode = true, discardMode = false, autoConnect = true,
     username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
@@ -325,7 +328,9 @@ module.exports = function (RED) {
         // console.log('Creating token with endpoint ', endpoint);
         // tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey, iamUrl: endpoint});
 
+        //tokenService = new AuthIAMV1({apikey : apikey});
         tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey});
+        //tokenService = new AuthIAMV1.IamTokenManager({apikey : apikey});
         //tokenService = new iamutils(apikey);
 
       } else {
@@ -442,13 +447,11 @@ module.exports = function (RED) {
           tokenPending = true;
           tokenService.getToken(function (err, res) {
             if (err) {
-              // console.log('Error getting token ', err);
               reject(err);
             } else {
               tokenPending = false;
               tokenTime = now;
               token = res;
-              // console.log('We have the token ', token);
               resolve();
             }
           });
@@ -662,7 +665,6 @@ module.exports = function (RED) {
         .then(() => {
           switch (audioData.action) {
           case 'start':
-            // console.log('Its a start');
             return processSTTSocketStart(true);
           case 'stop':
             delay = 2000;
@@ -671,7 +673,6 @@ module.exports = function (RED) {
             // Add a Delay to allow the listening thread to kick in
             // Delays for Stop is longer, so that it doesn't get actioned
             // before the audio buffers.
-            // console.log('We have data');
             setTimeout(() => {
               if (socketListening) {
                 return sendAudioSTTSocket(audioData);

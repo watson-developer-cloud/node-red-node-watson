@@ -73,10 +73,11 @@ ToneUtils.prototype = {
 
     switch (config['tone-method']) {
     case 'generalTone' :
+      let isHTML =  msg.contentType || config.contentType;
       options.sentences = msg.sentences || config.sentences;
-      options.isHTML = msg.contentType || config.contentType;
+      options.contentType = isHTML ? 'text/html' : 'text/plain';
       options.tones = this.parseToneOption(msg, config);
-      options.text = this.isJsonObject(msg.payload) ?
+      options.toneInput = this.isJsonObject(msg.payload) ?
                             JSON.stringify(msg.payload) :
                             msg.payload;
       break;

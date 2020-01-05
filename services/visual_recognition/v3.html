@@ -26,17 +26,13 @@
     </div>
     <div class="form-row credentials">
         <label for="node-input-vr-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
-        <select type="text" id="node-input-vr-service-endpoint" style="display: inline-block; width: 70%;" >
-            <option value="https://gateway-a.watsonplatform.net/visual-recognition/api">https://gateway-a.watsonplatform.net/visual-recognition/api</option>
-            <option value="https://gateway.watsonplatform.net/visual-recognition/api">https://gateway.watsonplatform.net/visual-recognition/api</option>
-        </select>
+        <input type="text" id="node-input-vr-service-endpoint" placeholder="https://gateway.watsonplatform.net/visual-recognition/api">
     </div>
 
     <div class="form-row">
         <label for="node-input-image-feature"><i class="fa fa-book"></i> Detect: </label>
         <select type="text" id="node-input-image-feature" style="display: inline-block; width: 70%;">
             <option selected="selected" value="classifyImage">Classify an image</option>
-            <option value="detectFaces">Detect Faces</option>
         </select>
     </div>
     <div class="form-row">
@@ -74,14 +70,11 @@
     </div>
     <div class="form-row credentials">
         <label for="node-input-vr-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
-        <select type="text" id="node-input-vr-service-endpoint" style="display: inline-block; width: 70%;" >
-            <option value="https://gateway-a.watsonplatform.net/visual-recognition/api">https://gateway-a.watsonplatform.net/visual-recognition/api</option>
-            <option value="https://gateway.watsonplatform.net/visual-recognition/api">https://gateway.watsonplatform.net/visual-recognition/api</option>
-        </select>
+        <input type="text" id="node-input-vr-service-endpoint" placeholder="https://gateway.watsonplatform.net/visual-recognition/api">
     </div>
 
     <div class="form-row">
-        <label for="node-input-image-feature"><i class="fa fa-book"></i> Detect: </label>
+        <label for="node-input-image-feature"><i class="fa fa-book"></i> Mode: </label>
         <select type="text" id="node-input-image-feature" style="display: inline-block; width: 70%;">
             <option value="createClassifier">Create a classifier</option>
             <option value="retrieveClassifiersList">Retrieve a list of classifiers</option>
@@ -98,12 +91,10 @@
 </script>
 
 <script type="text/x-red" data-help-name="visual-recognition-v3">
-	<p>Using the Visual Recognition v3 node, you can use the Watson Visual Recognition service V3 to identify scenes, objects, faces, and text in images you upload to the service. You can create and train a custom classifier to identify subjects that suit your needs.</p>
+	<p>Using the Visual Recognition v3 node, you can use the Watson Visual Recognition service V3 to identify scenes and objects in images you upload to the service. You can create and train a custom classifier to identify subjects that suit your needs.</p>
     <p>The following features are available :</p>
     <ul>
         <li><b>Classify an image</b> Upload images or URLs to identify built-in classifiers by default. To identify custom classifiers, include the classifier_ids or owners parameters. Images must be in .jpeg, .jpg or .png format.</li>
-        <li><b>Detect Faces</b> : analyze faces in images and get data about them, such as estimated age and gender. Images must be in .jpeg, .jpg or .png format.</li>
-        <li><b>Recognize Text</b> : recognizes text in images. This is a beta function of the Visual Recognition service that supports only English language text identification</li>
     </ul>
 
     <p>All Results will made available at <code>msg.result</code></p>
@@ -114,27 +105,13 @@
     <p>This feature should be provided in input : </p>
     <ul>
     <li><code>msg.payload</code> : the URL or the Node.js Buffer of an image. Redirects are followed, so you can use shortened URLs. (Required)</li>
-    <li><code>msg.params["detect_mode"]</code> : A setting of "classify" or "faces" indicating the visual recognition feature required. "Default" is "classify" (string) (Optional)</li>
-    <li><code>msg.params["classifier_ids"]</code> : A comma-separated list of the classifier IDs used to classify the images. "Default" is the classifier_id of the built-in classifier. (string) (Optional)</li>
+    <li><code>msg.params["detect_mode"]</code> : A setting of "classify" indicating the visual recognition feature required. "Default" is "classify" (string) (Optional)</li>
+    <li><code>msg.params["classifier_ids"]</code> : A comma-separated list of the classifier IDs, with no spaces, used to classify the images. "Default" is the classifier_id of the built-in classifier. (string) (Optional)</li>
     <li><code>msg.params["owners"]</code> : A comma-separated list with the value(s) "IBM" and/or "me" to specify which classifiers to run. (string) (Optional)</li>
     <li><code>msg.params["threshold"]</code> : A floating value (in string format) that specifies the minimum score a class must have to be displayed in the response (Optional)</li>
     <li><code>msg.params["accept_language"]</code> : Specifies the language of the output class names. Can be 'en' (English as default), 'es' (Spanish), 'ar' (Arabic) or 'ja' (Japanese). Classes for which no translation is available are omitted. If specified, it overrides the language specified in the node configuration (Optional)</li>
     </ul>
     <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#classify_an_image">API documentation</a>.</p>
-
-    <p><b>Detect Faces</b></p>
-    <p>This feature should be provided in input : </p>
-    <ul>
-    <li><code>msg.payload</code> : the URL or the Node.js Buffer of an image. Redirects are followed, so you can use shortened URLs. (Required)</li>
-    </ul>
-    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#detect_faces">API documentation</a>.</p>
-
-    <p><b>Text Recognition</b></p>
-    <p>This feature should be provided in input : </p>
-    <ul>
-    <li><code>msg.payload</code> : the URL or the Node.js Buffer of an image. Redirects are followed, so you can use shortened URLs. (Required)</li>
-    </ul>
-    <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#recognize_text">API documentation</a>.</p>
 
     <br/>
     <p>For full details on the feature details and response values, please see the <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/">Watson Visual Recognition (v3) API documentation</a></p>
@@ -166,7 +143,7 @@
             category: 'IBM Watson',
             defaults: {
               name: {value: ""},
-              'vr-service-endpoint' :{value: 'https://gateway-a.watsonplatform.net/visual-recognition/api'},
+              'vr-service-endpoint' :{value: ""},
               "image-feature": {value: ""},
               "lang": {value: ""},
             },
@@ -234,7 +211,7 @@
             category: 'IBM Watson',
             defaults: {
               name: {value: ""},
-              'vr-service-endpoint' :{value: 'https://gateway-a.watsonplatform.net/visual-recognition/api'},
+              'vr-service-endpoint' :{value: ""},
               "image-feature": {value: ""}
             },
             credentials: {
@@ -268,12 +245,13 @@
 </script>
 
 <script type="text/x-red" data-help-name="visual-recognition-util-v3">
-	<p> This node enables you to use the training features of the Watson Visual Recognition service V3 that aims to identify scenes, objects, faces, and text in images you upload to the service. Using this node you can create and train a custom classifier to identify subjects that suit your needs.</p>
+	<p> This node enables you to use the training features of the Watson Visual Recognition service V3 that aims to identify scenes and objects in images you upload to the service. Using this node you can create and train a custom classifier to identify subjects that suit your needs.</p>
     <p>The following features are available :</p>
     <ul>
         <li><b>Create a classifier</b> </li>
         <li><b>Retrieve a list of custom classifier</b></li>
         <li><b>Retrieve classifier details</b></li>
+        <li><b>Update a classifier</b></li>
         <li><b>Delete a classifier</b></li>
         <li><b>Delete all classifiers</b></li>
     </ul>
@@ -284,7 +262,7 @@
     <p>this feature should be provided in input : </p>
     <ul>
     <li><code>msg.params["name"]</code> : a string name that will be used as prefix for the returned classifier_id (Required)</li>
-    <li><code>msg.params["{classname}_positive_examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images. (Required)</li>
+    <li><code>msg.params["{classname}__examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images. (Required) Muliple entires are optional</li>
     <li><code>msg.params["negative_examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images.(Optional)</li>
     </ul>
     <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#create_a_classifier">API documentation</a>.</p>
@@ -300,6 +278,14 @@
     <li><code>msg.params["classifier_id"]</code> : the classifier_id (string) (Required)</li>
     </ul>
     <p>More information on this <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/visual-recognition/api/v3/?curl#retrieve_classifier_details">API documentation</a>.</p>
+
+    <p><b>Update a Classifier</b></p>
+    <p>this feature should be provided in input : </p>
+    <ul>
+    <li><code>msg.params["classifier_id"]</code> : the classifier_id (string) (Required)</li>
+    <li><code>msg.params["{classname}__examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images. (Optional) Muliple entires are optional</li>
+    <li><code>msg.params["negative_examples"]</code> : a Node.js binary Buffer of the ZIP that contains a minimum of 10 images.(Optional)</li>
+    </ul>
 
     <p><b>Delete a classifier </b></p>
     <p>this feature should be provided in input : </p>

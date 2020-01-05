@@ -191,7 +191,7 @@
     </p>
 
     <br/><br/>
-    
+
     <p>For more information about the Language Translator service, read the
       <a href="https://console.bluemix.net/docs/services/language-translator/index.html">
         documentation</a>.
@@ -217,34 +217,43 @@
 
     doctor.LANGUAGES = { 'ar' : 'Arabic',
                       'arz': 'Spoken Arabic',
+                      'bg' : 'Bulgarian',
                       'ca' : 'Catalan',
                       'cs' : 'Czech',
                       'da' : 'Danish',
-                      'en' : 'English' ,
+                      'el' : 'Greek',
+                      'en' : 'English',
                       'es' : 'Spanish',
+                      'et' : 'Estonian',
                       'fr' : 'French',
                       'fi' : 'Finnish',
+                      'ga' : 'Galican',
+                      'he' : 'Hebrew',
                       'hi' : 'Hindi',
+                      'hr' : 'Croatian',
                       'hu' : 'Hungarian',
+                      'id' : 'Indonesian',
                       'it' : 'Italian',
                       'de' : 'German',
                       'ja' : 'Japanese',
+                      'lt' : 'Lithuanian',
+                      'ms' : 'Malay',
                       'pt' : 'Portuguese',
                       'ko' : 'Korean',
                       'nb' : 'Norwegian Bokmål',
                       'nl' : 'Dutch',
                       'pl' : 'Polish',
+                      'ro' : 'Romanian',
                       'ru' : 'Russian',
+                      'sk' : 'Slovak',
+                      'sl' : 'Slovenian',
                       'sv' : 'Swedish',
+                      'th' : 'Thai',
                       'tr' : 'Turkish',
                       'zh' : 'Chinese',
                       'zh-TW' : 'Taiwanese',
                       'zht' : 'Traditional Chinese'
                     };
-
-
-
-
 
     doctor.showSelectedFields = function(fields) {
       for (i = 0; i < fields.length; i++) {
@@ -488,7 +497,7 @@
                         + '"' + lang + '"'
                         + selectedText
                         + '>'
-                        + (tor.LANGUAGES[lang] ? tor.LANGUAGES[lang] : lang)
+                        + (doctor.LANGUAGES[lang] ? doctor.LANGUAGES[lang] : lang)
                         + '</option>');
       });
     }
