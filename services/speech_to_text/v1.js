@@ -29,9 +29,9 @@ module.exports = function (RED) {
     sttutils = require('./stt-utils'),
     AuthV1 = require('watson-developer-cloud/authorization/v1'),
     //AuthIAMV1 = require('ibm-cloud-sdk-core/iam-token-manager/v1'),
-    AuthIAMV1 = require('ibm-cloud-sdk-core/auth/iam-token-manager-v1'),
+    //AuthIAMV1 = require('ibm-cloud-sdk-core/auth/iam-token-manager-v1'),
     //AuthIAMV1 = require('ibm-cloud-sdk-core/auth/token-managers/iam-token-manager'),
-    //{ IamTokenManager } = require('ibm-watson/auth');
+    { IamTokenManager } = require('ibm-watson/auth');
     muteMode = true, discardMode = false, autoConnect = true,
     username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
@@ -329,8 +329,9 @@ module.exports = function (RED) {
         // tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey, iamUrl: endpoint});
 
         //tokenService = new AuthIAMV1({apikey : apikey});
-        tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey});
+        //tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey});
         //tokenService = new AuthIAMV1.IamTokenManager({apikey : apikey});
+        tokenService = new IamTokenManager({apikey : apikey});
         //tokenService = new iamutils(apikey);
 
       } else {
@@ -445,16 +446,17 @@ module.exports = function (RED) {
         } else {
           // Everything is now in place to invoke the service
           tokenPending = true;
-          tokenService.getToken(function (err, res) {
-            if (err) {
-              reject(err);
-            } else {
+
+          tokenService.getToken()
+            .then((t) => {
+              token = t;
               tokenPending = false;
               tokenTime = now;
-              token = res;
               resolve();
-            }
-          });
+            })
+            .catch((err) => {
+              reject(err);
+            })
         }
       });
       return p;
