@@ -8,7 +8,9 @@ Node-RED Watson Nodes for IBM Cloud
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 ### New in version 0.8.1
-- 
+- Node-RED & IBM-Watson & Use of promises on API invokation & IAM URL construct migration & Removal of default endpoint of
+    - Speech to Text node
+    - Speech to Text Corpus Builder node
 
 ### New in version 0.8.0
 - In the 0.8.x releases the nodes are migrated to a node-red 1.0.x input

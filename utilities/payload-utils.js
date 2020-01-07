@@ -128,7 +128,15 @@ PayloadUtils.prototype = {
   reportError: function (node, msg, err) {
     var messageTxt = err;
 
-    if (err.error) {
+    if (err.body && 'string' === typeof err.body) {
+      messageTxt = err.body;
+      try {
+        let errBody = JSON.parse(err.body);
+        if (('object' === typeof errBody) && errBody.error) {
+          messageTxt = errBody.error;
+        }
+      } catch(e) {}
+    } else if (err.error) {
       messageTxt = err.error;
     } else if (err.description) {
       messageTxt = err.description;
@@ -139,6 +147,7 @@ PayloadUtils.prototype = {
     msg.watsonerror = messageTxt;
     node.status({fill:'red', shape:'dot', text: messageTxt});
     node.error(messageTxt, msg);
+    return messageTxt;
   },
 
   isReadableStream : function (obj) {

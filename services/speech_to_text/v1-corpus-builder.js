@@ -18,9 +18,11 @@ module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'speech-to-text';
   var temp = require('temp'),
     fs = require('fs'),
+    fsp = require('fs').promises,
     fileType = require('file-type'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
+    responseutils = require('../../utilities/response-utils'),
     sttutils = require('./stt-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = '', password = '', sUsername = '', sPassword = '',
@@ -48,125 +50,192 @@ module.exports = function (RED) {
   }
 
   function executeCreateCustomisation(node, stt, params, msg) {
-    stt.createLanguageModel(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['customization_id'] = response;
-      }
-      node.send(msg);
+    return new Promise(function resolver(resolve, reject) {
+      stt.createLanguageModel(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'customization_id');
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        })
     });
   }
 
   function executeListCustomisations(node, stt, params, msg) {
-    stt.listLanguageModels(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['customizations'] = response.customizations ?
-                                      response.customizations: response;
-      }
-      node.send(msg);
+    return new Promise(function resolver(resolve, reject) {
+      stt.listLanguageModels(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'customizations');
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   }
 
   function executeGetCustomisation(node, stt, params, msg) {
-    stt.getLanguageModel(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['customization'] = response ;
-      }
-      node.send(msg);
+    return new Promise(function resolver(resolve, reject) {
+      stt.getLanguageModel(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'customization');
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   }
 
   function executeDeleteCustomisation(node, stt, params, msg) {
-    stt.deleteLanguageModel(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['delcustomresponse'] = response ;
-      }
-      node.send(msg);
+    return new Promise(function resolver(resolve, reject) {
+      stt.deleteLanguageModel(params)
+        .then((response) => {
+          msg['delcustomresponse'] = response;
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        })
+    });
+  }
+
+  function executeUpgradeCustomisation(node, stt, params, msg) {
+    return new Promise(function resolver(resolve, reject) {
+      stt.upgradeLanguageModel(params)
+        .then((response) => {
+          msg['updcustomresponse'] = response;
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        })
     });
   }
 
 
+  function executeResetCustomisation(node, stt, params, msg) {
+    return new Promise(function resolver(resolve, reject) {
+      stt.resetLanguageModel(params)
+        .then((response) => {
+          msg['rescustomresponse'] = response;
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        })
+    });
+  }
+
   function executeAddCorpus(node, stt, params, msg) {
-    stt.addCorpus(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['addcorpusresponse'] = response ;
-      }
-      node.send(msg);
+    return new Promise(function resolver(resolve, reject) {
+      stt.addCorpus(params)
+        .then((response) => {
+          msg['addcorpusresponse'] = response;
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        })
     });
   }
 
   function executeGetCorpora(node, stt, params, msg) {
-    stt.listCorpora(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['corpora'] = response.corpora ? response.corpora : response ;
-      }
-      node.send(msg);
+    return new Promise(function resolver(resolve, reject) {
+      stt.listCorpora(params)
+      .then((response) => {
+        responseutils.parseResponseFor(msg, response, 'corpora');
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      })
+    });
+  }
+
+  function executeGetCorpus(node, stt, params, msg) {
+    return new Promise(function resolver(resolve, reject) {
+      stt.getCorpus(params)
+      .then((response) => {
+        responseutils.parseResponseFor(msg, response, 'corpus');
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      })
     });
   }
 
   function executeTrain(node, stt, params, msg) {
-    stt.trainLanguageModel(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['train'] = response ;
-      }
-      node.send(msg);
+    return new Promise(function resolver(resolve, reject) {
+      stt.trainLanguageModel(params)
+      .then((response) => {
+        msg['train'] = response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      })
     });
   }
 
   function executeGetCustomWords(node, stt, params, msg) {
-    stt.listWords(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['words'] = response.words ? response.words : response ;
-      }
-      node.send(msg);
+    return new Promise(function resolver(resolve, reject) {
+      stt.listWords(params)
+      .then((response) => {
+        responseutils.parseResponseFor(msg, response, 'words');
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      })
     });
   }
 
   function executeAddWords(node, stt, params, msg) {
-    stt.addWords(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['addwordsresponse'] = response ;
-      }
-      node.send(msg);
+    return new Promise(function resolver(resolve, reject) {
+      stt.addWords(params)
+      .then((response) => {
+        msg['addwordsresponse'] = response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      })
     });
   }
 
-
   function executeDeleteCorpus(node, stt, params, msg) {
-    stt.deleteCorpus(params, function (err, response) {
-      node.status({});
-      if (err) {
-        payloadutils.reportError(node, msg, err);
-      } else {
-        msg['delcorpusresponse'] = response ;
-      }
-      node.send(msg);
+    return new Promise(function resolver(resolve, reject) {
+      stt.deleteCorpus(params)
+      .then((response) => {
+        msg['delcorpusresponse'] = response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      })
+    });
+  }
+
+  function executeDeleteWord(node, stt, params, msg) {
+    return new Promise(function resolver(resolve, reject) {
+      stt.deleteWord(params)
+      .then((response) => {
+        msg['delwordresponse'] = response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      })
+    });
+  }
+
+  function executeUnknownMethod(node, stt, params, msg) {
+    return new Promise(function resolver(resolve, reject) {
+      msg.error = 'Unable to process as unknown mode has been specified';
+      reject(msg.error);
     });
   }
 
@@ -176,49 +245,67 @@ module.exports = function (RED) {
 
 
   function executeMethod(node, method, params, msg) {
-    var stt = determineService();
+    let stt = determineService();
+    let p = null;
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
 
     switch (method) {
     case 'createCustomisation':
-      executeCreateCustomisation(node, stt, params, msg);
+      p = executeCreateCustomisation(node, stt, params, msg);
       break;
     case 'listCustomisations':
-      executeListCustomisations(node, stt, params, msg);
+      p = executeListCustomisations(node, stt, params, msg);
       break;
     case 'getCustomisation':
-      executeGetCustomisation(node, stt, params, msg);
+      p = executeGetCustomisation(node, stt, params, msg);
       break;
     case 'deleteCustomisation':
-      executeDeleteCustomisation(node, stt, params, msg);
+      p = executeDeleteCustomisation(node, stt, params, msg);
+      break;
+    case 'resetCustomisation':
+      p = executeResetCustomisation(node, stt, params, msg);
+      break;
+    case 'upgradeCustomisation':
+      p = executeUpgradeCustomisation(node, stt, params, msg);
       break;
     case 'addCorpus':
-      executeAddCorpus(node, stt, params, msg);
+      p = executeAddCorpus(node, stt, params, msg);
       break;
     case 'getCorpora':
-      executeGetCorpora(node, stt, params, msg);
+      p = executeGetCorpora(node, stt, params, msg);
+      break;
+    case 'getCorpus':
+      p = executeGetCorpus(node, stt, params, msg);
       break;
     case 'train':
-      executeTrain(node, stt, params, msg);
+      p = executeTrain(node, stt, params, msg);
       break;
     case 'listCustomWords':
-      executeGetCustomWords(node, stt, params, msg);
+      p = executeGetCustomWords(node, stt, params, msg);
       break;
     case 'addWords':
-      executeAddWords(node, stt, params, msg);
+      p = executeAddWords(node, stt, params, msg);
       break;
     case 'deleteCorpus':
-      executeDeleteCorpus(node, stt, params, msg);
+      p = executeDeleteCorpus(node, stt, params, msg);
+      break;
+    case 'deleteCustomWord':
+      p = executeDeleteWord(node, stt, params, msg);
+      break;
+    default:
+      p = executeUnknownMethod(node, stt, params, msg);
       break;
     }
+
+    return p;
   }
 
   function paramsForNewCustom(config) {
     var params = {};
 
     if (config['stt-base-model']) {
-      params['base_model_name'] = config['stt-base-model'];
+      params['baseModelName'] = config['stt-base-model'];
     }
     if (config['stt-custom-model-name']) {
       params['name'] = config['stt-custom-model-name'];
@@ -234,13 +321,13 @@ module.exports = function (RED) {
     var params = {};
 
     if (config['stt-corpus-name']) {
-      params['name'] = config['stt-corpus-name'];
+      params['corpusName'] = config['stt-corpus-name'];
     }
     if (config['stt-custom-id']) {
-      params['customization_id'] = config['stt-custom-id'];
+      params['customizationId'] = config['stt-custom-id'];
     }
     if ('addCorpus' === method) {
-      params['allow_overwrite'] = config['stt-allow-overwrite'];
+      params['allowOverwrite'] = config['stt-allow-overwrite'];
     }
 
     return params;
@@ -256,17 +343,25 @@ module.exports = function (RED) {
       break;
     case 'listCustomisations':
       break;
+    case 'deleteCustomWord':
+      if (config['stt-word-name']) {
+        params['wordName'] = config['stt-word-name'];
+      }
+      // Deliberate no break;
     case 'getCustomisation':
     case 'getCorpora':
     case 'train':
     case 'listCustomWords':
     case 'addWords':
     case 'deleteCustomisation':
+    case 'upgradeCustomisation':
+    case 'resetCustomisation':
       if (config['stt-custom-id']) {
-        params['customization_id'] = config['stt-custom-id'];
+        params['customizationId'] = config['stt-custom-id'];
       }
       break;
     case 'addCorpus':
+    case 'getCorpus':
     case 'deleteCorpus':
       params = paramsForCorpus(config, method);
       break;
@@ -278,7 +373,7 @@ module.exports = function (RED) {
   function setFileParams(method, params, msg) {
     switch (method) {
     case 'addCorpus':
-      params.corpus = msg.payload;
+      params.corpusFile = msg.payload;
       break;
     case 'addWords':
       params.words = msg.payload;
@@ -288,45 +383,41 @@ module.exports = function (RED) {
   }
 
   function loadFile(node, method, params, msg) {
-    temp.open({
-      suffix: '.txt'
-    }, function(err, info) {
-      if (err) {
-        node.status({
-          fill: 'red',
-          shape: 'dot',
-          text: 'Error receiving the data buffer for training'
-        });
-        throw err;
-      }
-
-      // Syncing up the asynchronous nature of the stream
-      // so that the full file can be sent to the API.
-      fs.writeFile(info.path, msg.payload, function(err) {
+    return new Promise(function resolver(resolve, reject) {
+      temp.open({
+        suffix: '.txt'
+      }, function(err, info) {
         if (err) {
           node.status({
             fill: 'red',
             shape: 'dot',
-            text: 'Error processing data buffer for training'
+            text: 'Error receiving the data buffer for training'
           });
-          throw err;
+          reject(err);
         }
 
-        switch (method) {
-        case 'addCorpus':
-          params.corpus = fs.createReadStream(info.path);
-          break;
-        case 'addWords':
-          try {
-            params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
-          } catch (err) {
-            params.words = fs.createReadStream(info.path);
-          }
-        }
-
-        executeMethod(node, method, params, msg);
-        temp.cleanup();
+        // Syncing up the asynchronous nature of the stream
+        // so that the full file can be sent to the API.
+        fsp.writeFile(info.path, msg.payload)
+          .then(() => {
+            switch (method) {
+            case 'addCorpus':
+              params.corpusFile = fs.createReadStream(info.path);
+              break;
+            case 'addWords':
+              try {
+                params.words = JSON.parse(fs.readFileSync(info.path, 'utf8'));
+              } catch (err) {
+                params.words = fs.createReadStream(info.path);
+              }
+            }
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          })
       });
+
     });
   }
 
@@ -334,9 +425,9 @@ module.exports = function (RED) {
     switch (method) {
     case 'addCorpus':
     case 'addWords':
-      return true;
+      return Promise.resolve(true);
     }
-    return false;
+    return Promise.resolve(false);
   }
 
 
@@ -356,13 +447,17 @@ module.exports = function (RED) {
 
     var stt = sttutils.initSTTService(req, sApikey, sUsername, sPassword, sEndpoint);
 
-    stt.listModels({}, function(err, models){
-      if (err) {
-        res.json(err);
-      } else {
+    stt.listModels({})
+      .then((response) => {
+        let models = response;
+        if (response.result) {
+          models = response.result;
+        }
         res.json(models);
-      }
-    });
+      })
+      .catch((err) => {
+        res.json(err);
+      })
   });
 
 
@@ -371,7 +466,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg, send, done) {
       var method = config['stt-custom-mode'],
         message = '',
         params = {};
@@ -381,7 +476,7 @@ module.exports = function (RED) {
       apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
-      if ((!config['default-endpoint']) && config['service-endpoint']) {
+      if (config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
@@ -398,15 +493,33 @@ module.exports = function (RED) {
         return;
       }
 
-      if (checkForFile(method)) {
-        if (msg.payload instanceof Buffer) {
-          loadFile(node, method, params, msg);
-          return;
-        }
-        params = setFileParams(method, params, msg);
-      }
+      checkForFile(method)
+        .then((lookForBuffer) => {
+          if (! lookForBuffer) {
+            return Promise.resolve();
+          } else if (msg.payload instanceof Buffer) {
+            return loadFile(node, method, params, msg);
+          } else {
+            params = setFileParams(method, params, msg);
+            return Promise.resolve();
+          }
+        })
+        .then(() => {
+          return executeMethod(node, method, params, msg)
+        })
+        .then(() => {
+          node.status({});
+          send(msg);
+          temp.cleanup();
+          done();
+        })
+        .catch((err) => {
+          node.status({});
+          let errMsg = payloadutils.reportError(node, msg, err);
+          temp.cleanup();
+          done(errMsg);
+        });
 
-      executeMethod(node, method, params, msg);
     });
   }
 

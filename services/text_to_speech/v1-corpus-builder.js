@@ -22,6 +22,7 @@ module.exports = function (RED) {
     fileType = require('file-type'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
+    responseutils = require('../../utilities/response-utils'),    
     ttsutils = require('./tts-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     endpoint = '',
@@ -48,17 +49,6 @@ module.exports = function (RED) {
     sEndpoint = service.url;
   }
 
-  function parseResponseFor(msg, response, field) {
-    if (response && response.result) {
-      if (response.result[field]) {
-        msg[field] = response.result[field];
-      } else {
-        msg[field] = response.result;
-      }
-    } else {
-      msg[field] = response;
-    }
-  }
 
   function executeCreateCustomisation(node, tts, params, msg) {
     return new Promise(function resolver(resolve, reject) {
@@ -81,7 +71,7 @@ module.exports = function (RED) {
     return new Promise(function resolver(resolve, reject) {
       tts.listVoiceModels(params)
         .then((response) => {
-          parseResponseFor(msg, response, 'customizations');
+          responseutils.parseResponseFor(msg, response, 'customizations');
           resolve();
         })
         .catch((err) => {
@@ -94,7 +84,7 @@ module.exports = function (RED) {
     return new Promise(function resolver(resolve, reject) {
       tts.listVoices(params)
         .then((response) => {
-          parseResponseFor(msg, response, 'voices');
+          responseutils.parseResponseFor(msg, response, 'voices');
           resolve();
         })
         .catch((err) => {
@@ -137,7 +127,7 @@ module.exports = function (RED) {
     return new Promise(function resolver(resolve, reject) {
       tts.getPronunciation(params)
         .then((response) => {
-          parseResponseFor(msg, response, 'pronunciation');
+          responseutils.parseResponseFor(msg, response, 'pronunciation');
           resolve();
         })
         .catch((err) => {
@@ -164,7 +154,7 @@ module.exports = function (RED) {
     return new Promise(function resolver(resolve, reject) {
       tts.listWords(params)
         .then((response) => {
-          parseResponseFor(msg, response, 'words');
+          responseutils.parseResponseFor(msg, response, 'words');
           resolve();
         })
         .catch((err) => {
@@ -190,8 +180,7 @@ module.exports = function (RED) {
     return new Promise(function resolver(resolve, reject) {
       payloadutils.reportError(node, msg, 'Unknown Mode');
       msg.error = 'Unable to process as unknown mode has been specified';
-      node.send(msg);
-      resolve();
+      reject(msg.error);
     });
   }
 
@@ -257,7 +246,7 @@ module.exports = function (RED) {
             shape: 'dot',
             text: 'Error receiving the data buffer for training'
           });
-          throw err;
+          reject(err);
         }
 
         // Syncing up the asynchronous nature of the stream
@@ -418,8 +407,9 @@ module.exports = function (RED) {
 
       checkForFile(method)
         .then((lookForBuffer) => {
-          if (msg.payload instanceof Buffer) {
-            console.log('Processing as a Buffer');
+          if (! lookForBuffer) {
+            return Promise.resolve();
+          } else if (msg.payload instanceof Buffer) {
             return loadFile(node, method, params, msg);
           } else {
             params = setFileParams(method, params, msg);
@@ -437,9 +427,9 @@ module.exports = function (RED) {
         })
         .catch((err) => {
           node.status({});
-          payloadutils.reportError(node, msg, err);
+          let errMsg = payloadutils.reportError(node, msg, err);
           temp.cleanup();
-          done(err);
+          done(errMsg);
         })
       });
   }
