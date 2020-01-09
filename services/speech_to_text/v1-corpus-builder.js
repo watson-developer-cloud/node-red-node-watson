@@ -54,7 +54,7 @@ module.exports = function (RED) {
       stt.createLanguageModel(params)
         .then((response) => {
           responseutils.parseResponseFor(msg, response, 'customization_id');
-          resolve(response);
+          resolve();
         })
         .catch((err) => {
           reject(err);
