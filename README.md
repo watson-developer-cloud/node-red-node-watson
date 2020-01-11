@@ -13,8 +13,15 @@ Node-RED Watson Nodes for IBM Cloud
     - Speech to Text Corpus Builder node
     - Natural Language Understanding node
     - Natural Language Classifier node
+    - Language Identifier node
+    - Language Translator node
 - New NLU Model Manager node.
 - NLC CreateClassifier is broken until defect on ibm-watson is fixed.
+- Remove X-Watson-Technology-Preview Neural translation option for Language Translator node
+- Remove monolingual corpus option from Language Translator mode
+- Added new modes to Language Translator mode
+  - List Custom models
+  - List Default models
 
 ### New in version 0.8.0
 - In the 0.8.x releases the nodes are migrated to a node-red 1.0.x input

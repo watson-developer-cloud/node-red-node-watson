@@ -193,6 +193,7 @@ module.exports = function(RED) {
         };
 
         params.trainingMetadata = JSON.stringify(meta);
+        //params.trainingMetadata = meta;
 
         if ('string' === typeof msg.payload) {
           params.trainingData = msg.payload;
@@ -251,10 +252,8 @@ module.exports = function(RED) {
           mode = 'classifyCollection';
         }
 
-        natural_language_classifier[mode](params, function(err, response) {
-          if (err) {
-            reject(err);
-          } else {
+        natural_language_classifier[mode](params)
+          .then((response) => {
             switch (mode) {
             case 'classify':
               responseutils.parseResponseFor(msg, response, 'result');
@@ -279,8 +278,10 @@ module.exports = function(RED) {
               msg.payload = response;
             }
             resolve();
-          }
-        });
+          })
+          .catch((err) => {
+            reject(err);
+          });
       });
 
       return p;
