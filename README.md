@@ -11,8 +11,10 @@ Node-RED Watson Nodes for IBM Cloud
 - Node-RED & IBM-Watson & Use of promises on API invokation & IAM URL construct migration & Removal of default endpoint of
     - Speech to Text node
     - Speech to Text Corpus Builder node
-    - Natural Language Understandig node
+    - Natural Language Understanding node
+    - Natural Language Classifier node
 - New NLU Model Manager node.
+- NLC CreateClassifier is broken until defect on ibm-watson is fixed.
 
 ### New in version 0.8.0
 - In the 0.8.x releases the nodes are migrated to a node-red 1.0.x input
