@@ -8,7 +8,12 @@ Node-RED Watson Nodes for IBM Cloud
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 ### New in version 0.8.1
-- Node-RED & IBM-Watson & Use of promises on API invokation & IAM URL construct migration & Removal of default endpoint of
+- Node-RED & IBM-Watson & Use of promises on API invocation & IAM URL construct migration & Removal of default endpoint of
+    - Document Translator node
+
+
+### New in version 0.8.1
+- Node-RED & IBM-Watson & Use of promises on API invocation & IAM URL construct migration & Removal of default endpoint of
     - Speech to Text node
     - Speech to Text Corpus Builder node
     - Natural Language Understanding node
@@ -33,7 +38,7 @@ During the migration there will be a dependancy on both modules.
 - Bump dependancy on node to >=10.0.0
 - Bump dependancy on cfenv, request, file-type
 - Bump dependancy on ibm-cloud-sdk-core to 0.3.7 (need to stay on 0.x, for STT Streaming to work)
-- Node-RED & IBM-Watson & Use of promises on API invokation & IAM URL construct migration & Removal of default endpoint of
+- Node-RED & IBM-Watson & Use of promises on API invocation & IAM URL construct migration & Removal of default endpoint of
     - Tone Analyzer node.
     - Personality Insights node.
     - Visual Recognition V3 node

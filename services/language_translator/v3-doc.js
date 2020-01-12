@@ -17,10 +17,11 @@
 module.exports = function (RED) {
   const request = require('request'),
     SERVICE_IDENTIFIER = 'language-translator',
-    SERVICE_VERSION = '2018-05-01';
+    SERVICE_VERSION = '2018-05-01',
+    LanguageTranslatorV3 = require('ibm-watson/language-translator/v3'),
+    { IamAuthenticator } = require('ibm-watson/auth');
 
   var pkg = require('../../package.json'),
-    LanguageTranslatorV3 = require('watson-developer-cloud/language-translator/v3'),
     fs = require('fs'),
     fileType = require('file-type'),
     temp = require('temp'),
@@ -54,6 +55,7 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/watson-doc-translator/models', function (req, res) {
     endpoint = req.query.e ? req.query.e : sEndpoint;
     var lt = null,
+      authSettings = {},
       serviceSettings = {
         version: SERVICE_VERSION,
         url: endpoint,
@@ -63,23 +65,27 @@ module.exports = function (RED) {
       };
 
     if (sApikey || req.query.key) {
-      serviceSettings.iam_apikey = sApikey ? sApikey : req.query.key;
+      authSettings.apikey = sApikey ? sApikey : req.query.key;
     } else {
-      serviceSettings.username = sUsername ? sUsername : req.query.un;
-      serviceSettings.password = sPassword ? sPassword : req.query.pwd;
+      authSettings.username = sUsername ? sUsername : req.query.un;
+      authSettings.password = sPassword ? sPassword : req.query.pwd;
     }
+    serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     lt = new LanguageTranslatorV3(serviceSettings);
 
-    lt.listModels({}, function (err, models) {
-      if (err) {
-        res.json(err);
-      } else {
+    lt.listModels({})
+      .then((response) => {
+        let models = [];
+        if (response && response.result && response.result.models) {
+          models = response.result;
+        }
         res.json(models);
-      }
-    });
+      })
+      .catch((err) => {
+        res.json(err);
+      })
   });
-
 
   function Node (config) {
     var node = this;
@@ -144,6 +150,30 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
+    function getService() {
+      let authSettings = {},
+        serviceSettings = {
+          version: '2018-05-01',
+          headers: {
+            'User-Agent': pkg.name + '-' + pkg.version
+          }
+        };
+
+      if (apikey) {
+        authSettings.apikey = apikey;
+      } else {
+        authSettings.username = username;
+        authSettings.password = password;
+      }
+      serviceSettings.authenticator = new IamAuthenticator(authSettings);
+
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
+
+      return new LanguageTranslatorV3(serviceSettings);
+    }
+
 
     function buildAuthSettings () {
       var authSettings = {};
@@ -186,7 +216,6 @@ module.exports = function (RED) {
               reject('Document not found ' + response.statusCode);
               break;
             default:
-              console.log(body);
               reject('Error Invoking API ' + response.statusCode);
               break;
             }
@@ -324,10 +353,46 @@ module.exports = function (RED) {
     }
 
     function executeGetDocument(msg) {
-      var docid = docID(msg);
-      let uriAddress = `${endpoint}/v3/documents/${docid}/translated_document?version=${SERVICE_VERSION}`;
+      return new Promise(function resolver(resolve, reject){
+        let lt = getService(),
+          docid = docID(msg);
 
-      return executeGetRequest(uriAddress);
+        lt.getTranslatedDocument({documentId : docid})
+          .then((response) => {
+            msg.payload = response;
+            if (response && response.result) {
+              msg.payload = response.result;
+            }
+            return payloadutils.checkForStream(msg);
+          })
+          .then(() => {
+            resolve(msg.payload);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    }
+
+    function executeGetDocumentXX(msg) {
+      return new Promise(function resolver(resolve, reject){
+        var docid = docID(msg);
+        let uriAddress = `${endpoint}/v3/documents/${docid}/translated_document?version=${SERVICE_VERSION}`;
+
+        executeGetRequest(uriAddress)
+          .then((response) => {
+            msg.payload = response;
+            return payloadutils.checkForStream(msg);
+          })
+          .then(() => {
+            resolve(msg.payload);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+
+      // return executeGetRequest(uriAddress);
     }
 
     function executeDeleteDocument(msg) {
@@ -416,7 +481,7 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
-    function doit(msg) {
+    function doit(msg, send) {
       let action = msg.action || config.action;
 
       translatorutils.credentialCheck(username, password, apikey)
@@ -440,16 +505,16 @@ module.exports = function (RED) {
         .then(function(){
           temp.cleanup();
           node.status({});
-          node.send(msg);
+          send(msg);
         })
         .catch(function(err){
           temp.cleanup();
           payloadutils.reportError(node, msg, err);
-          node.send(msg);
+          send(msg);
         });
     }
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg, send, done) {
       // The dynamic nature of this node has caused problems with the password field. it is
       // hidden but not a credential. If it is treated as a credential, it gets lost when there
       // is a request to refresh the model list.
@@ -459,7 +524,7 @@ module.exports = function (RED) {
       apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
-      if ((!config['default-endpoint']) && config['service-endpoint']) {
+      if (config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
@@ -476,12 +541,13 @@ module.exports = function (RED) {
             pos = i+1;
           node.status({ fill: 'blue', shape: 'dot', text: `Processing document ${pos} of ${len}` });
           msgClone.payload = e;
-          doit(msgClone);
+          doit(msgClone, send);
         });
 
       } else {
-        doit(msg);
+        doit(msg, send);
       }
+      done();
     });
   }
 
