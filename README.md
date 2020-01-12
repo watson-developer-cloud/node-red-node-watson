@@ -15,6 +15,7 @@ Node-RED Watson Nodes for IBM Cloud
     - Natural Language Classifier node
     - Language Identifier node
     - Language Translator node
+    - Translator Util node
 - New NLU Model Manager node.
 - NLC CreateClassifier is broken until defect on ibm-watson is fixed.
 - Remove X-Watson-Technology-Preview Neural translation option for Language Translator node
