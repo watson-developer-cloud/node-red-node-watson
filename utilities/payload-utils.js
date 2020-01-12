@@ -124,10 +124,8 @@ PayloadUtils.prototype = {
     });
   },
 
-
-  reportError: function (node, msg, err) {
-    var messageTxt = err;
-
+  runThroughErrOptions: function(err) {
+    let messageTxt = err;
     if (err.error) {
       messageTxt = err.error;
     } else if (err.description) {
@@ -135,10 +133,26 @@ PayloadUtils.prototype = {
     } else if (err.message) {
       messageTxt = err.message;
     }
+    return messageTxt;
+  },
+
+  reportError: function (node, msg, err) {
+    let messageTxt = err;
+
+    if (err.body && 'string' === typeof err.body) {
+      messageTxt = err.body;
+      try {
+        let errBody = JSON.parse(err.body);
+        messageTxt = PayloadUtils.prototype.runThroughErrOptions(errBody);
+      } catch(e) {}
+    } else {
+      messageTxt = PayloadUtils.prototype.runThroughErrOptions(err);
+    }
 
     msg.watsonerror = messageTxt;
     node.status({fill:'red', shape:'dot', text: messageTxt});
     node.error(messageTxt, msg);
+    return messageTxt;
   },
 
   isReadableStream : function (obj) {

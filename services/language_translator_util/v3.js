@@ -15,12 +15,59 @@
  **/
 
 module.exports = function (RED) {
+  const SERVICE_IDENTIFIER = 'language-translator',
+    LanguageTranslatorV3 = require('ibm-watson/language-translator/v3'),
+    { IamAuthenticator } = require('ibm-watson/auth'),
+    LANGS = {
+      'es': 'Spanish',
+      'ar': 'Arabic',
+      'arz': 'Spoken Arabic',
+      'en': 'English',
+      'fr': 'French',
+      'it': 'Italian',
+      'zh': 'Chinese',
+      'ko': 'Korean',
+      'pt': 'Portuguese',
+      'de': 'German',
+      'ja': 'Japanese',
+      'nl': 'Dutch',
+      'pl': 'Polish',
+      'ru': 'Russian',
+      'tr': 'Turkish',
+      'zh-TW' : 'Taiwanese',
+      'zht': 'Traditional Chinese',
+      'bg' : 'Bulgarian',
+      'ca' : 'Catalan',
+      'cs' : 'Czech',
+      'da' : 'Danish',
+      'el' : 'Greek',
+      'et' : 'Estonian',
+      'fi' : 'Finnish',
+      'ga' : 'Galican',
+      'he' : 'Hebrew',
+      'hi' : 'Hindi',
+      'hr' : 'Croatian',
+      'hu' : 'Hungarian',
+      'id' : 'Indonesian',
+      'lt' : 'Lithuanian',
+      'ms' : 'Malay',
+      'nb' : 'Norwegian Bokmål',
+      'ro' : 'Romanian',
+      'sk' : 'Slovak',
+      'sl' : 'Slovenian',
+      'sv' : 'Swedish',
+      'th' : 'Thai'
+    };
+
   var pkg = require('../../package.json'),
-    LanguageTranslatorV3 = require('watson-developer-cloud/language-translator/v3'),
     cfenv = require('cfenv'),
     username = null, password = null, sUsername = null, sPassword = null,
     apikey = null, sApikey = null,
-    service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
+    payloadutils = require('../../utilities/payload-utils'),
+    serviceutils = require('../../utilities/service-utils'),
+    responseutils = require('../../utilities/response-utils'),
+    //service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
+    service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/language-translator/api';
 
@@ -68,9 +115,10 @@ module.exports = function (RED) {
     // The node has received an input as part of a flow, need to determine
     // what the request is for, and based on that if the required fields
     // have been provided.
-    this.on('input', function (msg) {
+    this.on('input', function(msg, send, done) {
 
-      var message = '',
+      let message = '',
+        authSettings = {},
         serviceSettings = {
           version: '2018-05-01',
           headers: {
@@ -85,11 +133,13 @@ module.exports = function (RED) {
       }
 
       if (apikey) {
-        serviceSettings.iam_apikey = apikey;
+        authSettings.apikey = apikey;
       } else {
-        serviceSettings.username = username;
-        serviceSettings.password = password;
+        authSettings.username = username;
+        authSettings.password = password;
       }
+
+      serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
       endpoint = sEndpoint;
       if ((!config['default-endpoint']) && config['service-endpoint']) {
@@ -118,42 +168,26 @@ module.exports = function (RED) {
       }
 
       function makeLanguageBeautifier(string) {
-        var langs = {
-          'es': 'Spanish',
-          'ar': 'Arabic',
-          'arz': 'Spoken Arabic',
-          'en': 'English',
-          'fr': 'French',
-          'it': 'Italian',
-          'zh': 'Chinese',
-          'ko': 'Korean',
-          'pt': 'Portuguese',
-          'de': 'German',
-          'ja': 'Japanese',
-          'nl': 'Dutch',
-          'pl': 'Polish',
-          'ru': 'Russian',
-          'tr': 'Turkish',
-          'zh-TW' : 'Taiwanese',
-          'zht': 'Traditional Chinese'
-        };
-        return langs[string];
+        if (LANGS[string]) {
+          return LANGS[string];
+        }
+        return string;
       }
       // ---- END OF UTILITY FUNCTIONS ----
 
       if (lt) {
-        lt.listModels({},function (err, models ){
-          if (err) {
-            node.error(err,msg);
-          } else {
-            msg.payload = models;
+        node.status({fill:'blue', shape:'dot', text:'fetching models'});
+        lt.listModels({})
+          .then((response) => {
+            node.status({fill:'blue', shape:'dot', text:'parsing response'});
+            responseutils.parseResponseFor(msg, response, 'models');
 
+            msg.payload = msg.models;
             // the overall array would be used to populate the dropdown list
             var dropdown_array = [];
             var domain_src_target_model = [];
             var domain_src_target = '';
             var sTmp3 = '';
-            msg.options_dropdown = {};
             msg.dropdown_object = {};
 
             // Populating 'DOMAIN's into an array which would be returned by the msg object
@@ -176,13 +210,13 @@ module.exports = function (RED) {
             msg.options_target_lang = {};
             msg.target_lang_object = {};
 
-            for (var i = 0; i < msg.payload.models.length; i++) {
-              ldom[i] = msg.payload.models[i].domain;
+            for (var i = 0; i < msg.models.length; i++) {
+              ldom[i] = msg.models[i].domain;
               ldom[i] = capitalize(ldom[i]);
-              model_id_array[i] = msg.payload.models[i].model_id;
-              src_lang_array[i] = msg.payload.models[i].source;
+              model_id_array[i] = msg.models[i].model_id;
+              src_lang_array[i] = msg.models[i].source;
               src_lang_array[i] = makeLanguageBeautifier(src_lang_array[i]);
-              target_lang_array[i] = msg.payload.models[i].target;
+              target_lang_array[i] = msg.models[i].target;
               target_lang_array[i] = makeLanguageBeautifier(target_lang_array[i]);
 
               sTmp3 = makeLanguageBeautifier(target_lang_array[i]);
@@ -226,9 +260,14 @@ module.exports = function (RED) {
             msg.target_lang_object = Object.keys(msg.options_target_lang);
             msg.dropdown_object = dropdown_array;
 
-            node.send(msg);
-          }
-        });
+            node.status({});
+            send(msg);
+            done();
+          })
+          .catch((err) => {
+            let errMsg = payloadutils.reportError(node, msg, err);
+            done(errMsg);
+          });
       } else {
         node.error('Error instantiating the language service',msg);
       }

@@ -1,0 +1,113 @@
+<!--
+  Copyright 2020 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+<script type="text/x-red" data-template-name="natural-language-understanding-model-manager-v1">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key">
+    </div>
+    <div class="form-row credentials">
+        <label for="node-input-nlu-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-nlu-service-endpoint" placeholder="https://gateway.watsonplatform.net/natural-language-understanding/api">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-nlu-model-mode"><i class="fa fa-book"></i> Mode: </label>
+        <select type="text" id="node-input-nlu-model-mode" style="display: inline-block; width: 70%;">
+            <option value="listModels">List Models</option>
+            <option value="deleteModel">Delete Model</option>
+        </select>
+    </div>
+</script>
+
+
+<script type="text/javascript">
+
+    (function() {
+        RED.nodes.registerType('natural-language-understanding-model-manager-v1', {
+            category: 'IBM Watson',
+            defaults: {
+              name: {value: ""},
+              'nlu-service-endpoint' :{value: ""},
+              "nlu-model-mode": {value: ""}
+            },
+            credentials: {
+              apikey: {type:"password"}
+            },
+            color: '#60A2FF',
+            inputs: 1,
+            outputs: 1,
+            icon: "NaturalLanguageUnderstanding.png",
+            paletteLabel: "natural language understanding V1 model manager",
+            label: function() {
+                return this.name || "natural language understanding V1 model manager";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+              $.getJSON('watson-nlu-model-manager-v4/vcap/')
+                  .done(function (service) {
+                    $('.credentials').toggle(!service);
+                  })
+                  .fail(function () {
+                    $('.credentials').show();
+                  })
+                  .always(function () {
+                    $('#credentials-check').hide();
+                  })
+            }
+        });
+    })();
+</script>
+
+<script type="text/x-red" data-help-name="natural-language-understanding-model-manager-v1">
+	<p> This node enables you to list or delete
+    watson Knowledge Studio custom entities and relations models that are
+    deployed to your Natural Language Understanding service.
+  </p>
+    <p>The following features are available :</p>
+    <ul>
+      <li><b>List models</b></li>
+      <li><b>Delete a model</b></li>
+    </ul>
+
+    <p><b>List models</b></p>
+    <p>No input parameters are required : </p>
+    <p>More information on this
+      <a href="https://cloud.ibm.com/apidocs/natural-language-understanding/natural-language-understanding?code=node#list-models">
+        API documentation</a>.</p>
+
+    <p><b>Delete model</b></p>
+    <p>this feature should be provided as input : </p>
+    <ul>
+        <li><code>msg.payload</code> : The identifier of the model to delete (Required)</li>
+    </ul>
+    <p>More information on this
+      <a href="https://cloud.ibm.com/apidocs/natural-language-understanding/natural-language-understanding?code=node#delete-model">
+        API documentation</a>.</p>
+
+</script>

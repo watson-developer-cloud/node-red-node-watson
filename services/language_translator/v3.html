@@ -44,11 +44,6 @@
     </div>
 
     <div class="form-row credentials">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
-    </div>
-    <div class="form-row">
         <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
         <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/language-translator/api">
     </div>
@@ -59,15 +54,11 @@
             <option value="translate">Translate</option>
             <option value="custom">Customised Translate</option>
             <option value="train">Train</option>
+            <option value="listcustom">List Customised Models</option>
+            <option value="listdefault">List Default Models</option>
             <option value="getstatus">Get status</option>
             <option value="delete">Delete</option>
         </select>
-    </div>
-
-    <div class="form-row credentials">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-neural" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-neural" style="width: 70%;"> Use Experimental Neural Translation</label>
     </div>
 
     <div class="form-row">
@@ -122,7 +113,6 @@
         <select type="text" id="node-input-filetype" style="display: inline-block; vertical-align:middle; width: 70%;">
             <option value="forcedglossary" selected="selected">Forced glossary</option>
             <option value="parallelcorpus">Parallel corpus</option>
-            <option value="monolingualcorpus">Monolingual corpus</option>
         </select>
     </div>
 
@@ -149,6 +139,7 @@
 <script type="text/x-red" data-help-name="watson-translator">
     <p>The Watson Language Translator service enables you to translate text from one language to another and to add your own translation models.</p>
     <p></p>
+
     <p><b>Translation Mode</b>.</p>
     <p>The text to translate should be passed in on <code>msg.payload</code>.</p>
     <p>The translated text will be returned on <code>msg.payload</code>.</p>
@@ -163,6 +154,7 @@
     the documentation linked below for the currently supported source and destination
     languages translation permutations.</p>
     <p></p>
+
     <p><b>Customised Translation Mode</b>.</p>
     <p>In this mode you can select a translation model that you have customised through
     the training options.</p>
@@ -170,17 +162,18 @@
     <p>The translated text will be returned on <code>msg.payload</code>.</p>
     <p>The full response from the service will be returned on <code>msg.translation</code></p>
     <p></p>
+
     <p><b>Training Mode</b>.</p>
     <p>This mode enables you to add your own customized model to the Watson Language Translator service. </p>
     <p>In <code>msg.payload</code>, (this can be through box, dropbox or a file-inject node.
        you must specify one of the following file options to customize the training:</p>
     <p>forced_glossary - A UTF-8 encoded TMX file that contains pairs of matching terms in the source and target language that are seen as absolute by the system. This file completely overwrites the original domain data.</p>
     <p>parallel_corpus - A UTF-8 encoded TMX file that contains matching phrases in the source and target language that serve as examples for Watson. Parallel corpora differ from glossaries because they do not overwrite the original domain data.</p>
-    <p>monolingual_corpus - A UTF-8 encoded plain text file that contains a body of text in the target language that is related to what you are translating. A monolingual corpus helps improve literal translations to be more fluent and human.</p>
     <p>The Language Translator Node will return the ID of the created customized model.</p>
     <p<b>Note:</b>As the input file is expected on msg.payload, only one file can be specified. This is
     an enforced restriction by this Node. The service API allows more than one file to be specified.</p>
     <p></p>
+
     <p><b>Get Status Mode</b>.</p>
     <p>This mode allows you to get the status of a model sent to training by providing its ID.</p>
     <p>Values can be the followings:</p>
@@ -189,8 +182,17 @@
     <p>error - Training did not complete because of an error. if you want to see the reason behind the error
     this will be returned in <code>msg.translation</code></p>
     <p>available - Training is completed, and the service is now available to use with your custom translation model.</p>
-    <p><b>Delete Mode</b>.</p>
     <p></p>
+
+    <p><b>List Default models Mode</b>.</p>
+    <p>This mode returns a list of all the default translation models.</p>
+    <p></p>
+
+    <p><b>List Customised models Mode</b>.</p>
+    <p>This mode returns a list of all the customised translation models.</p>
+    <p></p>
+
+    <p><b>Delete Mode</b>.</p>
     <p>This mode allows you to delete a model by providing its ID</p>
     <p><b>Parameters Scope</b>.</p>
     <p>This parameter makes the language translation node to toogle using incoming parameters form the dashboard Dropdown list or locally.</p>
@@ -295,7 +297,6 @@
         $('select#node-input-filetype').parent().hide();
         $('input#node-input-trainid').parent().hide();
         $('input#node-input-lgparams2').parent().hide();
-        $('input#node-input-neural').parent().hide();
         $('#languagetranslation-form-tips').show();
     }
   }
@@ -319,14 +320,6 @@
     return self.indexOf(value) === index;
   }
 
-  // Flush the cache
-  tor.flushModelCache = function () {
-    tor.models = null;
-    tor.domains = null;
-    tor.basemodels = null;
-    tor.custommodels = null;
-    tor.checkModels();
-  }
 
   // Retrieve the available models from the server, if data is returned, then
   // can enable the dynamic selection fields.
@@ -337,13 +330,7 @@
     var e = $('#node-input-service-endpoint').val();
     var creds = {un: u, pwd: p, key: k};
 
-    if ($('#node-input-neural').prop('checked')) {
-      creds.n = 'Y';
-    }
-
-    if (! $('#node-input-default-endpoint').prop('checked')) {
-      creds.e = e;
-    }
+    creds.e = e;
 
     $.getJSON('watson-translator/models/', creds)
     .done(function (data) {
@@ -445,12 +432,25 @@
     }
   }
 
+  tor.modelcompare = function(a, b) {
+    let result = 0;
+    if (a.model_id && b.model_id) {
+      if (a.model_id > b.model_id) {
+        result = 1;
+      } else if (a.model_id < b.model_id) {
+        result = -1;
+      }
+    }
+    return result;
+  }
+
   // Populates the base model field. These are the models that are available to be customised.
   tor.checkBaseModels = function () {
     if (!tor.basemodels && tor.models) {
       tor.basemodels = tor.models.filter(function (model) {
         return model.customizable === true;
       });
+      tor.basemodels.sort(tor.modelcompare);
     }
     if (tor.basemodels) {
       $('select#node-input-basemodel').empty();
@@ -517,7 +517,6 @@
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
           $('input#node-input-trainid').parent('').hide();
           $('input#node-input-lgparams2').parent().show();
-          $('input#node-input-neural').parent().show();
           $('#languagetranslation-form-tips').show();
           break;
         case 'custom':
@@ -527,7 +526,6 @@
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
           $('input#node-input-trainid').parent('').hide();
           $('input#node-input-lgparams2').parent().show();
-          $('input#node-input-neural').parent().hide();
           $('#languagetranslation-form-tips').show();
           break;
         case 'train':
@@ -537,7 +535,6 @@
           $('select#node-input-basemodel, select#node-input-filetype').parent('').show();
           $('input#node-input-trainid').parent('').hide();
           $('input#node-input-lgparams2').parent().show();
-          $('input#node-input-neural').parent().hide();
           $('#languagetranslation-form-tips').show();
           break;
         case 'getstatus':
@@ -548,9 +545,17 @@
           $('select#node-input-domain').parent().hide();
           $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
           $('input#node-input-lgparams2').parent().show();
-          $('input#node-input-neural').parent().hide();
           $('#languagetranslation-form-tips').show();
           break;
+        case 'listcustom':
+        case 'listdefault':
+          $('select#node-input-custom').parent().hide();
+          $('input#node-input-trainid').parent('').hide();
+          $('select#node-input-srclang, select#node-input-destlang').parent().hide();
+          $('select#node-input-domain').parent().hide();
+          $('select#node-input-basemodel, select#node-input-filetype').parent('').hide();
+          $('input#node-input-lgparams2').parent().hide();
+          $('#languagetranslation-form-tips').show();
       }
       tor.checkDomains();
       tor.checkBaseModels();
@@ -664,20 +669,6 @@
     $('#node-input-basemodel').change(function (val) {
       tor.base_model_selected = $('#node-input-basemodel').val();
     });
-
-    $('#node-input-default-endpoint').change(function () {
-      var checked = $('#node-input-default-endpoint').prop('checked')
-      if (checked) {
-        $('#node-input-service-endpoint').parent().hide();
-      } else {
-        $('#node-input-service-endpoint').parent().show();
-      }
-    });
-
-    $('#node-input-neural').change(function () {
-      tor.flushModelCache();
-    });
-
   }
 
   // The dynamic nature of the selection fields in this node has caused problems.
@@ -775,9 +766,7 @@
                 filetype: {value: 'forcedglossary'},
                 trainid: {value: ''},
                 lgparams2: {value: 'lparams'},
-                neural: {value: false},
-                'default-endpoint' :{value: true},
-                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/language-translator/api'}
+                'service-endpoint' :{value: ''}
             },
             credentials: {
               username: {type: 'text'}

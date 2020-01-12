@@ -15,15 +15,16 @@
  **/
 
 module.exports = function(RED) {
-  const SERVICE_IDENTIFIER = 'natural-language-classifier';
-  const NaturalLanguageClassifierV1 =
-           require('watson-developer-cloud/natural-language-classifier/v1');
+  const SERVICE_IDENTIFIER = 'natural-language-classifier',
+    NaturalLanguageClassifierV1 = require('ibm-watson/natural-language-classifier/v1'),
+    { IamAuthenticator } = require('ibm-watson/auth');
 
   var pkg = require('../../package.json'),
     temp = require('temp'),
     fs = require('fs'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
+    responseutils = require('../../utilities/response-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
@@ -52,7 +53,7 @@ module.exports = function(RED) {
 
   function Node(config) {
     RED.nodes.createNode(this, config);
-    var node = this;
+    let node = this;
 
     // Perform basic check to see that credentials
     // are provided, altough they may still be
@@ -63,7 +64,7 @@ module.exports = function(RED) {
       apikey = sApikey || node.credentials.apikey;
 
       endpoint = sEndpoint;
-      if ((!config['default-endpoint']) && config['service-endpoint']) {
+      if (config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
@@ -74,15 +75,33 @@ module.exports = function(RED) {
       }
     };
 
-    // Sanity check on the payload, must be present
-    node.payloadCheck = function(msg) {
-      if (!msg.payload) {
-        return Promise.reject('Payload is required');
-      } else {
-        return Promise.resolve();
+    // default the mode if not what expected.
+    node.modeCheck = function(msg) {
+      switch(config.mode) {
+        case 'classify':
+        case 'createClassifier':
+        case 'listClassifiers':
+        case 'getClassifier':
+        case 'deleteClassifier':
+          break;
+        default:
+          config.mode = 'classify';
       }
+      return Promise.resolve();
     };
 
+    // Sanity check on the payload, must be present
+    node.payloadCheck = function(msg) {
+      switch(config.mode) {
+        case 'classify':
+        case 'createClassifier':
+          if (!msg.payload) {
+            return Promise.reject('Payload is required');
+          }
+          break;
+      }
+      return Promise.resolve();
+    };
 
     node.payloadCollectionCheck = function(msg, config, payloadData) {
       if ('classify' === config.mode) {
@@ -136,9 +155,9 @@ module.exports = function(RED) {
     };
 
 
-    // If this is a create then the paload will be a stream
+    // If this is a create then the payload will be a stream
     node.checkForCreate = function(msg, config) {
-      if ('create' !== config.mode) {
+      if ('createClassifier' !== config.mode) {
         return Promise.resolve(null);
       } else if ('string' === typeof msg.payload) {
         return Promise.resolve(null);
@@ -161,26 +180,36 @@ module.exports = function(RED) {
           params.text = msg.payload;
         }
 
-        params.classifier_id = config.classifier;
+        params.classifierId = config.classifier;
         if (msg.nlcparams && msg.nlcparams.classifier_id) {
-          params.classifier_id = msg.nlcparams.classifier_id;
+          params.classifierId = msg.nlcparams.classifier_id;
         }
         break;
-      case 'create':
-        if ('string' === typeof msg.payload) {
-          params.training_data = msg.payload;
-        } else {
-          params.training_data = fs.createReadStream(info.path);
-        }
-
+      case 'createClassifier':
         params.language = config.language;
+
+        let meta = {
+          language : config.language
+        };
+
+        params.trainingMetadata = JSON.stringify(meta);
+        //params.trainingMetadata = meta;
+
+        if ('string' === typeof msg.payload) {
+          params.trainingData = msg.payload;
+        } else {
+          params.trainingData = fs.createReadStream(info.path);
+        }
         break;
       case 'deleteClassifier':
       case 'listClassifiers':
-        params.classifier_id = msg.payload;
+      case 'getClassifier':
+        params.classifierId = config.classifier ? config.classifier : msg.payload;
         if (msg.nlcparams && msg.nlcparams.classifier_id) {
-          params.classifier_id = msg.nlcparams.classifier_id;
+          params.classifierId = msg.nlcparams.classifier_id;
         }
+        break;
+      case 'listClassifiers':
         break;
       default:
         message = 'Unknown Natural Language Classification mode, ' + config.mode;
@@ -195,7 +224,8 @@ module.exports = function(RED) {
 
     node.performOperation = function(msg, config, params) {
       var p = new Promise(function resolver(resolve, reject) {
-        var natural_language_classifier = null,
+        let natural_language_classifier = null,
+          authSettings = {};
           serviceSettings = {
             version: 'v1',
             headers: {
@@ -204,11 +234,12 @@ module.exports = function(RED) {
           };
 
         if (apikey) {
-          serviceSettings.iam_apikey = apikey;
+          authSettings.apikey = apikey;
         } else {
-          serviceSettings.username = username;
-          serviceSettings.password = password;
+          authSettings.username = username;
+          authSettings.password = password;
         }
+        serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
         if (endpoint) {
           serviceSettings.url = endpoint;
@@ -221,39 +252,50 @@ module.exports = function(RED) {
           mode = 'classifyCollection';
         }
 
-        natural_language_classifier[mode](params, function(err, response) {
-          if (err) {
-            reject(err);
-          } else {
-            //console.log(response);
+        natural_language_classifier[mode](params)
+          .then((response) => {
             switch (mode) {
             case 'classify':
+              responseutils.parseResponseFor(msg, response, 'result');
               msg.payload = {
-                classes: response.classes,
-                top_class: response.top_class
+                classes: msg.result.classes,
+                top_class: msg.result.top_class
               };
               break;
             case 'classifyCollection':
-              msg.payload = {
-                collection: response.collection
-              };
+              responseutils.parseResponseFor(msg, response, 'collection');
+              msg.payload = msg.collection;
+              break;
+            case 'listClassifiers':
+              responseutils.parseResponseFor(msg, response, 'classifiers');
+              msg.payload = msg.classifiers;
+              break;
+            case 'getClassifier':
+              responseutils.parseResponseFor(msg, response, 'result');
+              msg.payload = msg.result;
               break;
             default:
               msg.payload = response;
             }
             resolve();
-          }
-        });
+          })
+          .catch((err) => {
+            reject(err);
+          });
       });
 
       return p;
     };
 
 
-    this.on('input', function(msg) {
+    this.on('input', function(msg, send, done) {
       //var params = {}
       let payloadData = {};
+
       node.verifyCredentials(msg)
+        .then(function() {
+          return node.modeCheck(msg);
+        })
         .then(function() {
           return node.payloadCheck(msg);
         })
@@ -277,16 +319,12 @@ module.exports = function(RED) {
         .then(function() {
           temp.cleanup();
           node.status({});
-          node.send(msg);
+          send(msg);
+          done();
         })
         .catch(function(err) {
-          var messageTxt = err.error ? err.error : err;
-          node.status({
-            fill: 'red',
-            shape: 'dot',
-            text: messageTxt
-          });
-          node.error(messageTxt, msg);
+          let errMsg = payloadutils.reportError(node, msg, err);
+          done(errMsg);
         });
     });
   }

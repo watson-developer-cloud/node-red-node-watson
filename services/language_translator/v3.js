@@ -22,13 +22,16 @@ module.exports = function (RED) {
   // Otherwise, once set username would never get reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
-  const SERVICE_IDENTIFIER = 'language-translator';
+  const SERVICE_IDENTIFIER = 'language-translator',
+    LanguageTranslatorV3 = require('ibm-watson/language-translator/v3'),
+    { IamAuthenticator } = require('ibm-watson/auth');
+
   var pkg = require('../../package.json'),
-    LanguageTranslatorV3 = require('watson-developer-cloud/language-translator/v3'),
     //cfenv = require('cfenv'),
     payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
     translatorutils = require('./translator-utils'),
+    responseutils = require('../../utilities/response-utils'),
     fs = require('fs'),
     temp = require('temp'),
     username = null,
@@ -66,7 +69,7 @@ module.exports = function (RED) {
     //endpoint = sEndpoint ? sEndpoint : req.query.e;
     endpoint = req.query.e ? req.query.e : sEndpoint;
     var lt = null,
-      neural = req.query.n ? true : false,
+      authSettings = {},
       serviceSettings = {
         version: '2018-05-01',
         url: endpoint,
@@ -76,26 +79,26 @@ module.exports = function (RED) {
       };
 
     if (sApikey || req.query.key) {
-      serviceSettings.iam_apikey = sApikey ? sApikey : req.query.key;
+      authSettings.apikey = sApikey ? sApikey : req.query.key;
     } else {
-      serviceSettings.username = sUsername ? sUsername : req.query.un;
-      serviceSettings.password = sPassword ? sPassword : req.query.pwd;
+      authSettings.username = sUsername ? sUsername : req.query.un;
+      authSettings.password = sPassword ? sPassword : req.query.pwd;
     }
-
-    if (neural) {
-      serviceSettings.headers['X-Watson-Technology-Preview'] = '2017-07-01';
-    }
+    serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     lt = new LanguageTranslatorV3(serviceSettings);
 
-    lt.listModels({}, function (err, models) {
-      if (err) {
-        res.json(err);
-      }
-      else {
+    lt.listModels({})
+      .then((response) => {
+        let models = [];
+        if (response && response.result && response.result.models) {
+          models = response.result;
+        }
         res.json(models);
-      }
-    });
+      })
+      .catch((err) => {
+        res.json(err);
+      });
   });
 
 
@@ -141,32 +144,30 @@ module.exports = function (RED) {
     // If a translation is requested, then the model id will have been
     // built by the calling function based on source, target and domain.
     function doTranslate(language_translator, msg, model_id) {
-      var p = new Promise(function resolver(resolve, reject){
+      let p = new Promise(function resolver(resolve, reject) {
         // Please be careful when reading the below. The first parameter is
         // a structure, and the tabbing enforced by codeacy imho obfuscates
         // the code, rather than making it clearer. I would have liked an
         // extra couple of spaces.
         language_translator.translate({
           text: msg.payload,
-          model_id: model_id
-        },
-        function (err, response) {
-          if (err) {
-            reject(err);
-          } else {
-            msg.translation = {};
-            msg.translation.response = response;
-            msg.payload = response.translations[0].translation;
+          modelId: model_id
+        })
+          .then((response) => {
+            responseutils.parseResponseFor(msg, response, 'translations');
+            msg.translation = msg.translations;
+            msg.payload = msg.translations[0].translation;
             resolve();
-          }
-        });
-
+          })
+          .catch((err) => {
+            reject(err);
+          });
       });
       return p;
     }
 
     function determineModelId(msg) {
-      var domain = msg.domain || config.domain,
+      let domain = msg.domain || config.domain,
         srclang = msg.srclang || config.srclang,
         destlang = msg.destlang || config.destlang,
         model_id = '';
@@ -248,17 +249,18 @@ module.exports = function (RED) {
       if (msg.filename) {
         params.name = msg.filename.replace(/[^0-9a-z]/gi, '');
       }
-      params.base_model_id = td.basemodel;
+      if (params.name.length > 32) {
+        params.name = params.name.slice(0, 32);
+      }
+
+      params.baseModelId = td.basemodel;
 
       switch (td.filetype) {
       case 'forcedglossary':
-        params.forced_glossary = fs.createReadStream(info.path);
+        params.forcedGlossary = fs.createReadStream(info.path);
         break;
       case 'parallelcorpus':
-        params.parallel_corpus = fs.createReadStream(info.path);
-        break;
-      case 'monolingualcorpus':
-        params.monolingual_corpus = fs.createReadStream(info.path);
+        params.parallelCorpus = fs.createReadStream(info.path);
         break;
       }
 
@@ -267,34 +269,35 @@ module.exports = function (RED) {
 
     function doTrain(language_translator, msg, params) {
       var p = new Promise(function resolver(resolve, reject){
-        language_translator.createModel(params,
-          function(err, model){
-            if (err) {
-              reject(err);
+        language_translator.createModel(params)
+          .then((response) => {
+            responseutils.parseResponseFor(msg, response, 'result');
+            if (msg.result && msg.result.name && msg.result.model_id) {
+              msg.payload = 'Model ' + msg.result.name + ' successfully sent for training with id: ' + msg.result.model_id;
+              msg.trained_model_id = msg.result.model_id;
             } else {
-              msg.payload = 'Model ' + model.name + ' successfully sent for training with id: ' + model.model_id;
-              msg.trained_model_id = model.model_id;
-              resolve();
+              msg.payload = result;
             }
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
           });
       });
       return p;
     }
 
     function executeDelete(language_translator, msg) {
-      var p = new Promise(function resolver(resolve, reject) {
-        var trainid = msg.trainid || config.trainid;
-        language_translator.deleteModel (
-          {
-            model_id: trainid,
-          },
-          function (err) {
-            if (err) {
-              reject(err);
-            } else {
-              msg.payload = 'Model ' + trainid + ' has been deleted';
-              resolve();
-            }
+      let p = new Promise(function resolver(resolve, reject) {
+        let trainid = msg.trainid || config.trainid;
+
+        language_translator.deleteModel({modelId: trainid})
+          .then((response) => {
+            msg.payload = 'Model ' + trainid + ' has been deleted';
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
           });
       });
       return p;
@@ -304,29 +307,40 @@ module.exports = function (RED) {
     // is available. This will also return any training errors.
     // The full error reason is returned in msg.translation
     function executeGetStatus(language_translator, msg) {
-      var p = new Promise(function resolver(resolve, reject) {
-        var trainid = msg.trainid || config.trainid;
+      let p = new Promise(function resolver(resolve, reject) {
+        let trainid = msg.trainid || config.trainid;
 
-        language_translator.getModel(
-          {
-            model_id: trainid,
-          },
-          function (err, model) {
-            if (err) {
-              reject(err);
-            } else {
-              msg.payload = model.status;
-              msg.translation = model;
-              resolve();
-            }
-          }
-        );
+        language_translator.getModel({modelId: trainid})
+          .then((response) => {
+            responseutils.parseResponseFor(msg, response, 'result');
+            msg.payload = msg.result.status;
+            msg.translation = msg.result;
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+      return p;
+    }
+
+    function executeListModels(language_translator, msg, onlydefault) {
+      let p = new Promise(function resolver(resolve, reject) {
+        language_translator.listModels({_default: onlydefault})
+          .then((response) => {
+            responseutils.parseResponseFor(msg, response, 'models');
+            msg.payload = msg.models;
+            resolve();
+          })
+          .catch((err) => {
+            reject(err);
+          });
       });
       return p;
     }
 
     function executeTrain(language_translator, msg) {
-      var trainingData = {}, p = null, info = null;
+      let trainingData = {}, p = null, info = null;
 
       p = performTrainPreChecks(msg)
         .then(function(td){
@@ -348,16 +362,15 @@ module.exports = function (RED) {
     }
 
     function executeCustomTranslate(language_translator, msg) {
-      var p = determineCustomModelId(msg)
+      let p = determineCustomModelId(msg)
         .then(function(model_id){
           return doTranslate(language_translator, msg, model_id);
         });
       return p;
     }
 
-
     function executeTranslate(language_translator, msg) {
-      var p = determineModelId(msg)
+      let p = determineModelId(msg)
         .then(function(model_id){
           return doTranslate(language_translator, msg, model_id);
         });
@@ -365,8 +378,9 @@ module.exports = function (RED) {
     }
 
     function executeAction(msg, action) {
-      var p = null,
+      let p = null,
         language_translator = null,
+        authSettings = {},
         serviceSettings = {
           version: '2018-05-01',
           headers: {
@@ -375,18 +389,15 @@ module.exports = function (RED) {
         };
 
       if (apikey) {
-        serviceSettings.iam_apikey = apikey;
+        authSettings.apikey = apikey;
       } else {
-        serviceSettings.username = username;
-        serviceSettings.password = password;
+        authSettings.username = username;
+        authSettings.password = password;
       }
+      serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
       if (endpoint) {
         serviceSettings.url = endpoint;
-      }
-
-      if (config.neural && 'translate' === action) {
-        serviceSettings.headers['X-Watson-Technology-Preview'] = '2017-07-01';
       }
 
       language_translator = new LanguageTranslatorV3(serviceSettings);
@@ -407,6 +418,12 @@ module.exports = function (RED) {
       case 'getstatus':
         p = executeGetStatus(language_translator, msg);
         break;
+      case 'listdefault':
+        p = executeListModels(language_translator, msg, true);
+        break;
+      case 'listcustom':
+        p = executeListModels(language_translator, msg, false);
+        break;
       case 'delete':
         p = executeDelete(language_translator, msg);
         break;
@@ -424,7 +441,7 @@ module.exports = function (RED) {
     // The node has received an input as part of a flow, need to determine
     // what the request is for, and based on that if the required fields
     // have been provided.
-    this.on('input', function (msg) {
+    this.on('input', function(msg, send, done) {
       var action = msg.action || config.action;
 
       // The dynamic nature of this node has caused problems with the password field. it is
@@ -436,7 +453,7 @@ module.exports = function (RED) {
       apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
-      if ((!config['default-endpoint']) && config['service-endpoint']) {
+      if (config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
@@ -459,12 +476,13 @@ module.exports = function (RED) {
         .then(function(){
           temp.cleanup();
           node.status({});
-          node.send(msg);
+          send(msg);
+          done();
         })
         .catch(function(err){
           temp.cleanup();
-          payloadutils.reportError(node,msg,err);
-          node.send(msg);
+          let errMsg = payloadutils.reportError(node, msg, err);
+          done(errMsg);
         });
     });
   }

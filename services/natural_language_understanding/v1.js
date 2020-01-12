@@ -15,8 +15,9 @@
  **/
 
 module.exports = function (RED) {
-  const SERVICE_IDENTIFIER = 'natural-language-understanding';
-  const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1');
+  const SERVICE_IDENTIFIER = 'natural-language-understanding',
+    NaturalLanguageUnderstandingV1 = require('ibm-watson/natural-language-understanding/v1'),
+    { IamAuthenticator } = require('ibm-watson/auth');
 
   const NLU_FEATURES = {
     'categories': 'categories',
@@ -44,11 +45,6 @@ module.exports = function (RED) {
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/natural-language-understanding/api';
 
-  function reportError(node, msg, message) {
-    var messageTxt = message.error ? message.error : message;
-    node.status({fill:'red', shape:'dot', text: messageTxt});
-    node.error(message, msg);
-  }
 
   function initialCheck(u, p, k) {
     if (!k && (!u || !p)) {
@@ -84,7 +80,7 @@ module.exports = function (RED) {
     var limitCharacters = parseInt(config.limittextcharacters);
 
     if (! isNaN(limitCharacters) && 0 < limitCharacters) {
-      options.limit_text_characters = limitCharacters;
+      options.limitTextCharacters = limitCharacters;
     }
 
     return Promise.resolve();
@@ -216,20 +212,22 @@ module.exports = function (RED) {
   }
 
   function invokeService(options) {
-    var nlu = null,
+    let nlu = null,
+      authSettings  = {};
       serviceSettings = {
-        version: '2018-11-16',
+        version: '2019-07-12',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
       };
 
     if (apikey) {
-      serviceSettings.iam_apikey = apikey;
+      authSettings.apikey = apikey;
     } else {
-      serviceSettings.username = username;
-      serviceSettings.password = password;
+      authSettings.username = username;
+      authSettings.password = password;
     }
+    serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     if (endpoint) {
       serviceSettings.url = endpoint;
@@ -237,14 +235,14 @@ module.exports = function (RED) {
 
     nlu = new NaturalLanguageUnderstandingV1(serviceSettings);
 
-    var p = new Promise(function resolver(resolve, reject){
-      nlu.analyze(options, function(err, data) {
-        if (err) {
+    var p = new Promise(function resolver(resolve, reject) {
+      nlu.analyze(options)
+        .then((response) => {
+          resolve(response);
+        })
+        .catch((err) => {
           reject(err);
-        } else {
-          resolve(data);
-        }
-      });
+        });
     });
     return p;
   }
@@ -267,7 +265,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg, send, done) {
       var message = '',
         options = {};
 
@@ -278,7 +276,7 @@ module.exports = function (RED) {
       apikey = sApikey || this.credentials.apikey;
 
       endpoint = sEndpoint;
-      if ((!config['default-endpoint']) && config['service-endpoint']) {
+      if (config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
@@ -304,11 +302,16 @@ module.exports = function (RED) {
         })
         .then(function(data){
           msg.features = data;
-          node.send(msg);
+          if (data && data.result) {
+            msg.features = data.result;
+          }
+          send(msg);
           node.status({});
+          done();
         })
         .catch(function(err){
-          reportError(node,msg,err);
+          let errMsg = payloadutils.reportError(node, msg, err);
+          done(errMsg);
         });
 
     });
