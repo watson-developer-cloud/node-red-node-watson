@@ -15,7 +15,8 @@
  **/
 
 const pkg = require('../../package.json'),
-  STTV1 = require('watson-developer-cloud/speech-to-text/v1');
+  STTV1 = require('ibm-watson/speech-to-text/v1'),
+  { IamAuthenticator } = require('ibm-watson/auth');
 
 class STTUtils {
   constructor() {
@@ -24,6 +25,7 @@ class STTUtils {
   static initSTTService(req, sApikey, sUsername, sPassword, sEndpoint) {
     const endpoint = req.query.e ? req.query.e : sEndpoint;
 
+    let authSettings  = {};
     let serviceSettings = {
       url: endpoint,
       headers: {
@@ -32,16 +34,18 @@ class STTUtils {
     };
 
     if (sApikey || req.query.key) {
-      serviceSettings.iam_apikey = sApikey ? sApikey : req.query.key;
+      authSettings.apikey = sApikey ? sApikey : req.query.key;
     } else {
-      serviceSettings.username = sUsername ? sUsername : req.query.un;
-      serviceSettings.password = sPassword ? sPassword : req.query.pwd;
+      authSettings.username = sUsername ? sUsername : req.query.un;
+      authSettings.password = sPassword ? sPassword : req.query.pwd;
     }
+    serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     return new STTV1(serviceSettings);
   }
 
   static determineService(apikey, username, password, endpoint) {
+    let authSettings  = {};
     let serviceSettings = {
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
@@ -49,32 +53,36 @@ class STTUtils {
     };
 
     if (apikey) {
-      serviceSettings.iam_apikey = apikey;
+      authSettings.apikey = apikey;
     } else {
-      serviceSettings.username = username;
-      serviceSettings.password = password;
+      authSettings.username = username;
+      authSettings.password = password;
     }
 
     if (endpoint) {
       serviceSettings.url = endpoint;
     }
+    serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     return new STTV1(serviceSettings);
   }
 
   static determineServiceFromToken(accessToken, endpoint) {
+    let authSettings  = {};
     let serviceSettings = {
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
     };
 
-    serviceSettings.iam_access_token = accessToken;
+    authSettings.accessToken = accessToken;
 
     if (endpoint) {
       serviceSettings.url = endpoint;
     }
 
+    serviceSettings.authenticator = new IamAuthenticator(authSettings);
+    
     return new STTV1(serviceSettings);
   }
 

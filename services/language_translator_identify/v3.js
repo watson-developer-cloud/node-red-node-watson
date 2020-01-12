@@ -15,11 +15,14 @@
  **/
 
 module.exports = function (RED) {
-  const SERVICE_IDENTIFIER = 'language-translator';
+  const SERVICE_IDENTIFIER = 'language-translator',
+    LanguageTranslatorV3 = require('ibm-watson/language-translator/v3'),
+    { IamAuthenticator } = require('ibm-watson/auth');
+
   var pkg = require('../../package.json'),
-    LanguageTranslatorV3 = require('watson-developer-cloud/language-translator/v3'),
     payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
+    responseutils = require('../../utilities/response-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
@@ -52,8 +55,9 @@ module.exports = function (RED) {
   }
 
   function execute(node, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      var language_translator = null,
+    var p = new Promise(function resolver(resolve, reject) {
+      let language_translator = null,
+        authSettings = {},
         serviceSettings = {
           version: '2018-05-01',
           headers: {
@@ -62,11 +66,12 @@ module.exports = function (RED) {
         };
 
       if (apikey) {
-        serviceSettings.iam_apikey = apikey;
+        authSettings.apikey = apikey;
       } else {
-        serviceSettings.username = username;
-        serviceSettings.password = password;
+        authSettings.username = username;
+        authSettings.password = password;
       }
+      serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
       if (endpoint) {
         serviceSettings.url = endpoint;
@@ -74,16 +79,18 @@ module.exports = function (RED) {
 
       language_translator = new LanguageTranslatorV3(serviceSettings);
 
-      language_translator.identify({text: msg.payload}, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.languages = response.languages
-          msg.lang = response.languages[0];
-          resolve();
-        }
-      });
+      language_translator.identify({text: msg.payload})
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'languages');
 
+          if (msg.languages && Array.isArray(msg.languages)) {
+            msg.lang = msg.languages[0];
+          }
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        })
     });
     return p;
   }
@@ -96,13 +103,13 @@ module.exports = function (RED) {
     var node = this;
     RED.nodes.createNode(this, config);
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg, send, done) {
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password;
       apikey = sApikey || this.credentials.apikey;
 
       endpoint = sEndpoint;
-      if ((!config['default-endpoint']) && config['service-endpoint']) {
+      if (config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
@@ -117,10 +124,12 @@ module.exports = function (RED) {
         })
         .then(function(){
           node.status({});
-          node.send(msg);
+          send(msg);
+          done();
         })
         .catch(function(err){
-          payloadutils.reportError(node,msg,err);
+          let errMsg = payloadutils.reportError(node, msg, err);
+          done(errMsg);
         });
     });
   }

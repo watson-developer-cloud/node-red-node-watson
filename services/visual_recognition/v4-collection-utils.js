@@ -460,7 +460,7 @@ module.exports = function(RED) {
       });
   }
 
-  // This is the Watson Visual Recognition V3 Node
+  // This is the Watson Visual Recognition V4 Node
   function WatsonVisualRecognitionV4Node(config) {
     let node = this;
 

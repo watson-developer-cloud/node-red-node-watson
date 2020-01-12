@@ -44,11 +44,6 @@
     </div>
 
     <div class="form-row credentials">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
-    </div>
-    <div class="form-row">
         <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
         <input type="text" id="node-input-service-endpoint" placeholder="https://stream.watsonplatform.net/speech-to-text/api">
     </div>
@@ -59,13 +54,21 @@
             <option value="createCustomisation">Create a custom language model</option>
             <option value="listCustomisations">List Customizations</option>
             <option value="getCustomisation">Get Customization</option>
+            <option value="resetCustomisation">Reset Customization</option>
+            <option value="upgradeCustomisation">Upgrade Customization</option>
             <option value="deleteCustomisation">Delete Customization</option>
+            <option disabled>______________</option>
             <option value="addCorpus">Add Corpus</option>
-            <option value="getCorpora">Get Corpora</option>
-            <option value="train">Train</option>
-            <option value="listCustomWords">List Custom Words</option>
-            <option value="addWords">Add Words</option>
+            <option value="getCorpus">Get Corpus</option>
+            <option value="getCorpora">List Corpora</option>
             <option value="deleteCorpus">Delete Corpus</option>
+            <option disabled>______________</option>
+            <option value="addWords">Add Words</option>
+            <option value="listCustomWords">List Custom Words</option>
+            <option value="deleteCustomWord">Delete Custom Word</option>
+            <option disabled>______________</option>
+            <option value="train">Train Customization</option>
+
         </select>
     </div>
 
@@ -99,6 +102,11 @@
     </div>
 
     <div class="form-row">
+        <label for="node-input-stt-word-name"><i class="fa fa-book"></i> Word Name</label>
+        <input type="text" id="node-input-stt-word-name" placeholder="">
+    </div>
+
+    <div class="form-row">
         <label for="node-input-stt-allow-overwrite"><i class="fa fa-book"></i> Allow Overwrite</label>
         <input type="checkbox" id="node-input-stt-allow-overwrite" placeholder="">
     </div>
@@ -128,6 +136,17 @@
         <code>msg.customization</code>
       </p>
     </li>
+    <li>Reset Customization
+      <p>In this mode, the specified customization is reset,
+        removing all corpora, grammars, and words from the model.
+      </p>
+    </li>
+    <li>Upgrade Customization
+      <p>In this mode, an upgrade of the custom language model
+        to the latest version of its base language model is
+        initialised.
+      </p>
+    </li>
     <li>Delete Customization
       <p>In this mode, the specified customization is deleted.
       </p>
@@ -144,6 +163,12 @@
         the specified customization
         is returned on
         <code>msg.corpora</code>
+      </p>
+    </li>
+    <li>Get Corpus
+      <p>In this mode, details for the selected corporus
+        is returned on
+        <code>msg.corpus</code>
       </p>
     </li>
     <li>Train
@@ -207,6 +232,7 @@
     $('input#node-input-stt-custom-model-description').parent().hide();
     $('input#node-input-stt-custom-id').parent().hide();
     $('input#node-input-stt-corpus-name').parent().hide();
+    $('input#node-input-stt-word-name').parent().hide();
     $('input#node-input-stt-allow-overwrite').parent().hide();
   }
 
@@ -237,6 +263,8 @@
         break;
       case 'getCustomisation':
       case 'deleteCustomisation':
+      case 'upgradeCustomisation':
+      case 'resetCustomisation':
       case 'getCorpora':
       case 'train':
       case 'listCustomWords':
@@ -249,9 +277,14 @@
                      + ', #node-input-stt-allow-overwrite');
         break;
       case 'deleteCorpus':
-          fields.push('#node-input-stt-custom-id'
-                         + ', #node-input-stt-corpus-name');
-          break;
+      case 'getCorpus':
+        fields.push('#node-input-stt-custom-id'
+                      + ', #node-input-stt-corpus-name');
+        break;
+      case 'deleteCustomWord':
+        fields.push('#node-input-stt-custom-id'
+                     + ', #node-input-stt-word-name');
+      break;
     }
     sttv1qbb.showSelectedFields(fields);
   }
@@ -303,15 +336,6 @@
 
     $('#node-input-stt-base-model').change(function (val) {
       sttv1qbb.model_selected = $('#node-input-stt-base-model').val();
-    });
-
-    $('#node-input-default-endpoint').change(function () {
-      var checked = $('#node-input-default-endpoint').prop('checked')
-      if (checked) {
-        $('#node-input-service-endpoint').parent().hide();
-      } else {
-        $('#node-input-service-endpoint').parent().show();
-      }
     });
   }
 
@@ -367,9 +391,8 @@
     var e = $('#node-input-service-endpoint').val();
     var creds = {un: u, pwd: p, key: k};
 
-    if (! $('#node-input-default-endpoint').prop('checked')) {
-      creds.e = e;
-    }
+    creds.e = e;
+
     $.getJSON('watson-speech-to-text-v1-query-builder/models/', creds)
     .done(function (data) {
       if (data.error) {
@@ -430,9 +453,9 @@
                 'stt-custom-model-description' : {value: ''},
                 'stt-custom-id' : {value: ''},
                 'stt-corpus-name' : {value: ''},
+                'stt-word-name' : {value: ''},
                 'stt-allow-overwrite' : {value: false},
-                'default-endpoint' :{value: true},
-                'service-endpoint' :{value: 'https://stream.watsonplatform.net/speech-to-text/api'}
+                'service-endpoint' :{value: ''}
             },
             credentials: {
               username: {type:'text'} //,

@@ -39,11 +39,6 @@
     </div>
 
     <div class="form-row credentials">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
-    </div>
-    <div class="form-row">
         <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
         <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/natural-language-classifier/api">
     </div>
@@ -52,16 +47,17 @@
         <label for="node-input-mode"><i class="fa fa-question"></i> Mode</label>
         <select type="text" id="node-input-mode" style="display: inline-block; width: 70%;" >
             <option value="classify">Classify</option>
-            <option value="create">Train</option>
-			      <option value="deleteClassifier">Remove</option>
-		        <option value="listClassifiers">List</option>
+            <option value="createClassifier">Train</option>
+            <option value="listClassifiers">List</option>
+            <option value="getClassifier">Classifier details</option>
+            <option value="deleteClassifier">Remove</option>
         </select>
     </div>
-    <div class="form-row mode classify">
+    <div class="form-row mode classify getClassifier deleteClassifier">
         <label for="node-input-classifier"><i class="fa fa-tag"></i> Classifier ID</label>
         <input type="text" id="node-input-classifier" placeholder="Classifier ID">
     </div>
-    <div class="form-row mode create">
+    <div class="form-row mode createClassifier">
         <label for="node-input-language"><i class="fa fa-language"></i> Language</label>
         <select type="text" id="node-input-language" style="display: inline-block; width: 70%;" >
             <option value="ar">Arabic</option>
@@ -113,12 +109,15 @@
     <p>Set the mode in the node configuration window.</p>
     <p>The request is triggered by a request to the input node
     <p>The returned list of classifiers will be returned on <code>msg.payload</code>.</p>
-	<p><b>Remove Mode</b>.</p>
+  <p><b>Classifier Details Mode</b>.</p>
     <p>Set the mode in the node configuration window.</p>
-    <p>The Classifier ID should be passed in on <code>msg.payload</code> as a String<p>
-    <p>The status of the delete be returned on <code>msg.payload</code>.  It will contain {} if successful</p>
-	<p><b>More Information</b>.</p>
-    <p>For more information about the Natural Language Classifier service, read the <a href="http://www.ibm.com/watson/developercloud/natural-language-classifier/api/v1/">documentation</a>.</p>
+    <p>If not set in the configuration the Classifier ID should be passed in on
+      <code>msg.payload</code> as a String<p>
+    <p>The details of the classifier be returned on <code>msg.payload</code>.</p>
+  <p><b>Remove Mode</b>.</p>
+    <p>Set the mode in the node configuration window.</p>
+    <p>The status of the delete be returned on <code>msg.payload</code>. It will contain {} if successful.
+  <p>For more information about the Natural Language Classifier service, read the <a href="http://www.ibm.com/watson/developercloud/natural-language-classifier/api/v1/">documentation</a>.</p>
 </script>
 
 <script type="text/javascript">
@@ -145,9 +144,6 @@
       $('.form-row.mode.' + mode).show();
       $('.form-row.mode:not(.' + mode + ')').hide();
     });
-
-    nlcV1.CreateIListener($('#node-input-default-endpoint'),
-                                $('#node-input-service-endpoint'), true);
   };
 
   nlcV1.checkForPrepare = function () {
@@ -181,8 +177,7 @@
               language: {value: "en"},
               classifier: {value: ""},
               'collections-off' :{value: true},
-              'default-endpoint' :{value: true},
-              'service-endpoint' :{value: 'https://gateway.watsonplatform.net/natural-language-classifier/api'}
+              'service-endpoint' :{value: ''}
             },
             credentials: {
               username: {type:"text"},

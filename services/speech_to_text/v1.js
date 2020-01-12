@@ -29,9 +29,9 @@ module.exports = function (RED) {
     sttutils = require('./stt-utils'),
     AuthV1 = require('watson-developer-cloud/authorization/v1'),
     //AuthIAMV1 = require('ibm-cloud-sdk-core/iam-token-manager/v1'),
-    AuthIAMV1 = require('ibm-cloud-sdk-core/auth/iam-token-manager-v1'),
+    //AuthIAMV1 = require('ibm-cloud-sdk-core/auth/iam-token-manager-v1'),
     //AuthIAMV1 = require('ibm-cloud-sdk-core/auth/token-managers/iam-token-manager'),
-    //{ IamTokenManager } = require('ibm-watson/auth');
+    { IamTokenManager } = require('ibm-watson/auth');
     muteMode = true, discardMode = false, autoConnect = true,
     username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
@@ -73,26 +73,34 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/watson-speech-to-text/models', (req, res) => {
     var stt = sttutils.initSTTService(req, sApikey, sUsername, sPassword, sEndpoint);
 
-    stt.listModels({}, (err, models) => {
-      if (err) {
-        res.json(err);
-      } else {
+    stt.listModels({})
+      .then((response) => {
+        let models = response;
+        if (response.result) {
+          models = response.result;
+        }
         res.json(models);
-      }
-    });
+      })
+      .catch((err) => {
+        res.json(err);
+      })
   });
 
   // API used by widget to fetch available customisations
   RED.httpAdmin.get('/watson-speech-to-text/customs', (req, res) => {
     var stt = sttutils.initSTTService(req, sApikey, sUsername, sPassword, sEndpoint);
 
-    stt.listLanguageModels({}, (err, customs) => {
-      if (err) {
-        res.json(err);
-      } else {
+    stt.listLanguageModels({})
+      .then((response) => {
+        let customs = response;
+        if (response.result) {
+          customs = response.result;
+        }
         res.json(customs);
-      }
-    });
+      })
+      .catch((err) => {
+        res.json(err);
+      })
   });
 
 
@@ -329,8 +337,9 @@ module.exports = function (RED) {
         // tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey, iamUrl: endpoint});
 
         //tokenService = new AuthIAMV1({apikey : apikey});
-        tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey});
+        //tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey});
         //tokenService = new AuthIAMV1.IamTokenManager({apikey : apikey});
+        tokenService = new IamTokenManager({apikey : apikey});
         //tokenService = new iamutils(apikey);
 
       } else {
@@ -381,7 +390,7 @@ module.exports = function (RED) {
           end--;
         }
         params.keywords = keywords.substring(start, end).split(',');
-        params['keywords_threshold'] = isNaN(threshold) ? 0 : threshold;
+        params['keywordsThreshold'] = isNaN(threshold) ? 0 : threshold;
       }
     }
 
@@ -399,12 +408,12 @@ module.exports = function (RED) {
 
         params = {
           audio: audioData.audio,
-          content_type: 'audio/' + audioData.format,
+          contentType: 'audio/' + audioData.format,
           model: model,
-          max_alternatives: config['alternatives'] ? parseInt(config['alternatives']) : 1,
-          speaker_labels: config.speakerlabels ? config.speakerlabels : false,
-          smart_formatting: config.smartformatting ? config.smartformatting : false,
-          word_confidence: config['word-confidence'] ? config['word-confidence'] : false
+          maxAlternatives: config['alternatives'] ? parseInt(config['alternatives']) : 1,
+          speakerLabels: config.speakerlabels ? config.speakerlabels : false,
+          smartFormatting: config.smartformatting ? config.smartformatting : false,
+          wordConfidence: config['word-confidence'] ? config['word-confidence'] : false
         };
 
         keywordParams(params);
@@ -412,18 +421,24 @@ module.exports = function (RED) {
         // Check the params for customisation options
         if (config.langcustom && 'NoCustomisationSetting' !== config.langcustom) {
           var weight = parseFloat(config['custom-weight']);
-          params.customization_id = config.langcustom;
-          params.customization_weight = isNaN(weight) ? 0 : weight;
+          params.languageCustomizationId = config.langcustom;
+          params.customizationWeight = isNaN(weight) ? 0 : weight;
         }
 
+        console.log('Invoking with params');
+        console.log(params);
         // Everything is now in place to invoke the service
-        speech_to_text.recognize(params, function (err, res) {
-          if (err) {
+        speech_to_text.recognize(params)
+          .then((response) => {
+            let result = response;
+            if (response.result) {
+              result = response.result;
+            }
+            resolve(result);
+          })
+          .catch((err) => {
             reject(err);
-          } else {
-            resolve(res);
-          }
-        });
+          })
 
       });
       return p;
@@ -445,16 +460,17 @@ module.exports = function (RED) {
         } else {
           // Everything is now in place to invoke the service
           tokenPending = true;
-          tokenService.getToken(function (err, res) {
-            if (err) {
-              reject(err);
-            } else {
+
+          tokenService.getToken()
+            .then((t) => {
+              token = t;
               tokenPending = false;
               tokenTime = now;
-              token = res;
               resolve();
-            }
-          });
+            })
+            .catch((err) => {
+              reject(err);
+            })
         }
       });
       return p;
@@ -501,16 +517,16 @@ module.exports = function (RED) {
             var streamStartPacket = startPacket;
 
             if (config['alternatives']) {
-              streamStartPacket.max_alternatives = parseInt(config['alternatives']);
+              streamStartPacket.maxAlternatives = parseInt(config['alternatives']);
             }
             if (config.speakerlabels) {
-              streamStartPacket.speakerlabels = config.speakerlabels;
+              streamStartPacket.speakerLabels = config.speakerlabels;
             }
             if (config.smart_formatting) {
-              streamStartPacket.smartformatting = config.smartformatting;
+              streamStartPacket.smartFormatting = config.smartformatting;
             }
             if (config['word-confidence']) {
-              streamStartPacket.word_confidence = config['word-confidence'];
+              streamStartPacket.wordConfidence = config['word-confidence'];
             }
 
             keywordParams(streamStartPacket);
@@ -714,7 +730,7 @@ module.exports = function (RED) {
       return Promise.resolve();
     }
 
-    this.on('input', (msg) => {
+    this.on('input', function(msg, send, done) {
       // Credentials are needed for the service. They will either be bound or
       // specified by the user in the dialog.
       username = sUsername || this.credentials.username;
@@ -722,7 +738,7 @@ module.exports = function (RED) {
       apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
-      if ((!config['default-endpoint']) && config['service-endpoint']) {
+      if (config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
@@ -770,12 +786,14 @@ module.exports = function (RED) {
           node.status({fill:'blue', shape:'dot', text:'listening for socket data'});
         } else {
           node.status({});
-          node.send(msg);
+          send(msg);
+          done();
         }
       })
       .catch((err) => {
         temp.cleanup();
         payloadutils.reportError(node,msg,err);
+        done(err);
       });
 
     });
