@@ -374,27 +374,6 @@ module.exports = function (RED) {
       });
     }
 
-    function executeGetDocumentXX(msg) {
-      return new Promise(function resolver(resolve, reject){
-        var docid = docID(msg);
-        let uriAddress = `${endpoint}/v3/documents/${docid}/translated_document?version=${SERVICE_VERSION}`;
-
-        executeGetRequest(uriAddress)
-          .then((response) => {
-            msg.payload = response;
-            return payloadutils.checkForStream(msg);
-          })
-          .then(() => {
-            resolve(msg.payload);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-
-      // return executeGetRequest(uriAddress);
-    }
-
     function executeDeleteDocument(msg) {
       var docid = docID(msg);
       //let uriAddress = endpoint + '/v3/documents/' + docid + '?version=' + SERVICE_VERSION;
