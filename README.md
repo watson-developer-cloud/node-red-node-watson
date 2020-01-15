@@ -54,7 +54,7 @@ During the migration there will be a dependancy on both modules.
 - Update language lists for STT, TTS, Language Translator and Document Translator Nodes
 
 ### Watson Nodes for Node-RED
-A collection of nodes to interact with the IBM Watson services in [IBM Cloud](http://bluemix.net).
+A collection of nodes to interact with the IBM Watson services in [IBM Cloud](http://cloud.ibm.com).
 
 # Nodes
 

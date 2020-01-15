@@ -104,8 +104,8 @@ DiscoveryUtils.prototype = {
   buildParamsForPassages: function (me, msg, config, params) {
     let passagesFound = false;
 
-    // Allow the passages parameters to be passed in two ways
-    // 1. As the API is expecting
+    // Allow the passages parameters to be passed in three ways
+    // 1. As the API was expecting (watson-developer-cloud)
     ['passages.fields', 'passages.count', 'passages.characters'
     ].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);
@@ -113,6 +113,7 @@ DiscoveryUtils.prototype = {
     });
 
     // 2. As anyone misreading the documentation might do it.
+    // (again watson-developer-cloud)
     if (msg.discoveryparams && msg.discoveryparams.passages) {
       passagesFound = true;
       ['fields', 'count', 'characters'
@@ -123,7 +124,25 @@ DiscoveryUtils.prototype = {
       });
     }
 
+    // 3. As the ibm-watson SDK expects
+    ['passagesFields', 'passagesCount', 'passagesCharacters'
+    ].forEach(function(f) {
+      params = me.buildParamsFor(msg, config, params, f);
+      passagesFound = true;
+    });
+
     if (passagesFound) {
+      // Perform autocorrect for watson-developer-cloud to ibm-watson
+      // differences
+      ['passages.fields', 'passages.count', 'passages.characters'
+      ].forEach(function(f) {
+        if (params[f]) {
+          let parts = f.split(".");
+          let secondPart = parts[1]
+          let reformedField = parts[0] + secondPart[0].toUpperCase() + secondPart.slice(1);
+          params[reformedField] = params[f];
+        }
+      });
       params.passages = true;
     }
 

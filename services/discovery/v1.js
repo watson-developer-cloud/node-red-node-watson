@@ -251,27 +251,33 @@ module.exports = function (RED) {
 
   function executeQuery(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.query(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
+      discovery.query(params)
+        .then((response) => {
           msg.search_results = response;
+          if (response && response.result) {
+            msg.search_results = response.result;
+          }
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
     return p;
   }
 
   function executeQueryNotices(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.queryNotices(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.search_results = response;
-          resolve();
+      discovery.queryNotices(params)
+      .then((response) => {
+        msg.search_results = response;
+        if (response && response.result) {
+          msg.search_results = response.result;
         }
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
     return p;
