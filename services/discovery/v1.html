@@ -62,6 +62,9 @@
             <option value="listConfigurations">List existing configurations</option>
             <option value="getConfigurationDetails">Retrieve configuration details</option>
             <option value="deleteConfiguration">Delete configuration</option>
+            <option disabled>______________</option>
+            <option value="listExpansions">Get expansion list for collection.</option>
+            <option value="listTrainingData">Get training data for collection.</option>
         </select>
     </div>
 
@@ -313,6 +316,33 @@
         </li>
         <br/>
         <li>
+            <p><b>List Expansions</b><p>
+            <p>For this method the node needs an Environment ID and Collection ID as input.</p>
+            <p>The Environment ID, and Collection ID for the collection list being requested can be overridden by specifying the search id
+      in <code>msg.discoveryparams.environmentId</code>
+      and in <code>msg.discoveryparams.collectionId</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.expansions</code> : The current expansion list for the specified collection.
+                  If an expansion list is not specified, an object with empty expansion arrays is returned.</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
+            <p><b>List Training Data</b><p>
+            <p>For this method the node needs an Environment ID and Collection ID as input.</p>
+            <p>The Environment ID, and Collection ID for the collection list being requested can be overridden by specifying the search id
+      in <code>msg.discoveryparams.environmentId</code>
+      and in <code>msg.discoveryparams.collectionId</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.trainingData</code> : Lists the training data for the specified collection</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
             <p><b>Search in Collection</b><p>
             <p>For this method the node needs an Environment ID and Collection ID as input.
             </p>
@@ -414,6 +444,8 @@
           break;
         case 'getCollectionDetails':
         case 'deleteCollection':
+        case 'listExpansions':
+        case 'listTrainingData':
           fields.push('#node-input-environmentId'
                           + ', #node-input-collectionId');
           break;

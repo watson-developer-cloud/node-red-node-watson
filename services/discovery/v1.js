@@ -31,6 +31,25 @@ module.exports = function (RED) {
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/discovery/api';
 
+const ExecutionList = {
+  'createEnvrionment': executeCreateEnvrionment,
+  'listEnvrionments': executeListEnvrionments,
+  'getEnvironmentDetails': executeEnvrionmentDetails,
+  'createCollection': executeCreateCollection,
+  'listCollections': executeListCollections,
+  'getCollectionDetails': executeGetCollectionDetails,
+  'deleteCollection': executeDeleteCollection,
+  'createConfiguration': executeCreateConfiguration,
+  'listConfigurations': executeListConfigurations,
+  'getConfigurationDetails': executeGetConfigurationDetails,
+  'deleteConfiguration': executeDeleteConfiguration,
+  'deleteEnvironment': executeDeleteEnvironment,
+  'listExpansions': executeListExpansions,
+  'listTrainingData': executeListTrainingData,
+  'query': executeQuery,
+  'queryNotices': executeQueryNotices
+};
+
 
   function checkParams(method, params){
     var response = '';
@@ -51,6 +70,8 @@ module.exports = function (RED) {
     case 'getCollectionDetails':
     case 'query':
     case 'queryNotices':
+    case 'listExpansions':
+    case 'listTrainingData':
       response = discoveryutils.paramEnvCheck(params) +
              discoveryutils.paramCollectionCheck(params);
       break;
@@ -207,6 +228,35 @@ module.exports = function (RED) {
     return p;
   }
 
+  function executeListExpansions(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.listExpansions(params)
+      .then((response) => {
+        responseutils.parseResponseFor(msg, response, 'expansions');
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      });
+    });
+    return p;
+  }
+
+  function executeListTrainingData(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.listTrainingData(params)
+      .then((response) => {
+        msg.trainingData = response.result ? response.result : response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      });
+    });
+    return p;
+  }
+
+
   function executeCreateConfiguration(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
       discovery.createConfiguration(params)
@@ -289,56 +339,13 @@ module.exports = function (RED) {
 
   function executeMethod(node, method, params, msg) {
     let discovery = discoveryutils.buildService(username, password, apikey, endpoint);
-    var p = null;
 
-    switch (method) {
-    case 'createEnvrionment':
-      p = executeCreateEnvrionment(node, discovery, params, msg);
-      break;
-    case 'listEnvrionments':
-      p = executeListEnvrionments(node, discovery, params, msg);
-      break;
-    case 'getEnvironmentDetails':
-      p = executeEnvrionmentDetails(node, discovery, params, msg);
-      break;
-    case 'createCollection':
-      p = executeCreateCollection(node, discovery, params, msg);
-      break;
-    case 'listCollections':
-      p = executeListCollections(node, discovery, params, msg);
-      break;
-    case 'getCollectionDetails':
-      p = executeGetCollectionDetails(node, discovery, params, msg);
-      break;
-    case 'deleteCollection':
-      p = executeDeleteCollection(node, discovery, params, msg);
-      break;
-    case 'createConfiguration':
-      p = executeCreateConfiguration(node, discovery, params, msg);
-      break;
-    case 'listConfigurations':
-      p = executeListConfigurations(node, discovery, params, msg);
-      break;
-    case 'getConfigurationDetails':
-      p = executeGetConfigurationDetails(node, discovery, params, msg);
-      break;
-    case 'deleteConfiguration':
-      p = executeDeleteConfiguration(node, discovery, params, msg);
-      break;
-    case 'deleteEnvironment':
-      p = executeDeleteEnvironment(node, discovery, params, msg);
-      break;
-    case 'query':
-      p = executeQuery(node, discovery, params, msg);
-      break;
-    case 'queryNotices':
-      p = executeQueryNotices(node, discovery, params, msg);
-      break;
-    default :
-      p = unknownMethod(node, discovery, params, msg);
-      break;
+    let exe = ExecutionList[method];
+    if (!exe) {
+      exe = unknownMethod
     }
-    return p;
+
+    return exe(node, discovery, params, msg);
   }
 
   function initialCheck(u, p, k, m) {

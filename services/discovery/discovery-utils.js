@@ -334,18 +334,20 @@ DiscoveryUtils.prototype = {
 
     if (schemaData &&
            'object' === typeof schemaData &&
-           schemaData['fields'] &&
-            Array.isArray(schemaData['fields'])) {
-      schemaData['fields'].forEach((f) => {
+           schemaData.result &&
+           'object' === typeof schemaData.result &&
+           schemaData.result['fields'] &&
+            Array.isArray(schemaData.result['fields'])) {
+      schemaData.result['fields'].forEach((f) => {
         if (f['field'] && f['type'] && 'nested' !== f['type']) {
           fields.push(f['field']);
         }
       });
-
     }
 
     if (fields.length) {
       fields = fields.filter(this.uniqueFilter);
+      fields.sort();
     }
 
     return fields;

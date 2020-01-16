@@ -37,6 +37,20 @@ module.exports = function(RED) {
     res.json(serviceutils.checkServiceBound(SERVICE_IDENTIFIER));
   });
 
+  function processResponse(response, field) {
+    let reply = response;
+    if (response) {
+      if (response.result) {
+        if (response.result[field]) {
+          reply = response.result[field];
+        } else {
+          reply = response.result;
+        }
+      }
+    }
+    return reply;
+  }
+
   // API used by widget to fetch available environments
   RED.httpAdmin.get('/watson-discovery-v1-query-builder/environments', function(req, res) {
 
@@ -45,13 +59,13 @@ module.exports = function(RED) {
                                          sApikey ? sApikey : req.query.key,
                                          req.query.endpoint ? req.query.endpoint : sEndpoint);
 
-    discovery.listEnvironments({}, function(err, response) {
-      if (err) {
+    discovery.listEnvironments({})
+      .then((response) => {
+        res.json(processResponse(response,'environments'));
+      })
+      .catch((err) => {
         res.json(err);
-      } else {
-        res.json(response.environments ? response.environments : response);
-      }
-    });
+      });
   });
 
   // API used by widget to fetch available collections in environment
@@ -61,17 +75,13 @@ module.exports = function(RED) {
                                          sApikey ? sApikey : req.query.key,
                                          req.query.endpoint ? req.query.endpoint : sEndpoint);
 
-    discovery.listCollections({
-      environment_id: req.query.environment_id
-    },
-      function(err, response) {
-        if (err) {
-          res.json(err);
-        } else {
-          res.json(response.collections ? response.collections : response);
-        }
-      }
-    );
+    discovery.listCollections({environmentId: req.query.environment_id})
+      .then((response) => {
+        res.json(processResponse(response,'collections'));
+      })
+      .catch((err) => {
+        res.json(err);
+      });
   });
 
 
@@ -83,18 +93,17 @@ module.exports = function(RED) {
                                          req.query.endpoint ? req.query.endpoint : sEndpoint);
 
     discovery.listCollectionFields({
-      environment_id: req.query.environment_id,
-      collection_id: req.query.collection_id
-    },
-      function(err, response) {
-        if (err) {
-          res.json(err);
-        } else {
-          var fieldList = discoveryutils.buildFieldList(response);
-          res.json(fieldList);
-        }
-      }
-    );
+      environmentId: req.query.environment_id,
+      collectionId: req.query.collection_id
+    })
+      .then((response) => {
+        let fieldList = discoveryutils.buildFieldList(response);
+        res.json(fieldList);
+      })
+      .catch((err) => {
+        res.json(err);
+      });
+
   });
 
   function Node(config) {
