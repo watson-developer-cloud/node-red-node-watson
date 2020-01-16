@@ -38,22 +38,17 @@
     </div>
 
     <div class="form-row credentials">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
-    </div>
-    <div class="form-row">
         <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
         <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/discovery/api">
     </div>
 
     <div class="form-row">
-        <label for="node-input-environment_id"><i class="fa fa-tag"></i> Environment ID</label>
-        <input type="text" id="node-input-environment_id" placeholder="">
+        <label for="node-input-environmentId"><i class="fa fa-tag"></i> Environment ID</label>
+        <input type="text" id="node-input-environmentId" placeholder="">
     </div>
     <div class="form-row">
-        <label for="node-input-collection_id"><i class="fa fa-tag"></i> Collection ID</label>
-        <input type="text" id="node-input-collection_id" placeholder="">
+        <label for="node-input-collectionId"><i class="fa fa-tag"></i> Collection ID</label>
+        <input type="text" id="node-input-collectionId" placeholder="">
     </div>
     <div class="form-row">
         <label for="node-input-filename"><i class="fa fa-tag"></i> Filename</label>
@@ -69,8 +64,8 @@
     <p>If a filename is not provided then one is automatically generated</p>
     <p>The collection being written to can be overridden by specifying the
     search ids in
-    <code>msg.discoveryparams.environment_id</code>
-    , <code>msg.discoveryparams.collection_id</code>
+    <code>msg.discoveryparams.environmentId</code>
+    , <code>msg.discoveryparams.collectionId</code>
     and <code>msg.discoveryparams.filename</code>
     </p>
     <p>The document to be added should be passed in as a data buffer
@@ -91,14 +86,6 @@
     var disdocV1 = new DiscoveryDocLoaderV1();
 
     disdocV1.UIListeners = function () {
-      $('input#node-input-default-endpoint').change(function () {
-          var checked = $('input#node-input-default-endpoint').prop('checked')
-          if (checked) {
-              $('#node-input-service-endpoint').parent().hide();
-          } else {
-              $('#node-input-service-endpoint').parent().show();
-          }
-      });
     }
 
     disdocV1.checkForPrepare = function () {
@@ -124,11 +111,10 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ''},
-                environment_id: {value: ''},
-                collection_id: {value: ''},
+                environmentId: {value: ''},
+                collectionId: {value: ''},
                 filename: {value: ''},
-                'default-endpoint' :{value: true},
-                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/discovery/api'}
+                'service-endpoint' :{value: ''}
             },
             credentials: {
               username: {type:'text'},
