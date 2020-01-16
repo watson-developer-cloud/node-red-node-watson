@@ -192,7 +192,8 @@ module.exports = function(RED) {
           language : config.language
         };
 
-        params.trainingMetadata = JSON.stringify(meta);
+        params.trainingMetadata = Buffer.from(JSON.stringify(meta));
+
         //params.trainingMetadata = meta;
 
         if ('string' === typeof msg.payload) {

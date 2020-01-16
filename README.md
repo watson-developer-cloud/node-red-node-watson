@@ -13,7 +13,9 @@ Node-RED Watson Nodes for IBM Cloud
     - Discovery node
     - Discovery Document Loader node
     - Discovery Query Builder node
-- List Expansion list, and List Training data modes added to Discovery node  
+    - Assistant V1 Workspace Manager node
+- List Expansion list, and List Training data modes added to Discovery node
+- Fix to Create Classifier mode in NLC node
 
 ### New in version 0.8.1
 - Node-RED & IBM-Watson & Use of promises on API invocation & IAM URL construct migration & Removal of default endpoint of
