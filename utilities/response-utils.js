@@ -37,6 +37,15 @@ class ResponseUtils {
     }
   }
 
+  static assignResultToField(msg, response, field) {
+    if (response && response.result) {
+        msg[field] = response.result;
+    } else {
+      msg[field] = response;
+    }
+  }
+
+
 }
 
 module.exports = ResponseUtils;
