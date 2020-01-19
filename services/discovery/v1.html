@@ -38,11 +38,6 @@
     </div>
 
     <div class="form-row credentials">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
-    </div>
-    <div class="form-row">
         <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
         <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/discovery/api">
     </div>
@@ -66,6 +61,10 @@
             <option value="createConfiguration">Create new configuration</option>
             <option value="listConfigurations">List existing configurations</option>
             <option value="getConfigurationDetails">Retrieve configuration details</option>
+            <option value="deleteConfiguration">Delete configuration</option>
+            <option disabled>______________</option>
+            <option value="listExpansions">Get expansion list for collection.</option>
+            <option value="listTrainingData">Get training data for collection.</option>
         </select>
     </div>
 
@@ -74,24 +73,24 @@
         <input type="text" id="node-input-environmentname" placeholder="">
     </div>
     <div class="form-row">
-        <label for="node-input-environment_id"><i class="fa fa-tag"></i> Environment ID</label>
-        <input type="text" id="node-input-environment_id" placeholder="">
+        <label for="node-input-environmentId"><i class="fa fa-tag"></i> Environment ID</label>
+        <input type="text" id="node-input-environmentId" placeholder="">
     </div>
     <div class="form-row">
         <label for="node-input-collection_name"><i class="fa fa-tag"></i> Collection Name</label>
         <input type="text" id="node-input-collection_name" placeholder="">
     </div>
     <div class="form-row">
-        <label for="node-input-collection_id"><i class="fa fa-tag"></i> Collection ID</label>
-        <input type="text" id="node-input-collection_id" placeholder="">
+        <label for="node-input-collectionId"><i class="fa fa-tag"></i> Collection ID</label>
+        <input type="text" id="node-input-collectionId" placeholder="">
     </div>
     <div class="form-row">
         <label for="node-input-configurationname"><i class="fa fa-tag"></i> Configuration Name</label>
         <input type="text" id="node-input-configurationname" placeholder="">
     </div>
     <div class="form-row">
-        <label for="node-input-configuration_id"><i class="fa fa-tag"></i> Configuration ID</label>
-        <input type="text" id="node-input-configuration_id" placeholder="">
+        <label for="node-input-configurationId"><i class="fa fa-tag"></i> Configuration ID</label>
+        <input type="text" id="node-input-configurationId" placeholder="">
     </div>
 
     <div class="form-row">
@@ -208,7 +207,7 @@
             <p>For this method the node needs an Environment ID as input.
             </p>
             <p>The environment being requested can be overridden by specifying the search id
-      in <code>msg.discoveryparams.environment_id</code>
+      in <code>msg.discoveryparams.environmentId</code>
             </p>
             <p>Node output : </p>
               <ul>
@@ -221,10 +220,10 @@
             Description, Configuration ID and Language Code as input.
             </p>
             <p>The fields can be overridden by specifying
-              in <code>msg.discoveryparams.environment_id</code>
+              in <code>msg.discoveryparams.environmentId</code>
               , <code>msg.discoveryparams.collection_name</code>
               , <code>msg.discoveryparams.description</code>
-              , <code>msg.discoveryparams.configuration_id</code>
+              , <code>msg.discoveryparams.configurationId</code>
               and <code>msg.discoveryparams.language_code</code>
             </p>
 
@@ -239,7 +238,7 @@
             <p><b>List Existing Collections</b><p>
             <p>For this method the node needs an Environment ID as input.</p>
             <p>The Environment ID for the collection list being requested can be overridden by specifying the search id
-      in <code>msg.discoveryparams.environment_id</code>
+      in <code>msg.discoveryparams.environmentId</code>
             </p>
             <p>Node output : </p>
               <ul>
@@ -254,8 +253,8 @@
             </p>
             <p>The collection being requested can be overridden by specifying the
             search ids in
-            <code>msg.discoveryparams.environment_id</code>
-            and <code>msg.discoveryparams.collection_id</code>
+            <code>msg.discoveryparams.environmentId</code>
+            and <code>msg.discoveryparams.collectionId</code>
             </p>
             <p>Node output : </p>
               <ul>
@@ -270,7 +269,7 @@
                configuration with the given name.</p>
             <p>The Environment ID for the configuration list being requested can be
                overridden by specifying the environment id in
-               <code>msg.discoveryparams.environment_id</code>
+               <code>msg.discoveryparams.environmentId</code>
                The configuration name can be overridden by specifying the name inspect
                <code>msg.discoveryparams.configuration_name</code>
             </p>
@@ -288,9 +287,9 @@
             <p>The Environment and Configuration IDs for the configuration being
                requested can be
                overridden by specifying the environment id in
-               <code>msg.discoveryparams.environment_id</code>
+               <code>msg.discoveryparams.environmentId</code>
                and the configuration id in
-               <code>msg.discoveryparams.configuration_id</code>
+               <code>msg.discoveryparams.configurationId</code>
             </p>
             <p>Node output : </p>
               <ul>
@@ -300,13 +299,57 @@
         </li>
         <br/>
         <li>
+            <p><b>Delete Configuration</b><p>
+            <p>For this method node needs an Environment ID and Configuration ID as input.</p>
+            <p>The Environment and Configuration IDs for the configuration being
+               deleted can be
+               overridden by specifying the environment id in
+               <code>msg.discoveryparams.environmentId</code>
+               and the configuration id in
+               <code>msg.discoveryparams.configurationId</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.configuration</code> : Details the
+                  deleted configuration.</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
+            <p><b>List Expansions</b><p>
+            <p>For this method the node needs an Environment ID and Collection ID as input.</p>
+            <p>The Environment ID, and Collection ID for the collection list being requested can be overridden by specifying the search id
+      in <code>msg.discoveryparams.environmentId</code>
+      and in <code>msg.discoveryparams.collectionId</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.expansions</code> : The current expansion list for the specified collection.
+                  If an expansion list is not specified, an object with empty expansion arrays is returned.</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
+            <p><b>List Training Data</b><p>
+            <p>For this method the node needs an Environment ID and Collection ID as input.</p>
+            <p>The Environment ID, and Collection ID for the collection list being requested can be overridden by specifying the search id
+      in <code>msg.discoveryparams.environmentId</code>
+      and in <code>msg.discoveryparams.collectionId</code>
+            </p>
+            <p>Node output : </p>
+              <ul>
+                <li><code>msg.trainingData</code> : Lists the training data for the specified collection</li>
+              </ul>
+        </li>
+        <br/>
+        <li>
             <p><b>Search in Collection</b><p>
             <p>For this method the node needs an Environment ID and Collection ID as input.
             </p>
             <p>The collection being requested can be overridden by specifying the
             search ids in
-            <code>msg.discoveryparams.environment_id</code>
-            and <code>msg.discoveryparams.collection_id</code>
+            <code>msg.discoveryparams.environmentId</code>
+            and <code>msg.discoveryparams.collectionId</code>
             </p>
             <p>Optionally you can specify the number of documents to retrieve, a
                query to find the most relevant search results, whether to
@@ -351,11 +394,11 @@
     //disV1.abc = 'abc';
     disV1.hideAll = function() {
       $('#node-input-environmentname').parent().hide();
-      $('#node-input-environment_id').parent().hide();
+      $('#node-input-environmentId').parent().hide();
       $('#node-input-collection_name').parent().hide();
-      $('#node-input-collection_id').parent().hide();
+      $('#node-input-collectionId').parent().hide();
       $('#node-input-configurationname').parent().hide();
-      $('#node-input-configuration_id').parent().hide();
+      $('#node-input-configurationId').parent().hide();
       $('#node-input-language_code').parent().hide();
       $('#node-input-count').parent().hide();
       $('#node-input-passages').parent().hide();
@@ -387,35 +430,38 @@
           fields.push('#node-input-environmentname');
           break;
         case 'createCollection':
-          fields.push('#node-input-environment_id'
-                          + ', #node-input-configuration_id'
+          fields.push('#node-input-environmentId'
+                          + ', #node-input-configurationId'
                           + ', #node-input-language_code'
                           + ', #node-input-collection_name'
                           + ', #node-input-description');
           break;
-        case 'createConfiguration':
+        case 'listConfigurations':
         case 'getEnvironmentDetails':
         case 'listCollections':
         case 'deleteEnvironment':
-          fields.push('#node-input-environment_id');
+          fields.push('#node-input-environmentId');
           break;
         case 'getCollectionDetails':
         case 'deleteCollection':
-          fields.push('#node-input-environment_id'
-                          + ', #node-input-collection_id');
+        case 'listExpansions':
+        case 'listTrainingData':
+          fields.push('#node-input-environmentId'
+                          + ', #node-input-collectionId');
           break;
-        case 'listConfigurations':
-          fields.push('#node-input-environment_id'
+        case 'createConfiguration':
+          fields.push('#node-input-environmentId'
                           + ', #node-input-configurationname');
           break;
         case 'getConfigurationDetails':
-          fields.push('#node-input-environment_id'
-                         + ', #node-input-configuration_id');
+        case 'deleteConfiguration':
+          fields.push('#node-input-environmentId'
+                         + ', #node-input-configurationId');
           break;
         case 'query':
-        case 'queryNotices':        
-          fields.push('#node-input-environment_id'
-                         + ', #node-input-collection_id'
+        case 'queryNotices':
+          fields.push('#node-input-environmentId'
+                         + ', #node-input-collectionId'
                          + ', #node-input-count'
                          + ', #node-input-passages'
                          + ', #node-input-nlp_query'
@@ -432,15 +478,6 @@
       $('#node-input-discovery-method').change(function(val){
         var method = $('#node-input-discovery-method').val();
         disV1.processSelectedMethod(method);
-      });
-
-      $('input#node-input-default-endpoint').change(function () {
-          var checked = $('input#node-input-default-endpoint').prop('checked')
-          if (checked) {
-              $('#node-input-service-endpoint').parent().hide();
-          } else {
-              $('#node-input-service-endpoint').parent().show();
-          }
       });
     }
 
@@ -469,10 +506,10 @@
             defaults: {
                 name: {value: ''},
                 environmentname: {value: ''},
-                environment_id: {value: ''},
-                collection_id: {value: ''},
+                environmentId: {value: ''},
+                collectionId: {value: ''},
                 configurationname: {value: ''},
-                configuration_id: {value: ''},
+                configurationId: {value: ''},
                 language_code: {value: 'en'},
                 collection_name: {value: ''},
                 count: {value: '1'},
@@ -485,8 +522,7 @@
                 description: {value: ''},
                 size: {value: 'LT'},
                 'discovery-method': {value:'query'},
-                'default-endpoint' :{value: true},
-                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/discovery/api'}
+                'service-endpoint' :{value: ''}
             },
             credentials: {
               username: {type:'text'},

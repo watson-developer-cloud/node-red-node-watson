@@ -44,17 +44,12 @@
     </div>
 
     <div class="form-row credentials">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-cwm-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-cwm-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
-    </div>
-    <div class="form-row">
         <label for="node-input-cwm-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
         <input type="text" id="node-input-cwm-service-endpoint" placeholder="https://gateway.watsonplatform.net/assistant/api">
     </div>
 
     <div class="form-row">
-        <label for="node-input-cwm-custom-mode"><i class="fa fa-book"></i> Detect: </label>
+        <label for="node-input-cwm-custom-mode"><i class="fa fa-book"></i> Mode: </label>
         <select type="text" id="node-input-cwm-custom-mode" style="display: inline-block; width: 70%;">
             <option value="listWorkspaces">List Workspaces</option>
             <option value="getWorkspace">Get Workspace Details</option>
@@ -341,7 +336,7 @@
         defining the content of the updates
         should be passed in
         as <code>msg.payload</code>. Fields to be updated need a
-        <code>new_</code> prefix as part of their key. 
+        <code>new_</code> prefix as part of their key.
       </p>
     </li>
     <li>Delete Dialog Node
@@ -438,7 +433,6 @@
   // moved in if there is a clash with other nodes.
   var cv1wm = new CV1WM();
   cv1wm.mode_selected = null;
-  cv1wm.endpoint_required = false;
 
   cv1wm.showSelectedFields = function(fields) {
     for (i = 0; i < fields.length; i++) {
@@ -463,8 +457,7 @@
                      + ', #node-input-cwm-entity'
                      + ', #node-input-cwm-entity-value'
                      + ', #node-input-cwm-dialog-node'
-                     + ', #node-input-cwm-export-content'
-                     + ', #node-input-cwm-service-endpoint');
+                     + ', #node-input-cwm-export-content');
 
     cv1wm.hideSelectedFields(fields);
   }
@@ -546,9 +539,7 @@
       case 'createWorkspace':
         break;
     }
-    if (cv1wm.endpoint_required) {
-      fields.push('#node-input-cwm-service-endpoint');
-    }
+
     cv1wm.showSelectedFields(fields);
   }
 
@@ -556,10 +547,6 @@
   cv1wm.handlersUI = function () {
     $('#node-input-cwm-custom-mode').change(function() {
       cv1wm.mode_selected = $('#node-input-cwm-custom-mode').val();
-      cv1wm.processSelectedMethod(cv1wm.mode_selected);
-    });
-    $('#node-input-cwm-default-endpoint').change(function () {
-      cv1wm.endpoint_required = ! $('#node-input-cwm-default-endpoint').prop('checked');
       cv1wm.processSelectedMethod(cv1wm.mode_selected);
     });
   }
@@ -600,8 +587,7 @@
                 'cwm-entity-value': {value:""},
                 'cwm-dialog-node': {value:""},
                 'cwm-export-content': {value:false},
-                'cwm-default-endpoint' :{value: true},
-                'cwm-service-endpoint' :{value: 'https://gateway.watsonplatform.net/assistant/api'}
+                'cwm-service-endpoint' :{value: ''}
             },
             credentials: {
               username: {type:'text'},

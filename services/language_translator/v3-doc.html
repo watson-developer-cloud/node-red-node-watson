@@ -47,11 +47,6 @@
     </div>
 
     <div class="form-row credentials">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
-    </div>
-    <div class="form-row">
         <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
         <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/language-translator/api">
     </div>
@@ -335,15 +330,6 @@
         doctor.checkActionSelected();
       });
 
-      $('#node-input-default-endpoint').change(() => {
-        var checked = $('#node-input-default-endpoint').prop('checked')
-        if (checked) {
-          $('#node-input-service-endpoint').parent().hide();
-        } else {
-          $('#node-input-service-endpoint').parent().show();
-        }
-      });
-
       $('#node-input-srclang').change(function () {
         doctor.srclang_selected = $('#node-input-srclang').val();
         if (doctor.models) {
@@ -400,9 +386,7 @@
           var e = $('#node-input-service-endpoint').val();
           var creds = {un: u, pwd: p, key: k};
 
-          if (! $('#node-input-default-endpoint').prop('checked')) {
-            creds.e = e;
-          }
+          creds.e = e;
 
           $.getJSON('watson-doc-translator/models/', creds)
           .done(function (data) {
@@ -541,8 +525,7 @@
                 destlanghidden: {value: ''},
                 filename: {value: ''},
                 'document-id': {value: ''},
-                'default-endpoint' :{value: true},
-                'service-endpoint' :{value: 'https://gateway.watsonplatform.net/language-translator/api'}
+                'service-endpoint' :{value: ''}
             },
             credentials: {
                 username: {type: 'text'}

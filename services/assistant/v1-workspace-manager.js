@@ -16,14 +16,16 @@
 
 module.exports = function (RED) {
   const SERVICE_IDENTIFIER = 'assistant',
-    OLD_SERVICE_IDENTIFIER = 'conversation';
+    OLD_SERVICE_IDENTIFIER = 'conversation',
+    AssistantV1 = require('ibm-watson/assistant/v1'),
+    { IamAuthenticator } = require('ibm-watson/auth');
 
   var pkg = require('../../package.json'),
     temp = require('temp'),
     fs = require('fs'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
-    AssistantV1 = require('watson-developer-cloud/assistant/v1'),
+    responseutils = require('../../utilities/response-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
@@ -33,6 +35,40 @@ module.exports = function (RED) {
   if (!service) {
     service = serviceutils.getServiceCreds(OLD_SERVICE_IDENTIFIER);
   }
+
+  const ExecutionList = {
+    'listWorkspaces'  : executeListWorkspaces,
+    'getWorkspace'    : executeGetWorkspace,
+    'createWorkspace' : executeCreateWorkspace,
+    'updateWorkspace' : executeUpdateWorkspace,
+    'deleteWorkspace' : executeDeleteWorkspace,
+    'listIntents'     : executeListIntents,
+    'getIntent'       : executeGetIntent,
+    'createIntent'    : executeCreateIntent,
+    'updateIntent'    : executeUpdateIntent,
+    'deleteIntent'    : executeDeleteIntent,
+    'listExamples'    : executeListExamples,
+    'createExample'   : executeCreateExample,
+    'deleteExample'   : executeDeleteExample,
+    'listCounterExamples' : executeListCounterExamples,
+    'createCounterExample': executeCreateCounterExample,
+    'deleteCounterExample': executeDeleteCounterExample,
+    'listEntities'    : executeListEntities,
+    'getEntity'       : executeGetEntity,
+    'createEntity'    : executeCreateEntity,
+    'updateEntity'    : executeUpdateEntity,
+    'deleteEntity'    : executeDeleteEntity,
+    'listEntityValues': executeListEntityValues,
+    'getEntityValue'  : executeGetEntityValue,
+    'addEntityValue'  : executeAddEntityValue,
+    'updateEntityValue'   : executeUpdateEntityValue,
+    'deleteEntityValue'   : executeDeleteEntityValue,
+    'listDialogNodes' : executeListDialogNodes,
+    'getDialogNode'   : executeGetDialogNode,
+    'updateDialogNode': executeUpdateDialogNode,
+    'createDialogNode': executeCreateDialogNode,
+    'deleteDialogNode': executeDeleteDialogNode
+  };
 
   temp.track();
 
@@ -55,449 +91,408 @@ module.exports = function (RED) {
   }
 
   function executeListWorkspaces(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.listWorkspaces(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['workspaces'] = response.workspaces ?
-                                        response.workspaces: response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.listWorkspaces(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'workspaces');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeGetWorkspace(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.getWorkspace(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['workspace'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.getWorkspace(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'workspace');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeCreateWorkspace(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.createWorkspace(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['workspace'] = response;
+    return new Promise(function resolver(resolve, reject){
+      conv.createWorkspace(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'workspace');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeUpdateWorkspace(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.updateWorkspace(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['workspace'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.updateWorkspace(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'workspace');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeDeleteWorkspace(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.deleteWorkspace(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['workspace'] = response;
-          resolve();
-        }
+    return new Promise(function resolver(resolve, reject) {
+      conv.deleteWorkspace(params)
+      .then((response) => {
+        responseutils.assignResultToField(msg, response, 'workspace');
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
-    return p;
   }
 
   function executeListIntents(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.listIntents(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['intents'] = response.intents ?
-                                        response.intents: response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.listIntents(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'intents');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeGetIntent(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.getIntent(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          // returning the whole response even though response.intent has
-          // the intent, but the details with export = true
-          // are provided as response.examples
-          msg['intent'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.getIntent(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'intent');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeCreateIntent(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.createIntent(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['intent'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.createIntent(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'intent');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeUpdateIntent(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.updateIntent(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['intent'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.updateIntent(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'intent');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeDeleteIntent(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.deleteIntent(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['intent'] = response;
+    return new Promise(function resolver(resolve, reject){
+      conv.deleteIntent(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'intent');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   // For now we are not doing anything with the pagination
   // response
   function executeListExamples(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.listExamples(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['examples'] = response.examples ?
-                                        response.examples: response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.listExamples(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'examples');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeCreateExample(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.createExample(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['example'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.createExample(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'example');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeDeleteExample(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.deleteExample(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['example'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.deleteExample(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'example');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeListCounterExamples(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.listCounterexamples(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['counterexamples'] = response.counterexamples ?
-                                        response.counterexamples: response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.listCounterexamples(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'counterexamples');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeCreateCounterExample(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.createCounterexample(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['counterexample'] = response;
+    return new Promise(function resolver(resolve, reject){
+      conv.createCounterexample(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'counterexample');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeDeleteCounterExample(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.deleteCounterexample(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['counterexample'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.deleteCounterexample(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'counterexample');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeListEntities(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.listEntities(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['entities'] = response.entities ? response.entities: response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.listEntities(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'entities');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeGetEntity(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.getEntity(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          // returning the whole response even though response.intent has
-          // the intent, but the details with export = true
-          // are provided as response.examples
-          msg['entity'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.getEntity(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'entity');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeCreateEntity(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.createEntity(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['entity'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.createEntity(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'entity');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeUpdateEntity(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.updateEntity(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['entity'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.updateEntity(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'entity');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeDeleteEntity(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.deleteEntity(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['entity'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.deleteEntity(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'entity');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeListEntityValues(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.listValues(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['values'] = response.values ? response.values: response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.listValues(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'values');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeGetEntityValue(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.getValue(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['value'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.getValue(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'value');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeAddEntityValue(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.createValue(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['value'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.createValue(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'value');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeUpdateEntityValue(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.updateValue(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['value'] = response;
-          resolve();
-        }
+    return new Promise(function resolver(resolve, reject) {
+      conv.updateValue(params)
+      .then((response) => {
+        responseutils.assignResultToField(msg, response, 'value');
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
-    return p;
   }
 
   function executeDeleteEntityValue(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.deleteValue(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['value'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.deleteValue(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'value');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeListDialogNodes(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.listDialogNodes(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['dialog_nodes'] = response.dialog_nodes ? response.dialog_nodes: response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.listDialogNodes(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'dialog_nodes');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeGetDialogNode(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.getDialogNode(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['dialog_node'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.getDialogNode(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'dialog_node');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeCreateDialogNode(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.createDialogNode(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['dialog_node'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.createDialogNode(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'dialog_node');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeUpdateDialogNode(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.updateDialogNode(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['dialog_node'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.updateDialogNode(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'dialog_node');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeDeleteDialogNode(node, conv, params, msg) {
-    var p = new Promise(function resolver(resolve, reject){
-      conv.deleteDialogNode(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg['dialog_node'] = response;
+    return new Promise(function resolver(resolve, reject) {
+      conv.deleteDialogNode(params)
+        .then((response) => {
+          responseutils.assignResultToField(msg, response, 'dialog_node');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
-    return p;
   }
 
   function executeUnknownMethod(node, conv, params, msg) {
@@ -507,6 +502,7 @@ module.exports = function (RED) {
   function executeMethod(node, method, params, msg) {
     let conv = null,
       version = '2018-09-20',
+      authSettings = {},
       serviceSettings = {
         version_date: version,
         version: version,
@@ -516,124 +512,27 @@ module.exports = function (RED) {
       };
 
     if (apikey) {
-      serviceSettings.iam_apikey = apikey;
+      authSettings.apikey = apikey;
     } else {
-      serviceSettings.username = username;
-      serviceSettings.password = password;
+      authSettings.username = username;
+      authSettings.password = password;
     }
+    serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     if (endpoint) {
       serviceSettings.url = endpoint;
     }
 
-
-
     conv = new AssistantV1(serviceSettings);
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
 
-    var p = null;
-
-    switch (method) {
-    case 'listWorkspaces':
-      p = executeListWorkspaces(node, conv, params, msg);
-      break;
-    case 'getWorkspace':
-      p = executeGetWorkspace(node, conv, params, msg);
-      break;
-    case 'createWorkspace':
-      p = executeCreateWorkspace(node, conv, params, msg);
-      break;
-    case 'updateWorkspace':
-      p = executeUpdateWorkspace(node, conv, params, msg);
-      break;
-    case 'deleteWorkspace':
-      p = executeDeleteWorkspace(node, conv, params, msg);
-      break;
-    case 'listIntents':
-      p = executeListIntents(node, conv, params, msg);
-      break;
-    case 'getIntent':
-      p = executeGetIntent(node, conv, params, msg);
-      break;
-    case 'createIntent':
-      p = executeCreateIntent(node, conv, params, msg);
-      break;
-    case 'updateIntent':
-      p = executeUpdateIntent(node, conv, params, msg);
-      break;
-    case 'deleteIntent':
-      p = executeDeleteIntent(node, conv, params, msg);
-      break;
-    case 'listExamples':
-      p = executeListExamples(node, conv, params, msg);
-      break;
-    case 'createExample':
-      p = executeCreateExample(node, conv, params, msg);
-      break;
-    case 'deleteExample':
-      p = executeDeleteExample(node, conv, params, msg);
-      break;
-    case 'listCounterExamples':
-      p = executeListCounterExamples(node, conv, params, msg);
-      break;
-    case 'createCounterExample':
-      p = executeCreateCounterExample(node, conv, params, msg);
-      break;
-    case 'deleteCounterExample':
-      p = executeDeleteCounterExample(node, conv, params, msg);
-      break;
-    case 'listEntities':
-      p = executeListEntities(node, conv, params, msg);
-      break;
-    case 'getEntity':
-      p = executeGetEntity(node, conv, params, msg);
-      break;
-    case 'createEntity':
-      p = executeCreateEntity(node, conv, params, msg);
-      break;
-    case 'updateEntity':
-      p = executeUpdateEntity(node, conv, params, msg);
-      break;
-    case 'deleteEntity':
-      p = executeDeleteEntity(node, conv, params, msg);
-      break;
-    case 'listEntityValues':
-      p = executeListEntityValues(node, conv, params, msg);
-      break;
-    case 'getEntityValue':
-      p = executeGetEntityValue(node, conv, params, msg);
-      break;
-    case 'addEntityValue':
-      p = executeAddEntityValue(node, conv, params, msg);
-      break;
-    case 'updateEntityValue':
-      p = executeUpdateEntityValue(node, conv, params, msg);
-      break;
-    case 'deleteEntityValue':
-      p = executeDeleteEntityValue(node, conv, params, msg);
-      break;
-    case 'listDialogNodes':
-      p = executeListDialogNodes(node, conv, params, msg);
-      break;
-    case 'getDialogNode':
-      p = executeGetDialogNode(node, conv, params, msg);
-      break;
-    case 'updateDialogNode':
-      p = executeUpdateDialogNode(node, conv, params, msg);
-      break;
-    case 'createDialogNode':
-      p = executeCreateDialogNode(node, conv, params, msg);
-      break;
-    case 'deleteDialogNode':
-      p = executeDeleteDialogNode(node, conv, params, msg);
-      break;
-    default:
-      p = executeUnknownMethod(node, conv, params, msg);
-      break;
+    let exe = ExecutionList[method];
+    if (!exe) {
+      exe = unknownMethod
     }
 
-    return p;
+    return exe(node, conv, params, msg);
   }
 
   function buildWorkspaceParams(msg, method, config, params) {
@@ -676,7 +575,7 @@ module.exports = function (RED) {
         workspace_id = config['cwm-workspace-id'];
       }
       if (workspace_id) {
-        params['workspace_id'] = workspace_id;
+        params['workspaceId'] = workspace_id;
       } else {
         message = 'Workspace ID is required';
       }
@@ -786,12 +685,12 @@ module.exports = function (RED) {
 
   function buildDialogParams(msg, method, config, params) {
     var message = '',
-      field = 'dialog_node',
+      field = 'dialogNode',
       dialogID = '';
 
     switch (method) {
     case 'updateDialogNode':
-      field = 'old_dialog_node';
+      field = 'old_dialogNode';
       // deliberate no break
     case 'getDialogNode':
     case 'deleteDialogNode':
@@ -849,7 +748,7 @@ module.exports = function (RED) {
     case 'getEntity':
     case 'listEntityValues':
     case 'getEntityValue':
-      params['export'] = config['cwm-export-content'];
+      params['_export'] = config['cwm-export-content'];
       break;
     }
     return Promise.resolve();
@@ -923,8 +822,8 @@ module.exports = function (RED) {
       }
       break;
     case 'updateDialogNode':
-      if (params['old_dialog_node']) {
-        stash['old_dialog_node'] = params['old_dialog_node'];
+      if (params['old_dialogNode']) {
+        stash['old_dialogNode'] = params['old_dialogNode'];
       }
       break;
     }
@@ -938,8 +837,8 @@ module.exports = function (RED) {
     case 'updateEntityValue':
     case 'createDialogNode':
     case 'updateDialogNode':
-      if (params['workspace_id']) {
-        stash['workspace_id'] = params['workspace_id'];
+      if (params['workspaceId']) {
+        stash['workspaceId'] = params['workspaceId'];
       }
       break;
     }
@@ -959,7 +858,7 @@ module.exports = function (RED) {
 
 
   function openTheFile() {
-    var p = new Promise(function resolver(resolve, reject){
+    return new Promise(function resolver(resolve, reject){
       temp.open({
         suffix: '.txt'
       }, function(err, info) {
@@ -970,11 +869,10 @@ module.exports = function (RED) {
         }
       });
     });
-    return p;
   }
 
   function syncTheFile(info, msg) {
-    var p = new Promise(function resolver(resolve, reject){
+    return new Promise(function resolver(resolve, reject){
       fs.writeFile(info.path, msg.payload, function(err) {
         if (err) {
           reject('Error processing data buffer');
@@ -982,7 +880,6 @@ module.exports = function (RED) {
         resolve();
       });
     });
-    return p;
   }
 
 
@@ -1018,8 +915,8 @@ module.exports = function (RED) {
   // compromising of all the promises from the async and
   // sync functions.
   function loadFile(node, method, params, msg) {
-    var fileInfo = null;
-    var p = openTheFile()
+    let fileInfo = null;
+    let p = openTheFile()
       .then(function(info){
         fileInfo = info;
         return syncTheFile(fileInfo, msg);
@@ -1052,6 +949,70 @@ module.exports = function (RED) {
     return Promise.resolve(false);
   }
 
+  function newOldUtility(params, field) {
+    let newField = 'new' + field[0].toUpperCase() + field.slice(1),
+      oldField = 'old_' + field;
+
+    if (params[oldField]) {
+      if (params[field]) {
+        params[newField] = params[field];
+      }
+      params[field] = params[oldField];
+      delete params[oldField];
+    }
+  }
+
+  function newUtility(params, field) {
+    let newField = 'new' + field[0].toUpperCase() + field.slice(1);
+
+    if (params[field]) {
+      params[newField] = params[field];
+    }
+    delete params[field];
+  }
+
+  function newOldParamShift(method, params) {
+    return new Promise(function resolver(resolve, reject) {
+      ['intent', 'entity', 'value', 'dialogNode'].forEach(function(field) {
+        newOldUtility(params, field);
+      });
+
+      switch (method) {
+        case 'updateIntent' :
+          ['description', 'examples'].forEach(function(field) {
+            newUtility(params, field);
+          });
+          break;
+        case 'updateEntity' :
+          ['description', 'metadata', 'fuzzyMatch', 'values'].forEach(function(field) {
+            newUtility(params, field);
+          });
+          break;
+        case 'updateEntityValue' :
+          ['metadata', 'type', 'synonyms', 'patterns'].forEach(function(field) {
+            newUtility(params, field);
+          });
+          break;
+        case 'updateDialogNode' :
+          ['description', 'conditions', 'parent', 'previousSibling', 'output',
+            'context', 'metadata', 'nextStep', 'title', 'type', 'eventName',
+            'variable', 'actions', 'digressIn', 'digressOut', 'digressOutSlots',
+            'userLabel', 'disambiguationOptOut'].forEach(function(field) {
+            newUtility(params, field);
+          });
+          // deliberate no break
+        case 'createDialogNode':
+          if (params && params.dialog_node){
+            params.dialogNode = params.dialog_node;
+            delete params.dialog_node;
+          }
+          break;
+      }
+
+      resolve(params);
+    });
+  }
+
   function initialCheck(a, u, p, m) {
     var message = '';
     if (!a && (!u || !p)) {
@@ -1079,10 +1040,10 @@ module.exports = function (RED) {
   // This is the Conversation Workspace Manager Node
   function Node (config) {
     RED.nodes.createNode(this, config);
-    var node = this;
+    let node = this;
 
-    this.on('input', function (msg) {
-      var method = config['cwm-custom-mode'],
+    this.on('input', function(msg, send, done) {
+      let method = config['cwm-custom-mode'],
         message = '',
         params = {};
 
@@ -1109,7 +1070,7 @@ module.exports = function (RED) {
         }
       }
       endpoint = sEndpoint;
-      if ((!config['cwm-default-endpoint']) && config['cwm-service-endpoint']) {
+      if (config['cwm-service-endpoint']) {
         endpoint = config['cwm-service-endpoint'];
       }
 
@@ -1134,17 +1095,23 @@ module.exports = function (RED) {
         })
         .then(function(p){
           params = p;
+          return newOldParamShift(method, params);
+        })
+        .then(function(p){
+          params = p;
           node.status({fill:'blue', shape:'dot', text:'executing'});
           return executeMethod(node, method, params, msg);
         })
         .then(function(){
           temp.cleanup();
           node.status({});
-          node.send(msg);
+          send(msg);
+          done();
         })
         .catch(function(err){
           temp.cleanup();
-          payloadutils.reportError(node,msg,err);
+          let errMsg = payloadutils.reportError(node, msg, err);
+          done(errMsg);
         });
 
     });

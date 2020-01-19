@@ -69,14 +69,18 @@ module.exports = function (RED) {
   function determineSuffix(msg) {
     // Let's assume that if we can't determine the suffix that
     // its a word doc.
-    var ext = '.json',
-      ft = fileType(msg.payload);
+    let ext = '.json';
+    if (! discoveryutils.isJsonObject(msg.payload)) {
+      let ext = '.json',
+        ft = fileType(msg.payload);
 
-    if (ft && ft.ext) {
-      ext = '.' + ft.ext;
-    }
-    if (isDocx(msg.payload)) {
-      ext = '.docx';
+      if (ft && ft.ext) {
+        ext = '.' + ft.ext;
+      }
+
+      if (isDocx(msg.payload)) {
+        ext = '.docx';
+      }
     }
 
     return Promise.resolve(ext);
@@ -131,20 +135,22 @@ module.exports = function (RED) {
       // modify as getting addJsonDocument will be deprecated messages
       if ('.json' === suffix) {
         //method = 'addJsonDocument';
-        params.file = JSON.stringify(params.file);
+        //params.file = JSON.stringify(params.file);
+
+        params.file = Buffer.from(JSON.stringify(params.file));
       //} else {
         //method = 'addDocument';
       }
       method = 'addDocument';
 
-      discovery[method](params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.document = response.document ? response.document : response;
+      discovery[method](params)
+        .then((response) => {
+          msg.document = response.result ? response.result : response;
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
 
     });
     return p;
@@ -166,7 +172,7 @@ module.exports = function (RED) {
     var node = this;
     RED.nodes.createNode(this, config);
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg, send, done) {
       var message = '',
         fileInfo = '',
         fileSuffix = '',
@@ -177,7 +183,7 @@ module.exports = function (RED) {
       apikey = sApikey || this.credentials.apikey;
 
       endpoint = sEndpoint;
-      if ((!config['default-endpoint']) && config['service-endpoint']) {
+      if (config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
@@ -223,12 +229,13 @@ module.exports = function (RED) {
         .then(function(){
           temp.cleanup();
           node.status({});
-          node.send(msg);
+          send(msg);
+          done();
         })
         .catch(function(err){
           temp.cleanup();
-          payloadutils.reportError(node,msg,err);
-          node.send(msg);
+          let errMsg = payloadutils.reportError(node, msg, err);
+          done(errMsg);
         });
     });
   }
