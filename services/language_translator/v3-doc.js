@@ -84,7 +84,7 @@ module.exports = function (RED) {
       })
       .catch((err) => {
         res.json(err);
-      })
+      });
   });
 
   function Node (config) {
