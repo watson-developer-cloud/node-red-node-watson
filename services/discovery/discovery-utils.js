@@ -14,25 +14,29 @@
  * limitations under the License.
  **/
 const pkg = require('../../package.json'),
-  DiscoveryV1 = require('watson-developer-cloud/discovery/v1');
+  DiscoveryV1 = require('ibm-watson/discovery/v1'),
+  { IamAuthenticator } = require('ibm-watson/auth');
+
 
 function DiscoveryUtils() {}
 DiscoveryUtils.prototype = {
 
   buildService: function(username, password, apikey, endpoint) {
+    let authSettings = {};
     let serviceSettings = {
-      version_date: '2018-12-03',
+      version: '2019-04-30',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
     };
 
     if (apikey) {
-      serviceSettings.iam_apikey = apikey;
+      authSettings.apikey = apikey;
     } else {
-      serviceSettings.username = username;
-      serviceSettings.password = password;
+      authSettings.username = username;
+      authSettings.password = password;
     }
+    serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     if (endpoint) {
       serviceSettings.url = endpoint;
@@ -64,7 +68,7 @@ DiscoveryUtils.prototype = {
       targetField = 'query';
 
     if (config.nlp_query || (msg.discoveryparams && msg.discoveryparams.nlp_query)) {
-      targetField = 'natural_language_query';
+      targetField = 'naturalLanguageQuery';
     }
     if (msg.discoveryparams && msg.discoveryparams[sourceField]) {
       params[targetField] = msg.discoveryparams[sourceField];
@@ -83,7 +87,7 @@ DiscoveryUtils.prototype = {
       params.file = this.isJsonObject(msg.payload) ?
         JSON.stringify(msg.payload) :
         msg.payload;
-      params.file_content_type = 'application/json';
+      params.fileContentType = 'application/json';
     }
     return params;
   },
@@ -100,8 +104,8 @@ DiscoveryUtils.prototype = {
   buildParamsForPassages: function (me, msg, config, params) {
     let passagesFound = false;
 
-    // Allow the passages parameters to be passed in two ways
-    // 1. As the API is expecting
+    // Allow the passages parameters to be passed in three ways
+    // 1. As the API was expecting (watson-developer-cloud)
     ['passages.fields', 'passages.count', 'passages.characters'
     ].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);
@@ -109,6 +113,7 @@ DiscoveryUtils.prototype = {
     });
 
     // 2. As anyone misreading the documentation might do it.
+    // (again watson-developer-cloud)
     if (msg.discoveryparams && msg.discoveryparams.passages) {
       passagesFound = true;
       ['fields', 'count', 'characters'
@@ -119,7 +124,25 @@ DiscoveryUtils.prototype = {
       });
     }
 
+    // 3. As the ibm-watson SDK expects
+    ['passagesFields', 'passagesCount', 'passagesCharacters'
+    ].forEach(function(f) {
+      params = me.buildParamsFor(msg, config, params, f);
+      passagesFound = true;
+    });
+
     if (passagesFound) {
+      // Perform autocorrect for watson-developer-cloud to ibm-watson
+      // differences
+      ['passages.fields', 'passages.count', 'passages.characters'
+      ].forEach(function(f) {
+        if (params[f]) {
+          let parts = f.split(".");
+          let secondPart = parts[1]
+          let reformedField = parts[0] + secondPart[0].toUpperCase() + secondPart.slice(1);
+          params[reformedField] = params[f];
+        }
+      });
       params.passages = true;
     }
 
@@ -149,7 +172,7 @@ DiscoveryUtils.prototype = {
     params = me.buildParamsForName(msg, config, params);
     params = me.buildParamsForQuery(msg, config, params);
 
-    ['environment_id', 'collection_id', 'configuration_id',
+    ['environmentId', 'collectionId', 'configurationId',
       'collection_name', 'language_code',
       'passages', 'description', 'size', 'filename',
       'highlight'
@@ -173,10 +196,10 @@ DiscoveryUtils.prototype = {
   buildMsgOverrides: function(msg, config) {
     var params = {};
     if (config.environment) {
-      params.environment_id = config.environment;
+      params.environmentId = config.environment;
     }
     if (config.collection) {
-      params.collection_id = config.collection;
+      params.collectionId = config.collection;
     }
     if (config.passages) {
       params.passages = config.passages;
@@ -222,7 +245,7 @@ DiscoveryUtils.prototype = {
 
   paramEnvCheck: function(params) {
     var response = '';
-    if (!params.environment_id) {
+    if (!params.environmentId) {
       response = 'Missing Environment ID ';
     }
     return response;
@@ -262,7 +285,7 @@ DiscoveryUtils.prototype = {
 
   paramCollectionCheck: function(params) {
     var response = '';
-    if (!params.collection_id) {
+    if (!params.collectionId) {
       response = 'Missing Collection ID ';
     }
     return response;
@@ -270,7 +293,7 @@ DiscoveryUtils.prototype = {
 
   paramConfigurationCheck: function(params) {
     var response = '';
-    if (!params.configuration_id) {
+    if (!params.configurationId) {
       response = 'Missing Configuration ID ';
     }
     return response;
@@ -311,18 +334,20 @@ DiscoveryUtils.prototype = {
 
     if (schemaData &&
            'object' === typeof schemaData &&
-           schemaData['fields'] &&
-            Array.isArray(schemaData['fields'])) {
-      schemaData['fields'].forEach((f) => {
+           schemaData.result &&
+           'object' === typeof schemaData.result &&
+           schemaData.result['fields'] &&
+            Array.isArray(schemaData.result['fields'])) {
+      schemaData.result['fields'].forEach((f) => {
         if (f['field'] && f['type'] && 'nested' !== f['type']) {
           fields.push(f['field']);
         }
       });
-
     }
 
     if (fields.length) {
       fields = fields.filter(this.uniqueFilter);
+      fields.sort();
     }
 
     return fields;

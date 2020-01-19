@@ -7,8 +7,18 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.8.2
+- Node-RED & IBM-Watson & Use of promises on API invocation & IAM URL construct migration & Removal of default endpoint of
+    - Document Translator node
+    - Discovery node
+    - Discovery Document Loader node
+    - Discovery Query Builder node
+    - Assistant V1 Workspace Manager node
+- List Expansion list, and List Training data modes added to Discovery node
+- Fix to Create Classifier mode in NLC node
+
 ### New in version 0.8.1
-- Node-RED & IBM-Watson & Use of promises on API invokation & IAM URL construct migration & Removal of default endpoint of
+- Node-RED & IBM-Watson & Use of promises on API invocation & IAM URL construct migration & Removal of default endpoint of
     - Speech to Text node
     - Speech to Text Corpus Builder node
     - Natural Language Understanding node
@@ -33,7 +43,7 @@ During the migration there will be a dependancy on both modules.
 - Bump dependancy on node to >=10.0.0
 - Bump dependancy on cfenv, request, file-type
 - Bump dependancy on ibm-cloud-sdk-core to 0.3.7 (need to stay on 0.x, for STT Streaming to work)
-- Node-RED & IBM-Watson & Use of promises on API invokation & IAM URL construct migration & Removal of default endpoint of
+- Node-RED & IBM-Watson & Use of promises on API invocation & IAM URL construct migration & Removal of default endpoint of
     - Tone Analyzer node.
     - Personality Insights node.
     - Visual Recognition V3 node
@@ -46,7 +56,7 @@ During the migration there will be a dependancy on both modules.
 - Update language lists for STT, TTS, Language Translator and Document Translator Nodes
 
 ### Watson Nodes for Node-RED
-A collection of nodes to interact with the IBM Watson services in [IBM Cloud](http://bluemix.net).
+A collection of nodes to interact with the IBM Watson services in [IBM Cloud](http://cloud.ibm.com).
 
 # Nodes
 

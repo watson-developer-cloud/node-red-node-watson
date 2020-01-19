@@ -1,5 +1,5 @@
 /**
- * Copyright 20016 IBM Corp.
+ * Copyright 2016, 2020 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ module.exports = function (RED) {
   var discoveryutils = require('./discovery-utils'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
+    responseutils = require('../../utilities/response-utils'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     username = null,
     password = null,
@@ -30,6 +31,25 @@ module.exports = function (RED) {
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/discovery/api';
 
+const ExecutionList = {
+  'createEnvrionment': executeCreateEnvrionment,
+  'listEnvrionments': executeListEnvrionments,
+  'getEnvironmentDetails': executeEnvrionmentDetails,
+  'createCollection': executeCreateCollection,
+  'listCollections': executeListCollections,
+  'getCollectionDetails': executeGetCollectionDetails,
+  'deleteCollection': executeDeleteCollection,
+  'createConfiguration': executeCreateConfiguration,
+  'listConfigurations': executeListConfigurations,
+  'getConfigurationDetails': executeGetConfigurationDetails,
+  'deleteConfiguration': executeDeleteConfiguration,
+  'deleteEnvironment': executeDeleteEnvironment,
+  'listExpansions': executeListExpansions,
+  'listTrainingData': executeListTrainingData,
+  'query': executeQuery,
+  'queryNotices': executeQueryNotices
+};
+
 
   function checkParams(method, params){
     var response = '';
@@ -39,7 +59,8 @@ module.exports = function (RED) {
             discoveryutils.paramDescriptionCheck(params);
       break;
     case 'createConfiguration':
-      response = discoveryutils.paramEnvCheck(params) +
+      response = discoveryutils.paramNameCheck(params) +
+          discoveryutils.paramEnvCheck(params) +
           discoveryutils.paramJSONCheck(params);
       break;
     case 'getEnvironmentDetails':
@@ -49,6 +70,8 @@ module.exports = function (RED) {
     case 'getCollectionDetails':
     case 'query':
     case 'queryNotices':
+    case 'listExpansions':
+    case 'listTrainingData':
       response = discoveryutils.paramEnvCheck(params) +
              discoveryutils.paramCollectionCheck(params);
       break;
@@ -69,42 +92,45 @@ module.exports = function (RED) {
 
   function executeCreateEnvrionment(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.createEnvironment(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.environment = response.environment ? response.environment : response;
+      discovery.createEnvironment(params)
+        .then((response) => {
+          msg.environment = response.result ? response.result : response;
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
     return p;
   }
 
   function executeListEnvrionments(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.listEnvironments(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.environments = response.environments ? response.environments : [];
+      discovery.listEnvironments(params)
+        .then((response) => {
+          responseutils.parseResponseFor(msg, response, 'environments');
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
     return p;
   }
 
   function executeEnvrionmentDetails(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.getEnvironment(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
+      discovery.getEnvironment(params)
+        .then((response) => {
           msg.environment_details = response;
+          if (response && response.result) {
+            msg.environment_details = response.result;
+          }
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
     return p;
   }
@@ -119,13 +145,13 @@ module.exports = function (RED) {
       //  //delete params[f];
       //});
 
-      discovery.createCollection(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.collection = response.collection ? response.collection : response;
-          resolve();
-        }
+      discovery.createCollection(params)
+      .then((response) => {
+        msg.collection = response.result ? response.result : response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
     return p;
@@ -133,27 +159,42 @@ module.exports = function (RED) {
 
   function executeDeleteCollection(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.deleteCollection(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.collection = response.collection ? response.collection : response;
-          resolve();
-        }
+      discovery.deleteCollection(params)
+      .then((response) => {
+        msg.collection = response.result ? response.result : response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
     return p;
   }
 
+  function executeDeleteConfiguration(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.deleteConfiguration(params)
+      .then((response) => {
+        msg.configuration = response.result ? response.result : response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      });
+    });
+    return p;
+  }
+
+
   function executeDeleteEnvironment(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.deleteEnvironment(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.environment = response.environment ? response.environment : response;
-          resolve();
-        }
+      discovery.deleteEnvironment(params)
+      .then((response) => {
+        msg.environment = response.result ? response.result : response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
     return p;
@@ -161,13 +202,13 @@ module.exports = function (RED) {
 
   function executeListCollections(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.listCollections(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.collections = response.collections ? response.collections : [];
-          resolve();
-        }
+      discovery.listCollections(params)
+      .then((response) => {
+        responseutils.parseResponseFor(msg, response, 'collections');
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
     return p;
@@ -175,27 +216,56 @@ module.exports = function (RED) {
 
   function executeGetCollectionDetails(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.getCollection(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.collection_details = response;
-          resolve();
-        }
+      discovery.getCollection(params)
+      .then((response) => {
+        msg.collection_details = response.result ? response.result : response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
     return p;
   }
 
+  function executeListExpansions(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.listExpansions(params)
+      .then((response) => {
+        responseutils.parseResponseFor(msg, response, 'expansions');
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      });
+    });
+    return p;
+  }
+
+  function executeListTrainingData(node, discovery, params, msg) {
+    var p = new Promise(function resolver(resolve, reject){
+      discovery.listTrainingData(params)
+      .then((response) => {
+        msg.trainingData = response.result ? response.result : response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      });
+    });
+    return p;
+  }
+
+
   function executeCreateConfiguration(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.createConfiguration(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.configuration = response.configuration ? response.configuration : response;
-          resolve();
-        }
+      discovery.createConfiguration(params)
+      .then((response) => {
+        msg.configuration = response.result ? response.result : response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
     return p;
@@ -203,13 +273,13 @@ module.exports = function (RED) {
 
   function executeListConfigurations(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.listConfigurations(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.configurations = response.configurations ? response.configurations : [];
-          resolve();
-        }
+      discovery.listConfigurations(params)
+      .then((response) => {
+        responseutils.parseResponseFor(msg, response, 'configurations');
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
     return p;
@@ -217,13 +287,13 @@ module.exports = function (RED) {
 
   function executeGetConfigurationDetails(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.getConfiguration(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.configuration_details = response;
-          resolve();
-        }
+      discovery.getConfiguration(params)
+      .then((response) => {
+        msg.configuration_details = response.result ? response.result : response;
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
     return p;
@@ -231,27 +301,33 @@ module.exports = function (RED) {
 
   function executeQuery(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.query(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
+      discovery.query(params)
+        .then((response) => {
           msg.search_results = response;
+          if (response && response.result) {
+            msg.search_results = response.result;
+          }
           resolve();
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
     return p;
   }
 
   function executeQueryNotices(node, discovery, params, msg) {
     var p = new Promise(function resolver(resolve, reject){
-      discovery.queryNotices(params, function (err, response) {
-        if (err) {
-          reject(err);
-        } else {
-          msg.search_results = response;
-          resolve();
+      discovery.queryNotices(params)
+      .then((response) => {
+        msg.search_results = response;
+        if (response && response.result) {
+          msg.search_results = response.result;
         }
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
       });
     });
     return p;
@@ -263,53 +339,13 @@ module.exports = function (RED) {
 
   function executeMethod(node, method, params, msg) {
     let discovery = discoveryutils.buildService(username, password, apikey, endpoint);
-    var p = null;
 
-    switch (method) {
-    case 'createEnvrionment':
-      p = executeCreateEnvrionment(node, discovery, params, msg);
-      break;
-    case 'listEnvrionments':
-      p = executeListEnvrionments(node, discovery, params, msg);
-      break;
-    case 'getEnvironmentDetails':
-      p = executeEnvrionmentDetails(node, discovery, params, msg);
-      break;
-    case 'createCollection':
-      p = executeCreateCollection(node, discovery, params, msg);
-      break;
-    case 'listCollections':
-      p = executeListCollections(node, discovery, params, msg);
-      break;
-    case 'getCollectionDetails':
-      p = executeGetCollectionDetails(node, discovery, params, msg);
-      break;
-    case 'deleteCollection':
-      p = executeDeleteCollection(node, discovery, params, msg);
-      break;
-    case 'createConfiguration':
-      p = executeCreateConfiguration(node, discovery, params, msg);
-      break;
-    case 'listConfigurations':
-      p = executeListConfigurations(node, discovery, params, msg);
-      break;
-    case 'getConfigurationDetails':
-      p = executeGetConfigurationDetails(node, discovery, params, msg);
-      break;
-    case 'deleteEnvironment':
-      p = executeDeleteEnvironment(node, discovery, params, msg);
-      break;
-    case 'query':
-      p = executeQuery(node, discovery, params, msg);
-      break;
-    case 'queryNotices':
-      p = executeQueryNotices(node, discovery, params, msg);
-      break;
-    default :
-      p = unknownMethod(node, discovery, params, msg);
-      break;
+    let exe = ExecutionList[method];
+    if (!exe) {
+      exe = unknownMethod
     }
-    return p;
+
+    return exe(node, discovery, params, msg);
   }
 
   function initialCheck(u, p, k, m) {
@@ -341,7 +377,7 @@ module.exports = function (RED) {
     var node = this;
     RED.nodes.createNode(this, config);
 
-    this.on('input', function (msg) {
+    this.on('input', function(msg, send, done) {
       var method = config['discovery-method'],
         message = '',
         params = {};
@@ -351,7 +387,7 @@ module.exports = function (RED) {
       apikey = sApikey || this.credentials.apikey;
 
       endpoint = sEndpoint;
-      if ((!config['default-endpoint']) && config['service-endpoint']) {
+      if (config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
@@ -367,12 +403,12 @@ module.exports = function (RED) {
         })
         .then(function(){
           node.status({});
-          node.send(msg);
+          send(msg);
+          done();
         })
         .catch(function(err){
-          //discoveryutils.reportError(node,msg,err);
-          payloadutils.reportError(node,msg,err);
-          node.send(msg);
+          let errMsg = payloadutils.reportError(node, msg, err);
+          done(errMsg);
         });
     });
   }
