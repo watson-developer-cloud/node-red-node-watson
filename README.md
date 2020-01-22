@@ -7,6 +7,14 @@ Node-RED Watson Nodes for IBM Cloud
 
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
+### New in version 0.9.0
+- Node-RED & IBM-Watson & Use of promises on API invocation & IAM URL construct migration & Removal of default endpoint of
+    - Assistant V1
+    - Assistant V2
+- All Nodes now require Node-RED 1.0.x or above
+- Remove watson-developer-cloud dependancy
+- Remove code for redundant nodes
+
 ### New in version 0.8.2
 - Node-RED & IBM-Watson & Use of promises on API invocation & IAM URL construct migration & Removal of default endpoint of
     - Document Translator node

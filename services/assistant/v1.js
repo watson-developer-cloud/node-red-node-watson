@@ -16,11 +16,13 @@
 
 module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'assistant',
-    OLD_SERVICE_IDENTIFIER = 'conversation';
+    OLD_SERVICE_IDENTIFIER = 'conversation',
+    AssistantV1 = require('ibm-watson/assistant/v1'),
+    { IamAuthenticator } = require('ibm-watson/auth');
 
   var pkg = require('../../package.json'),
-    AssistantV1 = require('watson-developer-cloud/assistant/v1'),
     serviceutils = require('../../utilities/service-utils'),
+    payloadutils = require('../../utilities/payload-utils'),
     service = null,
     sApikey = null,
     sUsername = null,
@@ -50,10 +52,9 @@ module.exports = function(RED) {
         shape: 'ring',
         text: 'missing payload'
       });
-      node.error('Missing property: msg.payload', msg);
-      return false;
+      return Promise.reject('Missing property: msg.payload');
     }
-    return true;
+    return Promise.resolve();
   }
 
   function verifyOptionalInputs(node, msg, config, params) {
@@ -70,17 +71,7 @@ module.exports = function(RED) {
     }
   }
 
-  function verifyInputs(node, msg, config, params) {
-    if (!config.workspaceid && !msg.params.workspace_id) {
-      node.error('Missing workspace_id. check node documentation.', msg);
-      return false;
-    }
-    // mandatory message
-    params.input = {
-      text: msg.payload
-    };
-    var prop = null;
-
+  function setContextParams(node, msg, config, params) {
     if (config.context) {
       if (config.multiuser) {
         if (msg.user) {
@@ -105,15 +96,20 @@ module.exports = function(RED) {
         }
       }
     }
+  }
 
+  function setWorkspaceParams(node, msg, config, params) {
     // workspaceid can be either configured in the node,
     // or sent into msg.params.workspace_id
     if (config.workspaceid) {
-      params.workspace_id = config.workspaceid;
+      params.workspaceId = config.workspaceid;
     }
     if (msg.params && msg.params.workspace_id) {
-      params.workspace_id = msg.params.workspace_id;
+      params.workspaceId = msg.params.workspace_id;
     }
+  }
+
+  function setSavedContextParams(node, msg, config, params) {
     // option context in JSON format
     if (msg.params && msg.params.context) {
       if (config.context) {
@@ -127,13 +123,37 @@ module.exports = function(RED) {
       }
       params.context = msg.params.context;
     }
+  }
+
+  function setAlternativeIntentsParams(node, msg, config, params) {
     // optional alternate_intents : boolean
     if (msg.params && msg.params.alternate_intents) {
       params.alternate_intents = msg.params.alternate_intents;
     }
+  }
 
-    verifyOptionalInputs(node, msg, config, params);
-    return true;
+  function verifyInputs(node, msg, config, params) {
+    return new Promise(function resolver(resolve, reject) {
+      if (!config.workspaceid && (!msg || !msg.params ||!msg.params.workspace_id)) {
+        reject('Missing workspace_id. check node documentation.');
+      }
+
+      // mandatory message
+      params.input = {
+        text: msg.payload
+      };
+
+      var prop = null;
+
+      // Invoke each of the functions building up the params in turn
+      [setContextParams, setWorkspaceParams, setSavedContextParams,
+        setAlternativeIntentsParams, verifyOptionalInputs].forEach((f) => {
+          f(node, msg, config, params);
+        });
+
+      resolve();
+
+    });
   }
 
   function verifyCredentials(msg, k, u, p) {
@@ -153,154 +173,172 @@ module.exports = function(RED) {
     // takes precedence over the existing one.
     // If msg.params contain credentials then these will Overridde
     // the bound or configured credentials.
-    const serviceSettings = {
-      headers: {
-        'User-Agent': pkg.name + '-' + pkg.version
+    return new Promise(function resolver(resolve, reject) {
+      let authSettings = {},
+        serviceSettings = {
+        headers: {
+          'User-Agent': pkg.name + '-' + pkg.version
+        }
+      };
+
+      let userName = sUsername || node.credentials.username,
+        passWord = sPassword || node.credentials.password,
+        apiKey = sApikey || node.credentials.apikey,
+        endpoint = '',
+        optoutLearning = false,
+        version = '2018-09-20';
+
+      if (!verifyCredentials(msg, apiKey, userName, passWord)) {
+        reject('Missing Watson Assistant API service credentials');
       }
-    };
 
-    let userName = sUsername || node.credentials.username,
-      passWord = sPassword || node.credentials.password,
-      apiKey = sApikey || node.credentials.apikey,
-      endpoint = '',
-      optoutLearning = false,
-      version = '2018-09-20';
-
-    if (!verifyCredentials(msg, apiKey, userName, passWord)) {
-      node.error('Missing Watson Assistant API service credentials');
-      return false;
-    }
-
-    if (msg.params) {
-      if (msg.params.username) {
-        userName = msg.params.username;
+      if (msg.params) {
+        if (msg.params.username) {
+          userName = msg.params.username;
+        }
+        if (msg.params.password) {
+          passWord = msg.params.password;
+        }
+        if (msg.params.apikey) {
+          apiKey = msg.params.apikey;
+        }
+        if (msg.params.version) {
+          version = msg.params.version;
+        }
       }
-      if (msg.params.password) {
-        passWord = msg.params.password;
+
+      if (apiKey) {
+        authSettings.apikey = apiKey;
+      } else {
+        authSettings.username = userName;
+        authSettings.password = passWord;
       }
-      if (msg.params.apikey) {
-        apiKey = msg.params.apikey;
+      serviceSettings.authenticator = new IamAuthenticator(authSettings);
+
+      serviceSettings.version = version;
+      serviceSettings.version_date = version;
+
+      if (service) {
+        endpoint = service.url;
       }
-      if (msg.params.version) {
-        version = msg.params.version;
+      if (config['service-endpoint']) {
+        endpoint = config['service-endpoint'];
       }
-    }
+      if (msg.params && msg.params.endpoint) {
+        endpoint = msg.params.endpoint;
+      }
 
-    if (apiKey) {
-      serviceSettings.iam_apikey = apiKey;
-    } else {
-      serviceSettings.username = userName;
-      serviceSettings.password = passWord;
-    }
+      if (endpoint) {
+        serviceSettings.url = endpoint;
+      }
 
-    serviceSettings.version = version;
-    serviceSettings.version_date = version;
+      if ((msg.params && msg.params['optout_learning'])){
+        optoutLearning = true;
+      } else if (config['optout-learning']){
+        optoutLearning = true;
+      }
 
-    if (service) {
-      endpoint = service.url;
-    }
-    if (!config['default-endpoint'] && config['service-endpoint']) {
-      endpoint = config['service-endpoint'];
-    }
-    if (msg.params && msg.params.endpoint) {
-      endpoint = msg.params.endpoint;
-    }
+      if (optoutLearning){
+        serviceSettings.headers = serviceSettings.headers || {};
+        serviceSettings.headers['X-Watson-Learning-Opt-Out'] = '1';
+      }
 
-    if (endpoint) {
-      serviceSettings.url = endpoint;
-    }
+      if (config['timeout'] && config['timeout'] !== '0' && isFinite(config['timeout'])){
+        serviceSettings.timeout = parseInt(config['timeout']);
+      }
 
-    if ((msg.params && msg.params['optout_learning'])){
-      optoutLearning = true;
-    } else if (config['optout-learning']){
-      optoutLearning = true;
-    }
+      if (msg.params && msg.params.timeout !== '0' && isFinite(msg.params.timeout)){
+        serviceSettings.timeout = parseInt(msg.params.timeout);
+      }
 
-    if (optoutLearning){
-      serviceSettings.headers = serviceSettings.headers || {};
-      serviceSettings.headers['X-Watson-Learning-Opt-Out'] = '1';
-    }
+      if (msg.params && msg.params.disable_ssl_verification){
+        serviceSettings.disable_ssl_verification = true;
+      }
 
-    if (config['timeout'] && config['timeout'] !== '0' && isFinite(config['timeout'])){
-      serviceSettings.timeout = parseInt(config['timeout']);
-    }
-
-    if (msg.params && msg.params.timeout !== '0' && isFinite(msg.params.timeout)){
-      serviceSettings.timeout = parseInt(msg.params.timeout);
-    }
-
-    if (msg.params && msg.params.disable_ssl_verification){
-      serviceSettings.disable_ssl_verification = true;
-    }
-
-    node.service = new AssistantV1(serviceSettings);
-    return true;
+      node.service = new AssistantV1(serviceSettings);
+      resolve();
+    });
   }
 
-  function processResponse(err, body, node, msg, config) {
-    if (err !== null && (body === null || typeof (body) === 'undefined')) {
-      node.error(err, msg);
-      node.status({
-        fill: 'red',
-        shape: 'ring',
-        text: 'call to watson conversation service failed'
-      });
-      return;
-    }
-    msg.payload = body;
-
-    if (config.context) {
-      if (config.multiuser && msg.user) {
-        node.context().flow.set('context-' + msg.user, body.context);
-      } else {
-        if (msg.user) {
-          node.warn('msg.user ignored when multiple users not set in node');
-        }
-        node.context().flow.set('context', body.context);
+  function processResponse(response, node, msg, config) {
+    return new Promise(function resolver(resolve, reject) {
+      if (response === null || typeof (response) === 'undefined') {
+        reject('call to watson conversation service failed');
       }
-    }
 
-    node.send(msg);
-    node.status({});
+      msg.payload = response;
+      if (response && response.result) {
+        msg.payload = response.result;
+      }
+
+      let body = msg.payload;
+
+      if (config.context && body && body.context) {
+        if (config.multiuser && msg.user) {
+          node.context().flow.set('context-' + msg.user, body.context);
+        } else {
+          if (msg.user) {
+            node.warn('msg.user ignored when multiple users not set in node');
+          }
+          node.context().flow.set('context', body.context);
+        }
+      }
+
+      resolve();
+    });
   }
 
   function execute(params, node, msg, config) {
-    node.status({
-      fill: 'blue',
-      shape: 'dot',
-      text: 'Calling Conversation service ...'
-    });
-    // call POST /message through SDK
-    node.service.message(params, function(err, body) {
-      processResponse(err, body, node, msg, config);
+    return new Promise(function resolver(resolve, reject) {
+      node.status({
+        fill: 'blue',
+        shape: 'dot',
+        text: 'Calling Conversation service ...'
+      });
+      // call POST /message through SDK
+      node.service.message(params)
+        .then((response) => {
+          return processResponse(response, node, msg, config);
+        })
+        .then(() => {
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   }
 
   // This is the Watson Conversation V1 (GA) Node
   function WatsonConversationV1Node(config) {
-    var node = this,
-      b = false;
+    var node = this;
 
     RED.nodes.createNode(this, config);
 
-    node.on('input', function(msg) {
+    this.on('input', function(msg, send, done) {
       var params = {};
 
       node.status({});
 
-      b = verifyPayload(node, msg, config);
-      if (!b) {
-        return;
-      }
-      b = verifyInputs(node, msg, config, params);
-      if (!b) {
-        return;
-      }
-      b = verifyServiceCredentials(node, msg, config);
-      if (!b) {
-        return;
-      }
-      execute(params, node, msg, config);
+      verifyPayload(node, msg, config)
+        .then(() => {
+          return verifyInputs(node, msg, config, params);
+        })
+        .then(() => {
+          return verifyServiceCredentials(node, msg, config);
+        })
+        .then(() => {
+          return execute(params, node, msg, config);
+        })
+        .then(() => {
+          send(msg);
+          node.status({});
+          done();
+        })
+        .catch(function(err){
+          let errMsg = payloadutils.reportError(node, msg, err);
+          done(errMsg);
+        });
     });
   }
 
