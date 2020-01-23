@@ -57,4 +57,4 @@ before doing so.
 
 ### Copyright and license
 
-Copyright 2018 IBM Corp. under [the Apache 2.0 license](LICENSE).
+Copyright 2018, 2019, 2020 IBM Corp. under [the Apache 2.0 license](LICENSE).
