@@ -40,11 +40,6 @@
     </div>
 
     <div class="form-row credentials">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
-    </div>
-    <div class="form-row">
         <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
         <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/assistant/api">
     </div>
@@ -135,14 +130,6 @@
                 $('#conversation-form-tips').hide();
             }
         });
-        $('input#node-input-default-endpoint').change(function () {
-            var checked = $('input#node-input-default-endpoint').prop('checked');
-            if (checked) {
-                $('#node-input-service-endpoint').parent().hide();
-            } else {
-                $('#node-input-service-endpoint').parent().show();
-            }
-        });
 
         $.getJSON('watson-conversation/vcap/')
             .done(function (service) {
@@ -165,8 +152,7 @@
               multiuser: {value: false},
               context: {value: true},
               'empty-payload': {value: false},
-              'default-endpoint' : {value: true},
-              'service-endpoint' : {value: 'https://gateway.watsonplatform.net/assistant/api'},
+              'service-endpoint' : {value: ''},
               timeout: {value: '', validate: RED.validators.number(true)},
               'optout-learning': {value: false}
             },

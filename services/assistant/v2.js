@@ -17,10 +17,11 @@
 module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'assistant',
     OLD_SERVICE_IDENTIFIER = 'conversation',
-    SERVICE_VERSION = '2018-11-08';
+    SERVICE_VERSION = '2018-11-08',
+    AssistantV2 = require('ibm-watson/assistant/v2'),
+    { IamAuthenticator } = require('ibm-watson/auth');
 
   var pkg = require('../../package.json'),
-    AssistantV2 = require('watson-developer-cloud/assistant/v2'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     service = null,
@@ -64,7 +65,7 @@ module.exports = function(RED) {
           creds.password = msg.params.password;
         }
         if (msg.params.apikey) {
-          creds.apiKey = msg.params.apikey;
+          creds.apikey = msg.params.apikey;
         }
       }
 
@@ -141,6 +142,10 @@ module.exports = function(RED) {
       if (msg.params) {
         checkAndSet(msg.params, params, 'assistant_id');
       }
+      if (params && params['assistant_id']) {
+        params.assistantId = params['assistant_id'];
+        delete params['assistant_id'];
+      }
     }
 
     function setInputOptions(msg, params) {
@@ -173,7 +178,7 @@ module.exports = function(RED) {
           'text' : msg.payload,
           'options' : {}
         },
-        'session_id' : setSessionID(msg)
+        'sessionId' : setSessionID(msg)
       };
 
       let context = setContext(msg, params);
@@ -190,8 +195,9 @@ module.exports = function(RED) {
     }
 
     function setServiceSettings(msg, creds) {
-      const serviceSettings = {
-        headers: {
+      let authSettings = {};
+      let serviceSettings = {
+          headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
       };
@@ -201,16 +207,17 @@ module.exports = function(RED) {
         version = SERVICE_VERSION;
 
       if (creds.apikey) {
-        serviceSettings.iam_apikey = creds.apikey;
+        authSettings.apikey = creds.apikey;
       } else {
-        serviceSettings.username = creds.username;
-        serviceSettings.password = creds.password;
+        authSettings.username = creds.username;
+        authSettings.password = creds.password;
       }
+      serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
       if (service) {
         endpoint = service.url;
       }
-      if (!config['default-endpoint'] && config['service-endpoint']) {
+      if (config['service-endpoint']) {
         endpoint = config['service-endpoint'];
       }
 
@@ -260,41 +267,49 @@ module.exports = function(RED) {
 
     function checkSession(params) {
       return new Promise(function resolver(resolve, reject){
-        if (params.session_id) {
+        if (params.sessionId) {
           resolve();
         } else {
-          node.service.createSession({
-            assistant_id: params.assistant_id
-          }, function(err, response) {
-            if (err) {
-              reject(err);
-            } else if (response && response.session_id) {
-              params.session_id = response.session_id;
-              if (!config.multisession) {
-                node.context().flow.set('session_id', params.session_id);
+          node.service.createSession({assistantId: params.assistantId})
+            .then((response) => {
+              if (response && response.result && response.result.session_id) {
+                params.sessionId = response.result.session_id;
+              } else if (response && response.session_id) {
+                params.sessionId = response.session_id;
               }
-              resolve();
-            } else {
-              reject('Unable to set session');
-            }
-          });
+              if (params.sessionId) {
+                if (!config.multisession) {
+                  node.context().flow.set('session_id', params.sessionId);
+                }
+                resolve();
+              } else {
+                reject('Unable to set session');
+              }
+            })
+            .catch((err) => {
+              reject(err);
+            });
         }
       });
     }
 
     function messageTurn(params) {
-      return new Promise(function resolver(resolve, reject){
-        node.service.message(params, function(err, body) {
-          if (err) {
+      return new Promise(function resolver(resolve, reject) {
+        node.service.message(params)
+          .then((response) => {
+            if (response.result) {
+              resolve(response.result);
+            } else {
+              resolve(response);
+            }
+          })
+          .catch((err) => {
             reject(err);
-          } else {
-            resolve(body);
-          }
-        });
+          })
       });
     }
 
-    this.on('input', function(msg) {
+    this.on('input', function(msg, send, done) {
       var creds = setCredentials(msg),
         params = {};
 
@@ -325,17 +340,18 @@ module.exports = function(RED) {
           return messageTurn(params);
         })
         .then(function(body){
-          body.session_id = params.session_id;
+          body.session_id = params.sessionId;
           msg.payload = body;
           return Promise.resolve();
         })
         .then(function(){
           node.status({});
-          node.send(msg);
+          send(msg);
+          done();
         })
         .catch(function(err){
-          payloadutils.reportError(node,msg,err);
-          node.send(msg);
+          let errMsg = payloadutils.reportError(node, msg, err);
+          done(errMsg);
         });
 
     });
