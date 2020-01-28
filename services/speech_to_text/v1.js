@@ -27,7 +27,7 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     iamutils = require('../../utilities/iam-utils'),
     sttutils = require('./stt-utils'),
-    AuthV1 = require('watson-developer-cloud/authorization/v1'),
+    //AuthV1 = require('watson-developer-cloud/authorization/v1'),
     //AuthIAMV1 = require('ibm-cloud-sdk-core/iam-token-manager/v1'),
     //AuthIAMV1 = require('ibm-cloud-sdk-core/auth/iam-token-manager-v1'),
     //AuthIAMV1 = require('ibm-cloud-sdk-core/auth/token-managers/iam-token-manager'),
@@ -342,9 +342,9 @@ module.exports = function (RED) {
         tokenService = new IamTokenManager({apikey : apikey});
         //tokenService = new iamutils(apikey);
 
-      } else {
-        tokenService = new AuthV1(stt.getCredentials());
-      }
+      } //else {
+        //tokenService = new AuthV1(stt.getCredentials());
+      //}
 
       // Streaming - IAM Key fudge.
       // Check if the token service options have the header set. If not then

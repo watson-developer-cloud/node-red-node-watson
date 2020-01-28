@@ -41,11 +41,6 @@
   </div>
 
   <div class="form-row credentials">
-      <label>&nbsp;</label>
-      <input type="checkbox" id="node-input-default-endpoint" style="display: inline-block; width: auto; vertical-align: top;">
-      <label for="node-input-default-endpoint" style="width: 70%;"> Use Default Service Endpoint</label>
-  </div>
-  <div class="form-row">
       <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
       <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/assistant/api">
   </div>
@@ -115,7 +110,7 @@
     <li><code>msg.payload</code> : the message of the Assistant to analyse. Format: String </li>
     <li><code>msg.params.session_id</code> (optional): unique identifier for the conversation session.
       If this field is not provided then the node will generate a new session_id and
-      return itt as part of the response. If the node is not used in multi-session mode, then
+      return it as part of the response. If the node is not used in multi-session mode, then
       a session_id need not be provided, to reset the session_id in single-session mode
       send a null value as the session_id. Format: String </li>
     <li><code>msg.params.assistant_id</code> : unique identifier of the assistant to be used. Could be also configured in the node. Format: String </li>
@@ -171,15 +166,6 @@
           $('#assistantv2-form-tips').hide();
         }
     });
-
-    $('input#node-input-default-endpoint').change(function () {
-      var checked = $('input#node-input-default-endpoint').prop('checked');
-      if (checked) {
-        $('#node-input-service-endpoint').parent().hide();
-      } else {
-        $('#node-input-service-endpoint').parent().show();
-      }
-    });
   }
 
   assistantV2.checkCredentials = function () {
@@ -205,8 +191,7 @@
       category: 'IBM Watson',
       defaults: {
         name: { value: '' },
-        'default-endpoint' : {value: true},
-        'service-endpoint' : {value: 'https://gateway.watsonplatform.net/assistant/api'},
+        'service-endpoint' : {value: ''},
         assistant_id: {value: ''},
         debug: {value: false},
         restart: {value: false},
