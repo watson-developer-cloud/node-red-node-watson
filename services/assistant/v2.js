@@ -95,14 +95,27 @@ module.exports = function(RED) {
 
     function setSessionID(msg) {
       let session_id = null;
+      let id = null;
 
-      if (!config.multisession) {
-        let id = node.context().flow.get('session_id');
-        if (id) {
-          session_id = id;
+      if (msg.params && 'reset_session' in msg.params) {
+        // There is a reset request, therefore no need
+        // to look it up
+      } else {
+        if (!config.multisession) {
+          if (msg.params && 'session_id' in msg.params && !msg.params.session_id) {
+            // Have a session id in single session mode
+            // but its a null string so force a reset of the session.
+          } else {
+            id = node.context().flow.get('session_id');
+          }
+        } else if (msg.params && msg.params.session_id) {
+          let key = msg.params.session_id;
+          id = node.context().flow.get('session-' + key);
         }
-      } else if (msg.params && msg.params.session_id) {
-        session_id = msg.params.session_id;
+      }
+
+      if (id) {
+        session_id = id;
       }
 
       return session_id;
@@ -265,7 +278,8 @@ module.exports = function(RED) {
       return Promise.resolve();
     }
 
-    function checkSession(params) {
+
+    function checkSession(msg, params) {
       return new Promise(function resolver(resolve, reject){
         if (params.sessionId) {
           resolve();
@@ -280,6 +294,12 @@ module.exports = function(RED) {
               if (params.sessionId) {
                 if (!config.multisession) {
                   node.context().flow.set('session_id', params.sessionId);
+                } else {
+                  let key = params.sessionId;
+                  if (msg.params && msg.params.session_id){
+                    key = msg.params.session_id;
+                  }
+                  node.context().flow.set('session-' + key, params.sessionId);
                 }
                 resolve();
               } else {
@@ -333,7 +353,7 @@ module.exports = function(RED) {
           return buildService(settings);
         })
         .then(function(){
-          return checkSession(params);
+          return checkSession(msg, params);
         })
         .then(function(){
           node.status({ fill: 'blue', shape: 'dot', text: 'Calling Assistant service ...'});
