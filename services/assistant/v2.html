@@ -112,7 +112,10 @@
       If this field is not provided then the node will generate a new session_id and
       return it as part of the response. If the node is not used in multi-session mode, then
       a session_id need not be provided, to reset the session_id in single-session mode
-      send a null value as the session_id. Format: String </li>
+      send a null value as the session_id.
+      Format: String </li>
+    <li><code>msg.params.reset_session</code> (optional): Will force a session reset 
+      Format: Any </li>
     <li><code>msg.params.assistant_id</code> : unique identifier of the assistant to be used. Could be also configured in the node. Format: String </li>
     <li><code>msg.params.timeout</code> (optional): The timeout period (in millisecond) for Watson request. Leave empty or set to 0 to disable. </li>
     <li><code>msg.params.alternate_intents</code> (optional) : whether to return more than one intent. Default is false. Set to true to return all matching intents. For example, return all intents when the confidence is not high to allow users to choose their intent.</li>
