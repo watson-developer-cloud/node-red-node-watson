@@ -19,7 +19,8 @@ module.exports = function(RED) {
     OLD_SERVICE_IDENTIFIER = 'conversation',
     SERVICE_VERSION = '2018-11-08',
     AssistantV2 = require('ibm-watson/assistant/v2'),
-    { IamAuthenticator } = require('ibm-watson/auth');
+    { IamAuthenticator } = require('ibm-watson/auth'),
+    INVALID_SESSION = 'Invalid Session';
 
   var pkg = require('../../package.json'),
     serviceutils = require('../../utilities/service-utils'),
@@ -313,7 +314,16 @@ module.exports = function(RED) {
       });
     }
 
-    function messageTurn(params) {
+    function checkForInvalidSession(err) {
+      if (err &&
+            err.code && (404 === err.code) &&
+            err.message && (INVALID_SESSION === err.message)) {
+        return true;
+      }
+      return false;
+    }
+
+    function messageTurn(params, repeatedTurn) {
       return new Promise(function resolver(resolve, reject) {
         node.service.message(params)
           .then((response) => {
@@ -324,8 +334,37 @@ module.exports = function(RED) {
             }
           })
           .catch((err) => {
-            reject(err);
-          })
+            if ((!repeatedTurn) && checkForInvalidSession(err)) {
+              resolve({INVALID_SESSION : true});
+            } else {
+              reject(err);
+            }
+          });
+      });
+    }
+
+    function invalidSessionTurnCheck(body, msg, params) {
+      return new Promise(function resolver(resolve, reject) {
+        if (body && body.INVALID_SESSION) {
+          // Message Turn has returned an invalid session
+          // This time round force a new session, but ensure
+          // that the messageTurn sends a consequental invalid session
+          // as an error.
+          node.status({ fill: 'blue', shape: 'dot', text: 'Resetting Session ...'});
+          params.sessionId = null;
+          checkSession(msg, params)
+            .then (function(){
+              return messageTurn(params, true);
+            })
+            .then ((body) => {
+              return resolve(body);
+            })
+            .catch ((err) => {
+              reject(err);
+            })
+        } else {
+          resolve(body);
+        }
       });
     }
 
@@ -357,7 +396,10 @@ module.exports = function(RED) {
         })
         .then(function(){
           node.status({ fill: 'blue', shape: 'dot', text: 'Calling Assistant service ...'});
-          return messageTurn(params);
+          return messageTurn(params, false);
+        })
+        .then(function(body){
+          return invalidSessionTurnCheck(body, msg, params);
         })
         .then(function(body){
           body.session_id = params.sessionId;
