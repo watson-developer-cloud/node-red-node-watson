@@ -8,6 +8,10 @@ Node-RED Watson Nodes for IBM Cloud
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 
+### New in version 0.9.2
+- Assistant V2 - Fix bug session expiry bug.
+
+
 ### New in version 0.9.1
 - Assistant V2 - Allow flow to assign a string session id. The node maps this user specified session id to the real session id. Additional param option allow session id to be reset.  
 
