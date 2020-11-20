@@ -368,6 +368,29 @@ module.exports = function(RED) {
       });
     }
 
+    function setInitialSessionId(msg) {
+      let persistSessionId = false;
+      if (config['persist-session-id']){
+        persistSessionId = true;
+      }
+      if ((msg.params['persist_session_id'])){
+        persistSessionId = true;
+      }
+      return new Promise(function resolver(resolve) {
+        if (persistSessionId) {
+          if (msg.params && msg.params.session_id) {
+            if (msg.payload) {
+              msg.payload.session_id = msg.params.session_id;
+              if (msg.payload.context && msg.payload.context.global) {
+                msg.payload.context.global.session_id = msg.params.session_id;
+              }
+            }
+          }
+        }
+        resolve(msg);
+      });
+    }
+
     this.on('input', function(msg, send, done) {
       var creds = setCredentials(msg),
         params = {};
@@ -405,6 +428,9 @@ module.exports = function(RED) {
           body.session_id = params.sessionId;
           msg.payload = body;
           return Promise.resolve();
+        })
+        .then(function() {
+          return setInitialSessionId(msg)
         })
         .then(function(){
           node.status({});
