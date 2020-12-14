@@ -94,7 +94,7 @@
   <div class="form-row">
       <label>&nbsp;</label>
       <input type="checkbox" id="node-input-persist-session-id" style="display: inline-block; width: auto; vertical-align: top;">
-      <label for="node-input-persist-session-id" style="width: 70%;">Set to true to return session_id that was provided with request.</label>
+      <label for="node-input-persist-session-id" style="width: 70%;">Return session_id from request.</label>
   </div>
 
   <div class="form-tips" id="assistantv2-form-tips">
@@ -120,7 +120,7 @@
       a session_id need not be provided, to reset the session_id in single-session mode
       send a null value as the session_id.
       Format: String </li>
-    <li><code>msg.params.reset_session</code> (optional): Will force a session reset 
+    <li><code>msg.params.reset_session</code> (optional): Will force a session reset
       Format: Any </li>
     <li><code>msg.params.assistant_id</code> : unique identifier of the assistant to be used. Could be also configured in the node. Format: String </li>
     <li><code>msg.params.timeout</code> (optional): The timeout period (in millisecond) for Watson request. Leave empty or set to 0 to disable. </li>
