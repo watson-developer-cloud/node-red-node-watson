@@ -91,6 +91,12 @@
       <label for="node-input-optout-learning" style="width: 70%;"> Opt Out Request Logging</label>
   </div>
 
+  <div class="form-row">
+      <label>&nbsp;</label>
+      <input type="checkbox" id="node-input-persist-session-id" style="display: inline-block; width: auto; vertical-align: top;">
+      <label for="node-input-persist-session-id" style="width: 70%;">Set to true to return session_id that was provided with request.</label>
+  </div>
+
   <div class="form-tips" id="assistantv2-form-tips">
     <strong>Note:</strong> When using multiple sessions, and <code>msg.params.session_id</code>
     is not set then a new session id is generated. <br>
@@ -132,6 +138,7 @@
     <li><code>msg.params.endpoint</code> : If provided will be used as the url for the Assistant service.</li>
     <li><code>msg.params.version</code> : If provided will be used as the API version date for the Assistant service.</li>
     <li><code>msg.params.optout_learning</code> : Set to true to opt out of request logging. Check the <a href="https://console.bluemix.net/docs/services/watson/getting-started-logging.html#controlling-request-logging-for-watson-services" target="_blank">documentation</a> for details.</li>
+    <li><code>msg.params.persist_session_id</code> (optional) : Set to true to return session_id that was provided with request.</li>
     <li><code>msg.params.disable_ssl_verification</code> : Set to true to disable SSL verification. <b>Note that this has serious security implications - only do this if you really mean to!</b></li>
     </ul>
     <p>See <a href="https://cloud.ibm.com/apidocs/assistant-v2" target="_blank">Assistant V2 API documentation</a> for details.</p>
@@ -202,7 +209,8 @@
         alternate_intents: {value: false},
         multisession: {value: true},
         timeout: {value: '', validate: RED.validators.number(true)},
-        'optout-learning': {value: false}
+        'optout-learning': {value: false},
+        'persist-session-id': {value: false}
       },
       credentials: {
         username: {type:'text'},

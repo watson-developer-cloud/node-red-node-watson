@@ -128,7 +128,7 @@ module.exports = function(RED) {
   function setAlternativeIntentsParams(node, msg, config, params) {
     // optional alternate_intents : boolean
     if (msg.params && msg.params.alternate_intents) {
-      params.alternate_intents = msg.params.alternate_intents;
+      params.alternateIntents = msg.params.alternate_intents;
     }
   }
 
