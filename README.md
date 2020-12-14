@@ -8,6 +8,11 @@ Node-RED Watson Nodes for IBM Cloud
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 
+### New in version 0.9.3
+- Assistant V1 - Fix alternateIntents setting.
+- Assistant V2 - Allow return of request session id.
+- Update list of supported languages in Speech to Text, Text to Speech and Translation nodes.
+
 ### New in version 0.9.2
 - Assistant V2 - Fix bug session expiry bug.
 
