@@ -1050,7 +1050,12 @@ module.exports = function (RED) {
       username = sUsername || this.credentials.username;
       password = sPassword || this.credentials.password || config.password;
       apikey = sApikey || this.credentials.apikey || config.apikey;
-
+      endpoint = sEndpoint;
+      
+      if (config['cwm-service-endpoint']) {
+        endpoint = config['cwm-service-endpoint'];
+      }
+      
       // All method to be overridden
       if (msg.params) {
         if (msg.params.method) {
@@ -1068,10 +1073,9 @@ module.exports = function (RED) {
         if (msg.params.version) {
           version = msg.params.version;
         }
-      }
-      endpoint = sEndpoint;
-      if (config['cwm-service-endpoint']) {
-        endpoint = config['cwm-service-endpoint'];
+        if (msg.params.endpoint) {
+          endpoint = msg.params.endpoint;
+        }
       }
 
       node.status({});
