@@ -153,6 +153,8 @@
       $('select#node-input-lang').empty();
       var unique_langs = tts.languages.filter(tts.onlyUnique);
 
+      unique_langs.sort();
+
       unique_langs.forEach(function(l) {
         var selectedText = '';
         if (tts.language_selected === l) {

@@ -559,6 +559,8 @@
       $('select#node-input-lang').empty();
       var unique_langs = stt.languages.filter(stt.onlyUnique);
 
+      unique_langs.sort();
+
       unique_langs.forEach(function(l) {
         var selectedText = '';
         if (stt.language_selected === l) {
