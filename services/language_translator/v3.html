@@ -234,6 +234,7 @@
                     'bn' : 'Bengali',
                     'bs' : 'Bosnian',
                     'bg' : 'Bulgarian',
+                    'CA-en' : 'Canadian English',
                     'ca' : 'Catalan',
                     'cs' : 'Czech',
                     'da' : 'Danish',
@@ -397,6 +398,8 @@
 
     // Flush out the list first
     $('select#node-input-destlang').empty();
+
+    available_destlang.sort();
 
     available_destlang.forEach(function (val) {
       // can now have languages like zh-TW, so simple split on -
@@ -619,6 +622,7 @@
 
       // Flush out the List before repopulating it.
       $('select#node-input-srclang').empty();
+      input_lang_unique.sort();
 
       input_lang_unique.forEach(function(lang){
         var selectedText = '';
