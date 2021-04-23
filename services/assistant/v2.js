@@ -260,6 +260,9 @@ module.exports = function(RED) {
         if (msg.params.disable_ssl_verification){
           serviceSettings.disable_ssl_verification = true;
         }
+        if (msg.params.customerId) {
+          serviceSettings.headers['X-Watson-Metadata'] = msg.params.customerId;
+        }
       }
 
       serviceSettings.version = version;
