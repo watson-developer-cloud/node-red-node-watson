@@ -373,7 +373,7 @@ module.exports = function(RED) {
       if (config['persist-session-id']){
         persistSessionId = true;
       }
-      if ((msg.params['persist_session_id'])){
+      if ( msg.hasOwnProperty('params') && msg.params['persist_session_id'] ){
         persistSessionId = true;
       }
       return new Promise(function resolver(resolve) {
