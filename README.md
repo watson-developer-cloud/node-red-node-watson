@@ -8,6 +8,10 @@ Node-RED Watson Nodes for IBM Cloud
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 
+### New in version 0.9.4
+- Assistant V1 Workspace manager - Allow endpoint to be overridden through msg.params
+- Language Translator, Speech to Text, Text to Speech - Sort Languages in drop down select list.
+
 ### New in version 0.9.3
 - Assistant V1 - Fix alternateIntents setting.
 - Assistant V2 - Allow return of request session id.

@@ -205,6 +205,9 @@ module.exports = function(RED) {
         if (msg.params.version) {
           version = msg.params.version;
         }
+        if (msg.params.customerId) {
+          serviceSettings.headers['X-Watson-Metadata'] = msg.params.customerId;
+        }
       }
 
       if (apiKey) {

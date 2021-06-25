@@ -260,6 +260,9 @@ module.exports = function(RED) {
         if (msg.params.disable_ssl_verification){
           serviceSettings.disable_ssl_verification = true;
         }
+        if (msg.params.customerId) {
+          serviceSettings.headers['X-Watson-Metadata'] = msg.params.customerId;
+        }
       }
 
       serviceSettings.version = version;
@@ -373,7 +376,7 @@ module.exports = function(RED) {
       if (config['persist-session-id']){
         persistSessionId = true;
       }
-      if ((msg.params['persist_session_id'])){
+      if ( msg.hasOwnProperty('params') && msg.params['persist_session_id'] ){
         persistSessionId = true;
       }
       return new Promise(function resolver(resolve) {

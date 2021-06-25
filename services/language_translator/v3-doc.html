@@ -216,6 +216,7 @@
                       'bn' : 'Bengali',
                       'bs' : 'Bosnian',
                       'bg' : 'Bulgarian',
+                      'CA-en' : 'Canadian English',
                       'ca' : 'Catalan',
                       'cs' : 'Czech',
                       'da' : 'Danish',
@@ -450,6 +451,8 @@
         var input_lang_unique = input_lang.filter(tor.checkUnique);
         //var output_lang_unique = output_lang.filter(tor.checkUnique);
 
+        input_lang_unique.sort();
+
         input_lang_unique.forEach(function(lang){
           var selectedText = '';
 
@@ -483,6 +486,8 @@
       var available_destlang = pair_lang.filter(function (model_id) {
         return model_id.match('^' + doctor.srclang_selected + '-');
       });
+      
+      available_destlang.sort();
 
       available_destlang.forEach(function (val) {
         // can now have languages like zh-TW, so simple split on -
