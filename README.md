@@ -8,6 +8,11 @@ Node-RED Watson Nodes for IBM Cloud
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 
+### New in version 0.9.5
+- Assistant V1 & V2 - Allow customerId to be passed inside msg.params
+- Assistant V2 - Skip the persist_session_id check if there is no msg.params
+- Update list of supported languages in Speech to Text and Text to Speech nodes.
+
 ### New in version 0.9.4
 - Assistant V1 Workspace manager - Allow endpoint to be overridden through msg.params
 - Language Translator, Speech to Text, Text to Speech - Sort Languages in drop down select list.
