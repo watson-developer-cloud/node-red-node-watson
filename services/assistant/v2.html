@@ -140,6 +140,9 @@
     <li><code>msg.params.optout_learning</code> : Set to true to opt out of request logging. Check the <a href="https://console.bluemix.net/docs/services/watson/getting-started-logging.html#controlling-request-logging-for-watson-services" target="_blank">documentation</a> for details.</li>
     <li><code>msg.params.persist_session_id</code> (optional) : Set to true to return session_id that was provided with request.</li>
     <li><code>msg.params.disable_ssl_verification</code> : Set to true to disable SSL verification. <b>Note that this has serious security implications - only do this if you really mean to!</b></li>
+    <br/>
+    <li><code>msg.params.customerId</code> (optional) : Set to associate a customer ID with the data.
+      By specifying a customer ID, you indicate that it contains data that belongs to that customer.</li>
     </ul>
     <p>See <a href="https://cloud.ibm.com/apidocs/assistant-v2" target="_blank">Assistant V2 API documentation</a> for details.</p>
     <p>All Results will made available at <code>msg.payload</code> in JSON format.
