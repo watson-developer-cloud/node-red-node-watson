@@ -11,7 +11,6 @@
     "qs": "^6.10.3",
     "image-type": "^4.1.0",
     "ibm-watson": "^5.2.1",
-    "word-count": "^0.2.2",
     "is-docx": "^0.0.3",
     "stream-to-array": "^2.3.0",
     "ws": "^8.5.0"
@@ -47,7 +46,6 @@
       "watson-natural-language-classifier-v1": "services/natural_language_classifier/v1.js",
       "watson-natural-language-understanding-v1": "services/natural_language_understanding/v1.js",
       "watson-natural-language-understanding-model-manager-v1": "services/natural_language_understanding/v1-model-manager.js",
-      "watson-personality-insights-v3": "services/personality_insights/v3.js",
       "watson-speech-to-text-v1": "services/speech_to_text/v1.js",
       "watson-speech-to-text-corpus-builder-v1": "services/speech_to_text/v1-corpus-builder.js",
       "watson-text-to-speech-v1": "services/text_to_speech/v1.js",
