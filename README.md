@@ -14,7 +14,9 @@ Node-RED Watson Nodes for IBM Cloud
 - Drop Personality Insights node
 - Drop Visual Recognition nodes
 - Remove Username / Password fields from
-  - Watson Assistant V1 node
+  - Assistant V1 nodes
+  - Assistant V2 node
+  - Discovery V1 nodes
 
 
 ### Watson Nodes for Node-RED

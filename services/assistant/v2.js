@@ -26,9 +26,7 @@ module.exports = function(RED) {
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     service = null,
-    sApikey = null,
-    sUsername = null,
-    sPassword = null;
+    sApikey = null;
 
   service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
   if (!service) {
@@ -36,8 +34,6 @@ module.exports = function(RED) {
   }
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
   }
 
@@ -53,18 +49,10 @@ module.exports = function(RED) {
 
     function setCredentials(msg) {
       var creds = {
-        username : sUsername || node.credentials.username,
-        password : sPassword || node.credentials.password || config.password,
         apikey : sApikey || node.credentials.apikey || config.apikey,
       };
 
       if (msg.params) {
-        if (msg.params.username) {
-          creds.username = msg.params.username;
-        }
-        if (msg.params.password) {
-          creds.password = msg.params.password;
-        }
         if (msg.params.apikey) {
           creds.apikey = msg.params.apikey;
         }
@@ -73,8 +61,8 @@ module.exports = function(RED) {
       return creds;
     }
 
-    function credentialCheck(u, p, k) {
-      if (!k && (!u || !p)) {
+    function credentialCheck(k) {
+      if (!k) {
         return Promise.reject('Missing Watson Assistant service credentials');
       }
       return Promise.resolve();
@@ -222,10 +210,8 @@ module.exports = function(RED) {
 
       if (creds.apikey) {
         authSettings.apikey = creds.apikey;
-      } else {
-        authSettings.username = creds.username;
-        authSettings.password = creds.password;
       }
+
       serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
       if (service) {
@@ -400,7 +386,7 @@ module.exports = function(RED) {
 
       node.status({});
 
-      credentialCheck(creds.username, creds.password, creds.apikey)
+      credentialCheck(creds.apikey)
         .then(function(){
           return payloadCheck(msg);
         })
@@ -450,8 +436,6 @@ module.exports = function(RED) {
 
   RED.nodes.registerType('watson-assistant-v2', Node, {
     credentials: {
-      username: {type: 'text'},
-      password: {type: 'password'},
       apikey: {type: 'password'}
     }
   });

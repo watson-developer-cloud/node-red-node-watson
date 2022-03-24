@@ -1,5 +1,5 @@
 /**
- * Copyright 2016, 2020 IBM Corp.
+ * Copyright 2016, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,6 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     responseutils = require('../../utilities/response-utils'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = null,
-    password = null,
-    sUsername = null,
-    sPassword = null,
     apikey = null,
     sApikey = null,
     endpoint = '',
@@ -338,7 +334,7 @@ const ExecutionList = {
   }
 
   function executeMethod(node, method, params, msg) {
-    let discovery = discoveryutils.buildService(username, password, apikey, endpoint);
+    let discovery = discoveryutils.buildService(apikey, endpoint);
 
     let exe = ExecutionList[method];
     if (!exe) {
@@ -348,9 +344,9 @@ const ExecutionList = {
     return exe(node, discovery, params, msg);
   }
 
-  function initialCheck(u, p, k, m) {
+  function initialCheck(k, m) {
     var message = '';
-    if (!k && (!u || !p)) {
+    if (!k) {
       message = 'Missing Watson Discovery service credentials';
     } else if (!m || '' === m) {
       message = 'Required Discovery method has not been specified';
@@ -362,8 +358,6 @@ const ExecutionList = {
   }
 
   if (dservice) {
-    sUsername = dservice.username ? dservice.username : '';
-    sPassword = dservice.password ? dservice.password : '';
     sApikey = dservice.apikey ? dservice.apikey : '';
     sEndpoint = dservice.url ? dservice.url : '';
   }
@@ -378,13 +372,12 @@ const ExecutionList = {
     RED.nodes.createNode(this, config);
 
     this.on('input', function(msg, send, done) {
+
       var method = config['discovery-method'],
         message = '',
         params = {};
 
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password;
-      apikey = sApikey || this.credentials.apikey;
+      apikey = sApikey || node.credentials.apikey;
 
       endpoint = sEndpoint;
       if (config['service-endpoint']) {
@@ -392,7 +385,7 @@ const ExecutionList = {
       }
 
       node.status({});
-      initialCheck(username, password, apikey, method)
+      initialCheck(apikey, method)
         .then(function(){
           params = discoveryutils.buildParams(msg,config);
           return checkParams(method, params);
@@ -415,8 +408,6 @@ const ExecutionList = {
 
   RED.nodes.registerType('watson-discovery-v1', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type:'password'}
     }
   });
