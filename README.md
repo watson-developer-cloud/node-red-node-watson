@@ -16,10 +16,11 @@ Node-RED Watson Nodes for IBM Cloud
 - Remove Username / Password fields from nodes for
   - Assistant V1
   - Assistant V2
-  - Discovery V1 
+  - Discovery V1
   - Language Translator nodes
   - Natural Language Classifier
   - Speech to Text
+  - Text to Speech
 
 
 ### Watson Nodes for Node-RED

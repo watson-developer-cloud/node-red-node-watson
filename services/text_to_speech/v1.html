@@ -1,5 +1,5 @@
 <!--
-  Copyright 2015 IBM Corp.
+  Copyright 2015, 2022 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -30,14 +30,6 @@
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
-    </div>
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
         <input type="password" id="node-input-apikey" placeholder="API Key"></input>
@@ -123,17 +115,20 @@
                     'en-GB': 'UK English',
                     'en-AU': 'Australian English',
                     'pt-BR': 'Portuguese Brazilian',
+                    'cs-CZ': 'Czech',
                     'fr-FR': 'French',
-                    'fr-CA': 'French (Canadian)',                    
+                    'fr-CA': 'French (Canadian)',
                     'it-IT': 'Italian',
                     'de-DE': 'German',
                     'nl-NL': 'Dutch',
+                    'nl-BE': 'Dutch (Belgian)',
                     'zh-CN': 'Mandarin',
                     'es-ES': 'Spanish',
                     'es-LA': 'Latin American Spanish',
                     'es-US': 'US Spanish',
-                    'ar-AR': 'Arablic',
-                    'ar-MS': 'Arablic (MS)',
+                    'sv-SE': 'Swedish',
+                    'ar-AR': 'Arabic',
+                    'ar-MS': 'Arabic (MS)',
                     'ko-KR': 'Korean',
                     'ja-JP': 'Japanese'
                   };
@@ -242,11 +237,9 @@
   // Function to fetch the customisations, should only be done once
   tts.fetchCustomisations = function() {
     if (!tts.customisations) {
-      var u = $('#node-input-username').val();
-      var p = $('#node-input-password').val();
       var k = $('#node-input-apikey').val();
       var e = $('#node-input-service-endpoint').val();
-      var creds = {un: u, pwd: p, key: k};
+      var creds = {key: k};
 
       creds.e = e;
 
@@ -287,11 +280,9 @@
   // Retrieve the available voices from the server, if data is returned, then
   // can enable the dynamic selection fields.
   tts.getVoices = function (){
-    var u = $('#node-input-username').val();
-    var p = $('#node-input-password').val();
     var k = $('#node-input-apikey').val();
     var e = $('#node-input-service-endpoint').val();
-    var creds = {un: u, pwd: p, key: k};
+    var creds = {key: k};
 
     creds.e = e;
 
@@ -332,8 +323,6 @@
   // Simple check that is only invoked if the service is not bound into bluemix. In this case the
   // user has to provide credentials. Once there are credentials, then the tts.voices are retrieved.
   tts.checkCredentials = function () {
-    var u = $('#node-input-username').val();
-    var p = $('#node-input-password').val();
     var k = $('#node-input-apikey').val();
 
     if ( (k && k.length) || (u && u.length && p) ) {
@@ -413,12 +402,6 @@
 
   // Register the onchange handlers
   tts.registerHandlers = function () {
-    $('#node-input-username').change(function(val){
-      tts.checkCredentials();
-    });
-    $('#node-input-password').change(function(val){
-      tts.checkCredentials();
-    });
     $('#node-input-apikey').change(function(val){
       tts.checkCredentials();
     });
@@ -492,7 +475,6 @@
                 'service-endpoint' :{value: ""}
             },
             credentials: {
-              username: {type:"text"},
               // password: {type:"password"}   - // Taken out because, was not being restored on dialog open.
             },
             color: "rgb(140, 198, 63)",

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,23 +23,12 @@ module.exports = function(RED) {
     ttsutils = require('./tts-utils'),
     endpoint = '',
     sEndpoint = 'https://stream.watsonplatform.net/text-to-speech/api',
-    apikey = '', sApikey = '',
-    username = '', password = '', sUsername = '', sPassword = '';
-  // Require the Cloud Foundry Module to pull credentials from bound service
-  // If they are found then the username and password will be stored in
-  // the variables sUsername and sPassword.
-  //
-  // This separation between sUsername and username is to allow
-  // the end user to modify the credentials when the service is not bound.
-  // Otherwise, once set credentials are never reset, resulting in a frustrated
-  // user who, when he errenously enters bad credentials, can't figure out why
-  // the edited ones are not being taken.
+    apikey = '', sApikey = '';
+
 
   var service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
@@ -52,7 +41,7 @@ module.exports = function(RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-text-to-speech/voices', function (req, res) {
-    var tts = ttsutils.initTTSService(req, sApikey, sUsername, sPassword, sEndpoint);
+    var tts = ttsutils.initTTSService(req, sApikey, sEndpoint);
 
     tts.listVoices({})
       .then((response) => {
@@ -72,7 +61,7 @@ module.exports = function(RED) {
 
   // API used by widget to fetch available customisations
   RED.httpAdmin.get('/watson-text-to-speech/customs', function (req, res) {
-    var tts = ttsutils.initTTSService(req, sApikey, sUsername, sPassword, sEndpoint);
+    var tts = ttsutils.initTTSService(req, sApikey, sEndpoint);
 
     tts.listVoiceModels({})
     .then((response) => {
@@ -91,8 +80,8 @@ module.exports = function(RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    function initialCheck(username, password, apikey) {
-      if (!apikey && (!username || !password)) {
+    function initialCheck(apikey) {
+      if (!apikey) {
         return Promise.reject('Missing Text To Speech service credentials');
       }
       return Promise.resolve();
@@ -121,7 +110,7 @@ module.exports = function(RED) {
 
     function performTTS(msg, params) {
       var p = new Promise(function resolver(resolve, reject) {
-        let tts = ttsutils.buildStdSettings(apikey, username, password, endpoint);
+        let tts = ttsutils.buildStdSettings(apikey, endpoint);
 
         tts.synthesize(params)
           .then((body) => {
@@ -160,9 +149,6 @@ module.exports = function(RED) {
     }
 
     this.on('input', function(msg, send, done) {
-
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
       apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
@@ -172,7 +158,7 @@ module.exports = function(RED) {
 
       node.status({});
 
-      initialCheck(username, password, apikey)
+      initialCheck(apikey)
       .then(function(){
         return payloadCheck(msg);
       })
@@ -199,8 +185,6 @@ module.exports = function(RED) {
   }
   RED.nodes.registerType('watson-text-to-speech', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type:'password'}
     }
   });
