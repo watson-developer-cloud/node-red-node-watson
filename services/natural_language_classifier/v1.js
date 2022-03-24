@@ -26,18 +26,12 @@ module.exports = function(RED) {
     payloadutils = require('../../utilities/payload-utils'),
     responseutils = require('../../utilities/response-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = null,
-    password = null,
     apikey = null,
-    sUsername = null,
-    sPassword = null,
     sApikey = null,
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/natural-language-classifier/api';
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
@@ -59,8 +53,6 @@ module.exports = function(RED) {
     // are provided, altough they may still be
     // invalid
     node.verifyCredentials = function(msg) {
-      username = sUsername || node.credentials.username;
-      password = sPassword || node.credentials.password;
       apikey = sApikey || node.credentials.apikey;
 
       endpoint = sEndpoint;
@@ -68,7 +60,7 @@ module.exports = function(RED) {
         endpoint = config['service-endpoint'];
       }
 
-      if (!apikey && (!username || !password)) {
+      if (!apikey) {
         return Promise.reject('Missing Natural Language Classifier credentials');
       } else {
         return Promise.resolve();
@@ -236,9 +228,6 @@ module.exports = function(RED) {
 
         if (apikey) {
           authSettings.apikey = apikey;
-        } else {
-          authSettings.username = username;
-          authSettings.password = password;
         }
         serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
@@ -331,8 +320,6 @@ module.exports = function(RED) {
   }
   RED.nodes.registerType('watson-natural-language-classifier', Node, {
     credentials: {
-      username: {type: 'text'},
-      password: {type: 'password'},
       apikey: {type:'password'}
     }
   });
