@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 IBM Corp.
+ * Copyright 2016, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,25 +33,22 @@ module.exports = function (RED) {
     //AuthIAMV1 = require('ibm-cloud-sdk-core/auth/token-managers/iam-token-manager'),
     { IamTokenManager } = require('ibm-watson/auth');
     muteMode = true, discardMode = false, autoConnect = true,
-    username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
     endpoint = '',
     sEndpoint = 'https://stream.watsonplatform.net/speech-to-text/api',
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   // Require the Cloud Foundry Module to pull credentials from bound service
-  // If they are found then the username and password will be stored in
-  // the variables sUsername and sPassword.
+  // If they are found then the key
+  // the variable sApikey
   //
-  // This separation between sUsername and username is to allow
+  // This separation between is to allow
   // the end user to modify the credentials when the service is not bound.
   // Otherwise, once set credentials are never reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
@@ -71,7 +68,7 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available models
   RED.httpAdmin.get('/watson-speech-to-text/models', (req, res) => {
-    var stt = sttutils.initSTTService(req, sApikey, sUsername, sPassword, sEndpoint);
+    var stt = sttutils.initSTTService(req, sApikey, sEndpoint);
 
     stt.listModels({})
       .then((response) => {
@@ -88,7 +85,7 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available customisations
   RED.httpAdmin.get('/watson-speech-to-text/customs', (req, res) => {
-    var stt = sttutils.initSTTService(req, sApikey, sUsername, sPassword, sEndpoint);
+    var stt = sttutils.initSTTService(req, sApikey, sEndpoint);
 
     stt.listLanguageModels({})
       .then((response) => {
@@ -120,8 +117,8 @@ module.exports = function (RED) {
       audioStack =[];
     const HOUR = 60 * 60;
 
-    function initialCheck(username, password, apikey) {
-      if (!apikey && (!username || !password)) {
+    function initialCheck(apikey) {
+      if (!apikey) {
         return Promise.reject('Missing Speech To Text service credentials');
       }
       return Promise.resolve();
@@ -299,7 +296,7 @@ module.exports = function (RED) {
     }
 
     function determineService() {
-      return sttutils.determineService(apikey, username, password, endpoint);
+      return sttutils.determineService(apikey, endpoint);
     }
 
     function getService() {
@@ -733,8 +730,6 @@ module.exports = function (RED) {
     this.on('input', function(msg, send, done) {
       // Credentials are needed for the service. They will either be bound or
       // specified by the user in the dialog.
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
       apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
@@ -748,7 +743,7 @@ module.exports = function (RED) {
 
       // Now perform checks on the input and parameters, to make sure that all
       // is in place before the service is invoked.
-      initialCheck(username, password, apikey)
+      initialCheck(apikey)
       .then(() => {
         return configCheck();
       })
@@ -801,8 +796,6 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-speech-to-text', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type:'password'}
     }
   });

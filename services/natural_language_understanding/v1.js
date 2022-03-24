@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 IBM Corp.
+ * Copyright 2017, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -36,18 +36,14 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = null,
-    password = null,
     apikey = null,
-    sUsername = null,
-    sPassword = null,
     sApikey = null,
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/natural-language-understanding/api';
 
 
-  function initialCheck(u, p, k) {
-    if (!k && (!u || !p)) {
+  function initialCheck(k) {
+    if (!k) {
       return Promise.reject('Missing Watson Natural Language Understanding service credentials');
     }
     return Promise.resolve();
@@ -223,9 +219,6 @@ module.exports = function (RED) {
 
     if (apikey) {
       authSettings.apikey = apikey;
-    } else {
-      authSettings.username = username;
-      authSettings.password = password;
     }
     serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
@@ -248,8 +241,6 @@ module.exports = function (RED) {
   }
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
@@ -271,8 +262,6 @@ module.exports = function (RED) {
 
       node.status({});
 
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password;
       apikey = sApikey || this.credentials.apikey;
 
       endpoint = sEndpoint;
@@ -280,7 +269,7 @@ module.exports = function (RED) {
         endpoint = config['service-endpoint'];
       }
 
-      initialCheck(username, password, apikey)
+      initialCheck(apikey)
         .then(function(){
           return payloadCheck(msg, options);
         })
@@ -320,8 +309,6 @@ module.exports = function (RED) {
   //Register the node as natural-language-understanding to nodeRED
   RED.nodes.registerType('natural-language-understanding', NLUNode, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type: 'password'}
     }
   });

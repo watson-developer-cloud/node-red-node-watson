@@ -19,6 +19,7 @@ Node-RED Watson Nodes for IBM Cloud
   - Discovery V1 
   - Language Translator nodes
   - Natural Language Classifier
+  - Speech to Text
 
 
 ### Watson Nodes for Node-RED

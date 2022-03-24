@@ -4,7 +4,7 @@
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
     "cfenv": "~1.2.4",
-    "file-type": "^16.5.3",
+    "file-type": "^12.4.2",
     "request": "~2.88.2",
     "temp": "^0.9.4",
     "qs": "^6.10.3",
