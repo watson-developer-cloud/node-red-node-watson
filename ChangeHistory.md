@@ -1,3 +1,36 @@
+
+## 0.9.x
+
+### New in version 0.9.5
+- Assistant V1 & V2 - Allow customerId to be passed inside msg.params
+- Assistant V2 - Skip the persist_session_id check if there is no msg.params
+- Update list of supported languages in Speech to Text and Text to Speech nodes.
+
+### New in version 0.9.4
+- Assistant V1 Workspace manager - Allow endpoint to be overridden through msg.params
+- Language Translator, Speech to Text, Text to Speech - Sort Languages in drop down select list.
+
+### New in version 0.9.3
+- Assistant V1 - Fix alternateIntents setting.
+- Assistant V2 - Allow return of request session id.
+- Update list of supported languages in Speech to Text, Text to Speech and Translation nodes.
+
+### New in version 0.9.2
+- Assistant V2 - Fix bug session expiry bug.
+
+
+### New in version 0.9.1
+- Assistant V2 - Allow flow to assign a string session id. The node maps this user specified session id to the real session id. Additional param option allow session id to be reset.  
+
+### New in version 0.9.0
+- Node-RED & IBM-Watson & Use of promises on API invocation & IAM URL construct migration & Removal of default endpoint of
+    - Assistant V1
+    - Assistant V2
+- All Nodes now require Node-RED 1.0.x or above
+- Remove watson-developer-cloud dependancy
+- Remove code for redundant nodes
+
+
 ## 0.8.x
 
 ### New in version 0.8.2

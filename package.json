@@ -1,20 +1,20 @@
 {
   "name": "node-red-node-watson",
-  "version": "0.9.5",
+  "version": "0.10.0",
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
-    "async": "^1.5.2",
-    "cfenv": "~1.2.2",
-    "file-type": "^12.4.2",
-    "request": "~2.88.0",
-    "temp": "^0.9.0",
-    "qs": "6.x",
-    "image-type": "^2.0.2",
+    "async": "^3.2.3",
+    "cfenv": "~1.2.4",
+    "file-type": "^16.5.3",
+    "request": "~2.88.2",
+    "temp": "^0.9.4",
+    "qs": "^6.10.3",
+    "image-type": "^4.1.0",
     "ibm-watson": "^5.2.1",
     "word-count": "^0.2.2",
     "is-docx": "^0.0.3",
     "stream-to-array": "^2.3.0",
-    "ws": "^4.1.0"
+    "ws": "^8.5.0"
   },
   "repository": {
     "type": "git",
@@ -58,6 +58,6 @@
     }
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=12.20.0"
   }
 }
