@@ -3,13 +3,11 @@
   "version": "0.10.0",
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
-    "async": "^3.2.3",
     "cfenv": "~1.2.4",
     "file-type": "^16.5.3",
     "request": "~2.88.2",
     "temp": "^0.9.4",
     "qs": "^6.10.3",
-    "image-type": "^4.1.0",
     "ibm-watson": "^5.2.1",
     "is-docx": "^0.0.3",
     "stream-to-array": "^2.3.0",
@@ -50,9 +48,7 @@
       "watson-speech-to-text-corpus-builder-v1": "services/speech_to_text/v1-corpus-builder.js",
       "watson-text-to-speech-v1": "services/text_to_speech/v1.js",
       "watson-text-to-speech-corpus-builder-v1": "services/text_to_speech/v1-corpus-builder.js",
-      "watson-tone-analyzer-v3": "services/tone_analyzer/v3.js",
-      "watson-visual-recognition-v3": "services/visual_recognition/v3.js",
-      "watson-visual-recognition-collection-utils-v4": "services/visual_recognition/v4-collection-utils.js"
+      "watson-tone-analyzer-v3": "services/tone_analyzer/v3.js"
     }
   },
   "engines": {

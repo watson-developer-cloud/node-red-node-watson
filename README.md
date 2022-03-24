@@ -12,7 +12,7 @@ Node-RED Watson Nodes for IBM Cloud
 - Bump of dependencies
 - Min version of Node is 12.20.0
 - Drop Personality Insights node
-
+- Drop Visual Recognition nodes
 
 
 ### Watson Nodes for Node-RED
