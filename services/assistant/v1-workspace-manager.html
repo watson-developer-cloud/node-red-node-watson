@@ -1,5 +1,5 @@
 <!--
-  Copyright 2017 IBM Corp.
+  Copyright 2017, 2022 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -30,14 +30,6 @@
         <input type="text" id="node-input-name" placeholder="Name"></input>
     </div>
 
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username"></input>
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password"></input>
-    </div>
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
         <input type="password" id="node-input-apikey" placeholder="API Key"></input>
@@ -348,12 +340,6 @@
     <p>The node configurations can be overridden by setting
     <ul>
       <li>
-        <code>msg.params.username</code>
-      </li>
-      <li>
-        <code>msg.params.password</code>
-      </li>
-      <li>
         <code>msg.params.apikey</code>
       </li>
       <li>
@@ -593,8 +579,6 @@
                 'cwm-service-endpoint' :{value: ''}
             },
             credentials: {
-              username: {type:'text'},
-              password: {type: 'password'},
               apikey: {type: 'password'}
             },
             color: 'rgb(84,149,180)',

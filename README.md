@@ -13,6 +13,8 @@ Node-RED Watson Nodes for IBM Cloud
 - Min version of Node is 12.20.0
 - Drop Personality Insights node
 - Drop Visual Recognition nodes
+- Remove Username / Password fields from
+  - Watson Assistant V1 node
 
 
 ### Watson Nodes for Node-RED
