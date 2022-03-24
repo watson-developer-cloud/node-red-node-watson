@@ -211,7 +211,7 @@ module.exports = function (RED) {
     let nlu = null,
       authSettings  = {};
       serviceSettings = {
-        version: '2019-07-12',
+        version: '2021-08-01',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }

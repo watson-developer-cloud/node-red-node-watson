@@ -498,7 +498,7 @@ module.exports = function (RED) {
 
   function executeMethod(node, method, params, msg) {
     let conv = null,
-      version = '2018-09-20',
+      version = '2021-11-27',
       authSettings = {},
       serviceSettings = {
         version_date: version,

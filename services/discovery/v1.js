@@ -25,7 +25,7 @@ module.exports = function (RED) {
     apikey = null,
     sApikey = null,
     endpoint = '',
-    sEndpoint = 'https://gateway.watsonplatform.net/discovery/api';
+    sEndpoint = '';
 
 const ExecutionList = {
   'createEnvrionment': executeCreateEnvrionment,

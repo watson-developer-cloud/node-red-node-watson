@@ -8,7 +8,7 @@
     "request": "~2.88.2",
     "temp": "^0.9.4",
     "qs": "^6.10.3",
-    "ibm-watson": "^5.2.1",
+    "ibm-watson": "^6.2.2",
     "is-docx": "^0.0.3",
     "stream-to-array": "^2.3.0",
     "ws": "^8.5.0"

@@ -28,7 +28,7 @@ module.exports = function(RED) {
     apikey = '',
     service = null,
     endpoint = '',
-    sEndpoint = 'https://gateway.watsonplatform.net/natural-language-understanding/api';
+    sEndpoint = '';
 
 
   service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
@@ -124,7 +124,7 @@ module.exports = function(RED) {
     let authSettings  = {};
 
     var serviceSettings = {
-      version: '2019-07-12',
+      version: '2021-08-01',
       headers: {
         'User-Agent': pkg.name + '-' + pkg.version
       }
@@ -148,6 +148,7 @@ module.exports = function(RED) {
     if (!endpoint && config['nlu-service-endpoint']) {
       endpoint = config['nlu-service-endpoint'];
     }
+
     if (!endpoint) {
       return Promise.reject('No endpoint URL has been provided');
     }

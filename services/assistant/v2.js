@@ -17,7 +17,7 @@
 module.exports = function(RED) {
   const SERVICE_IDENTIFIER = 'assistant',
     OLD_SERVICE_IDENTIFIER = 'conversation',
-    SERVICE_VERSION = '2018-11-08',
+    SERVICE_VERSION = '2021-11-27',
     AssistantV2 = require('ibm-watson/assistant/v2'),
     { IamAuthenticator } = require('ibm-watson/auth'),
     INVALID_SESSION = 'Invalid Session';

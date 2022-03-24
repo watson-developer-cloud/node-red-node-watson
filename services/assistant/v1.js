@@ -180,7 +180,7 @@ module.exports = function(RED) {
       let apiKey = sApikey || node.credentials.apikey,
         endpoint = '',
         optoutLearning = false,
-        version = '2018-09-20';
+        version = '2021-11-27';
 
       if (!verifyCredentials(msg, apiKey)) {
         reject('Missing Watson Assistant API service credentials');
