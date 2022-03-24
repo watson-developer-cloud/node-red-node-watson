@@ -61,7 +61,6 @@ module.exports = function (RED) {
 
   var pkg = require('../../package.json'),
     cfenv = require('cfenv'),
-    username = null, password = null, sUsername = null, sPassword = null,
     apikey = null, sApikey = null,
     payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
@@ -74,8 +73,6 @@ module.exports = function (RED) {
     //endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
@@ -108,8 +105,6 @@ module.exports = function (RED) {
     // is a request to refresh the model list.
     // Credentials are needed for each of the modes.
 
-    username = sUsername || this.credentials.username;
-    password = sPassword || this.credentials.password || config.password;
     apikey = sApikey || this.credentials.apikey || config.apikey;
 
     // The node has received an input as part of a flow, need to determine
@@ -126,7 +121,7 @@ module.exports = function (RED) {
           }
         };
 
-      if (!apikey && (!username || !password)) {
+      if (!apikey) {
         message = 'Missing Language Translation service credentials';
         node.error(message, msg);
         return;
@@ -134,9 +129,6 @@ module.exports = function (RED) {
 
       if (apikey) {
         authSettings.apikey = apikey;
-      } else {
-        authSettings.username = username;
-        authSettings.password = password;
       }
 
       serviceSettings.authenticator = new IamAuthenticator(authSettings);
@@ -276,8 +268,6 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-translator-util', SMTNode, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type:'password'}
     }
   });

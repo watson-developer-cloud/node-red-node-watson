@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 IBM Corp.
+ * Copyright 2018, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ class TranslatorUtils {
   constructor() {
   }
 
-  credentialCheck(u, p, k) {
-    if (!k && (!u || !p)) {
+  credentialCheck(k) {
+    if (!k) {
       return Promise.reject('Missing Watson Language Translator service credentials');
     }
     return Promise.resolve();

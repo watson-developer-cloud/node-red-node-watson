@@ -17,6 +17,7 @@ Node-RED Watson Nodes for IBM Cloud
   - Assistant V1 nodes
   - Assistant V2 node
   - Discovery V1 nodes
+  - Language Translator nodes
 
 
 ### Watson Nodes for Node-RED
