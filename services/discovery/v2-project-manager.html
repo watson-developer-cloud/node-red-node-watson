@@ -49,6 +49,7 @@
           <option value="updateCollection">Update collection</option>
           <option value="deleteCollection">Delete collection</option>
           <option disabled>______________</option>
+          <option value="getComponentSettings">List component settings</option>
         </select>
     </div>
 
@@ -257,6 +258,21 @@
         </ul>
     </li>
 
+    <br/>
+
+    <li>
+      <p><b>List component settings</b><p>
+      <p>For this method the node needs project Id as input.
+      </p>
+      <p>The project being searched can be overridden by specifying
+        the id in <code>msg.discoveryparams.projectId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Details of the component settings.</li>
+        </ul>
+    </li>
+
 
     </ul>
 
@@ -298,6 +314,7 @@
         case 'getProject':
         case 'deleteProject':
         case 'listCollections':
+        case 'getComponentSettings':
           fields.push('#node-input-projectId');
           break;
         case 'createProject':
