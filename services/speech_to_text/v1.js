@@ -25,12 +25,7 @@ module.exports = function (RED) {
     pkg = require('../../package.json'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
-    iamutils = require('../../utilities/iam-utils'),
     sttutils = require('./stt-utils'),
-    //AuthV1 = require('watson-developer-cloud/authorization/v1'),
-    //AuthIAMV1 = require('ibm-cloud-sdk-core/iam-token-manager/v1'),
-    //AuthIAMV1 = require('ibm-cloud-sdk-core/auth/iam-token-manager-v1'),
-    //AuthIAMV1 = require('ibm-cloud-sdk-core/auth/token-managers/iam-token-manager'),
     { IamTokenManager } = require('ibm-watson/auth');
     muteMode = true, discardMode = false, autoConnect = true,
     apikey = '', sApikey = '',
@@ -323,33 +318,9 @@ module.exports = function (RED) {
 
     function determineTokenService(stt) {
       let tokenService = null;
-
       if (apikey) {
-        // console.log('API Key stuff to go here');
-        // tokenService = new AuthV1(stt.getCredentials());
-        // console.log('the keys that we have are ', stt.getCredentials());
-        // let creds = {}; // stt.getCredentials();
-        // creds.iamApikey = apikey;
-        // console.log('Creating token with endpoint ', endpoint);
-        // tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey, iamUrl: endpoint});
-
-        //tokenService = new AuthIAMV1({apikey : apikey});
-        //tokenService = new AuthIAMV1.IamTokenManagerV1({iamApikey : apikey});
-        //tokenService = new AuthIAMV1.IamTokenManager({apikey : apikey});
         tokenService = new IamTokenManager({apikey : apikey});
-        //tokenService = new iamutils(apikey);
-
-      } //else {
-        //tokenService = new AuthV1(stt.getCredentials());
-      //}
-
-      // Streaming - IAM Key fudge.
-      // Check if the token service options have the header set. If not then
-      // create them. This will stop the function from crashing the app,
-      // altough it will still fail authentication.
-      //if (!tokenService._options.headers) {
-      //  tokenService._options.headers = {};
-      //}
+      }
       return tokenService;
     }
 
