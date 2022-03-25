@@ -45,7 +45,9 @@ module.exports = function (RED) {
     'listTrainingQueries' : executeListQueries,
     'getTrainingQuery' : executeDiscoveryMethod,
     'deleteTrainingQueries' : executeDiscoveryMethod,
-    'deleteTrainingQuery' : executeDiscoveryMethod
+    'deleteTrainingQuery' : executeDiscoveryMethod,
+
+    'query' : executeDiscoveryMethod
   };
 
   function executeListProjects(fields) {
@@ -113,6 +115,11 @@ module.exports = function (RED) {
     var response = '';
 
     switch (method) {
+      case 'query':
+        response = discoveryutils.paramProjectCheck(params)
+                      + discoveryutils.paramQueryFieldCheck(params) ;
+        break;
+
       case 'getProject':
       case 'deleteProject':
       case 'listCollections':
@@ -145,8 +152,7 @@ module.exports = function (RED) {
 
       case 'getTrainingQuery':
       case 'deleteTrainingQuery':
-        response = discoveryutils.paramProjectCheck(params)
-                    + discoveryutils.paramQueryCheck(params);
+        response = discoveryutils.paramQueryIdCheck(params);
         break;
     }
 
@@ -212,6 +218,14 @@ module.exports = function (RED) {
       initialCheck(apikey, method)
         .then(() => {
           params = discoveryutils.buildParams(msg,config);
+          if (method == 'query' || method == 'querySearch') {
+            if (method == 'query') {
+              params.naturalLanguageQuery = msg.payload;
+            } else {
+              params.query = msg.payload;
+              method = 'query';
+            }
+          }
           return checkParams(method, params);
         })
         .then(function(){

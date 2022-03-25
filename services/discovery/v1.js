@@ -27,24 +27,24 @@ module.exports = function (RED) {
     endpoint = '',
     sEndpoint = '';
 
-const ExecutionList = {
-  'createEnvrionment': executeCreateEnvrionment,
-  'listEnvrionments': executeListEnvrionments,
-  'getEnvironmentDetails': executeEnvrionmentDetails,
-  'createCollection': executeCreateCollection,
-  'listCollections': executeListCollections,
-  'getCollectionDetails': executeGetCollectionDetails,
-  'deleteCollection': executeDeleteCollection,
-  'createConfiguration': executeCreateConfiguration,
-  'listConfigurations': executeListConfigurations,
-  'getConfigurationDetails': executeGetConfigurationDetails,
-  'deleteConfiguration': executeDeleteConfiguration,
-  'deleteEnvironment': executeDeleteEnvironment,
-  'listExpansions': executeListExpansions,
-  'listTrainingData': executeListTrainingData,
-  'query': executeQuery,
-  'queryNotices': executeQueryNotices
-};
+  const ExecutionList = {
+    'createEnvrionment': executeCreateEnvrionment,
+    'listEnvrionments': executeListEnvrionments,
+    'getEnvironmentDetails': executeEnvrionmentDetails,
+    'createCollection': executeCreateCollection,
+    'listCollections': executeListCollections,
+    'getCollectionDetails': executeGetCollectionDetails,
+    'deleteCollection': executeDeleteCollection,
+    'createConfiguration': executeCreateConfiguration,
+    'listConfigurations': executeListConfigurations,
+    'getConfigurationDetails': executeGetConfigurationDetails,
+    'deleteConfiguration': executeDeleteConfiguration,
+    'deleteEnvironment': executeDeleteEnvironment,
+    'listExpansions': executeListExpansions,
+    'listTrainingData': executeListTrainingData,
+    'query': executeQuery,
+    'queryNotices': executeQueryNotices
+  };
 
 
   function checkParams(method, params){
