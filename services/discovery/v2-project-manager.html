@@ -194,15 +194,13 @@
         </ul>
     </li>
 
-
     <br/>
 
     <li>
       <p><b>Create new collection</b><p>
       <p>For this method the node needs project id, and collection name.
         Optional inputs are
-        description and language
-        ....... as input.
+        description and language as input.
       </p>
       <p>The project id, collection name, description and language
         can be overridden by specifying
@@ -217,6 +215,31 @@
       <p>Node output : </p>
         <ul>
           <li><code>msg.discovery_response</code> : Details of the new collection.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Update collection</b><p>
+      <p>For this method the node needs project id, collection id.
+        Optional inputs are collection name,
+        description and language as.
+      </p>
+      <p>The project id, collection id, collection name, description and language
+        can be overridden by specifying
+        the <code>msg.discoveryparams.projectId</code> ,
+        <code>msg.discoveryparams.collectionId</code> ,
+        <code>msg.discoveryparams.collectionName</code> ,
+        <code>msg.discoveryparams.description</code>
+        and <code>msg.discoveryparams.language</code>
+      </p>
+      <p>Any enrichments for the collection can be set by
+        specifying <code>msg.discoveryparams.enrichments</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Details of the updated collection.</li>
         </ul>
     </li>
 
@@ -275,13 +298,16 @@
           fields.push('#node-input-projectId');
           fields.push('#node-input-collectionId');
           break;
+
+        case 'updateCollection':
+          fields.push('#node-input-collectionId');
+          // deliberate no break;
         case 'createCollection':
           fields.push('#node-input-projectId');
           fields.push('#node-input-collectionName');
           fields.push('#node-input-description');
           fields.push('#node-input-language');
           break;
-
       }
 
       disV2pm.showSelectedFields(fields);
