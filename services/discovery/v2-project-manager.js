@@ -36,6 +36,7 @@ module.exports = function (RED) {
 
     'listCollections' : executeListCollections,
     'getCollection' : executeDiscoveryMethod,
+    'createCollection' : executeDiscoveryMethod
   };
 
   function executeListProjects(fields) {
@@ -114,6 +115,11 @@ module.exports = function (RED) {
         break;
 
       case 'updateProject':
+        response = discoveryutils.paramProjectCheck(params)
+                      + discoveryutils.paramNameCheck(params);
+        break;
+
+      case 'createCollection':
         response = discoveryutils.paramProjectCheck(params)
                       + discoveryutils.paramNameCheck(params);
         break;

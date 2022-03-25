@@ -82,15 +82,20 @@ DiscoveryUtils2.prototype = {
   buildParamsForName: function(msg, config, params) {
     let name = '';
     if (msg.discoveryparams) {
-      if (msg.discoveryparams.projectName) {
-        name = msg.discoveryparams.projectName;
-      } else if (msg.discoveryparams.projectname) {
-        name = msg.discoveryparams.projectname;
+      for (f of ['projectName', 'projectname',
+        'collectionName', 'collectionname']) {
+        if (msg.discoveryparams[f]) {
+          name = msg.discoveryparams[f];
+          break;
+        }
       }
     }
     if (!name) {
-      if (config.projectName) {
-        name = config.projectName
+      for (f of ['projectName', 'collectionName']) {
+        if (config[f]) {
+          name = config[f];
+          break;
+        }
       }
     }
     if (name) {
@@ -119,9 +124,14 @@ DiscoveryUtils2.prototype = {
     return params;
   },
 
-  adddefaultQueryParameters: function(msg, params) {
-    if (msg.discoveryparams && msg.discoveryparams.defaultQueryParameters) {
-      params.defaultQueryParameters = msg.discoveryparams.defaultQueryParameters;
+  addOtherParams: function(msg, params) {
+    if (msg.discoveryparams) {
+      if (msg.discoveryparams.defaultQueryParameters) {
+        params.defaultQueryParameters = msg.discoveryparams.defaultQueryParameters;
+      }
+      if (msg.discoveryparams.enrichments) {
+        params.defaultQueryParameters = msg.discoveryparams.enrichments;
+      }
     }
     return params
   },
@@ -132,9 +142,9 @@ DiscoveryUtils2.prototype = {
 
     params = me.buildParamsForName(msg, config, params);
     params = me.buildParamsForType(msg, config, params);
-    params = me.adddefaultQueryParameters(msg, params);
+    params = me.addOtherParams(msg, params);
 
-    ['projectId', 'collectionId'].forEach(function(f) {
+    ['projectId', 'collectionId', 'description', 'language'].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);
     });
 
