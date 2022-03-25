@@ -46,6 +46,12 @@
         </select>
     </div>
 
+    <div class="form-row">
+        <label for="node-input-projectId"><i class="fa fa-tag"></i> Project ID</label>
+        <input type="text" id="node-input-projectId" placeholder="">
+    </div>
+
+
 </script>
 
 <script type="text/x-red" data-help-name="watson-discovery-v2-project-manager">
@@ -57,6 +63,26 @@
       <p><b>List Existing Projects</b><p>
       <p>For this method the node does not need any input.
       </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.projects</code> : A list of the projects created under
+        the Discovery service instance.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Retrieve project details</b><p>
+      <p>For this method the node needs an Project ID as input.
+      </p>
+      <p>The project being requested can be overridden by specifying
+        the search id in <code>msg.discoveryparams.projectId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Details of the requested project.</li>
+        </ul>
     </li>
 
     </ul>
@@ -74,9 +100,9 @@
     // This is the namespace for this version of this Node.
     var disV2pm = new DiscoveryExperimentalV1();
 
-    //disV2pm.abc = 'abc';
-    disV2pm.hideAll = function() {
 
+    disV2pm.hideAll = function() {
+      $('#node-input-projectId').parent().hide();
     };
 
     disV2pm.showSelectedFields = function(fields) {
@@ -88,6 +114,11 @@
     disV2pm.processSelectedMethod = function(method) {
       disV2pm.hideAll();
       fields = [];
+
+      switch (method) {
+        case 'getProject':
+        fields.push('#node-input-projectId');
+      }
 
       disV2pm.showSelectedFields(fields);
     }
@@ -123,6 +154,7 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ''},
+                projectId: {value: ''},
                 'discovery-method': {value:'listProjects'},
                 'service-endpoint' :{value: ''}
             },

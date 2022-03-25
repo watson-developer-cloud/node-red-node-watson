@@ -28,18 +28,12 @@ module.exports = function (RED) {
     sEndpoint = '';
 
   const ExecutionList = {
-    'listProjects' : executeProjectList
+    'listProjects' : executeListProjects,
+    'getProject' : executeDiscoveryMethod
   };
 
-  function executeProjectList(node, discovery, params, msg) {
-    let fields = {
-      node : node,
-      discovery : discovery,
-      params : params,
-      msg : msg,
-      method : "listProjects",
-      response : "projects"
-    }
+  function executeListProjects(fields) {
+    fields.response = "projects";
     return executeListMethod(fields)
   }
 
@@ -48,6 +42,24 @@ module.exports = function (RED) {
       fields.discovery[fields.method](fields.params)
         .then((response) => {
           responseutils.parseResponseFor(fields.msg, response, fields.response);
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+    return p;
+  }
+
+
+  function executeDiscoveryMethod(fields) {
+    var p = new Promise(function resolver(resolve, reject){
+      fields.discovery[fields.method](fields.params)
+        .then((response) => {
+          fields.msg.discovery_response = response;
+          if (response && response.result) {
+            fields.msg.discovery_response = response.result;
+          }
           resolve();
         })
         .catch((err) => {
@@ -74,6 +86,12 @@ module.exports = function (RED) {
   function checkParams(method, params) {
     var response = '';
 
+    switch (method) {
+      case 'getProject':
+        response = discoveryutils.paramProjectCheck(params);
+        break;
+    }
+
     if (response) {
       return Promise.reject(response);
     } else {
@@ -93,7 +111,15 @@ module.exports = function (RED) {
       exe = unknownMethod
     }
 
-    return exe(node, discovery, params, msg);
+    let fields = {
+      node : node,
+      discovery : discovery,
+      params : params,
+      msg : msg,
+      method : method
+    }
+
+    return exe(fields);
   }
 
 

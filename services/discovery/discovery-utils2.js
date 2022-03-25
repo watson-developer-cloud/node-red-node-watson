@@ -44,9 +44,31 @@ DiscoveryUtils2.prototype = {
   },
 
 
+  paramProjectCheck: function(params) {
+    var response = '';
+    if (!params.projectId) {
+      response = 'Missing Project ID ';
+    }
+    return response;
+  },
+
+  buildParamsFor: function(msg, config, params, field) {
+    if (msg.discoveryparams && msg.discoveryparams[field]) {
+      params[field] = msg.discoveryparams[field];
+    } else if (config[field]) {
+      params[field] = config[field];
+    }
+    return params;
+  },
+
+
   buildParams: function(msg, config) {
     var params = {},
       me = this;
+
+    ['projectId'].forEach(function(f) {
+      params = me.buildParamsFor(msg, config, params, f);
+    });
 
     return params;
   }
