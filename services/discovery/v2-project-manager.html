@@ -162,7 +162,6 @@
         </ul>
     </li>
 
-
     <br/>
 
     <li>
@@ -177,7 +176,6 @@
           <li><code>msg.discovery_response</code> : result of the delete request.</li>
         </ul>
     </li>
-
 
     <br/>
 
@@ -243,6 +241,22 @@
         </ul>
     </li>
 
+    <br/>
+
+    <li>
+      <p><b>Delete Collection</b><p>
+        <p>For this method the node needs project Id and collection Id as input.
+        </p>
+        <p>The Ids can be overridden by specifying
+          <code>msg.discoveryparams.projectId</code> and
+          <code>msg.discoveryparams.collectionId</code>
+        </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : result of the delete request.</li>
+        </ul>
+    </li>
+
 
     </ul>
 
@@ -295,10 +309,10 @@
           fields.push('#node-input-projectName');
           break;
         case 'getCollection':
+        case 'deleteCollection':
           fields.push('#node-input-projectId');
           fields.push('#node-input-collectionId');
           break;
-
         case 'updateCollection':
           fields.push('#node-input-collectionId');
           // deliberate no break;
