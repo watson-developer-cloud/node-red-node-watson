@@ -1,0 +1,138 @@
+<!--
+  Copyright 2022 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-discovery-v2-project-manager">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+    </div>
+
+    <div class="form-row credentials">
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/discovery/api">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-discovery-method"><i class="fa fa-book"></i> Method: </label>
+        <select type="text" id="node-input-discovery-method" style="display: inline-block; width: 70%;">
+            <option disabled>______________</option>
+        </select>
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="watson-discovery-v2-project-manager">
+    <p>This is the Node for the V2 Watson Discovery service.</p>
+    <p>The following methods are available:</p>
+    <ul>
+
+    <li>
+    </li>
+
+    </ul>
+
+    <p>For more information about the Discovery service,
+    read the service <a href="https://cloud.ibm.com/docs/discovery-data">documentation</a>.</p>
+
+</script>
+
+<script type="text/javascript">
+
+    // Need to simulate a namespace, so that some of the variables don't leak across nodes
+    function DiscoveryExperimentalV1 () {}
+
+    // This is the namespace for this version of this Node.
+    var disV2pm = new DiscoveryExperimentalV1();
+
+    //disV2pm.abc = 'abc';
+    disV2pm.hideAll = function() {
+
+    };
+
+    disV2pm.showSelectedFields = function(fields) {
+      for (i = 0; i < fields.length; i++) {
+        $(fields[i]).parent().show();
+      }
+    }
+
+    disV2pm.processSelectedMethod = function(method) {
+      disV2pm.hideAll();
+      fields = [];
+
+      disV2pm.showSelectedFields(fields);
+    }
+
+    disV2pm.UIListeners = function () {
+      $('#node-input-discovery-method').change(function(val){
+        var method = $('#node-input-discovery-method').val();
+        disV2pm.processSelectedMethod(method);
+      });
+    }
+
+    disV2pm.checkForPrepare = function () {
+      disV2pm.hideAll();
+      disV2pm.UIListeners();
+    };
+
+    // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
+    function oneditprepare() {
+      disV2pm.checkForPrepare();
+      $.getJSON('watson-discovery-v2-pm/vcap/')
+        .done(function (service) {
+          $('.credentials').toggle(!service);
+        })
+        .fail(function () {
+          $('.credentials').show();
+        }).always(function () {
+          $('#credentials-check').hide();
+        })
+    }
+
+    (function() {
+        RED.nodes.registerType('watson-discovery-v2-project-manager', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ''},
+                'discovery-method': {value:''},
+                'service-endpoint' :{value: ''}
+            },
+            credentials: {
+              apikey: {type:'password'}
+            },
+            color: 'rgb(200,100,80)',
+            inputs: 1,
+            outputs: 1,
+            icon: 'discovery.png',
+            paletteLabel: 'discovery V2 project manger',
+            label: function() {
+                return this.name || 'discovery V2 project manager';
+            },
+            labelStyle: function() {
+                return this.name ? 'node_label_italic' : '';
+            },
+            oneditprepare: oneditprepare
+        });
+    })();
+</script>
