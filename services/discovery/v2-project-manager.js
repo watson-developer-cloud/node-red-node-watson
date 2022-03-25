@@ -32,11 +32,18 @@ module.exports = function (RED) {
     'getProject' : executeDiscoveryMethod,
     'createProject' : executeDiscoveryMethod,
     'updateProject' : executeDiscoveryMethod,
-    'deleteProject' : executeDiscoveryMethod
+    'deleteProject' : executeDiscoveryMethod,
+
+    'listCollections' : executeListCollections
   };
 
   function executeListProjects(fields) {
     fields.response = "projects";
+    return executeListMethod(fields)
+  }
+
+  function executeListCollections(fields) {
+    fields.response = "collections";
     return executeListMethod(fields)
   }
 
@@ -92,6 +99,7 @@ module.exports = function (RED) {
     switch (method) {
       case 'getProject':
       case 'deleteProject':
+      case 'listCollections':
         response = discoveryutils.paramProjectCheck(params);
         break;
 

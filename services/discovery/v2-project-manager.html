@@ -42,7 +42,13 @@
           <option value="getProject">Retrieve project details</option>
           <option value="updateProject">Update project</option>
           <option value="deleteProject">Delete project</option>
-            <option disabled>______________</option>
+          <option disabled>______________</option>
+          <option value="listCollections">List existing collections</option>
+          <option value="createCollection">Create new collection</option>
+          <option value="getCollection">Retrieve collection details</option>
+          <option value="updateCollection">Update collection</option>
+          <option value="deleteCollection">Delete collection</option>
+          <option disabled>______________</option>
         </select>
     </div>
 
@@ -152,6 +158,22 @@
         </ul>
     </li>
 
+
+    <br/>
+
+    <li>
+      <p><b>List Collections</b><p>
+      <p>For this method the node needs project Id as input.
+      </p>
+      <p>The project Id can be overridden by specifying
+        the search id in <code>msg.discoveryparams.projectId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.collections</code> : List of collections in the project.</li>
+        </ul>
+    </li>
+
     </ul>
 
     <p>For more information about the Discovery service,
@@ -187,6 +209,7 @@
       switch (method) {
         case 'getProject':
         case 'deleteProject':
+        case 'listCollections':
           fields.push('#node-input-projectId');
           break;
         case 'createProject':
