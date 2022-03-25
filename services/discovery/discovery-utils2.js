@@ -144,7 +144,8 @@ DiscoveryUtils2.prototype = {
     params = me.buildParamsForType(msg, config, params);
     params = me.addOtherParams(msg, params);
 
-    ['projectId', 'collectionId', 'description', 'language'].forEach(function(f) {
+    ['projectId', 'collectionId', 'queryId',
+        'description', 'language'].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);
     });
 

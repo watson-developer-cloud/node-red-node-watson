@@ -40,7 +40,12 @@ module.exports = function (RED) {
     'updateCollection' : executeDiscoveryMethod,
     'deleteCollection' : executeDiscoveryMethod,
 
-    'getComponentSettings' : executeDiscoveryMethod
+    'getComponentSettings' : executeDiscoveryMethod,
+
+    'listTrainingQueries' : executeListQueries,
+    'getTrainingQuery' : executeDiscoveryMethod,
+    'deleteTrainingQueries' : executeDiscoveryMethod,
+    'deleteTrainingQuery' : executeDiscoveryMethod
   };
 
   function executeListProjects(fields) {
@@ -50,6 +55,11 @@ module.exports = function (RED) {
 
   function executeListCollections(fields) {
     fields.response = "collections";
+    return executeListMethod(fields)
+  }
+
+  function executeListQueries(fields) {
+    fields.response = "queries";
     return executeListMethod(fields)
   }
 
@@ -107,6 +117,8 @@ module.exports = function (RED) {
       case 'deleteProject':
       case 'listCollections':
       case 'getComponentSettings':
+      case 'listTrainingQueries':
+      case 'deleteTrainingQueries':
         response = discoveryutils.paramProjectCheck(params);
         break;
 
@@ -129,6 +141,12 @@ module.exports = function (RED) {
       case 'deleteCollection':
         response = discoveryutils.paramProjectCheck(params)
                       + discoveryutils.paramCollectionCheck(params);
+        break;
+
+      case 'getTrainingQuery':
+      case 'deleteTrainingQuery':
+        response = discoveryutils.paramProjectCheck(params)
+                    + discoveryutils.paramQueryCheck(params);
         break;
     }
 

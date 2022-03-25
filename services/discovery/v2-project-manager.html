@@ -50,6 +50,12 @@
           <option value="deleteCollection">Delete collection</option>
           <option disabled>______________</option>
           <option value="getComponentSettings">List component settings</option>
+          <option disabled>______________</option>
+          <option value="listTrainingQueries">List training queries</option>
+          <option value="getTrainingQuery">Retrieve training query details</option>
+          <option value="deleteTrainingQueries">Delete all training queries</option>
+          <option value="deleteTrainingQuery">Delete a training query</option>
+          <option disabled>______________</option>
         </select>
     </div>
 
@@ -82,6 +88,11 @@
     <div class="form-row">
         <label for="node-input-collectionName"><i class="fa fa-tag"></i> Collection Name</label>
         <input type="text" id="node-input-collectionName" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-queryId"><i class="fa fa-tag"></i> Query ID</label>
+        <input type="text" id="node-input-queryId" placeholder="">
     </div>
 
     <div class="form-row">
@@ -273,6 +284,67 @@
         </ul>
     </li>
 
+    <br/>
+
+    <li>
+      <p><b>List Training Queries</b><p>
+      <p>For this method the node needs project Id as input.
+      </p>
+      <p>The project Id can be overridden by specifying
+        the id in <code>msg.discoveryparams.projectId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.queries</code> : List of training queries in the project.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Get Training Query</b><p>
+      <p>For this method the node needs project Id and query Id as input.
+      </p>
+      <p>The Ids can be overridden by specifying
+         <code>msg.discoveryparams.projectId</code>
+         and <code>msg.discoveryparams.queryId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Details of the requested training query.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Delete all Training Queries</b><p>
+      <p>For this method the node needs project Id as input.
+      </p>
+      <p>The project Id can be overridden by specifying
+        the id in <code>msg.discoveryparams.projectId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Result of the delete request.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Delete Training Query</b><p>
+      <p>For this method the node needs project Id and query Id as input.
+      </p>
+      <p>The Ids can be overridden by specifying
+         <code>msg.discoveryparams.projectId</code>
+         and <code>msg.discoveryparams.queryId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Result of the delete request.</li>
+        </ul>
+    </li>
 
     </ul>
 
@@ -298,6 +370,7 @@
       $('#node-input-collectionName').parent().hide();
       $('#node-input-description').parent().hide();
       $('#node-input-language').parent().hide();
+      $('#node-input-queryId').parent().hide();
     };
 
     disV2pm.showSelectedFields = function(fields) {
@@ -315,6 +388,8 @@
         case 'deleteProject':
         case 'listCollections':
         case 'getComponentSettings':
+        case 'listTrainingQueries':
+        case 'deleteTrainingQueries':
           fields.push('#node-input-projectId');
           break;
         case 'createProject':
@@ -338,6 +413,11 @@
           fields.push('#node-input-collectionName');
           fields.push('#node-input-description');
           fields.push('#node-input-language');
+          break;
+        case 'getTrainingQuery':
+        case 'deleteTrainingQuery':
+          fields.push('#node-input-projectId');
+          fields.push('#node-input-queryId');
           break;
       }
 
@@ -382,6 +462,7 @@
                 language: {value: 'en'},
                 projectType: {value: 'document_retrieval'},
                 collectionId: {value: ''},
+                queryId: {value: ''},
                 'discovery-method': {value:'listProjects'},
                 'service-endpoint' :{value: ''}
             },
