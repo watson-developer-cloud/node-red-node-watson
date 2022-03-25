@@ -48,6 +48,12 @@ DiscoveryUtils2.prototype = {
     return this.paramFieldCheck(params, 'projectId');
   },
 
+  paramCollectionCheck: function(params) {
+    return this.paramFieldCheck(params, 'projectId')
+              + this.paramFieldCheck(params, 'collectionId')  ;
+  },
+
+
   paramNameCheck: function(params) {
     return this.paramFieldCheck(params, 'name');
   },
@@ -128,7 +134,7 @@ DiscoveryUtils2.prototype = {
     params = me.buildParamsForType(msg, config, params);
     params = me.adddefaultQueryParameters(msg, params);
 
-    ['projectId'].forEach(function(f) {
+    ['projectId', 'collectionId'].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);
     });
 

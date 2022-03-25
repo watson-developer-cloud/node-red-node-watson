@@ -73,6 +73,10 @@
         </select>
     </div>
 
+    <div class="form-row">
+        <label for="node-input-collectionId"><i class="fa fa-tag"></i> Collection ID</label>
+        <input type="text" id="node-input-collectionId" placeholder="">
+    </div>
 
 </script>
 
@@ -194,6 +198,7 @@
       $('#node-input-projectId').parent().hide();
       $('#node-input-projectName').parent().hide();
       $('#node-input-projectType').parent().hide();
+      $('#node-input-collectionId').parent().hide();
     };
 
     disV2pm.showSelectedFields = function(fields) {
@@ -219,6 +224,10 @@
         case 'updateProject':
           fields.push('#node-input-projectId');
           fields.push('#node-input-projectName');
+          break;
+        case 'getCollection':
+          fields.push('#node-input-projectId');
+          fields.push('#node-input-collectionId');
           break;
       }
 
@@ -259,6 +268,7 @@
                 projectId: {value: ''},
                 projectName: {value: ''},
                 projectType: {value: 'document_retrieval'},
+                collectionId: {value: ''},
                 'discovery-method': {value:'listProjects'},
                 'service-endpoint' :{value: ''}
             },
