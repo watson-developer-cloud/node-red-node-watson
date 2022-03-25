@@ -17,14 +17,45 @@
 module.exports = function (RED) {
 
   const SERVICE_IDENTIFIER = 'discovery';
-  var discoveryutils = require('./discovery-utils'),
+  var discoveryutils = require('./discovery-utils2'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
+    responseutils = require('../../utilities/response-utils'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     apikey = null,
     sApikey = null,
     endpoint = '',
     sEndpoint = '';
+
+  const ExecutionList = {
+    'listProjects' : executeProjectList
+  };
+
+  function executeProjectList(node, discovery, params, msg) {
+    let fields = {
+      node : node,
+      discovery : discovery,
+      params : params,
+      msg : msg,
+      method : "listProjects",
+      response : "projects"
+    }
+    return executeListMethod(fields)
+  }
+
+  function executeListMethod(fields) {
+    var p = new Promise(function resolver(resolve, reject){
+      fields.discovery[fields.method](fields.params)
+        .then((response) => {
+          responseutils.parseResponseFor(fields.msg, response, fields.response);
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+    return p;
+  }
 
 
   function initialCheck(k, m) {
@@ -39,6 +70,33 @@ module.exports = function (RED) {
     }
     return Promise.resolve();
   }
+
+  function checkParams(method, params) {
+    var response = '';
+
+    if (response) {
+      return Promise.reject(response);
+    } else {
+      return Promise.resolve();
+    }
+  }
+
+  // function unknownMethod(node, discovery, params, msg) {
+  //   return Promise.reject('Unable to process as unknown mode has been specified');
+  // }
+
+  function executeMethod(node, method, params, msg) {
+    let discovery = discoveryutils.buildService(apikey, endpoint);
+
+    let exe = ExecutionList[method];
+    if (!exe) {
+      exe = unknownMethod
+    }
+
+    return exe(node, discovery, params, msg);
+  }
+
+
 
   if (dservice) {
     sApikey = dservice.apikey ? dservice.apikey : '';
@@ -70,7 +128,12 @@ module.exports = function (RED) {
       node.status({});
       initialCheck(apikey, method)
         .then(() => {
-          return Promise.reject("not yet implemented");
+          params = discoveryutils.buildParams(msg,config);
+          return checkParams(method, params);
+        })
+        .then(function(){
+          node.status({fill:'blue', shape:'dot', text:'requesting'});
+          return executeMethod(node, method, params, msg);
         })
         .then(function(){
           node.status({});
