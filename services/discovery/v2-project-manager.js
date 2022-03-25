@@ -30,7 +30,8 @@ module.exports = function (RED) {
   const ExecutionList = {
     'listProjects' : executeListProjects,
     'getProject' : executeDiscoveryMethod,
-    'createProject' : executeDiscoveryMethod
+    'createProject' : executeDiscoveryMethod,
+    'updateProject' : executeDiscoveryMethod
   };
 
   function executeListProjects(fields) {
@@ -96,6 +97,12 @@ module.exports = function (RED) {
         response = discoveryutils.paramNameCheck(params)
                       + discoveryutils.paramTypeCheck(params);
         break;
+
+      case 'updateProject':
+        response = discoveryutils.paramProjectCheck(params)
+                      + discoveryutils.paramNameCheck(params);
+        break;
+
     }
 
     if (response) {
