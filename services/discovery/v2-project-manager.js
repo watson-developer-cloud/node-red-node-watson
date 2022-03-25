@@ -31,7 +31,8 @@ module.exports = function (RED) {
     'listProjects' : executeListProjects,
     'getProject' : executeDiscoveryMethod,
     'createProject' : executeDiscoveryMethod,
-    'updateProject' : executeDiscoveryMethod
+    'updateProject' : executeDiscoveryMethod,
+    'deleteProject' : executeDiscoveryMethod
   };
 
   function executeListProjects(fields) {
@@ -90,6 +91,7 @@ module.exports = function (RED) {
 
     switch (method) {
       case 'getProject':
+      case 'deleteProject':
         response = discoveryutils.paramProjectCheck(params);
         break;
 
@@ -134,7 +136,6 @@ module.exports = function (RED) {
 
     return exe(fields);
   }
-
 
 
   if (dservice) {

@@ -40,7 +40,7 @@
           <option value="listProjects">List existing projects</option>
           <option value="createProject">Create new project</option>
           <option value="getProject">Retrieve project details</option>
-          <option value="updateProject">Update new project</option>
+          <option value="updateProject">Update project</option>
           <option value="deleteProject">Delete project</option>
             <option disabled>______________</option>
         </select>
@@ -136,6 +136,22 @@
         </ul>
     </li>
 
+
+    <br/>
+
+    <li>
+      <p><b>Delete Project</b><p>
+        <p>For this method the node needs project Id as input.
+        </p>
+        <p>The Id can be overridden by specifying
+          the <code>msg.discoveryparams.projectId</code>
+        </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : result of the delete request.</li>
+        </ul>
+    </li>
+
     </ul>
 
     <p>For more information about the Discovery service,
@@ -170,6 +186,7 @@
 
       switch (method) {
         case 'getProject':
+        case 'deleteProject':
           fields.push('#node-input-projectId');
           break;
         case 'createProject':
