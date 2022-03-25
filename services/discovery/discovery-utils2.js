@@ -45,9 +45,21 @@ DiscoveryUtils2.prototype = {
 
 
   paramProjectCheck: function(params) {
+    return this.paramFieldCheck(params, 'projectId');
+  },
+
+  paramNameCheck: function(params) {
+    return this.paramFieldCheck(params, 'name');
+  },
+
+  paramTypeCheck: function(params) {
+    return this.paramFieldCheck(params, 'type');
+  },
+
+  paramFieldCheck: function(params, field) {
     var response = '';
-    if (!params.projectId) {
-      response = 'Missing Project ID ';
+    if (!params[field]) {
+      response = 'Missing ' + field + ' ';
     }
     return response;
   },
@@ -61,10 +73,60 @@ DiscoveryUtils2.prototype = {
     return params;
   },
 
+  buildParamsForName: function(msg, config, params) {
+    let name = '';
+    if (msg.discoveryparams) {
+      if (msg.discoveryparams.projectName) {
+        name = msg.discoveryparams.projectName;
+      } else if (msg.discoveryparams.projectname) {
+        name = msg.discoveryparams.projectname;
+      }
+    }
+    if (!name) {
+      if (config.projectName) {
+        name = config.projectName
+      }
+    }
+    if (name) {
+      params.name = name;
+    }
+    return params;
+  },
+
+  buildParamsForType: function(msg, config, params) {
+    let type = '';
+    if (msg.discoveryparams) {
+      if (msg.discoveryparams.projectType) {
+        type = msg.discoveryparams.projectType;
+      } else if (msg.discoveryparams.projecttype) {
+        type = msg.discoveryparams.projecttype;
+      }
+    }
+    if (!type) {
+      if (config.projectType) {
+        type = config.projectType
+      }
+    }
+    if (type) {
+      params.type = type;
+    }
+    return params;
+  },
+
+  adddefaultQueryParameters: function(msg, params) {
+    if (msg.discoveryparams && msg.discoveryparams.defaultQueryParameters) {
+      params.defaultQueryParameters = msg.discoveryparams.defaultQueryParameters;
+    }
+    return params
+  },
 
   buildParams: function(msg, config) {
     var params = {},
       me = this;
+
+    params = me.buildParamsForName(msg, config, params);
+    params = me.buildParamsForType(msg, config, params);
+    params = me.adddefaultQueryParameters(msg, params);
 
     ['projectId'].forEach(function(f) {
       params = me.buildParamsFor(msg, config, params, f);

@@ -51,6 +51,23 @@
         <input type="text" id="node-input-projectId" placeholder="">
     </div>
 
+    <div class="form-row">
+        <label for="node-input-projectName"><i class="fa fa-tag"></i> Project Name</label>
+        <input type="text" id="node-input-projectName" placeholder="">
+    </div>
+
+
+    <div class="form-row">
+        <label for="node-input-projectType"> Project Type: </label>
+        <select type="text" id="node-input-projectType" style="display: inline-block; width: 70%;">
+            <option value="document_retrieval">document_retrieval</option>
+            <option value="conversational_search">conversational_search</option>
+            <option value="content_intelligence">content_intelligence</option>
+            <option value="content_mining">content_mining</option>
+            <option value="other">other</option>
+        </select>
+    </div>
+
 
 </script>
 
@@ -74,10 +91,29 @@
 
     <li>
       <p><b>Retrieve project details</b><p>
-      <p>For this method the node needs an Project ID as input.
+      <p>For this method the node needs project ID as input.
       </p>
       <p>The project being requested can be overridden by specifying
         the search id in <code>msg.discoveryparams.projectId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Details of the requested project.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Create new project</b><p>
+      <p>For this method the node needs project name and type as input.
+      </p>
+      <p>The name and type can be overridden by specifying
+        the <code>msg.discoveryparams.projectName</code>
+        and <code>msg.discoveryparams.projectType</code>
+      </p>
+      <p>The default query parameters for the query can be set by
+        specifying <code>msg.discoveryparams.defaultQueryParameters</code>
       </p>
       <p>Node output : </p>
         <ul>
@@ -103,6 +139,8 @@
 
     disV2pm.hideAll = function() {
       $('#node-input-projectId').parent().hide();
+      $('#node-input-projectName').parent().hide();
+      $('#node-input-projectType').parent().hide();
     };
 
     disV2pm.showSelectedFields = function(fields) {
@@ -117,7 +155,12 @@
 
       switch (method) {
         case 'getProject':
-        fields.push('#node-input-projectId');
+          fields.push('#node-input-projectId');
+          break;
+        case 'createProject':
+          fields.push('#node-input-projectName');
+          fields.push('#node-input-projectType');
+          break;
       }
 
       disV2pm.showSelectedFields(fields);
@@ -155,6 +198,8 @@
             defaults: {
                 name: {value: ''},
                 projectId: {value: ''},
+                projectName: {value: ''},
+                projectType: {value: 'document_retrieval'},
                 'discovery-method': {value:'listProjects'},
                 'service-endpoint' :{value: ''}
             },
