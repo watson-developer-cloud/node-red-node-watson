@@ -50,7 +50,19 @@ DiscoveryUtils2.prototype = {
 
   paramCollectionCheck: function(params) {
     return this.paramFieldCheck(params, 'projectId')
-              + this.paramFieldCheck(params, 'collectionId')  ;
+              + this.paramFieldCheck(params, 'collectionId');
+  },
+
+  paramQueryIdCheck: function(params) {
+    return this.paramFieldCheck(params, 'projectId')
+              + this.paramFieldCheck(params, 'queryId');
+  },
+
+  paramQueryFieldCheck: function(params) {
+    if (! params['query'] && ! params['naturalLanguageQuery'])  {
+      return "No query found on msg.payload";
+    }
+    return '';
   },
 
 
