@@ -225,6 +225,7 @@ module.exports = function (RED) {
               params.query = msg.payload;
               method = 'query';
             }
+            params = discoveryutils.addQueryParams(msg, params);
           }
           return checkParams(method, params);
         })

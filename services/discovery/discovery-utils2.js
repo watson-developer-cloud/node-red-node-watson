@@ -148,6 +148,22 @@ DiscoveryUtils2.prototype = {
     return params
   },
 
+  addQueryParams: function(msg, params) {
+    if (msg.discoveryparams) {
+      ['collectionIds', 'filter', 'aggregation',
+          'count', '_return', 'offset', 'sort',
+          'highlight', 'spellingSuggestions',
+          'tableResults', 'suggestedRefinements',
+          'passages'
+        ].forEach(function(f) {
+        if (msg.discoveryparams[f]) {
+          params[f] = msg.discoveryparams[f];
+        }
+      });
+    }
+    return params;
+  },
+
   buildParams: function(msg, config) {
     var params = {},
       me = this;
