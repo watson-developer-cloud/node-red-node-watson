@@ -53,6 +53,16 @@
 
             <div>
               <input style="width: 30px; margin-left: 20px; margin-top: 0;"
+                     type="checkbox" id="node-input-classifications" />
+              <label style="width: auto;" for="node-input-classifications">Classifications</label>
+            </div>
+            <div>
+              <label style="width: auto;" for="node-input-classifications-model">Classification model</label>
+              <input type="text" id="node-input-classifications-model" />
+            </div>
+
+            <div>
+              <input style="width: 30px; margin-left: 20px; margin-top: 0;"
                      type="checkbox" id="node-input-concepts" />
               <label style="width: auto;" for="node-input-concepts">Concepts</label>
             </div>
@@ -200,6 +210,7 @@
     <p>The following features are available for analysis:</p>
     <ul>
         <li><b>Categories</b>, categorize content into a taxonomy.</li>
+        <li><b>Classifications</b>, text classifications for the content.</li>
         <li><b>Concepts</b>, recognize high-level concepts.</li>
         <li><b>Document Emotion</b>, generate emotion scores.</li>
         <li><b>Emotion Targets</b>, optionally target the emotions scores to a
@@ -241,6 +252,8 @@
       <code>msg.nlu_options.entity_model</code>.
       To override the model used for relations set
       <code>msg.nlu_options.relations_model</code>.
+      To override the model used for classifications set
+      <code>msg.nlu_options.classifications_model</code>.
     </p>
     <br>
     <p>Results from the API service will made available
@@ -257,6 +270,7 @@
   var nluV1 = new NaturalLanguageUnderstandingV1();
 
   nluV1.hideAll = function() {
+    $('#node-input-classifications-model').parent().hide();
     $('#node-input-maxconcepts').parent().hide();
     $('#node-input-limitcategories').parent().hide();
     $('#node-input-doc-emotion-target').parent().hide();
@@ -295,6 +309,9 @@
   }
 
   nluV1.UIListeners = function () {
+    nluV1.CreateIListener($('#node-input-classifications'),
+                               $('#node-input-classifications-model'));
+
     nluV1.CreateIListener($('#node-input-concepts'),
                                $('#node-input-maxconcepts'));
 
@@ -357,6 +374,8 @@
               'name': {value: ''},
               'categories': {value: false},
               'limitcategories': {value: '3'},
+              'classifications': {value: false},
+              'classifications-model': {value: '8'},
               'concepts': {value: false},
               'maxconcepts': {value: '8'},
               'doc-emotion': {value: false},

@@ -16,7 +16,8 @@ Node-RED Watson Nodes for IBM Cloud
 - Drop Visual Recognition nodes
 - Remove Username / Password fields from all nodes
 - Bump to latest version of services
-- New Discovery V2 node 
+- New Discovery V2 node
+- Add Classifications to Natural Language Understanding node
 
 
 ### Watson Nodes for Node-RED

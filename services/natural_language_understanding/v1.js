@@ -21,6 +21,7 @@ module.exports = function (RED) {
 
   const NLU_FEATURES = {
     'categories': 'categories',
+    'classifications': 'classifications',
     'concepts': 'concepts',
     'doc-emotion': 'emotion',
     'doc-sentiment': 'sentiment',
@@ -112,6 +113,18 @@ module.exports = function (RED) {
     }
   }
 
+
+
+  function processClassificationsOptions(msg, config, features) {
+    if (features.classifications) {
+      if (msg.nlu_options && msg.nlu_options.classifications_model) {
+        features.classifications.model = msg.nlu_options.classifications_model;
+      } else if (config['classifications-model']) {
+        features.classifications.model = config['classifications-model'] ;
+      }
+    }
+  }
+
   function processCategoriesOptions(config, features) {
     if (features.categories) {
       features.categories.limit =
@@ -195,14 +208,15 @@ module.exports = function (RED) {
   function checkFeatureOptions(msg, config, options) {
     if (options && options.features) {
       processConceptsOptions(config, options.features);
+      processClassificationsOptions(msg, config, options.features);
       processCategoriesOptions(config, options.features);
       processEmotionOptions(config, options.features);
       processSentimentOptions(config, options.features);
-      processEntitiesOptions(msg,config, options.features);
-      processRelationsOptions(msg,config, options.features);
+      processEntitiesOptions(msg, config, options.features);
+      processRelationsOptions(msg, config, options.features);
       processKeywordsOptions(config, options.features);
       processSemanticRolesOptions(config, options.features);
-      processSyntaxOptions(msg,config, options.features);
+      processSyntaxOptions(msg, config, options.features);
     }
     return Promise.resolve();
   }
