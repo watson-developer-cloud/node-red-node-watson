@@ -49,7 +49,7 @@ module.exports = function (RED) {
 
   function executeCreateCustomisation(node, tts, params, msg) {
     return new Promise(function resolver(resolve, reject) {
-      tts.createVoiceModel(params)
+      tts.createCustomModel(params)
         .then((response) => {
           if (response && response.result) {
             msg['customization_id'] = response.result;
@@ -66,7 +66,7 @@ module.exports = function (RED) {
 
   function executeListCustomisations(node, tts, params, msg) {
     return new Promise(function resolver(resolve, reject) {
-      tts.listVoiceModels(params)
+      tts.listCustomModels(params)
         .then((response) => {
           responseutils.parseResponseFor(msg, response, 'customizations');
           resolve();
@@ -92,7 +92,7 @@ module.exports = function (RED) {
 
   function executeGetCustomisation(node, tts, params, msg) {
     return new Promise(function resolver(resolve, reject) {
-      tts.getVoiceModel(params)
+      tts.getCustomModel(params)
         .then((response) => {
           if (response && response.result) {
             msg['customization'] = response.result;
@@ -109,7 +109,7 @@ module.exports = function (RED) {
 
   function executeDeleteCustomisation(node, tts, params, msg) {
     return new Promise(function resolver(resolve, reject) {
-      tts.deleteVoiceModel(params)
+      tts.deleteCustomModel(params)
         .then((response) => {
           msg['response'] = response;
           resolve();
