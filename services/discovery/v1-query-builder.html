@@ -1,5 +1,5 @@
 <!--
-  Copyright 2016 IBM Corp.
+  Copyright 2016, 2022 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -40,14 +40,7 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
-    </div>
+
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
         <input type="password" id="node-input-apikey" placeholder="API Key"></input>
@@ -209,13 +202,6 @@
     // the collection list to be revised. A change in selected collection, needs
     // the schema lists to be revised.
     disQB.UIListeners = function () {
-      $('#node-input-username').change(function(val){
-        disQB.getCredentials();
-      });
-
-      $('#node-input-password').change(function(val){
-        disQB.getCredentials();
-      });
 
       $('#node-input-apikey').change(function(val){
         disQB.getCredentials();
@@ -439,11 +425,9 @@
     // Retrieve the available environments from the server, if data is returned, then
     // can enable the dynamic selection fields.
     disQB.getEnvironments = function () {
-      var u = $('#node-input-username').val();
-      var p = $('#node-input-password').val();
       var k = $('#node-input-apikey').val();
 
-      var creds = {un: u, pwd: p, key: k};
+      var creds = {key: k};
 
       creds.endpoint = $('#node-input-service-endpoint').val();
 
@@ -475,11 +459,9 @@
     // Retrieve the available collections in the selected envrionment from the server,
     // if data is returned, then can enable the dynamic selection fields.
     disQB.getCollections = function () {
-      var u = $('#node-input-username').val();
-      var p = $('#node-input-password').val();
       var k = $('#node-input-apikey').val();
 
-      var creds = {un: u, pwd: p, key: k};
+      var creds = {key: k};
 
       creds.endpoint = $('#node-input-service-endpoint').val();
 
@@ -511,11 +493,9 @@
     // Retrieve the available collections in the selected envrionment from the server,
     // if data is returned, then can enable the dynamic selection fields.
     disQB.getSchemas = function () {
-      var u = $('#node-input-username').val();
-      var p = $('#node-input-password').val();
       var k = $('#node-input-apikey').val();
 
-      var creds = {un: u, pwd: p, key: k};
+      var creds = {key: k};
 
       creds.endpoint = $('#node-input-service-endpoint').val();
 
@@ -550,11 +530,9 @@
     // In this case the user has to provide credentials. Once there are credentials,
     // then the discovery environments are retrieved.
     disQB.getCredentials = function () {
-      var u = $('#node-input-username').val();
-      var p = $('#node-input-password').val();
       var k = $('#node-input-apikey').val();
 
-      if ( (k && k.length) || (u && u.length && p) ) {
+      if ( (k && k.length) ) {
         if (!disQB.environments) {
           disQB.getEnvironments();
         }
@@ -689,7 +667,6 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ''},
-                password: {value: ''},
                 apikey: {type:'password'},
                 environment: {value: ''},
                 environmenthidden: {value: ''},
@@ -717,8 +694,6 @@
 
             },
             credentials: {
-              username: {type:"text"} //,
-              // password: {type:"password"}
             },
             color: "rgb(200,140,80)",
             inputs: 1,

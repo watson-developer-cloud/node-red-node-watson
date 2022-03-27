@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 IBM Corp.
+ * Copyright 2016, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ const pkg = require('../../package.json'),
 function DiscoveryUtils() {}
 DiscoveryUtils.prototype = {
 
-  buildService: function(username, password, apikey, endpoint) {
+  buildService: function(apikey, endpoint) {
     let authSettings = {};
     let serviceSettings = {
       version: '2019-04-30',
@@ -32,14 +32,12 @@ DiscoveryUtils.prototype = {
 
     if (apikey) {
       authSettings.apikey = apikey;
-    } else {
-      authSettings.username = username;
-      authSettings.password = password;
     }
     serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     if (endpoint) {
       serviceSettings.url = endpoint;
+      serviceSettings.serviceUrl = endpoint;
     }
 
     return new DiscoveryV1(serviceSettings);

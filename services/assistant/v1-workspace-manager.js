@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 IBM Corp.
+ * Copyright 2017, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     responseutils = require('../../utilities/response-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
     endpoint = '', sEndpoint = '',
     version = '2018-09-20';
@@ -73,18 +72,16 @@ module.exports = function (RED) {
   temp.track();
 
   // Require the Cloud Foundry Module to pull credentials from bound service
-  // If they are found then the username and password will be stored in
-  // the variables sUsername and sPassword.
+  // If they are found then the key will be stored in
+  // the variables sApikey.
   //
-  // This separation between sUsername and username is to allow
+  // This separation is to allow
   // the end user to modify the credentials when the service is not bound.
   // Otherwise, once set credentials are never reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
 
     sEndpoint = service.url;
@@ -501,7 +498,7 @@ module.exports = function (RED) {
 
   function executeMethod(node, method, params, msg) {
     let conv = null,
-      version = '2018-09-20',
+      version = '2021-11-27',
       authSettings = {},
       serviceSettings = {
         version_date: version,
@@ -513,10 +510,8 @@ module.exports = function (RED) {
 
     if (apikey) {
       authSettings.apikey = apikey;
-    } else {
-      authSettings.username = username;
-      authSettings.password = password;
     }
+
     serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     if (endpoint) {
@@ -1013,9 +1008,9 @@ module.exports = function (RED) {
     });
   }
 
-  function initialCheck(a, u, p, m) {
+  function initialCheck(a, m) {
     var message = '';
-    if (!a && (!u || !p)) {
+    if (!a) {
       message = 'Missing Conversation service credentials';
     } else if (!m || '' === m) {
       message = 'Required mode has not been specified';
@@ -1047,25 +1042,17 @@ module.exports = function (RED) {
         message = '',
         params = {};
 
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
       apikey = sApikey || this.credentials.apikey || config.apikey;
       endpoint = sEndpoint;
-      
+
       if (config['cwm-service-endpoint']) {
         endpoint = config['cwm-service-endpoint'];
       }
-      
+
       // All method to be overridden
       if (msg.params) {
         if (msg.params.method) {
           method = msg.params.method;
-        }
-        if (msg.params.username) {
-          username = msg.params.username;
-        }
-        if (msg.params.password) {
-          password = msg.params.password;
         }
         if (msg.params.apikey) {
           apikey = msg.params.apikey;
@@ -1079,7 +1066,7 @@ module.exports = function (RED) {
       }
 
       node.status({});
-      initialCheck(apikey, username, password, method)
+      initialCheck(apikey, method)
         .then(function(){
           return buildParams(msg, method, config, params);
         })
@@ -1123,8 +1110,6 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-conversation-v1-workspace-manager', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type: 'password'}
     }
   });

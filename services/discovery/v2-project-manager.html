@@ -1,0 +1,513 @@
+<!--
+  Copyright 2022 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="watson-discovery-v2-project-manager">
+    <div id="credentials-check" class="form-row">
+        <div class="form-tips">
+            <i class="fa fa-question-circle"></i><b> Please wait: </b> Checking for bound service credentials...
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row credentials" style="display: none;">
+        <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
+        <input type="password" id="node-input-apikey" placeholder="API Key"></input>
+    </div>
+
+    <div class="form-row credentials">
+        <label for="node-input-service-endpoint"><i class="fa fa-tag"></i> Service Endpoint</label>
+        <input type="text" id="node-input-service-endpoint" placeholder="https://gateway.watsonplatform.net/discovery/api">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-discovery-method"><i class="fa fa-book"></i> Method: </label>
+        <select type="text" id="node-input-discovery-method" style="display: inline-block; width: 70%;">
+          <option disabled>______________</option>
+          <option value="query">Run natural language query</option>
+          <option value="querySearch">Run query search</option>
+          <option disabled>______________</option>
+          <option value="listProjects">List existing projects</option>
+          <option value="createProject">Create new project</option>
+          <option value="getProject">Retrieve project details</option>
+          <option value="updateProject">Update project</option>
+          <option value="deleteProject">Delete project</option>
+          <option disabled>______________</option>
+          <option value="listCollections">List existing collections</option>
+          <option value="createCollection">Create new collection</option>
+          <option value="getCollection">Retrieve collection details</option>
+          <option value="updateCollection">Update collection</option>
+          <option value="deleteCollection">Delete collection</option>
+          <option disabled>______________</option>
+          <option value="getComponentSettings">List component settings</option>
+          <option disabled>______________</option>
+          <option value="listTrainingQueries">List training queries</option>
+          <option value="getTrainingQuery">Retrieve training query details</option>
+          <option value="deleteTrainingQueries">Delete all training queries</option>
+          <option value="deleteTrainingQuery">Delete a training query</option>
+          <option disabled>______________</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-projectId"><i class="fa fa-tag"></i> Project ID</label>
+        <input type="text" id="node-input-projectId" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-projectName"><i class="fa fa-tag"></i> Project Name</label>
+        <input type="text" id="node-input-projectName" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-projectType"> Project Type: </label>
+        <select type="text" id="node-input-projectType" style="display: inline-block; width: 70%;">
+            <option value="document_retrieval">document_retrieval</option>
+            <option value="conversational_search">conversational_search</option>
+            <option value="content_intelligence">content_intelligence</option>
+            <option value="content_mining">content_mining</option>
+            <option value="other">other</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-collectionId"><i class="fa fa-tag"></i> Collection ID</label>
+        <input type="text" id="node-input-collectionId" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-collectionName"><i class="fa fa-tag"></i> Collection Name</label>
+        <input type="text" id="node-input-collectionName" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-queryId"><i class="fa fa-tag"></i> Query ID</label>
+        <input type="text" id="node-input-queryId" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-description"><i class="fa fa-tag"></i> Description</label>
+        <input type="text" id="node-input-description" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-language"><i class="fa fa-tag"></i> Language</label>
+        <input type="text" id="node-input-language" placeholder="">
+    </div>
+
+
+</script>
+
+<script type="text/x-red" data-help-name="watson-discovery-v2-project-manager">
+    <p>This is the Node for the V2 Watson Discovery service.</p>
+    <p>The following methods are available:</p>
+    <ul>
+
+    <li>
+      <p><b>Natural Language Query and Query Search</b><p>
+      <p>For these method the node needs project Id input.
+      </p>
+      <p><code>msg.payload</code> is used as the query.
+      </p>
+      <p>The project being requested can be overridden by specifying
+        the id in <code>msg.discoveryparams.projectId</code>.
+      </p>
+      <p>Additional query parameters can be set by
+        adding to  <code>msg.discoveryparams</code> eg.
+        <code>msg.discoveryparams.collectionIds</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Response for the input query.</li>
+        </ul>
+    </li>
+
+    <br/>
+    <li>
+
+    <p><b>List Existing Projects</b><p>
+    <p>For this method the node does not need any input.
+    </p>
+    <p>Node output : </p>
+      <ul>
+        <li><code>msg.projects</code> : A list of the projects created under
+      the Discovery service instance.</li>
+      </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Retrieve project details</b><p>
+      <p>For this method the node needs project Id as input.
+      </p>
+      <p>The project being requested can be overridden by specifying
+        the search id in <code>msg.discoveryparams.projectId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Details of the requested project.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Create new project</b><p>
+      <p>For this method the node needs project name and type as input.
+      </p>
+      <p>The name and type can be overridden by specifying
+        the <code>msg.discoveryparams.projectName</code>
+        and <code>msg.discoveryparams.projectType</code>
+      </p>
+      <p>The default query parameters for the project can be set by
+        specifying <code>msg.discoveryparams.defaultQueryParameters</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Details of the new project.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Update Project</b><p>
+        <p>For this method the node needs project Id and name as input.
+        </p>
+        <p>The name and Id can be overridden by specifying
+          the <code>msg.discoveryparams.projectId</code>
+          and <code>msg.discoveryparams.projectName</code>
+        </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Details of the updated project.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Delete Project</b><p>
+        <p>For this method the node needs project Id as input.
+        </p>
+        <p>The Id can be overridden by specifying
+          the <code>msg.discoveryparams.projectId</code>
+        </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : result of the delete request.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>List Collections</b><p>
+      <p>For this method the node needs project Id as input.
+      </p>
+      <p>The project Id can be overridden by specifying
+        the search id in <code>msg.discoveryparams.projectId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.collections</code> : List of collections in the project.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Create new collection</b><p>
+      <p>For this method the node needs project id, and collection name.
+        Optional inputs are
+        description and language as input.
+      </p>
+      <p>The project id, collection name, description and language
+        can be overridden by specifying
+        the <code>msg.discoveryparams.projectId</code> ,
+        <code>msg.discoveryparams.collectionName</code> ,
+        <code>msg.discoveryparams.description</code>
+        and <code>msg.discoveryparams.language</code>
+      </p>
+      <p>Any enrichments for the collection can be set by
+        specifying <code>msg.discoveryparams.enrichments</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Details of the new collection.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Update collection</b><p>
+      <p>For this method the node needs project id, collection id.
+        Optional inputs are collection name,
+        description and language as.
+      </p>
+      <p>The project id, collection id, collection name, description and language
+        can be overridden by specifying
+        the <code>msg.discoveryparams.projectId</code> ,
+        <code>msg.discoveryparams.collectionId</code> ,
+        <code>msg.discoveryparams.collectionName</code> ,
+        <code>msg.discoveryparams.description</code>
+        and <code>msg.discoveryparams.language</code>
+      </p>
+      <p>Any enrichments for the collection can be set by
+        specifying <code>msg.discoveryparams.enrichments</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Details of the updated collection.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Delete Collection</b><p>
+        <p>For this method the node needs project Id and collection Id as input.
+        </p>
+        <p>The Ids can be overridden by specifying
+          <code>msg.discoveryparams.projectId</code> and
+          <code>msg.discoveryparams.collectionId</code>
+        </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : result of the delete request.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>List component settings</b><p>
+      <p>For this method the node needs project Id as input.
+      </p>
+      <p>The project being searched can be overridden by specifying
+        the id in <code>msg.discoveryparams.projectId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Details of the component settings.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>List Training Queries</b><p>
+      <p>For this method the node needs project Id as input.
+      </p>
+      <p>The project Id can be overridden by specifying
+        the id in <code>msg.discoveryparams.projectId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.queries</code> : List of training queries in the project.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Get Training Query</b><p>
+      <p>For this method the node needs project Id and query Id as input.
+      </p>
+      <p>The Ids can be overridden by specifying
+         <code>msg.discoveryparams.projectId</code>
+         and <code>msg.discoveryparams.queryId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Details of the requested training query.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Delete all Training Queries</b><p>
+      <p>For this method the node needs project Id as input.
+      </p>
+      <p>The project Id can be overridden by specifying
+        the id in <code>msg.discoveryparams.projectId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Result of the delete request.</li>
+        </ul>
+    </li>
+
+    <br/>
+
+    <li>
+      <p><b>Delete Training Query</b><p>
+      <p>For this method the node needs project Id and query Id as input.
+      </p>
+      <p>The Ids can be overridden by specifying
+         <code>msg.discoveryparams.projectId</code>
+         and <code>msg.discoveryparams.queryId</code>
+      </p>
+      <p>Node output : </p>
+        <ul>
+          <li><code>msg.discovery_response</code> : Result of the delete request.</li>
+        </ul>
+    </li>
+
+    </ul>
+
+    <p>For more information about the Discovery service,
+    read the service <a href="https://cloud.ibm.com/docs/discovery-data">documentation</a>.</p>
+
+</script>
+
+<script type="text/javascript">
+
+    // Need to simulate a namespace, so that some of the variables don't leak across nodes
+    function DiscoveryExperimentalV1 () {}
+
+    // This is the namespace for this version of this Node.
+    var disV2pm = new DiscoveryExperimentalV1();
+
+
+    disV2pm.hideAll = function() {
+      $('#node-input-projectId').parent().hide();
+      $('#node-input-projectName').parent().hide();
+      $('#node-input-projectType').parent().hide();
+      $('#node-input-collectionId').parent().hide();
+      $('#node-input-collectionName').parent().hide();
+      $('#node-input-description').parent().hide();
+      $('#node-input-language').parent().hide();
+      $('#node-input-queryId').parent().hide();
+    };
+
+    disV2pm.showSelectedFields = function(fields) {
+      for (let i = 0; i < fields.length; i++) {
+        $(fields[i]).parent().show();
+      }
+    }
+
+    disV2pm.processSelectedMethod = function(method) {
+      disV2pm.hideAll();
+      let fields = [];
+
+      switch (method) {
+        case 'getProject':
+        case 'deleteProject':
+        case 'listCollections':
+        case 'getComponentSettings':
+        case 'listTrainingQueries':
+        case 'deleteTrainingQueries':
+        case 'query':
+        case 'querySearch':
+          fields.push('#node-input-projectId');
+          break;
+        case 'createProject':
+          fields.push('#node-input-projectName');
+          fields.push('#node-input-projectType');
+          break;
+        case 'updateProject':
+          fields.push('#node-input-projectId');
+          fields.push('#node-input-projectName');
+          break;
+        case 'getCollection':
+        case 'deleteCollection':
+          fields.push('#node-input-projectId');
+          fields.push('#node-input-collectionId');
+          break;
+        case 'updateCollection':
+          fields.push('#node-input-collectionId');
+          // deliberate no break;
+        case 'createCollection':
+          fields.push('#node-input-projectId');
+          fields.push('#node-input-collectionName');
+          fields.push('#node-input-description');
+          fields.push('#node-input-language');
+          break;
+        case 'getTrainingQuery':
+        case 'deleteTrainingQuery':
+          fields.push('#node-input-projectId');
+          fields.push('#node-input-queryId');
+          break;
+      }
+
+      disV2pm.showSelectedFields(fields);
+    }
+
+    disV2pm.UIListeners = function () {
+      $('#node-input-discovery-method').change(function(val){
+        var method = $('#node-input-discovery-method').val();
+        disV2pm.processSelectedMethod(method);
+      });
+    }
+
+    disV2pm.checkForPrepare = function () {
+      disV2pm.hideAll();
+      disV2pm.UIListeners();
+    };
+
+    // This is the on edit prepare function, which will be invoked everytime the dialog is shown.
+    function oneditprepare() {
+      disV2pm.checkForPrepare();
+      $.getJSON('watson-discovery-v2-pm/vcap/')
+        .done(function (service) {
+          $('.credentials').toggle(!service);
+        })
+        .fail(function () {
+          $('.credentials').show();
+        }).always(function () {
+          $('#credentials-check').hide();
+        })
+    }
+
+    (function() {
+        RED.nodes.registerType('watson-discovery-v2-project-manager', {
+            category: 'IBM Watson',
+            defaults: {
+                name: {value: ''},
+                projectId: {value: ''},
+                projectName: {value: ''},
+                collectionName: {value: ''},
+                description: {value: ''},
+                language: {value: 'en'},
+                projectType: {value: 'document_retrieval'},
+                collectionId: {value: ''},
+                queryId: {value: ''},
+                'discovery-method': {value:'query'},
+                'service-endpoint' :{value: ''}
+            },
+            credentials: {
+              apikey: {type:'password'}
+            },
+            color: 'rgb(200,100,80)',
+            inputs: 1,
+            outputs: 1,
+            icon: 'discovery.png',
+            paletteLabel: 'discovery V2',
+            label: function() {
+                return this.name || 'discovery V2';
+            },
+            labelStyle: function() {
+                return this.name ? 'node_label_italic' : '';
+            },
+            oneditprepare: oneditprepare
+        });
+    })();
+</script>

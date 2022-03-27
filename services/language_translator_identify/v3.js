@@ -1,5 +1,5 @@
 /**
- * Copyright 2013,2015 IBM Corp.
+ * Copyright 2013,2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -24,24 +24,18 @@ module.exports = function (RED) {
     serviceutils = require('../../utilities/service-utils'),
     responseutils = require('../../utilities/response-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = null,
-    password = null,
-    sUsername = null,
-    sPassword = null,
     apikey = null,
     sApikey = null,
     endpoint = '', sEndpoint = '';
     //endpointUrl = 'https://gateway.watsonplatform.net/language-translator/api';
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
 
-  function initialCheck(u, p, k) {
-    if (!k && (!u || !p)) {
+  function initialCheck(k) {
+    if (!k) {
       return Promise.reject('Missing Watson Language Translator service credentials');
     }
     return Promise.resolve();
@@ -67,9 +61,6 @@ module.exports = function (RED) {
 
       if (apikey) {
         authSettings.apikey = apikey;
-      } else {
-        authSettings.username = username;
-        authSettings.password = password;
       }
       serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
@@ -104,8 +95,6 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
 
     this.on('input', function(msg, send, done) {
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password;
       apikey = sApikey || this.credentials.apikey;
 
       endpoint = sEndpoint;
@@ -114,7 +103,7 @@ module.exports = function (RED) {
       }
 
       node.status({});
-      initialCheck(username, password, apikey)
+      initialCheck(apikey)
         .then(function(){
           return payloadCheck(msg);
         })
@@ -135,8 +124,6 @@ module.exports = function (RED) {
   }
   RED.nodes.registerType('watson-language-translator-identify', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type:'password'}
     }
   });

@@ -194,26 +194,6 @@ PayloadUtils.prototype = {
     return code;
   },
 
-  // Function that is returns a function to count
-  // the characters in each language.
-  word_count: function(ct) {
-    var count = require('word-count'),
-      fn = function(txt, cb) {
-        // default
-        return cb(txt.split(' ').length);
-      };
-
-    if (ct === 'ja') {
-      fn = function(txt, cb) {
-        cb(200);
-      };
-    } else if (ct === 'ko') {
-      fn = function(txt, cb) {
-        cb(count(txt));
-      };
-    }
-    return fn;
-  }
 };
 
 var payloadutils = new PayloadUtils();

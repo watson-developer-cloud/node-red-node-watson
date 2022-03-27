@@ -22,29 +22,26 @@ module.exports = function (RED) {
     fileType = require('file-type'),
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
-    responseutils = require('../../utilities/response-utils'),    
+    responseutils = require('../../utilities/response-utils'),
     ttsutils = require('./tts-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
     endpoint = '',
     sEndpoint = 'https://stream.watsonplatform.net/text-to-speech/api',
-    apikey = '', sApikey = '',
-    username = '', password = '', sUsername = '', sPassword = '';
+    apikey = '', sApikey = '';
 
   temp.track();
 
   // Require the Cloud Foundry Module to pull credentials from bound service
-  // If they are found then the username and password will be stored in
-  // the variables sUsername and sPassword.
+  // If they are found then the key will be stored in
+  // the variables sApikey.
   //
-  // This separation between sUsername and username is to allow
+  // This separation between is to allow
   // the end user to modify the credentials when the service is not bound.
   // Otherwise, once set credentials are never reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
@@ -52,7 +49,7 @@ module.exports = function (RED) {
 
   function executeCreateCustomisation(node, tts, params, msg) {
     return new Promise(function resolver(resolve, reject) {
-      tts.createVoiceModel(params)
+      tts.createCustomModel(params)
         .then((response) => {
           if (response && response.result) {
             msg['customization_id'] = response.result;
@@ -69,7 +66,7 @@ module.exports = function (RED) {
 
   function executeListCustomisations(node, tts, params, msg) {
     return new Promise(function resolver(resolve, reject) {
-      tts.listVoiceModels(params)
+      tts.listCustomModels(params)
         .then((response) => {
           responseutils.parseResponseFor(msg, response, 'customizations');
           resolve();
@@ -95,7 +92,7 @@ module.exports = function (RED) {
 
   function executeGetCustomisation(node, tts, params, msg) {
     return new Promise(function resolver(resolve, reject) {
-      tts.getVoiceModel(params)
+      tts.getCustomModel(params)
         .then((response) => {
           if (response && response.result) {
             msg['customization'] = response.result;
@@ -112,7 +109,7 @@ module.exports = function (RED) {
 
   function executeDeleteCustomisation(node, tts, params, msg) {
     return new Promise(function resolver(resolve, reject) {
-      tts.deleteVoiceModel(params)
+      tts.deleteCustomModel(params)
         .then((response) => {
           msg['response'] = response;
           resolve();
@@ -185,7 +182,7 @@ module.exports = function (RED) {
   }
 
   function executeMethod(node, method, params, msg) {
-    let tts = ttsutils.buildStdSettings(apikey, username, password, endpoint);
+    let tts = ttsutils.buildStdSettings(apikey, endpoint);
     let p = null;
 
     node.status({fill:'blue', shape:'dot', text:'executing'});
@@ -355,7 +352,7 @@ module.exports = function (RED) {
 
   // API used by widget to fetch available voices
   RED.httpAdmin.get('/watson-text-to-speech-v1-query-builder/voices', function (req, res) {
-    var tts = ttsutils.initTTSService(req, sApikey, sUsername, sPassword, sEndpoint);
+    var tts = ttsutils.initTTSService(req, sApikey, sEndpoint);
 
     tts.listVoices({})
       .then((response) => {
@@ -383,8 +380,6 @@ module.exports = function (RED) {
         message = '',
         params = {};
 
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
       apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
@@ -392,7 +387,7 @@ module.exports = function (RED) {
         endpoint = config['service-endpoint'];
       }
 
-      if (!apikey && (!username || !password)) {
+      if (!apikey) {
         message = 'Missing Watson Text to Speech service credentials';
       } else if (!method || '' === method) {
         message = 'Required mode has not been specified';
@@ -436,8 +431,6 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-text-to-speech-v1-query-builder', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type:'password'}
     }
   });

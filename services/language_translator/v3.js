@@ -1,5 +1,5 @@
 /**
- * Copyright 2013,2016 IBM Corp.
+ * Copyright 2013,2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 module.exports = function (RED) {
   // Require the Cloud Foundry Module to pull credentials from bound service
-  // If they are found then they are stored in sUsername and sPassword, as the
-  // service credentials. This separation from sUsername and username to allow
+  // If they are found then they are stored in sApikey, as the
+  // service credentials. This separation is to allow
   // the end user to modify the node credentials when the service is not bound.
-  // Otherwise, once set username would never get reset, resulting in a frustrated
+  // Otherwise, once set apikey would never get reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
   const SERVICE_IDENTIFIER = 'language-translator',
@@ -34,10 +34,6 @@ module.exports = function (RED) {
     responseutils = require('../../utilities/response-utils'),
     fs = require('fs'),
     temp = require('temp'),
-    username = null,
-    password = null,
-    sUsername = null,
-    sPassword = null,
     apikey = null,
     sApikey = null,
     //service = cfenv.getAppEnv().getServiceCreds(/language translator/i),
@@ -49,8 +45,6 @@ module.exports = function (RED) {
   temp.track();
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
@@ -80,9 +74,6 @@ module.exports = function (RED) {
 
     if (sApikey || req.query.key) {
       authSettings.apikey = sApikey ? sApikey : req.query.key;
-    } else {
-      authSettings.username = sUsername ? sUsername : req.query.un;
-      authSettings.password = sPassword ? sPassword : req.query.pwd;
     }
     serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
@@ -390,9 +381,6 @@ module.exports = function (RED) {
 
       if (apikey) {
         authSettings.apikey = apikey;
-      } else {
-        authSettings.username = username;
-        authSettings.password = password;
       }
       serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
@@ -448,8 +436,6 @@ module.exports = function (RED) {
       // hidden but not a credential. If it is treated as a credential, it gets lost when there
       // is a request to refresh the model list.
       // Credentials are needed for each of the modes.
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
       apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
@@ -459,7 +445,7 @@ module.exports = function (RED) {
 
       node.status({});
 
-      translatorutils.credentialCheck(username, password, apikey)
+      translatorutils.credentialCheck(apikey)
         .then(function(){
           return payloadCheck(msg);
         })
@@ -489,8 +475,6 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-translator', SMTNode, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type:'password'}
     }
   });
