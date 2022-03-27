@@ -103,7 +103,7 @@ DiscoveryUtils2.prototype = {
       }
     }
     if (!name) {
-      for (f of ['projectName', 'collectionName']) {
+      for (let f of ['projectName', 'collectionName']) {
         if (config[f]) {
           name = config[f];
           break;
