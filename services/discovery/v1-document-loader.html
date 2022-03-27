@@ -1,5 +1,5 @@
 <!--
-  Copyright 2016 IBM Corp.
+  Copyright 2016, 2022 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -23,14 +23,6 @@
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username">
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
     </div>
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
@@ -117,8 +109,6 @@
                 'service-endpoint' :{value: ''}
             },
             credentials: {
-              username: {type:'text'},
-              password: {type:'password'},
               apikey: {type:'password'}
             },
             color: 'rgb(230,140,10)',

@@ -1,5 +1,5 @@
 /**
- * Copyright 20016 IBM Corp.
+ * Copyright 20016, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -25,20 +25,16 @@ module.exports = function (RED) {
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     dservice = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = null,
-    password = null,
-    sUsername = null,
-    sPassword = null,
     apikey = null,
     sApikey = null,
     endpoint = '',
-    sEndpoint = 'https://gateway.watsonplatform.net/discovery/api';
+    sEndpoint = '';
 
   temp.track();
 
-  function initialCheck(u, p, k) {
+  function initialCheck(k) {
     var message = '';
-    if (!k && (!u || !p)) {
+    if (!k) {
       message = 'Missing Watson Discovery service credentials';
     }
     if (message) {
@@ -130,7 +126,7 @@ module.exports = function (RED) {
 
   function execute(params, msg, suffix) {
     var p = new Promise(function resolver(resolve, reject) {
-      let discovery = discoveryutils.buildService(username, password, apikey, endpoint);
+      let discovery = discoveryutils.buildService(apikey, endpoint);
 
       // modify as getting addJsonDocument will be deprecated messages
       if ('.json' === suffix) {
@@ -157,8 +153,6 @@ module.exports = function (RED) {
   }
 
   if (dservice) {
-    sUsername = dservice.username ? dservice.username : '';
-    sPassword = dservice.password ? dservice.password : '';
     sApikey = dservice.apikey ? dservice.apikey : '';
     sEndpoint = dservice.url ? dservice.url : '';
   }
@@ -178,8 +172,6 @@ module.exports = function (RED) {
         fileSuffix = '',
         params = {};
 
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password;
       apikey = sApikey || this.credentials.apikey;
 
       endpoint = sEndpoint;
@@ -188,7 +180,7 @@ module.exports = function (RED) {
       }
 
       node.status({});
-      initialCheck(username, password, apikey)
+      initialCheck(apikey)
         .then(function(){
           return verifyPayload(msg);
         })
@@ -242,8 +234,6 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-discovery-v1-document-loader', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type:'password'}
     }
   });

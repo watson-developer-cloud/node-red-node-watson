@@ -1,5 +1,5 @@
 /**
- * Copyright 2017, 2020 IBM Corp.
+ * Copyright 2017, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ module.exports = function (RED) {
     responseutils = require('../../utilities/response-utils'),
     sttutils = require('./stt-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
     endpoint = '',
     sEndpoint = 'https://stream.watsonplatform.net/speech-to-text/api';
@@ -33,18 +32,16 @@ module.exports = function (RED) {
   temp.track();
 
   // Require the Cloud Foundry Module to pull credentials from bound service
-  // If they are found then the username and password will be stored in
-  // the variables sUsername and sPassword.
+  // If they are found then the key and password will be stored in
+  // the variable sApiket.
   //
-  // This separation between sUsername and username is to allow
+  // This separation between is to allow
   // the end user to modify the credentials when the service is not bound.
   // Otherwise, once set credentials are never reset, resulting in a frustrated
   // user who, when he errenously enters bad credentials, can't figure out why
   // the edited ones are not being taken.
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
@@ -240,7 +237,7 @@ module.exports = function (RED) {
   }
 
   function determineService() {
-    return sttutils.determineService(apikey, username, password, endpoint);
+    return sttutils.determineService(apikey, endpoint);
   }
 
 
@@ -445,7 +442,7 @@ module.exports = function (RED) {
   RED.httpAdmin.get('/watson-speech-to-text-v1-query-builder/models', function (req, res) {
     endpoint = req.query.e ? req.query.e : sEndpoint;
 
-    var stt = sttutils.initSTTService(req, sApikey, sUsername, sPassword, sEndpoint);
+    var stt = sttutils.initSTTService(req, sApikey, sEndpoint);
 
     stt.listModels({})
       .then((response) => {
@@ -471,8 +468,6 @@ module.exports = function (RED) {
         message = '',
         params = {};
 
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
       apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
@@ -480,7 +475,7 @@ module.exports = function (RED) {
         endpoint = config['service-endpoint'];
       }
 
-      if (!apikey && (!username || !password)) {
+      if (!apikey) {
         message = 'Missing Watson Speech to Text service credentials';
       } else if (!method || '' === method) {
         message = 'Required mode has not been specified';
@@ -525,8 +520,6 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-speech-to-text-v1-query-builder', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type:'password'}
     }
   });

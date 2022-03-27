@@ -28,14 +28,6 @@
   </div>
 
   <div class="form-row credentials" style="display: none;">
-      <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-      <input type="text" id="node-input-username" placeholder="Username">
-  </div>
-  <div class="form-row credentials" style="display: none;">
-      <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-      <input type="password" id="node-input-password" placeholder="Password">
-  </div>
-  <div class="form-row credentials" style="display: none;">
       <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
       <input type="password" id="node-input-apikey" placeholder="API Key"></input>
   </div>
@@ -132,8 +124,6 @@
     <li><code>msg.params.restart</code> (optional) : see API documentation </li>
     <li><code>msg.additional_context</code> (optional) : additional properties that will be added to the context object. Format: Object </li>
     <br/>
-    <li><code>msg.params.username</code> : If provided will be used as the username credential for the Assistant service.</li>
-    <li><code>msg.params.password</code> : If provided will be used as the password credential for the Assistant service.</li>
     <li><code>msg.params.apikey</code> : If provided will be used as the api key credential for the Assistant service.</li>
     <li><code>msg.params.endpoint</code> : If provided will be used as the url for the Assistant service.</li>
     <li><code>msg.params.version</code> : If provided will be used as the API version date for the Assistant service.</li>
@@ -216,8 +206,6 @@
         'persist-session-id': {value: false}
       },
       credentials: {
-        username: {type:'text'},
-        password: {type:'password'},
         apikey: {type:'password'}
       },
       color: 'rgb(84,149,230)',

@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 IBM Corp.
+ * Copyright 2016, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,8 @@ module.exports = function(RED) {
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     service = null,
-    sApikey = null,
-    sUsername = null,
-    sPassword = null;
+    sApikey = null;
+
 
   service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
   if (!service) {
@@ -34,8 +33,6 @@ module.exports = function(RED) {
   }
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
   }
 
@@ -156,11 +153,10 @@ module.exports = function(RED) {
     });
   }
 
-  function verifyCredentials(msg, k, u, p) {
-    if ( !(k) && (!(u) || !(p)) ) {
+  function verifyCredentials(msg, k) {
+    if ( !(k) ) {
       if ( (!msg.params) ||
-            (!(msg.params.apikey) &&
-               (!(msg.params.username) || !(msg.params.password))) ) {
+            (!(msg.params.apikey)) ) {
         return false;
       }
     }
@@ -181,24 +177,16 @@ module.exports = function(RED) {
         }
       };
 
-      let userName = sUsername || node.credentials.username,
-        passWord = sPassword || node.credentials.password,
-        apiKey = sApikey || node.credentials.apikey,
+      let apiKey = sApikey || node.credentials.apikey,
         endpoint = '',
         optoutLearning = false,
-        version = '2018-09-20';
+        version = '2021-11-27';
 
-      if (!verifyCredentials(msg, apiKey, userName, passWord)) {
+      if (!verifyCredentials(msg, apiKey)) {
         reject('Missing Watson Assistant API service credentials');
       }
 
       if (msg.params) {
-        if (msg.params.username) {
-          userName = msg.params.username;
-        }
-        if (msg.params.password) {
-          passWord = msg.params.password;
-        }
         if (msg.params.apikey) {
           apiKey = msg.params.apikey;
         }
@@ -212,9 +200,6 @@ module.exports = function(RED) {
 
       if (apiKey) {
         authSettings.apikey = apiKey;
-      } else {
-        authSettings.username = userName;
-        authSettings.password = passWord;
       }
       serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
@@ -347,8 +332,6 @@ module.exports = function(RED) {
 
   RED.nodes.registerType('watson-conversation-v1', WatsonConversationV1Node, {
     credentials: {
-      username: {type: 'text'},
-      password: {type: 'password'},
       apikey: {type: 'password'}
     }
   });

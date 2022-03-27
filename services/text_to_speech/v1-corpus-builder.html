@@ -1,5 +1,5 @@
 <!--
-  Copyright 2017 IBM Corp.
+  Copyright 2017, 2022 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -30,14 +30,7 @@
         <input type="text" id="node-input-name" placeholder="Name"></input>
     </div>
 
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username"></input>
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password"></input>
-    </div>
+
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
         <input type="password" id="node-input-apikey" placeholder="API Key"></input>
@@ -223,11 +216,9 @@
   // user has to provide credentials. Once there are credentials, then the
   // ttsv1qbb.??? are retrieved.
   ttsv1qbb.checkCredentials = function () {
-    var u = $('#node-input-username').val();
-    var p = $('#node-input-password').val();
     var k = $('#node-input-apikey').val();
 
-    if ( (k && k.length) || (u && u.length && p) ) {
+    if (k && k.length) {
       if (!ttsv1qbb.voices) {;
         ttsv1qbb.getVoices();
       }
@@ -341,12 +332,6 @@
 
   // Register the handlers for the fields
   ttsv1qbb.handlersUI = function () {
-    $('#node-input-username').change(function(val){
-      ttsv1qbb.checkCredentials();
-    });
-    $('#node-input-password').change(function(val){
-      ttsv1qbb.checkCredentials();
-    });
     $('#node-input-apikey').change(function(val){
       ttsv1qbb.checkCredentials();
     });
@@ -477,11 +462,9 @@
   // Retrieve the available voices from the server, if data is returned, then
   // can enable the dynamic selection fields.
   ttsv1qbb.getVoices = function (){
-    var u = $('#node-input-username').val();
-    var p = $('#node-input-password').val();
     var k = $('#node-input-apikey').val();
     var e = $('#node-input-service-endpoint').val();
-    var creds = {un: u, pwd: p, key: k};
+    var creds = {key: k};
 
     creds.e = e;
 
@@ -554,7 +537,6 @@
                 'service-endpoint' :{value: ''}
             },
             credentials: {
-              username: {type:'text'} //,
               // password: {type: 'password'}   - // Taken out because, was not being restored on dialog open.
             },
             color: 'rgb(100, 120, 50)',

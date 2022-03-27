@@ -1,5 +1,5 @@
 /**
- * Copyright 2013,2016 IBM Corp.
+ * Copyright 2013,2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,25 +23,14 @@ module.exports = function (RED) {
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     toneutils = require('../../utilities/tone-utils'),
-    username = '', password = '', sUsername = '', sPassword = '',
     apikey = '', sApikey = '',
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/tone-analyzer/api',
     service = null;
 
-  // Require the Cloud Foundry Module to pull credentials from bound service
-  // If they are found then they are stored in sUsername and sPassword, as the
-  // service credentials. This separation from sUsername and username to allow
-  // the end user to modify the node credentials when the service is not bound.
-  // Otherwise, once set username would never get reset, resulting in a frustrated
-  // user who, when he errenously enters bad credentials, can't figure out why
-  // the edited ones are not being taken.
-
   service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
@@ -57,15 +46,10 @@ module.exports = function (RED) {
   var checkCreds = function(credentials) {
     var taSettings = {};
 
-    username = sUsername || credentials.username;
-    password = sPassword || credentials.password;
     apikey = sApikey || credentials.apikey;
 
     if (apikey) {
       taSettings.iam_apikey = apikey;
-    } else if (username && password) {
-      taSettings.username = username;
-      taSettings.password = password;
     } else {
       taSettings = null;
     }
@@ -110,9 +94,6 @@ module.exports = function (RED) {
 
     if (settings.iam_apikey) {
       authSettings.apikey = settings.iam_apikey;
-    } else {
-      authSettings.username = settings.username;
-      authSettings.password = settings.password;
     }
 
     serviceSettings.authenticator = new IamAuthenticator(authSettings);
@@ -196,8 +177,6 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-tone-analyzer-v3', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type:'password'}
     }
   });

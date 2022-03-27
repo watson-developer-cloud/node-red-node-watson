@@ -1,5 +1,5 @@
 <!--
-  Copyright 2018 IBM Corp.
+  Copyright 2018, 2022 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -33,14 +33,6 @@
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-username"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-username" placeholder="Username"/>
-    </div>
-    <div class="form-row credentials" style="display: none;">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password"/>
-    </div>
     <div class="form-row credentials" style="display: none;">
         <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
         <input type="password" id="node-input-apikey" placeholder="API Key"></input>
@@ -237,13 +229,16 @@
                       'de' : 'German',
                       'gu' : 'Gujarati',
                       'ja' : 'Japanese',
+                      'kn' : 'Kannada',
                       'lv' : 'Latvian',
                       'lt' : 'Lithuanian',
+                      'mr' : 'Marathi',
                       'ms' : 'Malay',
                       'ml' : 'Malayalam',
                       'mt' : 'Maltese',
                       'cnr' : 'Montenegrin',
                       'ne' : 'Nepali',
+                      'pa' : 'Punjabi',
                       'pt' : 'Portuguese',
                       'ko' : 'Korean',
                       'nb' : 'Norwegian Bokmål',
@@ -332,13 +327,6 @@
 
     // Register the handlers for the fields
     doctor.UIListeners = function () {
-      $('#node-input-username').change((val) => {
-        doctor.checkModels().then(() => {}).catch((err) => {console.log(err)});
-      });
-
-      $('#node-input-password').change((val) => {
-        doctor.checkModels().then(() => {}).catch((err) => {console.log(err)});
-      });
 
       $('#node-input-apikey').change((val) => {
         doctor.checkModels().then(() => {}).catch((err) => {console.log(err)});
@@ -399,8 +387,6 @@
         if (doctor.models) {
           resolve();
         } else {
-          var u = $('#node-input-username').val();
-          var p = $('#node-input-password').val();
           var k = $('#node-input-apikey').val();
           var e = $('#node-input-service-endpoint').val();
           var creds = {un: u, pwd: p, key: k};
@@ -486,7 +472,7 @@
       var available_destlang = pair_lang.filter(function (model_id) {
         return model_id.match('^' + doctor.srclang_selected + '-');
       });
-      
+
       available_destlang.sort();
 
       available_destlang.forEach(function (val) {
@@ -539,7 +525,6 @@
             category: 'IBM Watson',
             defaults: {
                 name: {value: ""},
-                password: {value: ''},
                 apikey: {value: ''},
                 action: {value: 'translateDocument'},
                 srclang: {value: 'en'},
@@ -551,7 +536,6 @@
                 'service-endpoint' :{value: ''}
             },
             credentials: {
-                username: {type: 'text'}
             },
             color: "rgb(84,149,230)",
             inputs: 1,

@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 IBM Corp.
+ * Copyright 2017, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ module.exports = function (RED) {
 
   const NLU_FEATURES = {
     'categories': 'categories',
+    'classifications': 'classifications',
     'concepts': 'concepts',
     'doc-emotion': 'emotion',
     'doc-sentiment': 'sentiment',
@@ -36,18 +37,14 @@ module.exports = function (RED) {
     payloadutils = require('../../utilities/payload-utils'),
     serviceutils = require('../../utilities/service-utils'),
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER),
-    username = null,
-    password = null,
     apikey = null,
-    sUsername = null,
-    sPassword = null,
     sApikey = null,
     endpoint = '',
     sEndpoint = 'https://gateway.watsonplatform.net/natural-language-understanding/api';
 
 
-  function initialCheck(u, p, k) {
-    if (!k && (!u || !p)) {
+  function initialCheck(k) {
+    if (!k) {
       return Promise.reject('Missing Watson Natural Language Understanding service credentials');
     }
     return Promise.resolve();
@@ -113,6 +110,18 @@ module.exports = function (RED) {
     if (features.concepts) {
       features.concepts.limit =
          config['maxconcepts'] ? parseInt(config['maxconcepts']) : 8;
+    }
+  }
+
+
+
+  function processClassificationsOptions(msg, config, features) {
+    if (features.classifications) {
+      if (msg.nlu_options && msg.nlu_options.classifications_model) {
+        features.classifications.model = msg.nlu_options.classifications_model;
+      } else if (config['classifications-model']) {
+        features.classifications.model = config['classifications-model'] ;
+      }
     }
   }
 
@@ -199,14 +208,15 @@ module.exports = function (RED) {
   function checkFeatureOptions(msg, config, options) {
     if (options && options.features) {
       processConceptsOptions(config, options.features);
+      processClassificationsOptions(msg, config, options.features);
       processCategoriesOptions(config, options.features);
       processEmotionOptions(config, options.features);
       processSentimentOptions(config, options.features);
-      processEntitiesOptions(msg,config, options.features);
-      processRelationsOptions(msg,config, options.features);
+      processEntitiesOptions(msg, config, options.features);
+      processRelationsOptions(msg, config, options.features);
       processKeywordsOptions(config, options.features);
       processSemanticRolesOptions(config, options.features);
-      processSyntaxOptions(msg,config, options.features);
+      processSyntaxOptions(msg, config, options.features);
     }
     return Promise.resolve();
   }
@@ -215,7 +225,7 @@ module.exports = function (RED) {
     let nlu = null,
       authSettings  = {};
       serviceSettings = {
-        version: '2019-07-12',
+        version: '2021-08-01',
         headers: {
           'User-Agent': pkg.name + '-' + pkg.version
         }
@@ -223,9 +233,6 @@ module.exports = function (RED) {
 
     if (apikey) {
       authSettings.apikey = apikey;
-    } else {
-      authSettings.username = username;
-      authSettings.password = password;
     }
     serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
@@ -248,8 +255,6 @@ module.exports = function (RED) {
   }
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
@@ -271,8 +276,6 @@ module.exports = function (RED) {
 
       node.status({});
 
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password;
       apikey = sApikey || this.credentials.apikey;
 
       endpoint = sEndpoint;
@@ -280,7 +283,7 @@ module.exports = function (RED) {
         endpoint = config['service-endpoint'];
       }
 
-      initialCheck(username, password, apikey)
+      initialCheck(apikey)
         .then(function(){
           return payloadCheck(msg, options);
         })
@@ -320,8 +323,6 @@ module.exports = function (RED) {
   //Register the node as natural-language-understanding to nodeRED
   RED.nodes.registerType('natural-language-understanding', NLUNode, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type: 'password'}
     }
   });

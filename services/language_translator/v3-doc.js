@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 IBM Corp.
+ * Copyright 2018, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,6 @@ module.exports = function (RED) {
     serviceutils = require('../../utilities/service-utils'),
     payloadutils = require('../../utilities/payload-utils'),
     translatorutils = require('./translator-utils'),
-    username = null,
-    password = null,
-    sUsername = null,
-    sPassword = null,
     apikey = null,
     sApikey = null,
     endpoint = '',
@@ -39,8 +35,6 @@ module.exports = function (RED) {
     service = serviceutils.getServiceCreds(SERVICE_IDENTIFIER);
 
   if (service) {
-    sUsername = service.username ? service.username : '';
-    sPassword = service.password ? service.password : '';
     sApikey = service.apikey ? service.apikey : '';
     sEndpoint = service.url;
   }
@@ -66,9 +60,6 @@ module.exports = function (RED) {
 
     if (sApikey || req.query.key) {
       authSettings.apikey = sApikey ? sApikey : req.query.key;
-    } else {
-      authSettings.username = sUsername ? sUsername : req.query.un;
-      authSettings.password = sPassword ? sPassword : req.query.pwd;
     }
     serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
@@ -161,9 +152,6 @@ module.exports = function (RED) {
 
       if (apikey) {
         authSettings.apikey = apikey;
-      } else {
-        authSettings.username = username;
-        authSettings.password = password;
       }
       serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
@@ -180,9 +168,6 @@ module.exports = function (RED) {
       if (apikey) {
         authSettings.user = 'apikey';
         authSettings.pass = apikey;
-      } else {
-        authSettings.user = username;
-        authSettings.pass = password;
       }
       return authSettings;
     }
@@ -463,7 +448,7 @@ module.exports = function (RED) {
     function doit(msg, send) {
       let action = msg.action || config.action;
 
-      translatorutils.credentialCheck(username, password, apikey)
+      translatorutils.credentialCheck(apikey)
         .then(function(){
           return translatorutils.checkForAction(action);
         })
@@ -498,8 +483,6 @@ module.exports = function (RED) {
       // hidden but not a credential. If it is treated as a credential, it gets lost when there
       // is a request to refresh the model list.
       // Credentials are needed for each of the modes.
-      username = sUsername || this.credentials.username;
-      password = sPassword || this.credentials.password || config.password;
       apikey = sApikey || this.credentials.apikey || config.apikey;
 
       endpoint = sEndpoint;
@@ -532,8 +515,6 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('watson-doc-translator', Node, {
     credentials: {
-      username: {type:'text'},
-      password: {type:'password'},
       apikey: {type:'password'}
     }
   });

@@ -23,7 +23,7 @@ module.exports = function(RED) {
     sUsername = null,
     sPassword = null,
     sApikey = null,
-    sEndpoint = 'https://gateway.watsonplatform.net/discovery/api';
+    sEndpoint = '';
 
 
   if (dservice) {

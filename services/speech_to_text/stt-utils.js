@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 IBM Corp.
+ * Copyright 2018, 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ class STTUtils {
   constructor() {
   }
 
-  static initSTTService(req, sApikey, sUsername, sPassword, sEndpoint) {
+  static initSTTService(req, sApikey, sEndpoint) {
     const endpoint = req.query.e ? req.query.e : sEndpoint;
 
     let authSettings  = {};
@@ -35,16 +35,13 @@ class STTUtils {
 
     if (sApikey || req.query.key) {
       authSettings.apikey = sApikey ? sApikey : req.query.key;
-    } else {
-      authSettings.username = sUsername ? sUsername : req.query.un;
-      authSettings.password = sPassword ? sPassword : req.query.pwd;
     }
     serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
     return new STTV1(serviceSettings);
   }
 
-  static determineService(apikey, username, password, endpoint) {
+  static determineService(apikey, endpoint) {
     let authSettings  = {};
     let serviceSettings = {
       headers: {
@@ -54,9 +51,6 @@ class STTUtils {
 
     if (apikey) {
       authSettings.apikey = apikey;
-    } else {
-      authSettings.username = username;
-      authSettings.password = password;
     }
 
     if (endpoint) {
@@ -82,7 +76,7 @@ class STTUtils {
     }
 
     serviceSettings.authenticator = new IamAuthenticator(authSettings);
-    
+
     return new STTV1(serviceSettings);
   }
 
