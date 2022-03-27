@@ -63,7 +63,7 @@ module.exports = function(RED) {
   RED.httpAdmin.get('/watson-text-to-speech/customs', function (req, res) {
     var tts = ttsutils.initTTSService(req, sApikey, sEndpoint);
 
-    tts.listVoiceModels({})
+    tts.listCustomModels({})
     .then((response) => {
       let customs = response;
       if (response.result) {
