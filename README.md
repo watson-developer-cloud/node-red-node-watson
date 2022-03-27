@@ -37,18 +37,12 @@ A collection of nodes to interact with the IBM Watson services in [IBM Cloud](ht
     - Uses machine learning algorithms to return the top matching predefined classes for short text inputs.
 - Natural Language Understanding
     - Analyze text to extract meta-data from content such as concepts, entities, keywords ...
-- Personality Insights
-    - Use linguistic analytics to infer cognitive and social characteristics from text
-- Retrieve and Rank
-    - Creates a trainable search engine for your data  
 - Speech To Text
     - Convert audio containing speech to text
 - Text To Speech
     - Convert text to audio speech
 - Tone Analyzer
     - Discover, understand, and revise the language tones in text.
-- Visual Recognition
-    - Analyze visual appearance of images to understand their contents
 
 ### Usage
 Example usage flows can be found here [node-red-labs](https://github.com/watson-developer-cloud/node-red-labs)
