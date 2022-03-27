@@ -94,7 +94,7 @@ DiscoveryUtils2.prototype = {
   buildParamsForName: function(msg, config, params) {
     let name = '';
     if (msg.discoveryparams) {
-      for (f of ['projectName', 'projectname',
+      for (let f of ['projectName', 'projectname',
         'collectionName', 'collectionname']) {
         if (msg.discoveryparams[f]) {
           name = msg.discoveryparams[f];

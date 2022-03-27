@@ -399,14 +399,14 @@
     };
 
     disV2pm.showSelectedFields = function(fields) {
-      for (i = 0; i < fields.length; i++) {
+      for (let i = 0; i < fields.length; i++) {
         $(fields[i]).parent().show();
       }
     }
 
     disV2pm.processSelectedMethod = function(method) {
       disV2pm.hideAll();
-      fields = [];
+      let fields = [];
 
       switch (method) {
         case 'getProject':

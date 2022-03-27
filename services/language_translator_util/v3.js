@@ -127,10 +127,7 @@ module.exports = function (RED) {
         return;
       }
 
-      if (apikey) {
-        authSettings.apikey = apikey;
-      }
-
+      authSettings.apikey = apikey;
       serviceSettings.authenticator = new IamAuthenticator(authSettings);
 
       endpoint = sEndpoint;

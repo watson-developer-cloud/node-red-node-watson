@@ -163,9 +163,9 @@ module.exports = function (RED) {
     }
   }
 
-  // function unknownMethod(node, discovery, params, msg) {
-  //   return Promise.reject('Unable to process as unknown mode has been specified');
-  // }
+  function unknownMethod(node, discovery, params, msg) {
+    return Promise.reject('Unable to process as unknown mode has been specified');
+  }
 
   function executeMethod(node, method, params, msg) {
     let discovery = discoveryutils.buildService(apikey, endpoint);
@@ -204,7 +204,6 @@ module.exports = function (RED) {
     this.on('input', function(msg, send, done) {
 
       var method = config['discovery-method'],
-        message = '',
         params = {};
 
       apikey = sApikey || node.credentials.apikey;
