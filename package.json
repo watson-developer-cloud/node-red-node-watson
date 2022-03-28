@@ -1,6 +1,6 @@
 {
   "name": "node-red-node-watson",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "description": "A collection of Node-RED nodes for IBM Watson services",
   "dependencies": {
     "cfenv": "~1.2.4",
