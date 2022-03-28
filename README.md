@@ -8,6 +8,9 @@ Node-RED Watson Nodes for IBM Cloud
 <a href="https://cla-assistant.io/watson-developer-cloud/node-red-node-watson"><img src="https://cla-assistant.io/readme/badge/watson-developer-cloud/node-red-node-watson" alt="CLA assistant" /></a>
 
 
+### New in version 0.10.3
+- fix bug in cloud bound STT configuration
+
 ### New in version 0.10.2
 - fix bug in cloud bound TTS configuration
 
