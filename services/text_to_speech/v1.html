@@ -325,7 +325,7 @@
   tts.checkCredentials = function () {
     var k = $('#node-input-apikey').val();
 
-    if ( (k && k.length) || (u && u.length && p) ) {
+    if (k && k.length) {
       if (!tts.voices) {
         tts.getVoices();
       }
